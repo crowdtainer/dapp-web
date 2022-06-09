@@ -1,5 +1,10 @@
-<script>
-	import '../app.css';
+<script lang="ts">
+    import "../app.css";
+    import TopMenuNav from '$lib/TopMenuNav.svelte';
 </script>
 
-<slot />
+<TopMenuNav />
+
+<main>
+    <slot />
+</main>

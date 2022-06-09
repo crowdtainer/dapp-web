@@ -1,37 +1,38 @@
-<div style="text-align:center"><img src="static/CrowdtainerLogo.svg" alt="Crowdtainer" height="128px"/>
+# create-svelte
 
-<h1> Crowdtainer Svelte Web App </h1> </div>
-<br/>
+Everything you need to build a Svelte project, powered by [`create-svelte`](https://github.com/sveltejs/kit/tree/master/packages/create-svelte).
 
+## Creating a project
 
-Web-based application to interact with the [Crowdtainer solidity contracts](https://github.com/crowdtainer/dapp-contracts).
+If you're seeing this, you've probably already done this step. Congrats!
 
-This is the [Svelte](https://svelte.dev) based web interface for crowdtainer, configured with TailWindCSS / PostCSS, as a static page (@sveltejs/adapter-static).
+```bash
+# create a new project in the current directory
+npm init svelte
 
-We strive to keep it in `static` mode (without backends) to allow for hosting the app in a variety of emerging trustless CDN's such as IPFS and SWARM.
+# create a new project in my-app
+npm init svelte my-app
+```
 
-See [User stories](./UserStories.md).
+## Developing
 
-## Development
-
-### To start a development server:
+Once you've created a project and installed dependencies with `npm install` (or `pnpm install` or `yarn`), start a development server:
 
 ```bash
 npm run dev
 
-# or
-
-npm run dev -- --open #open in browser
+# or start the server and open the app in a new browser tab
+npm run dev -- --open
 ```
 
-### Building for production:
+## Building
+
+To create a production version of your app:
 
 ```bash
-npm run build #(generated in ./build)
+npm run build
 ```
 
-To preview: 
+You can preview the production build with `npm run preview`.
 
-```bash
-npm run preview
-```
+> To deploy your app, you may need to install an [adapter](https://kit.svelte.dev/docs/adapters) for your target environment.
