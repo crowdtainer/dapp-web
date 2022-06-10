@@ -4,7 +4,7 @@
 
 @layer components{
   .active-btn {
-    @apply bg-sky-800 text-white px-3 py-2 rounded-md text-sm font-medium;
+    @apply bg-sky-900 text-white px-3 py-2 rounded-md text-sm font-medium;
   }
   .inactive-btn {
       @apply text-gray-300 hover:bg-sky-900 hover:text-white px-3 py-2 rounded-md text-sm font-medium;

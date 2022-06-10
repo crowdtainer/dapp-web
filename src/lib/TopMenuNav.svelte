@@ -1,18 +1,62 @@
 <script lang="ts">
 
+import WalletConnectProvider from '@walletconnect/web3-provider/dist/umd/index.min.js';
+import { defaultEvmStores, connected, chainId, signerAddress, provider, signer } from 'svelte-ethers-store' ;
+
+import { ethers, providers } from "ethers";
+
+import { onMount } from 'svelte';
 import { clickOutside } from '$lib/clickOutside';
 import { page } from '$app/stores';
 import { fade } from 'svelte/transition';
 
-let mobileMenuOpen = Boolean, profileMenuOpen: Boolean;
+let localProvider: WalletConnectProvider;
+
+let mobileMenuOpen = false, profileMenuOpen = false;
 const flipMobileMenu = () => { mobileMenuOpen = !mobileMenuOpen; }
 const flipProfileMenu = () => { profileMenuOpen = !profileMenuOpen; }
 
 $: path = $page.url.pathname;
 
+// Web3
+onMount(async () => {
+  // await defaultEvmStores.setProvider()
+    // const _provider = new WalletConnectProvider({
+    //   infuraId: "27e484dcd9e3efcfd25a83a78777cdf1",
+    // });
+    // await provider.enable();
+    // await defaultEvmStores.setProvider(new ethers.providers.AlchemyProvider("optimism-kovan", "0A-8GO3Yg2wMVd705qJNlg9RkS_0DiOM"));
+    
+    // await defaultEvmStores.setProvider(new ethers.providers.EtherscanProvider("rinkeby"));
+    
+    localProvider = new WalletConnectProvider({rpc: {
+    10: "https://opt-kovan.g.alchemy.com/v2/0A-8GO3Yg2wMVd705qJNlg9RkS_0DiOM"}
+  });
+
+});
+
+async function connectWallet() {
+  localProvider.enable();
+
+  //  Wrap with Web3Provider from ethers.js
+  const web3Provider = new providers.Web3Provider(localProvider);
+  defaultEvmStores.setProvider(web3Provider);
+}
+
+async function disconnectWallet() {
+  localProvider.disconnect();
+  defaultEvmStores.disconnect();
+}
+
 </script>
 
-<nav class="bg-zinc-900">
+{#if !$connected}
+<!-- TODO -->
+{:else}
+<p>Connected to chain id {$chainId} with account {$signerAddress}</p>
+{/if}
+
+<nav class="bg-black">
     <div class="max-w-7xl mx-auto px-2 sm:px-6 lg:px-8">
       <div class="relative flex items-center justify-between h-16">
         <div class="absolute inset-y-0 left-0 flex items-center sm:hidden">
@@ -26,7 +70,7 @@ $: path = $page.url.pathname;
             <!-- Open menu -->
             <svg class="{mobileMenuOpen ? 'block' : 'hidden'} h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" aria-hidden="true">
               <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
-            </svg>         
+            </svg>
           </button>
         </div>
         <div class="flex-1 flex items-center justify-center sm:items-stretch sm:justify-start">
@@ -40,9 +84,8 @@ $: path = $page.url.pathname;
           </div>
           <div class="hidden sm:block sm:ml-6">
             <div class="flex space-x-4" >
-              <a href="/Projects" class="{path === '/Projects' ? "active-btn" : "inactive-btn"}" aria-current="page">Projects</a>
-              <a href="/Cart" class="{path === '/Cart' ? "active-btn" : "inactive-btn"}">Shopping Cart</a>
-              <a href="/Orders" class="{path === '/Orders' ? "active-btn" : "inactive-btn"}">Orders</a>
+              <a href="/" class="{path === '/' ? "active-btn" : "inactive-btn"}" aria-current="page">Campaigns</a>
+              <a href="/Cart" class="{path === '/Cart' ? "active-btn" : "inactive-btn"}">Cart</a>
             </div>
           </div>
         </div>
@@ -54,7 +97,7 @@ $: path = $page.url.pathname;
               <path stroke-linecap="round" stroke-linejoin="round" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
             </svg>
           </button>
-  
+
           <!-- Profile dropdown -->
           <div class="ml-3 relative">
             <div>
@@ -64,14 +107,13 @@ $: path = $page.url.pathname;
               </button>
             </div>
   
-            <!--
-              Dropdown menu, show/hide based on menu state.
-            -->
-  
             {#if profileMenuOpen}
               <div use:clickOutside={() => (profileMenuOpen = false)} transition:fade="{{duration: 130}}" class="origin-top-right absolute right-0 mt-2 w-48 rounded-md shadow-lg py-1 bg-white ring-1 ring-black ring-opacity-5 focus:outline-none" role="menu" aria-orientation="vertical" aria-labelledby="user-menu-button" tabindex="-1">
-                <!-- Active: "bg-gray-100", Not Active: "" -->
-                <a href="#" class="block px-4 py-2 text-sm text-gray-700" role="menuitem" tabindex="-1" id="user-menu-item-0">Sign out</a>
+                {#if $connected}
+                <a href='#' on:click={async () => ( await disconnectWallet())} class="block px-4 py-2 text-sm text-gray-700" role="menuitem" tabindex="-1" id="user-menu-item-0">Disconnect wallet</a>
+                {:else}
+                  <a href='#' on:click={async () => ( await connectWallet())} class="block px-4 py-2 text-sm text-gray-700" role="menuitem" tabindex="-1" id="user-menu-item-0">Connect wallet</a>
+                {/if}
               </div>
             {/if}
           </div>
@@ -84,11 +126,8 @@ $: path = $page.url.pathname;
       <div transition:fade="{{duration:200}}" class="sm:hidden" id="mobile-menu">
         <div class="px-2 pt-2 pb-3 space-y-1">
           <!-- Current: "bg-gray-900 text-white", Default: "text-gray-300 hover:bg-gray-700 hover:text-white" -->
-          <a href="/Projects" class="{path === '/Projects' ? "mobile-active-btn" : "mobile-inactive-btn"}" aria-current="page">Projects</a>
-          
-          <a href="/Cart" class="{path === '/Cart' ? "mobile-active-btn" : "mobile-inactive-btn"}">Shopping Cart</a>
-          
-          <a href="/Orders" class="{path === '/Orders' ? "mobile-active-btn" : "mobile-inactive-btn"}">Orders</a>
+          <a href="/" class="{path === '/' ? "mobile-active-btn" : "mobile-inactive-btn"}" aria-current="page">Campaigns</a>
+          <a href="/Cart" class="{path === '/Cart' ? "mobile-active-btn" : "mobile-inactive-btn"}">Cart</a>
         </div>
       </div>
     {/if}

@@ -33,13 +33,14 @@
     - Prices can be read from `Crowdtainer.unitPricePerType()`.
     - To join the project call `ICrowdtainer.join()`.
 
-- ◻️ When joining, I'd like to additionally specify:
-    - ◻️ whether I'd like to be eligible to share referral code so that I can get rewards for my friend's purchases (check-box).
-    - ◻️ a friend's referral code, so that I can get a discount on my own purchase (address/ENS text input field).
-
 - ◻️ After joining, I'd like to see my own purchase/voucher details, as a SVG image.
     - Use `Vouchers721.tokenUri()` to get the generated image.
 
+Not available in first version:
+
+- ◻️ When joining, I'd like to additionally specify:
+    - ◻️ whether I'd like to be eligible to share referral code so that I can get rewards for my friend's purchases (check-box).
+    - ◻️ a friend's referral code, so that I can get a discount on my own purchase (address/ENS text input field).
 #### Dashboard view (viewable components only if wallet is connected)
 
 - ◻️ I’d like an interface/button to view and withdrawl my deposits in a running project, so that I can quit if no longer interested, or if the crowdfunding failed.
@@ -48,19 +49,20 @@
 - ◻️ I'd like to view if the project's goal was reached, so that I can decide to either withdrawl my funds or wait for product delivery.
     - Use `Crowdtainer.crowdtainerState()`.
 
-- ◻️ I'd like an interface to view how much rewards I acquired due sharing of personal referral code, if the project succeeds.
-    - Use `Crowdtainer.accumulatedRewardsOf()` method.
-
-- ◻️ I'd like an interface/button to claim rewards due sharing of referral code.
-    - Only possible if the project is in `Delivery` state.
-    - Use `Crowdtainer.claimRewards()` method.
-
 - ◻️ I'd like an interface/button to claim refunds if the sale was not successful.
     - Only possible if the project is in `Failed` state.
     - Use `Crowdtainer.claimFunds()` method.
 
 - ◻️ I'd like an interface to see how much I bought for each type of product, to get an overview of my own order.
 
+Not present in first version (rewards functionality):
+
+- ◻️ I'd like an interface/button to claim rewards due sharing of referral code.
+    - Only possible if the project is in `Delivery` state.
+    - Use `Crowdtainer.claimRewards()` method.
+
+- ◻️ I'd like an interface to view how much rewards I acquired due sharing of personal referral code, if the project succeeds.
+    - Use `Crowdtainer.accumulatedRewardsOf()` method.
 ### As a service provider (lower priority for MVP)
 
 - ◻️ I must be able to create a project by specifying the following variables so that I can start a crowdtainer for my product or service:
