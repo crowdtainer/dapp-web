@@ -30,17 +30,31 @@ onMount(async () => {
     // await defaultEvmStores.setProvider(new ethers.providers.EtherscanProvider("rinkeby"));
     
     localProvider = new WalletConnectProvider({rpc: {
-    10: "https://opt-kovan.g.alchemy.com/v2/0A-8GO3Yg2wMVd705qJNlg9RkS_0DiOM"}
-  });
+      10: "https://opt-kovan.g.alchemy.com/v2/0A-8GO3Yg2wMVd705qJNlg9RkS_0DiOM"}
+    });
+    //  Wrap with Web3Provider from ethers.js
+    const web3Provider = new providers.Web3Provider(localProvider);
+    defaultEvmStores.setProvider(web3Provider);
+
+    if(connected) {
+      await localProvider.enable();
+    }
 
 });
 
 async function connectWallet() {
-  localProvider.enable();
+  try{
+    localProvider = new WalletConnectProvider({rpc: {
+      10: "https://opt-kovan.g.alchemy.com/v2/0A-8GO3Yg2wMVd705qJNlg9RkS_0DiOM"}
+    });
+    //  Wrap with Web3Provider from ethers.js
+    const web3Provider = new providers.Web3Provider(localProvider);
+    defaultEvmStores.setProvider(web3Provider);
+    await localProvider.enable();
+  } catch(error) {
+    console.log("Error: " + error);
+  }
 
-  //  Wrap with Web3Provider from ethers.js
-  const web3Provider = new providers.Web3Provider(localProvider);
-  defaultEvmStores.setProvider(web3Provider);
 }
 
 async function disconnectWallet() {
@@ -52,8 +66,10 @@ async function disconnectWallet() {
 
 {#if !$connected}
 <!-- TODO -->
+{console.log("Disconnected.")}
 {:else}
 <p>Connected to chain id {$chainId} with account {$signerAddress}</p>
+{console.log("Connected to chain id " + $chainId + " with account " + $signerAddress)}
 {/if}
 
 <nav class="bg-black">
