@@ -1,5 +1,13 @@
-<script>
-	import '../app.css';
+<script lang="ts">
+    import "../app.css";
+    import TopMenuNav from '$lib/TopMenuNav.svelte';
+    import FooterNav from '$lib/FooterNav.svelte';
 </script>
 
-<slot />
+<TopMenuNav />
+
+<main>
+    <slot />
+</main>
+
+<FooterNav />

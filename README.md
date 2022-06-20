@@ -1,8 +1,7 @@
-<div style="text-align:center"><img src="static/logo.png" alt="Crowdtainer" height="128px"/>
+<div style="text-align:center"><img src="static/CrowdtainerLogo.svg" alt="Crowdtainer" height="128px"/>
 
 <h1> Crowdtainer Web App </h1> </div>
 <br/>
-
 
 Web-based application to interact with the [Crowdtainer solidity contracts](https://github.com/crowdtainer/dapp-contracts).
 
@@ -30,8 +29,8 @@ To preview:
 npm run preview
 ```
 
-### Remarks
+### Frameworks
 
-To keep the application as *simple* and *readable* as possible, [SvelteKit](https://kit.svelte.dev) was chosen as a framework, configured with TailWindCSS / PostCSS, as a static page (@sveltejs/adapter-static).
-
-We strive to keep it in `static` mode (without backends) to allow for hosting the app in a variety of emerging trustless CDN's such as IPFS and SWARM.
+- [SvelteKit](https://kit.svelte.dev) 
+- TailWindCSS
+- Static page (@sveltejs/adapter-static).

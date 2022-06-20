@@ -1,4 +1,19 @@
-/* Write your global styles here, in PostCSS syntax */
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+@layer components{
+  .active-btn {
+    @apply bg-sky-900 text-white px-3 py-2 rounded-md text-sm font-medium;
+  }
+  .inactive-btn {
+      @apply text-gray-300 hover:bg-sky-900 hover:text-white px-3 py-2 rounded-md text-sm font-medium;
+  }
+  .mobile-active-btn {
+    @apply bg-gray-800 text-white block px-3 py-2 rounded-md text-base font-medium;
+  }
+  .mobile-inactive-btn {
+    @apply text-gray-300 hover:bg-gray-700 hover:text-white block px-3 py-2 rounded-md text-base font-medium;
+  }
+
+}
