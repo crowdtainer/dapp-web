@@ -22,10 +22,12 @@
           {title}
         </p>
       </blockquote>
+      <figure>
       <figcaption class="font-medium">
         <div class="text-center text-sky-500 dark:text-sky-400">
           No containers here.
         </div>
       </figcaption>
+    </figure>
     </div>
   </figure>
