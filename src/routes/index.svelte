@@ -1,12 +1,10 @@
+ <script context="module" lang="ts">
+    import { projects } from './data/projects.json';
+</script>
+
 <svelte:head>
 	<title>Crowdtainer</title>
 </svelte:head>
-
-<!-- <header class="bg-sky-900 shadow">
-  <div class=" mx-auto py-4 px-4 sm:px-6 lg:px-8 ">
-    <h1 class="text-center text-xl font-bold text-white">Offers</h1>
-  </div>
-</header> -->
 
 <header class="bg-black">
 	<div class="max-w-7xl mx-auto py-4 px-4 sm:px-6 lg:px-8">
@@ -16,6 +14,7 @@
 
 <main>
 	<!-- Project Container start -->
+	{#each projects as project}
 	<div class="max-w-10xl mx-auto py-1 sm:px-6 lg:px-8">
 		<div class="max-w-lg mx-auto bg-white rounded-xl shadow-md overflow-hidden md:max-w-7xl my-8">
 			<div class="md:flex">
@@ -28,26 +27,15 @@
 				</div>
 				<div class="p-8">
 					<div class="uppercase tracking-wide text-sm text-indigo-500 font-semibold">
-						Filter Coffee Beans
+						{project.title}
 					</div>
 					<a
 						href="#"
 						class="block mt-1 text-lg leading-tight font-medium text-black hover:underline"
-						>COLOMBIA Finca La Esperanza</a
+						>{project.subtitle}</a
 					>
 					<p class="mt-5 text-slate-500">
-						In the diverse department of Nariño, in the south west of Colombia, bordering Ecuador
-						and the Pacific Ocean, there is a municipality named Consacá. In the vereda (or
-						township) of La Aguada, Jesús Ignacio Paredes cultivates approximately one hectare made
-						up of three separate plots named La Esperanza.
-					</p>
-					<p class="mt-5 text-slate-500">
-						Jesús Ignacio's daily life looks a bit different as we can imagine. The farm where he
-						cultivates coffee is within a 20 minute walking distance from the place he lives. So he
-						walks to the three plots of land, where his parents taught him everything he needs to
-						know to be a successful producer, where his beloved Castillo and Colombia varietals
-						grow, protected with a shade from other trees like plantain and citrus fruit trees. The
-						crops grow at 1900 m.a.s.l. and he makes sure they are cared for.
+						{@html project.description}
 					</p>
 					<div class="">
 						<p class="my-3"><b>Service provider:</b> 0xa4b4433567777a65s577b655b5</p>
@@ -152,6 +140,9 @@
 		</div>
 	</div>
 	<!-- Project Container End -->
+	{/each}
+
+
 	<header class="bg-gradient-to-r from-black to-gray-700 shadow">
 		<div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
 			<h1 class="text-2xl font-bold text-white">Upcoming</h1>
