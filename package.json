@@ -10,11 +10,14 @@
 		"check": "svelte-check --tsconfig ./tsconfig.json",
 		"check:watch": "svelte-check --tsconfig ./tsconfig.json --watch",
 		"lint": "prettier --check --plugin-search-dir=. . && eslint .",
-		"format": "prettier --write --plugin-search-dir=. ."
+		"format": "prettier --write --plugin-search-dir=. .",
+		"build-types": "typechain --target ethers-v5 \"./abi/**/*.json\" --out-dir=out/typechain/",
+		"postinstall": "npm run build-types"
 	},
 	"devDependencies": {
 		"@sveltejs/adapter-auto": "next",
 		"@sveltejs/kit": "next",
+		"@typechain/ethers-v5": "^10.1.0",
 		"@typescript-eslint/eslint-plugin": "^5.27.0",
 		"@typescript-eslint/parser": "^5.27.0",
 		"@walletconnect/web3-provider": "^1.7.8",
@@ -35,6 +38,7 @@
 	},
 	"type": "module",
 	"dependencies": {
-		"svelte-ethers-store": "^2.3.3"
+		"svelte-ethers-store": "^2.3.3",
+		"typechain": "^8.1.0"
 	}
 }
