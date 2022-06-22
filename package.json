@@ -38,6 +38,7 @@
 	},
 	"type": "module",
 	"dependencies": {
+		"dotenv": "^16.0.1",
 		"svelte-ethers-store": "^2.3.3",
 		"typechain": "^8.1.0"
 	}
