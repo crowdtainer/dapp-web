@@ -7,6 +7,14 @@ Web-based application to interact with the [Crowdtainer solidity contracts](http
 
 ## Development
 
+To run everything locally, follow the instructions in [Crowdtainer solidity contracts](https://github.com/crowdtainer/dapp-contracts) to run and deploy the contracts.
+
+### Install dependencies:
+
+```bash
+npm install
+```
+
 ### To start a development server:
 
 ```bash
