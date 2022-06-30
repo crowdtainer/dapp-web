@@ -13,16 +13,22 @@ import type { RequestHandler } from './__types/[id]'
 import type { CrowdtainerStaticModel, Error } from '$lib/Model/CrowdtainerModel';
 import { Vouchers721Address, MetadataServiceV1Address } from '../data/projects.json';
 import { Coin__factory } from '../data/typechain';
+import { crowdtainerStaticDataMap } from '../../hooks/cache';
 
-const provider = new ethers.providers.JsonRpcProvider(import.meta.env.RPC_BACKEND);
+const provider = new ethers.providers.JsonRpcBatchProvider(import.meta.env.RPC_BACKEND);
 
 async function fetchData(crowdtainerId: BigNumber): Promise<Result<CrowdtainerStaticModel, Error>> {
    try {
       const vouchers721Contract = Vouchers721__factory.connect(Vouchers721Address, provider);
+
+      let crowdtainerStaticData: CrowdtainerStaticModel | undefined = crowdtainerStaticDataMap.get(crowdtainerId.toHexString());
+
+      if(crowdtainerStaticData != undefined) {
+         return Ok(crowdtainerStaticData);
+      }
+
       let crowdtainerAddress = await vouchers721Contract.crowdtainerForId(crowdtainerId);
       const crowdtainerContract = Crowdtainer__factory.connect(crowdtainerAddress, provider);
-
-      let state: number = await crowdtainerContract.crowdtainerState();
 
       let tokenContractAddress = await crowdtainerContract.token();
       const ERC20Contract = Coin__factory.connect(tokenContractAddress, provider);
@@ -44,6 +50,7 @@ async function fetchData(crowdtainerId: BigNumber): Promise<Result<CrowdtainerSt
       }
 
       let crowdtainerData: CrowdtainerStaticModel = {
+         contractAddress: crowdtainerAddress,
          serviceProvider: `${await crowdtainerContract.owner()}`,
          startDate: await crowdtainerContract.openingTime(),
          endDate: await crowdtainerContract.expireTime(),
@@ -55,6 +62,8 @@ async function fetchData(crowdtainerId: BigNumber): Promise<Result<CrowdtainerSt
          tokenDecimals: tokenDecimals,
          tokenSymbol: await ERC20Contract.symbol()
       }
+
+      crowdtainerStaticDataMap.set(crowdtainerId.toHexString(), crowdtainerData);
       return Ok(crowdtainerData);
    } catch (errorMessage) {
       let error: Error = { error: `${errorMessage}` };

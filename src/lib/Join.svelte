@@ -1,5 +1,6 @@
 <script lang="ts">
     import ProductQuantity from '$lib/ProductQuantity.svelte';
+import ProductQuantity_2 from './ProductQuantity_2.svelte';
 
     export let tokenSymbol: string;
     export let prices: number[];
@@ -15,8 +16,13 @@
     }
 </script>
 
+
+<ProductQuantity_2 {prices} {descriptions} on:quantitiesChanged={handleQuantityChange}/>
+
+
 <!-- Order container -->
 <div class=" border-2 rounded border-blue flex justify-center">
+
     <!-- Products container -->
     <div class=" m-6 border-black ">
 

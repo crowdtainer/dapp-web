@@ -4,7 +4,7 @@ import type { CrowdtainerDynamicModel } from '$lib/Model/CrowdtainerModel';
 
 import { fetchDynamicData, type Error } from '$lib/api';
 
-const fetchInterval : number = ( import.meta.env.DEV ? 2000 : 18000);
+const fetchInterval : number = ( import.meta.env.DEV ? 5000 : 18000);
 
 export let campaignStores: Map<number, Readable<CrowdtainerDynamicModel>> = new Map;
 

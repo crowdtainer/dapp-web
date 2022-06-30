@@ -8,6 +8,7 @@ export type CrowdtainerDynamicModel = {
 }
 
 export type CrowdtainerStaticModel = {
+	contractAddress: string | undefined;
 	serviceProvider: string | undefined;
 	startDate: BigNumber | undefined;
 	endDate: BigNumber | undefined;

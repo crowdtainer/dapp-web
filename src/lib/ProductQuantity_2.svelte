@@ -38,15 +38,26 @@
 	};
 </script>
 
+<!-- Header -->
+<div>
+	<div id="header" class="flex items-center bg-gray-100 h-10 px-4">
+		<div class="w-3/12 font-semibold">Description</div>
+		<div class="w-6/12 font-semibold">Quantity</div>
+		<div class="w-3/12 font-semibold">Subtotal</div>
+	</div>
+<!-- Header End -->
+
+<div id="body" class="px-4 spacey-y-4">
 {#each descriptions as product, index}
-	<div class="flex justify-center w-82 min-width-82">
-		<div id="container" class="grid grid-cols-5 gap-0 my-1">
-			<div class="col-span-1">
+
+		<div class="flex">
+			<!-- Row start -->
+			<div class="w-2/12">
 				<p class="text-right text-base py-1">
 					<b>{product} - </b>
 				</p>
 			</div>
-			<div class="col-span-1 flex justify-center">
+			<div class="w-2/12 flex justify-center">
 				<button
 					type="button"
 					class="px-3 border-2 border-gray-800 text-gray-800 font-medium text-xs leading-tight uppercase rounded hover:bg-black hover:bg-opacity-5 focus:outline-none focus:ring-0"
@@ -57,10 +68,10 @@
 					-
 				</button>
 			</div>
-			<div class="py-1 col-span-1 flex justify-center w-6 max-width-6">
+			<div class="py-1 w-2/12">
 				{productQuantities[index]}
 			</div>
-			<div class="col-span-1 flex justify-center">
+			<div class="w-2/12">
 				<button
 					type="button"
 					class="center t-2 px-3 border-2 border-gray-800 text-gray-800 font-medium text-xs leading-tight uppercase rounded hover:bg-black hover:bg-opacity-5 focus:outline-none focus:ring-0"
@@ -71,9 +82,10 @@
 					+
 				</button>
 			</div>
-			<div class="pl-1 py-1 pr-1 col-span-1">
+			<div class="pl-1 py-1 pr-1 w-2/12">
 				{prices[index] * productQuantities[index]} USDC
 			</div>
 		</div>
-	</div>
+		<!-- Row end -->
 {/each}
+</div></div>

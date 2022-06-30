@@ -34,10 +34,10 @@
 		let result = await fetchStaticData(crowdtainerId);
 		if (result.isOk()) {
 			campaignStatic = prepareForUI(result.unwrap());
+			campaignStaticDataLoaded = true;
 		} else {
 			console.log(`Failed to fetch static data..`); // TODO: error handling for static
 		}
-		campaignStaticDataLoaded = true;
 
 		// Dynamic data
 		if (campaign == undefined) {
