@@ -7,6 +7,7 @@
 	import { fetchStaticData } from '$lib/api';
 	import { initializeStore, campaignStores } from '$lib/campaignStore';
 	import { joinSelection } from '$lib/userStore';
+	import TimeLeft from './TimeLeft.svelte';
 
 	import type {
 		CrowdtainerDynamicModel,
@@ -16,6 +17,7 @@
 		toHuman,
 		toHumanPrices,
 		toFormattedDate,
+		toDate,
 		stateToString,
 		prettifyAddress
 	} from '$lib/Converters/CrowdtainerData';
@@ -79,8 +81,9 @@
 
 	type UIFields = {
 		serviceProviderAddress: string;
-		startDate: string;
-		endDate: string;
+		startDateString: string;
+		endDateString: string;
+		endDate: Date;
 		minimum: string;
 		maximum: string;
 		tokenSymbol: string;
@@ -92,8 +95,9 @@
 	function prepareForUI(data: CrowdtainerStaticModel): UIFields {
 		return {
 			serviceProviderAddress: prettifyAddress(data.serviceProvider),
-			startDate: toFormattedDate(data.startDate),
-			endDate: toFormattedDate(data.endDate),
+			startDateString: toFormattedDate(data.startDate),
+			endDateString: toFormattedDate(data.endDate),
+			endDate: toDate(data.endDate),
 			minimum: toHuman(data.minimumGoal, data.tokenDecimals),
 			maximum: toHuman(data.maximumGoal, data.tokenDecimals),
 			tokenSymbol: tokenSymbolPretty(data.tokenSymbol),
@@ -151,49 +155,51 @@
 					</p>
 
 					{#await loadStaticData()}
-					<p class="my-6">Loading data..</p>
+						<p class="my-6">Loading data..</p>
 					{:then}
 						<div class="">
 							<div class="my-6 bg-gray-200 rounded-md w-full">
 								<div
-								class="bg-blue-600 text-xs font-medium text-white text-center p-2 leading-normal rounded-l-md"
-								style="width: 25%"
+									class="bg-blue-600 text-xs font-medium text-white text-center p-2 leading-normal rounded-l-md"
+									style="width: 25%"
 								>
-								25%
+									25%
+								</div>
 							</div>
-						</div>
 
-						<!-- Main Status -->
-						<div class="flex items-center justify-between px-2 gap-5">
-						<div class="">
-							<p class="text-blue-600 text-3xl">{stateString}</p>
-							<p class="text-base">Status</p>
-						</div>
-						<div class="">
-							<p class="text-blue-600 text-3xl">{campaignStatic.tokenSymbol} {raised}</p>
-							<p class="text-base">raised of {campaignStatic.minimum} goal</p>
-						</div>
-						<div class="">
-							<p class="text-blue-600 text-3xl">9</p>
-							<p class="text-base">days to go</p>
-						</div>
-						</div>
+							<!-- Main Status -->
+							<div class="flex items-center justify-between px-2 gap-5">
+								<div class="">
+									<p class="text-blue-600 text-3xl">{stateString}</p>
+									<p class="text-base">Status</p>
+								</div>
+								<div class="">
+									<p class="text-blue-600 text-3xl">{campaignStatic.tokenSymbol} {raised}</p>
+									<p class="text-base">raised of {campaignStatic.minimum} goal</p>
+								</div>
+								<div class="">
+									<p class="text-blue-600 text-3xl">
+										<TimeLeft endTime={campaignStatic.endDate}/>
+									</p>
+									<p class="text-base">to go</p>
+								</div>
+							</div>
 
-						<!-- Dates -->
-						<div class="flex px-2 py-8 items-center justify-between gap-12">
-						<div class="">
-							<p class="text-xl"><b>{campaignStatic.startDate}</b></p>
-							<p class="text-base">Start</p>
-						</div>
-						<div class="">
-							<p class="text-xl"><b>{campaignStatic.endDate}</b></p>
-							<p class="text-base">End</p>
-						</div>
-						</div>
-							<div class="flex items-center justify-between">
+							<!-- Dates -->
+							<div class="flex px-2 py-8 items-center justify-between gap-12">
+								<div class="">
+									<p class="text-xl"><b>{campaignStatic.startDateString}</b></p>
+									<p class="text-base">Start</p>
+								</div>
+								<div class="">
+									<p class="text-xl"><b>{campaignStatic.endDateString}</b></p>
+									<p class="text-base">End</p>
+								</div>
+							</div>
+							<p class="px-2 text-xl text-gray-900">{currentPrice} {campaignStatic.tokenSymbol}</p>
+							<div class="flex px-2 items-center justify-between">
 								<h3 class="text-sm text-gray-900 font-medium">Price</h3>
 							</div>
-							<p class="text-xl text-gray-900">{currentPrice} {campaignStatic.tokenSymbol}</p>
 							<fieldset class="mt-4">
 								<legend class="sr-only">Choose a product</legend>
 								<div class="grid grid-cols-4 gap-4 sm:grid-cols-8 lg:grid-cols-4">
@@ -223,13 +229,13 @@
 							<!-- </div> -->
 						</div>
 						<button
-						type="submit"
-						class="mt-10 w-1/5 bg-gray-700 border border-transparent rounded-md py-3 px-8 flex items-center justify-center text-base font-medium text-white hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-					>
-						Add
-					</button>
+							type="submit"
+							class="mt-10 w-1/5 bg-gray-700 border border-transparent rounded-md py-3 px-8 flex items-center justify-center text-base font-medium text-white hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+						>
+							Add
+						</button>
 					{:catch error}
-					<p class="my-6 text-red-800">{error} Please reload the page.</p>
+						<p class="my-6 text-red-800">{error} Please reload the page.</p>
 					{/await}
 				</div>
 			</form>

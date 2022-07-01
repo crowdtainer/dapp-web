@@ -27,13 +27,18 @@ export function prettifyAddress(address: string | undefined): string {
     return address;
 }
 
+export function toDate(epoch: BigNumber | undefined): Date {
+    if(epoch === undefined) {
+        throw Error("Invalid date input");
+    }
+    return new Date(BigNumber.from(epoch).toNumber()*1000);
+}
+
 export function toFormattedDate(epoch: BigNumber | undefined): string {
     if(epoch === undefined) {
         return loadingString;
     }
-    let normalNumber = BigNumber.from(epoch).toNumber();
-    let date = new Date(normalNumber*1000);
-
+    let date = new Date(BigNumber.from(epoch).toNumber()*1000);
     return date.toLocaleString("en-GB", {dateStyle: 'short', timeStyle: 'short'});
 }
 
