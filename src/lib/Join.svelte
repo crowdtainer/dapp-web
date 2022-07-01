@@ -26,7 +26,7 @@
 
 <!-- Order container -->
 <div class="center container mx-auto max-w-6xl mb-8">
-<div class="border-2 ">
+<div class="border-2">
 
     <!-- Products container -->
     <div class="m-3">
@@ -42,15 +42,17 @@
         <div class="flex justify-center">
             <button
                 type="button"
-                class="bg-indigo-600 border-2 border-black px-16 mt-6 py-4 text-white font-medium text-xs leading-tight uppercase rounded shadow-md hover:bg-blue-700 hover:shadow-lg focus:shadow-lg focus:outline-none focus:ring-0 active:shadow-lg"
+                class="bg-indigo-600 border-2 border-black px-16 mt-6 py-4 text-white font-medium text-sm leading-tight uppercase rounded shadow-md hover:bg-blue-700 hover:shadow-lg focus:shadow-lg focus:outline-none focus:ring-0 active:shadow-lg"
             >
                 Join
             </button>
             <!-- Legal Disclaimer -->
         </div>
     </div>
-    <p class="text-sm m-4">
+    <div class="flex justify-center">
+    <p class="text-base m-4">
         By clicking on "Join" and cryptographically signing the transaction, I agree to the <b>General Terms and Conditions</b> related to the usage of this webpage.
     </p>
+    </div>
 </div> <!-- here-->
 </div>

@@ -138,12 +138,12 @@
 			</div>
 			<form on:submit|preventDefault={() => addProduct()} class="mt-10">
 				<div class="p-8">
-					<div class="uppercase tracking-wide text-sm text-indigo-500 font-semibold">
+					<div class="uppercase tracking-wide text-base text-indigo-500 font-semibold">
 						{title}
 					</div>
 					<a
 						href="#"
-						class="block mt-1 text-lg leading-tight font-medium text-black hover:underline"
+						class="block mt-1 text-2xl leading-tight font-medium text-black hover:underline"
 						>{subtitle}</a
 					>
 					<p class="mt-5 text-slate-500">
@@ -154,40 +154,46 @@
 					<p class="my-6">Loading data..</p>
 					{:then}
 						<div class="">
-							<div class="my-4 bg-gray-200 rounded-md w-full">
+							<div class="my-6 bg-gray-200 rounded-md w-full">
 								<div
-									class="bg-blue-600 text-xs font-medium text-white text-center p-2 leading-normal rounded-l-md"
-									style="width: 25%"
+								class="bg-blue-600 text-xs font-medium text-white text-center p-2 leading-normal rounded-l-md"
+								style="width: 25%"
 								>
-									25%
-								</div>
+								25%
 							</div>
-							<div class="flex flex-wrap ml-0 mr-2">
-								<p class="py-1"><b>Raised:</b> {raised} {campaignStatic.tokenSymbol}</p>
-							</div>
-							<div class="flex flex-wrap ml-0 mr-2">
-								<p class="my-1 mr-4">
-									<b>Minimum goal:</b>
-									{campaignStatic.minimum}
-									{campaignStatic.tokenSymbol}
-								</p>
-								<p class="my-1 mr-4">
-									<b>Maximum goal:</b>
-									{campaignStatic.maximum}
-									{campaignStatic.tokenSymbol}
-								</p>
-							</div>
-							<!-- <p class="my-3"><b>Service provider:</b> {campaignStatic.serviceProviderAddress}</p> -->
-							<p class="my-5"><b>Status:</b> {stateString} | <b>Ends in:</b> 42 days</p>
-							<p class="my-5">
-								<b>Start:</b>
-								{campaignStatic.startDate} - <b>End: </b>{campaignStatic.endDate}
-							</p>
+						</div>
 
+						<!-- Main Status -->
+						<div class="flex items-center justify-between px-2 gap-5">
+						<div class="">
+							<p class="text-blue-600 text-3xl">{stateString}</p>
+							<p class="text-base">Status</p>
+						</div>
+						<div class="">
+							<p class="text-blue-600 text-3xl">{campaignStatic.tokenSymbol} {raised}</p>
+							<p class="text-base">raised of {campaignStatic.minimum} goal</p>
+						</div>
+						<div class="">
+							<p class="text-blue-600 text-3xl">9</p>
+							<p class="text-base">days to go</p>
+						</div>
+						</div>
+
+						<!-- Dates -->
+						<div class="flex px-2 py-8 items-center justify-between gap-12">
+						<div class="">
+							<p class="text-xl"><b>{campaignStatic.startDate}</b></p>
+							<p class="text-base">Start</p>
+						</div>
+						<div class="">
+							<p class="text-xl"><b>{campaignStatic.endDate}</b></p>
+							<p class="text-base">End</p>
+						</div>
+						</div>
 							<div class="flex items-center justify-between">
 								<h3 class="text-sm text-gray-900 font-medium">Price</h3>
 							</div>
-							<p class="text-3xl text-gray-900">{currentPrice} {campaignStatic.tokenSymbol}</p>
+							<p class="text-xl text-gray-900">{currentPrice} {campaignStatic.tokenSymbol}</p>
 							<fieldset class="mt-4">
 								<legend class="sr-only">Choose a product</legend>
 								<div class="grid grid-cols-4 gap-4 sm:grid-cols-8 lg:grid-cols-4">
