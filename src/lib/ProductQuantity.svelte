@@ -1,11 +1,11 @@
 <script lang="ts">
 	import { joinSelection } from '$lib/userStore';
 	import { derived, type Readable } from 'svelte/store';
-	import { fade } from 'svelte/transition';
 
 	export let prices: number[];
 	export let descriptions: string[];
 	export let crowdtainerId: number;
+	export let tokenSymbol: string;
 
 	var selection: Readable<number[]> = derived(joinSelection, $joinSelection => {
 		let storeSelection = $joinSelection.get(crowdtainerId);
@@ -88,7 +88,7 @@
 			</div>
 		</div>
 		<div class="text-center pl-0 py-4 pr-1 w-3/12">
-			{prices[index] * $selection[index]} USDC
+			{prices[index] * $selection[index]} {tokenSymbol}
 		</div>
 	</div>
 		<!-- Row end -->

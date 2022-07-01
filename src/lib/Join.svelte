@@ -31,13 +31,13 @@
     <!-- Products container -->
     <div class="m-3">
 
-        <ProductQuantity {prices} {descriptions} {crowdtainerId}/>
+        <ProductQuantity {prices} {descriptions} {crowdtainerId} {tokenSymbol}/>
 
         <!-- Summary -->
         <div class="divide-y divide-dashed text-right mr-4 my-2 py-4">
             <p class="text-sm">7% tax (USt.) and shipping included</p>
             <p class="text-sm"><b>(Currently shipping only to Germany)</b></p>
-            <p class="text-lg my-4"><b>Summary</b>: {$totalSum} {tokenSymbol}</p>
+            <p class="text-lg my-4"><b>Total</b>: {$totalSum} {tokenSymbol}</p>
         </div>
         <div class="flex justify-center">
             <button
