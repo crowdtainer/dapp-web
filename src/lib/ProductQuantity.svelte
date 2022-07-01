@@ -1,55 +1,70 @@
 <script lang="ts">
-	import { createEventDispatcher } from 'svelte';
-	const dispatch = createEventDispatcher();
+	import { joinSelection } from '$lib/userStore';
+	import { derived, type Readable } from 'svelte/store';
+	import { fade } from 'svelte/transition';
 
 	export let prices: number[];
 	export let descriptions: string[];
+	export let crowdtainerId: number;
 
-	$: productQuantities = resetQuantities(descriptions.length);
-
-	function updateQuantities(newQuantities: Array<number>) {
-		dispatch('quantitiesChanged', {
-			quantities: newQuantities
-		});
-	}
-
-	function resetQuantities(size: number): number[] {
-		let newArray = Array(size);
-		newArray.fill(0);
-		return newArray;
-	}
+	var selection: Readable<number[]> = derived(joinSelection, $joinSelection => {
+		let storeSelection = $joinSelection.get(crowdtainerId);
+		let noSelection = Array(descriptions.length).fill(0);
+		if(storeSelection === undefined) {
+			return noSelection;
+		} else {
+			return storeSelection;
+		}
+	});
 
 	function incrementProduct(id: number) {
-		if (id > productQuantities.length) {
+		if (id > $selection.length) {
 			return;
 		}
-		productQuantities[id]++;
-		updateQuantities(productQuantities);
+		var quantities = $selection;
+		quantities[id]++;
+		$joinSelection.set(crowdtainerId, quantities);
+		$joinSelection = $joinSelection;
 	}
 
 	const decrementProduct = (id: number) => {
-		if (id > productQuantities.length) {
+		if (id > $selection.length) {
 			return;
 		}
-		if (productQuantities[id] > 0) {
-			productQuantities[id]--;
-			updateQuantities(productQuantities);
+		if ($selection[id] > 0) {
+			var quantities = $selection;
+			quantities[id]--;
+			$joinSelection.set(crowdtainerId, quantities);
+			$joinSelection = $joinSelection;
 		}
 	};
 </script>
 
+<!-- Header -->
+<div>
+	<div id="header" class="text-center flex items-center bg-gray-100 h-10 px-4">
+		<div class="w-5/12 font-semibold">Description</div>
+		<div class="w-4/12 font-semibold">Quantity</div>
+		<div class="w-3/12 font-semibold">Subtotal</div>
+	</div>
+<!-- Header End -->
+
+<div id="body" class="px-4 spacey-y-4">
 {#each descriptions as product, index}
-	<div class="flex justify-center w-82 min-width-82">
-		<div id="container" class="grid grid-cols-5 gap-0 my-1">
-			<div class="col-span-1">
-				<p class="text-right text-base py-1">
-					<b>{product} - </b>
+
+{#if $selection[index]>0 }
+<div class="flex">
+	<!-- Row start -->
+			<div class="w-5/12">
+				<p class="text-center text-base py-2 m-1">
+					<b>{product}</b>
 				</p>
 			</div>
-			<div class="col-span-1 flex justify-center">
+			<div class="w-4/12 flex justify-center">
+			<div class="">
 				<button
 					type="button"
-					class="px-3 border-2 border-gray-800 text-gray-800 font-medium text-xs leading-tight uppercase rounded hover:bg-black hover:bg-opacity-5 focus:outline-none focus:ring-0"
+					class="m-3 py-2 px-3 border-2 border-gray-800 text-gray-800 font-medium text-xs leading-tight uppercase rounded hover:bg-black hover:bg-opacity-5 focus:outline-none focus:ring-0"
 					on:click={() => {
 						decrementProduct(index);
 					}}
@@ -57,13 +72,13 @@
 					-
 				</button>
 			</div>
-			<div class="py-1 col-span-1 flex justify-center w-6 max-width-6">
-				{productQuantities[index]}
+			<div class="my-2 py-2">
+			{$selection[index]}
 			</div>
-			<div class="col-span-1 flex justify-center">
+			<div class="">
 				<button
 					type="button"
-					class="center t-2 px-3 border-2 border-gray-800 text-gray-800 font-medium text-xs leading-tight uppercase rounded hover:bg-black hover:bg-opacity-5 focus:outline-none focus:ring-0"
+					class="m-3 py-2 px-3 border-2 border-gray-800 text-gray-800 font-medium text-xs leading-tight uppercase rounded hover:bg-black hover:bg-opacity-5 focus:outline-none focus:ring-0"
 					on:click={() => {
 						incrementProduct(index);
 					}}
@@ -71,9 +86,12 @@
 					+
 				</button>
 			</div>
-			<div class="pl-1 py-1 pr-1 col-span-1">
-				{prices[index] * productQuantities[index]} USDC
-			</div>
+		</div>
+		<div class="text-center pl-0 py-4 pr-1 w-3/12">
+			{prices[index] * $selection[index]} USDC
 		</div>
 	</div>
+		<!-- Row end -->
+		{/if}
 {/each}
+</div></div>

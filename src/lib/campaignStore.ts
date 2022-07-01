@@ -26,7 +26,6 @@ export const initializeStore = (campaignId: number): Readable<CrowdtainerDynamic
 
 			if (response.isOk()) {
 				set(response.unwrap());
-				console.log('Updated campaign data.');
 			} else {
 				let error: Error = response.unwrapErr();
 				console.log(`${error.code} Error: ${error.message}`);
@@ -39,6 +38,5 @@ export const initializeStore = (campaignId: number): Readable<CrowdtainerDynamic
 	});
 
 	campaignStores.set(campaignId, timerBasedStore);
-	console.log(`Initialized campaign: ${campaignId}`);
 	return timerBasedStore;
 }

@@ -16,7 +16,6 @@ export async function fetchDynamicData(projectId: number): Promise<Result<Crowdt
 export async function fetchStaticData(projectId: number): Promise<Result<CrowdtainerStaticModel, Error>> {
 	const response = await fetch(`staticVoucherAPI/${projectId}`);
 	const jsonResponse = await response.json();
-	console.log(`This was called?`);
 	if (response.status != 200) {
 		return Err({ code: response.status, message: jsonResponse.error});
 	}
