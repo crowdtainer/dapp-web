@@ -9,7 +9,7 @@ export function stateToString(state: number | undefined): string {
         case 0:
             return 'Uninitialized';
         case 1:
-            return 'Funding';
+            return 'Funding'; // TODO: Handle initialized + opening time not reached yet.
         case 2:
             return 'Delivery';
         case 3:

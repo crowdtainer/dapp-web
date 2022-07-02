@@ -73,11 +73,23 @@
 		return descriptions;
 	}
 
+	function calculatePercentageRaised(raised: string): string {
+			if (campaignStaticDataLoaded) {
+				let raisedNumber = Number(raised);
+				if (raisedNumber === NaN) {
+					return '';
+				}
+				return `${raisedNumber / Number(campaignStatic.minimum)}`;
+			}
+			return '';
+	}
+
 	// dynamic
 	$: stateString = stateToString($campaign?.status);
 	$: raised = campaignStaticDataLoaded
 		? toHuman($campaign?.raised, campaignStatic.tokenDecimals)
 		: 'Loading..';
+	$: percentageRaised = calculatePercentageRaised(raised);
 
 	type UIFields = {
 		serviceProviderAddress: string;
@@ -161,9 +173,9 @@
 							<div class="my-6 bg-gray-200 rounded-md w-full">
 								<div
 									class="bg-blue-600 text-xs font-medium text-white text-center p-2 leading-normal rounded-l-md"
-									style="width: 25%"
+									style="width: {percentageRaised}%"
 								>
-									25%
+									{percentageRaised}%
 								</div>
 							</div>
 
@@ -179,7 +191,7 @@
 								</div>
 								<div class="">
 									<p class="text-blue-600 text-3xl">
-										<TimeLeft endTime={campaignStatic.endDate}/>
+										<TimeLeft endTime={campaignStatic.endDate} />
 									</p>
 									<p class="text-base">to go</p>
 								</div>
