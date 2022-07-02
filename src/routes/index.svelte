@@ -1,5 +1,6 @@
- <script context="module" lang="ts">
-    import { projects } from './data/projects.json';
+ <script lang="ts">
+	import { projects } from './data/projects.json';
+	import Project from '$lib/Project.svelte';
 </script>
 
 <svelte:head>
@@ -12,136 +13,15 @@
 	</div>
 </header>
 
-<main>
-	<!-- Project Container start -->
-	{#each projects as project}
-	<div class="max-w-10xl mx-auto py-1 sm:px-6 lg:px-8">
-		<div class="max-w-lg mx-auto bg-white rounded-xl shadow-md overflow-hidden md:max-w-7xl my-8">
-			<div class="md:flex">
-				<div class="md:shrink-0">
-					<img
-						class="h-48 w-full object-cover md:h-full md:w-96 blur-[3px]"
-						src="CoffeeBag.png"
-						alt="Coffee"
-					/>
-				</div>
-				<div class="p-8">
-					<div class="uppercase tracking-wide text-sm text-indigo-500 font-semibold">
-						{project.title}
-					</div>
-					<a
-						href="#"
-						class="block mt-1 text-lg leading-tight font-medium text-black hover:underline"
-						>{project.subtitle}</a
-					>
-					<p class="mt-5 text-slate-500">
-						{@html project.description}
-					</p>
-					<div class="">
-						<p class="my-3"><b>Service provider:</b> 0xa4b4433567777a65s577b655b5</p>
-						<p class="my-5"><b>Status:</b> Ongoing / Delivery | <b>Ends in:</b> 42 days</p>
-						<p class="my-5"><b>Start:</b> 23/06/2022 - <b>End:</b> 23/08/2022</p>
-						<div class="flex flex-wrap ml-0 mr-2">
-							<p class=""><b>Raised:</b> 53.500,00 USDC</p>
-							<div class="ml-2 mr-4 bg-gray-200 rounded-full w-80">
-								<div
-									class="bg-blue-600 text-xs font-medium text-white text-center p-1 leading-normal rounded-l-full"
-									style="width: 25%"
-								>
-									25%
-								</div>
-							</div>
-						</div>
-						<p class="my-3"><b>Minimum goal:</b> 100.000,00 USDC | <b>Maximum goal:</b> 130.000,00 USDC</p>
-						<!-- Prices -->
-						<div class="flex flex-wrap mb-4">
-							<p class="mr-4 "><b>Price</b></p>
-							<div>
-								<p><b>250g: </b></p>
-							</div>
-							<div><p class="mx-2 text-green-700">20 USDC (80 USDC/kg)</p></div>
-						<!-- </div>
-						<div class="flex flex-wrap"> -->
-							<div>
-								<p><b>| 500g:</b></p>
-							</div>
-							<div><p class="mx-3 text-green-700">38 USDC (76 USDC/kg)</p></div>
-						</div>
+<main>	<!-- Project Container start -->
 
-						<!-- Order container -->
-						<div class=" border-2 rounded border-blue flex justify-center">
-							<!-- Products container -->
-							<div class=" m-6 border-black ">
-								<!-- Product 1 -->
-								<div id="container" class="grid grid-cols-6 w-82 m-3">
-									<div class="col-span-3"><p class="text-right text-base mr-2 py-1"><b>250g</b> x</p></div>
-									<div>
-										<button
-											type="button"
-											class="px-3 py-2 border-2 border-gray-800 text-gray-800 font-medium text-xs leading-tight uppercase rounded hover:bg-black hover:bg-opacity-5 focus:outline-none focus:ring-0"
-										>
-											-
-										</button>
-									</div>
-									<div class="text-center py-1 pr-1">0</div>
-									<div>
-										<button
-											type="button"
-											class="t-2 px-3 py-2 border-2 border-gray-800 text-gray-800 font-medium text-xs leading-tight uppercase rounded hover:bg-black hover:bg-opacity-5 focus:outline-none focus:ring-0"
-										>
-											+
-										</button>
-									</div>
-								</div>
-								<!-- Product 2 -->
-								<div id="container" class=" grid grid-cols-6 w-82 m-3">
-									<div class="col-span-3"><p class="text-right mr-2 py-1"><b>500g</b> x</p></div>
-									<div>
-										<button
-											type="button"
-											class="px-3 py-2 border-2 border-gray-800 text-gray-800 font-medium text-xs leading-tight uppercase rounded hover:bg-black hover:bg-opacity-5 focus:outline-none focus:ring-0"
-										>
-											-
-										</button>
-									</div>
-									<div class="text-center py-1 pr-1">0</div>
-									<div>
-										<button
-											type="button"
-											class="t-2 px-3 py-2 border-2 border-gray-800 text-gray-800 font-medium text-xs leading-tight uppercase rounded hover:bg-black hover:bg-opacity-5 focus:outline-none focus:ring-0"
-										>
-											+
-										</button>
-									</div>
-								</div>
-								<!-- Summary -->
-								<div class="divide-y divide-dashed text-right mr-4 my-2 py-4">
-									<p class="text-sm">7% tax (USt.) and shipping included</p>
-									<p class="text-sm"><b>(Currently shipping only to Germany)</b></p>
-									<p class="text-lg my-4"><b>Summary</b>: 100 DAI</p>
-								</div>
-								<div class="flex justify-center">
-									<button
-										type="button"
-										class=" border-2 border-black px-16 mt-6 py-4 bg-gray-700 text-white font-medium text-xs leading-tight uppercase rounded shadow-md hover:bg-blue-700 hover:shadow-lg focus:shadow-lg focus:outline-none focus:ring-0 active:shadow-lg"
-									>
-										Join
-									</button>
-									<!-- Legal Disclaimer -->
-								</div>
-							</div>
-						</div>
-						<p class="text-sm m-4">
-							By clicking on "Join" and cryptographically signing the transaction, I agree to the <b>General Terms and Conditions</b> related to the usage of this webpage.
-						</p>
-					</div>
-				</div>
-			</div>
-		</div>
-	</div>
-	<!-- Project Container End -->
+	{#each projects as project}
+
+	<Project  {...project}/>
+
 	{/each}
 
+	<!-- Project Container End -->
 
 	<header class="bg-gradient-to-r from-black to-gray-700 shadow">
 		<div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">

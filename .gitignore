@@ -6,4 +6,4 @@ node_modules
 .env
 .env.*
 !.env.example
-/out
+/src/routes/data/typechain

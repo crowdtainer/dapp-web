@@ -1,13 +1,14 @@
 {
+    "MetadataServiceV1Address": "0xDc64a140Aa3E981100a9becA4E685f962f0cF6C9",
+    "Vouchers721Address": "0x5FC8d32690cc91D4c39d9d3abcBD16989F875707",
     "projects": 
     [
        {
-           "rootContractAddress": "0xabababababababaababababababa",
-           "projectNumber":1,
+           "crowdtainerId":1,
            "title": "FILTER COFFEE BEANS",
            "subtitle": "COLOMBIA Finca La Esperanza",
-           "description": "In the diverse department of Nariño, in the south west of Colombia, bordering Ecuador and the Pacific Ocean, there is a municipality named Consacá. In the vereda (or township) of La Aguada, Jesús Ignacio Paredes cultivates approximately one hectare made up of three separate plots named La Esperanza. <br /><br />Jesús Ignacio's daily life looks a bit different as we can imagine. The farm where he cultivates coffee is within a 20 minute walking distance from the place he lives. So he walks to the three plots of land, where his parents taught him everything he needs to know to be a successful producer, where his beloved Castillo and Colombia varietals grow, protected with a shade from other trees like plantain and citrus fruit trees. The crops grow at 1900 m.a.s.l. and he makes sure they are cared for.",
-           "projectImageURL": "http://test.com/some_image_here.jpeg"
+           "description": "In the diverse department of Nariño, in the south west of Colombia, bordering Ecuador and the Pacific Ocean, there is a municipality named Consacá. In the vereda (or township) of La Aguada, Jesús Ignacio Paredes cultivates approximately one hectare made up of three separate plots named La Esperanza.",
+           "projectImageURL": "CoffeeBag.png"
        }
     ]
 }
