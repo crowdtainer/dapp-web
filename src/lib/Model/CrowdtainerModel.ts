@@ -8,15 +8,15 @@ export type CrowdtainerDynamicModel = {
 }
 
 export type CrowdtainerStaticModel = {
-	contractAddress: string | undefined;
-	serviceProvider: string | undefined;
-	startDate: BigNumber | undefined;
-	endDate: BigNumber | undefined;
-	minimumGoal: BigNumber | undefined;
-	maximumGoal: BigNumber | undefined;
-	productDescription: string[] | undefined;
-	prices: BigNumber[] | undefined;
-	token: string | undefined;
-	tokenDecimals: number | undefined;
-	tokenSymbol: string | undefined;
+	contractAddress: string;
+	serviceProvider: string;
+	startDate: BigNumber;
+	endDate: BigNumber;
+	minimumGoal: BigNumber;
+	maximumGoal: BigNumber;
+	productDescription: string[];
+	prices: BigNumber[];
+	token: string;
+	tokenDecimals: number;
+	tokenSymbol: string;
 }

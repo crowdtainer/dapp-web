@@ -1,6 +1,8 @@
 <script lang="ts">
 	import type { Readable } from 'svelte/store';
 	import { onMount } from 'svelte';
+	import { tweened } from 'svelte/motion';
+	import { cubicOut } from 'svelte/easing';
 
 	import Join from '$lib/Join.svelte';
 
@@ -10,16 +12,15 @@
 	import TimeLeft from './TimeLeft.svelte';
 
 	import type {
-		CrowdtainerDynamicModel,
-		CrowdtainerStaticModel
+		CrowdtainerDynamicModel, CrowdtainerStaticModel
 	} from '$lib/Model/CrowdtainerModel';
 	import {
 		toHuman,
-		toHumanPrices,
-		toFormattedDate,
-		toDate,
-		stateToString,
-		prettifyAddress
+		toStateString,
+		calculatePercentageRaised,
+		calculatePercentageWidth,
+		type UIFields,
+		prepareForUI
 	} from '$lib/Converters/CrowdtainerData';
 
 	export let crowdtainerId: number;
@@ -29,11 +30,18 @@
 	export let projectImageURL: string;
 
 	let campaign: Readable<CrowdtainerDynamicModel> | undefined;
-	let campaignStatic: UIFields;
+	let campaignStatic: CrowdtainerStaticModel | undefined;
+	let campaignStaticUI: UIFields;
 	let campaignStaticDataLoaded: boolean;
 
 	let currentSelection = 0;
 	let currentPrice: number;
+	let raised: number;
+	let tweeningDuration = 650;
+	let tweenedRaised = tweened(0, { duration: tweeningDuration, easing: cubicOut });
+	let tweenedPercentageWidth = tweened(0, { duration: tweeningDuration, easing: cubicOut });
+	let tweenedPercentageRaised = tweened(0, { duration: tweeningDuration, easing: cubicOut });
+	let moneyFormatter = new Intl.NumberFormat('en-GB', { style: 'decimal', minimumFractionDigits: 0, maximumFractionDigits: 0, });
 
 	onMount(async () => {
 		// Dynamic data
@@ -47,77 +55,38 @@
 	async function loadStaticData() {
 		let result = await fetchStaticData(crowdtainerId);
 		if (result.isOk()) {
-			campaignStatic = prepareForUI(result.unwrap());
+			campaignStatic = result.unwrap();
+			campaignStaticUI = prepareForUI(campaignStatic);
 			// set initial price
-			currentPrice = campaignStatic.prices[currentSelection];
+			currentPrice = campaignStaticUI.prices[currentSelection];
 			campaignStaticDataLoaded = true;
 		} else {
 			throw new Error('Unable to load project.');
 		}
 	}
 
-	function tokenSymbolPretty(name: string | undefined): string {
-		if (name) {
-			return name;
-		} else {
-			return '-';
+	function setRaisedAmount() {
+		if(campaignStaticDataLoaded) {
+			raised = toHuman($campaign?.raised, campaignStaticUI.tokenDecimals);
+			tweenedRaised.set(raised);
 		}
 	}
 
-	function prettyDescription(descriptions: string[] | undefined): string[] {
-		if (descriptions == undefined) {
-			let emptyDescriptions: string[] = [];
-			emptyDescriptions.fill('');
-			return emptyDescriptions;
-		}
-		return descriptions;
-	}
-
-	function calculatePercentageRaised(raised: string): string {
-			if (campaignStaticDataLoaded) {
-				let raisedNumber = Number(raised);
-				if (raisedNumber === NaN) {
-					return '';
-				}
-				return `${raisedNumber / Number(campaignStatic.minimum)}`;
-			}
-			return '';
+	function setPercentages() {
+		if(campaignStaticDataLoaded) {
+			let percentage = Number(calculatePercentageRaised(raised.toString(), campaignStaticUI.minimum));
+			tweenedPercentageRaised.set(percentage);
+			tweenedPercentageWidth.set(calculatePercentageWidth(percentage));
+		} 
 	}
 
 	// dynamic
-	$: stateString = stateToString($campaign?.status);
-	$: raised = campaignStaticDataLoaded
-		? toHuman($campaign?.raised, campaignStatic.tokenDecimals)
+	$: stateString = (campaignStaticDataLoaded && $campaign !== undefined && campaignStatic !== undefined)
+		? toStateString($campaign, campaignStatic)
 		: 'Loading..';
-	$: percentageRaised = calculatePercentageRaised(raised);
 
-	type UIFields = {
-		serviceProviderAddress: string;
-		startDateString: string;
-		endDateString: string;
-		endDate: Date;
-		minimum: string;
-		maximum: string;
-		tokenSymbol: string;
-		tokenDecimals: number;
-		prices: number[];
-		descriptions: string[];
-	};
-
-	function prepareForUI(data: CrowdtainerStaticModel): UIFields {
-		return {
-			serviceProviderAddress: prettifyAddress(data.serviceProvider),
-			startDateString: toFormattedDate(data.startDate),
-			endDateString: toFormattedDate(data.endDate),
-			endDate: toDate(data.endDate),
-			minimum: toHuman(data.minimumGoal, data.tokenDecimals),
-			maximum: toHuman(data.maximumGoal, data.tokenDecimals),
-			tokenSymbol: tokenSymbolPretty(data.tokenSymbol),
-			tokenDecimals: data.tokenDecimals ? data.tokenDecimals : 0, // TODO
-			prices: toHumanPrices(data.prices, data.tokenDecimals),
-			descriptions: prettyDescription(data.productDescription)
-		};
-	}
+	$: $campaign, setRaisedAmount();
+	$: $campaign, setPercentages();
 
 	function updateCurrentSelection(index: number, price: number) {
 		currentSelection = index;
@@ -134,7 +103,7 @@
 			$joinSelection.set(crowdtainerId, updatedQuantity);
 			$joinSelection = $joinSelection;
 		} else {
-			let quantities: number[] = new Array<number>(campaignStatic.prices.length).fill(0);
+			let quantities: number[] = new Array<number>(campaignStaticUI.prices.length).fill(0);
 			quantities[currentSelection]++;
 			$joinSelection.set(crowdtainerId, quantities);
 			$joinSelection = $joinSelection;
@@ -170,28 +139,28 @@
 						<p class="my-6">Loading data..</p>
 					{:then}
 						<div class="">
-							<div class="my-6 bg-gray-200 rounded-md w-full">
+							<div class="my-6 bg-gray-300 rounded-md w-full">
 								<div
-									class="bg-blue-600 text-xs font-medium text-white text-center p-2 leading-normal rounded-l-md"
-									style="width: {percentageRaised}%"
+									class="bg-blue-700 text-sm font-medium text-white text-center p-1 leading-normal rounded-md"
+									style="width: {$tweenedPercentageWidth}%"
 								>
-									{percentageRaised}%
+								{($tweenedPercentageRaised).toFixed(0)}%
 								</div>
 							</div>
 
 							<!-- Main Status -->
 							<div class="flex items-center justify-between px-2 gap-5">
 								<div class="">
-									<p class="text-blue-600 text-3xl">{stateString}</p>
+									<p class="text-blue-700 text-3xl">{stateString}</p>
 									<p class="text-base">Status</p>
 								</div>
 								<div class="">
-									<p class="text-blue-600 text-3xl">{campaignStatic.tokenSymbol} {raised}</p>
-									<p class="text-base">raised of {campaignStatic.minimum} goal</p>
+									<p class="text-blue-700 text-3xl">{campaignStaticUI.tokenSymbol} {moneyFormatter.format($tweenedRaised)}</p>
+									<p class="text-base">raised of {moneyFormatter.format(Number(campaignStaticUI.minimum))} goal</p>
 								</div>
 								<div class="">
-									<p class="text-blue-600 text-3xl">
-										<TimeLeft endTime={campaignStatic.endDate} />
+									<p class="text-blue-700 text-3xl">
+										<TimeLeft endTime={campaignStaticUI.endDate} />
 									</p>
 									<p class="text-base">to go</p>
 								</div>
@@ -200,22 +169,22 @@
 							<!-- Dates -->
 							<div class="flex px-2 py-8 items-center justify-between gap-12">
 								<div class="">
-									<p class="text-xl"><b>{campaignStatic.startDateString}</b></p>
+									<p class="text-xl">{campaignStaticUI.startDateString}</p>
 									<p class="text-base">Start</p>
 								</div>
 								<div class="">
-									<p class="text-xl"><b>{campaignStatic.endDateString}</b></p>
+									<p class="text-xl">{campaignStaticUI.endDateString}</p>
 									<p class="text-base">End</p>
 								</div>
 							</div>
-							<p class="px-2 text-xl text-gray-900">{currentPrice} {campaignStatic.tokenSymbol}</p>
+							<p class="px-2 text-2xl text-gray-900">{currentPrice} {campaignStaticUI.tokenSymbol}</p>
 							<div class="flex px-2 items-center justify-between">
 								<h3 class="text-sm text-gray-900 font-medium">Price</h3>
 							</div>
 							<fieldset class="mt-4">
 								<legend class="sr-only">Choose a product</legend>
 								<div class="grid grid-cols-4 gap-4 sm:grid-cols-8 lg:grid-cols-4">
-									{#each campaignStatic.prices as price, index}
+									{#each campaignStaticUI.prices as price, index}
 										<label
 											class:ring-2={currentSelection === index}
 											class:ring-indigo-500={currentSelection === index}
@@ -225,11 +194,11 @@
 												type="radio"
 												name="size-choice"
 												on:click={() => updateCurrentSelection(index, price)}
-												value={campaignStatic.descriptions[index]}
+												value={campaignStaticUI.descriptions[index]}
 												class="sr-only"
 												aria-labelledby="size-choice-1-label"
 											/>
-											<span id="size-choice-1-label"> {campaignStatic.descriptions[index]} </span>
+											<span id="size-choice-1-label"> {campaignStaticUI.descriptions[index]} </span>
 											<span
 												class="absolute -inset-px rounded-md pointer-events-none"
 												aria-hidden="true"
@@ -255,9 +224,9 @@
 		<div>
 			{#if campaignStaticDataLoaded}
 				<Join
-					tokenSymbol={campaignStatic.tokenSymbol}
-					prices={campaignStatic.prices}
-					descriptions={campaignStatic.descriptions}
+					tokenSymbol={campaignStaticUI.tokenSymbol}
+					prices={campaignStaticUI.prices}
+					descriptions={campaignStaticUI.descriptions}
 					{crowdtainerId}
 				/>
 			{/if}

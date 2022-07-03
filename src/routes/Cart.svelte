@@ -50,7 +50,7 @@
                                     <img width="30" height="30" src="Transfer.svg" alt="Transfer participation proof to another wallet">
                                 </div>
                                 <p class="text-lg my-5">Transfer</p>                            
-                                <p class="text-xs">Transfer your participation proof (NFT) to another wallet</p>
+                                <p class="text-xs">Transfer participation proof (NFT) to another wallet</p>
                             </span>
                         </button>
                     </div>

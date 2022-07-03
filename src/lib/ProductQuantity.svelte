@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { joinSelection } from '$lib/userStore';
 	import { derived, type Readable } from 'svelte/store';
+	import { slide } from 'svelte/transition';
 
 	export let prices: number[];
 	export let descriptions: string[];
@@ -51,7 +52,8 @@
 
 	<div id="body" class="px-4 spacey-y-4">
 		{#each descriptions as product, index}
-			{#if $selection[index] > 0}
+		{#if $selection[index] > 0}
+			<div transition:slide|local="{{ duration: 100 }}">
 				<div class="flex">
 					<!-- Row start -->
 					<div class="w-5/12">
@@ -92,6 +94,7 @@
 					</div>
 					<!-- Row end -->
 				</div>
+			</div>
 			{/if}
 		{/each}
 	</div>
