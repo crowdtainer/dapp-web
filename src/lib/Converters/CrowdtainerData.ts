@@ -139,8 +139,8 @@ export function prepareForUI(data: CrowdtainerStaticModel): UIFields {
         endDateString: toFormattedDate(data.endDate),
         startDate: toDate(data.startDate),
         endDate: toDate(data.endDate),
-        minimum: toHuman(data.minimumGoal, data.tokenDecimals),
-        maximum: toHuman(data.maximumGoal, data.tokenDecimals),
+        minimum: toHuman(data.minimumGoal, data.tokenDecimals).toString(),
+        maximum: toHuman(data.maximumGoal, data.tokenDecimals).toString(),
         tokenSymbol: tokenSymbolPretty(data.tokenSymbol),
         tokenDecimals: data.tokenDecimals ? data.tokenDecimals : 0, // TODO
         prices: toHumanPrices(data.prices, data.tokenDecimals),

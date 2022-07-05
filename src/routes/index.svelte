@@ -7,7 +7,7 @@
 	<title>Crowdtainer</title>
 </svelte:head>
 
-<header class="bg-black">
+<header class="divider">
 	<div class="max-w-7xl mx-auto py-4 px-4 sm:px-6 lg:px-8">
 		<h1 class="text-2xl font-bold text-white">Active</h1>
 	</div>
@@ -23,7 +23,7 @@
 
 	<!-- Project Container End -->
 
-	<header class="bg-gradient-to-r from-black to-gray-700 shadow">
+	<header class="divider">
 		<div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
 			<h1 class="text-2xl font-bold text-white">Upcoming</h1>
 		</div>
@@ -32,12 +32,12 @@
 	<div class="max-w-7xl mx-auto py-6 sm:px-0 lg:px-0">
 		<div class="px-2 py-2 sm:px-0">
 			<div class="border-2 border-dashed border-gray-200 rounded-lg h-20">
-				<p class="text-white text-center m-5">More projects coming soon.</p>
+				<p class="text-black text-center m-5">More projects coming soon.</p>
 			</div>
 		</div>
 	</div>
 
-	<header class="bg-gradient-to-r from-black to-gray-700 shadow">
+	<header class="divider">
 		<div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
 			<h1 class="text-2xl font-bold text-white">Expired / Previous</h1>
 		</div>
@@ -46,7 +46,7 @@
 	<div class="max-w-7xl mx-auto py-6 sm:px-0 lg:px-0">
 		<div class="px-2 py-2 sm:px-0">
 			<div class="border-2 border-dashed border-gray-200 rounded-lg h-20">
-				<p class="text-white text-center m-5">Nothing to see here yet.</p>
+				<p class="text-black text-center m-5">Nothing to see here yet.</p>
 			</div>
 		</div>
 	</div>

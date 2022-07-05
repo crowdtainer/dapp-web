@@ -1,26 +1,6 @@
 <script lang="ts">
-    import ProductQuantity from '$lib/ProductQuantity.svelte';
-    import { joinSelection } from '$lib/userStore';
-    import { derived, type Readable } from 'svelte/store';
-
-    export let tokenSymbol: string;
-    export let prices: number[];
-    export let descriptions: string[];
-    export let crowdtainerId: number;
-
-    // CrowdtainerId -> totalSum
-    export const totalSum: Readable<number> = derived(joinSelection, $joinSelection => {
-        let totalSum = 0;
-        let selection = $joinSelection.get(crowdtainerId);
-        if(selection === undefined) {
-            selection = new Array<number>(descriptions.length).fill(0);
-            return 0;
-        }
-        for (var i = 0; i < selection.length; i++){
-                totalSum += selection[i] * prices[i];
-        }
-        return totalSum;
-    });
+    export let tokenSymbol: string | undefined = undefined;
+    export let totalSum: number;
 
 </script>
 
@@ -31,13 +11,12 @@
     <!-- Products container -->
     <div class="m-3">
 
-        <ProductQuantity {prices} {descriptions} {crowdtainerId} {tokenSymbol}/>
-
+        <slot/>
         <!-- Summary -->
         <div class="divide-y divide-dashed text-right mr-4 my-2 py-4">
             <p class="text-sm">7% tax (USt.) and shipping included</p>
             <p class="text-sm"><b>(Currently shipping only to Germany)</b></p>
-            <p class="text-lg my-4"><b>Total</b>: {$totalSum} {tokenSymbol}</p>
+            <p class="text-lg my-4"><b>Total</b>: {totalSum} {tokenSymbol}</p>
         </div>
         <div class="flex justify-center">
             <button
