@@ -19,11 +19,15 @@ const provider = new ethers.providers.JsonRpcBatchProvider(import.meta.env.RPC_B
 
 async function fetchData(crowdtainerId: BigNumber): Promise<Result<CrowdtainerStaticModel, Error>> {
    try {
+      if(crowdtainerId.toNumber() === 0) {
+         return Err({error: `Invalid crowdtainerId: ${crowdtainerId.toNumber()}`});
+      }
+
       const vouchers721Contract = Vouchers721__factory.connect(Vouchers721Address, provider);
 
       let crowdtainerStaticData: CrowdtainerStaticModel | undefined = crowdtainerStaticDataMap.get(crowdtainerId.toHexString());
 
-      if(crowdtainerStaticData != undefined) {
+      if (crowdtainerStaticData !== undefined) {
          return Ok(crowdtainerStaticData);
       }
 
@@ -67,24 +71,45 @@ async function fetchData(crowdtainerId: BigNumber): Promise<Result<CrowdtainerSt
       return Ok(crowdtainerData);
    } catch (errorMessage) {
       let error: Error = { error: `${errorMessage}` };
+      console.log(`${errorMessage}`);
       return Err(error);
    }
 }
 
-export const get: RequestHandler<CrowdtainerStaticModel | Error> = async ({ params}) => {
+export const get: RequestHandler<any> = async ({ params }) => {
+   try {
 
-   let crowdtainerId = BigNumber.from(params.id);
-   let result = await fetchData(crowdtainerId);
+      let responses = new Array<CrowdtainerStaticModel>();
 
-   if(result.isOk()) {
+      let projectIds: string[] = new Array<string>();
+
+      projectIds = params.id.split(",");
+
+      for(let i=0; i< projectIds.length; i++ ) {
+         let crowdtainer = BigNumber.from(Number(projectIds[i]));
+         let result = await fetchData(crowdtainer);
+
+         if (result.isOk()) {
+            responses.push(result.unwrap());
+         } else {
+            // Fail if any id request fails.
+            return {
+               status: 500,
+               body: result.unwrapErr()
+            };
+         }
+      }
+
       return {
          status: 200,
-         body: result.unwrap()
-      }
-   } else {
+         body: responses
+      };
+
+   } catch (error) {
+      console.log(error);
       return {
          status: 500,
-         body: result.unwrapErr()
+         body: error
       };
    }
 }

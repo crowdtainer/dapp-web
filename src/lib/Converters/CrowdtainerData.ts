@@ -4,6 +4,12 @@ import type {
     CrowdtainerDynamicModel
 } from '$lib/Model/CrowdtainerModel';
 
+export enum LoadStatus {
+    Loading,
+    Loaded,
+    FetchFailed
+}
+
 const loadingString = 'Loading...';
 export function toStateString(dynamicData: CrowdtainerDynamicModel, staticData: CrowdtainerStaticModel): string {
     if (dynamicData.status === undefined || dynamicData.raised === undefined || staticData.minimumGoal === undefined) {
