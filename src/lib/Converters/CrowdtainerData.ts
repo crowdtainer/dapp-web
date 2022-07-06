@@ -6,7 +6,7 @@ import type {
 
 const loadingString = 'Loading...';
 export function toStateString(dynamicData: CrowdtainerDynamicModel, staticData: CrowdtainerStaticModel): string {
-    if (dynamicData.status === undefined || dynamicData.raised === undefined) {
+    if (dynamicData.status === undefined || dynamicData.raised === undefined || staticData.minimumGoal === undefined) {
         return 'Loading..';
     }
     let nowInMs = (new Date).getTime();

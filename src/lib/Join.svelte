@@ -1,7 +1,7 @@
 <script lang="ts">
     export let tokenSymbol: string | undefined = undefined;
     export let totalSum: number;
-
+	import { fade, blur, fly, slide, scale } from 'svelte/transition';
 </script>
 
 <!-- Order container -->
@@ -16,12 +16,14 @@
         <div class="divide-y divide-dashed text-right mr-4 my-2 py-4">
             <p class="text-sm">7% tax (USt.) and shipping included</p>
             <p class="text-sm"><b>(Currently shipping only to Germany)</b></p>
-            <p class="text-lg my-4"><b>Total</b>: {totalSum} {tokenSymbol}</p>
+            {#key totalSum}
+            <p in:blur="{{ duration: 250 }}" class="text-lg my-4"><b>Total</b>: {totalSum} {tokenSymbol}</p>
+            {/key}
         </div>
         <div class="flex justify-center">
             <button
                 type="button"
-                class="bg-indigo-600 border-2 border-black px-16 mt-6 py-4 text-white font-medium text-sm leading-tight uppercase rounded shadow-md hover:bg-blue-700 hover:shadow-lg focus:shadow-lg focus:outline-none focus:ring-0 active:shadow-lg"
+                class="bg-sky-800 border-2 border-black px-16 mt-6 py-4 text-white font-medium text-sm leading-tight uppercase rounded shadow-md hover:bg-sky-600 hover:shadow-lg focus:shadow-lg focus:outline-none focus:ring-0 active:shadow-lg"
             >
                 Join
             </button>
