@@ -1,11 +1,15 @@
 <script lang="ts">
-	import type { Readable } from 'svelte/store';
+	import { derived, type Readable } from 'svelte/store';
 	import { onMount } from 'svelte';
+	import { tweened } from 'svelte/motion';
+	import { cubicOut } from 'svelte/easing';
+	import { slide } from 'svelte/transition';
 
 	import Join from '$lib/Join.svelte';
 
 	import { fetchStaticData } from '$lib/api';
 	import { initializeStore, campaignStores } from '$lib/campaignStore';
+	import ProductQuantity from '$lib/ProductQuantity.svelte';
 	import { joinSelection } from '$lib/userStore';
 	import TimeLeft from './TimeLeft.svelte';
 
@@ -15,27 +19,49 @@
 	} from '$lib/Model/CrowdtainerModel';
 	import {
 		toHuman,
-		toHumanPrices,
-		toFormattedDate,
-		toDate,
-		stateToString,
-		prettifyAddress
+		toStateString,
+		calculatePercentageRaised,
+		calculatePercentageWidth,
+		type UIFields,
+		prepareForUI
 	} from '$lib/Converters/CrowdtainerData';
 
 	export let crowdtainerId: number;
 	export let title: string;
 	export let subtitle: string;
 	export let description: string;
+	export let projectURL: string;
 	export let projectImageURL: string;
 
+	const loadingString = 'Loading...';
+
+	enum LoadStatus {
+		Loading,
+		Loaded,
+		FetchFailed
+	}
+
 	let campaign: Readable<CrowdtainerDynamicModel> | undefined;
-	let campaignStatic: UIFields;
-	let campaignStaticDataLoaded: boolean;
+	let campaignStatic: CrowdtainerStaticModel | undefined;
+	let campaignStaticUI: UIFields | undefined;
+	let staticDataLoadStatus: LoadStatus = LoadStatus.Loading;
 
 	let currentSelection = 0;
 	let currentPrice: number;
+	let raised: number;
+	let tweeningDuration = 650;
+	let tweenedRaised = tweened(0, { duration: tweeningDuration, easing: cubicOut });
+	let tweenedPercentageWidth = tweened(0, { duration: tweeningDuration, easing: cubicOut });
+	let tweenedPercentageRaised = tweened(0, { duration: tweeningDuration, easing: cubicOut });
+	let moneyFormatter = new Intl.NumberFormat('en-GB', {
+		style: 'decimal',
+		minimumFractionDigits: 0,
+		maximumFractionDigits: 0
+	});
 
 	onMount(async () => {
+		await loadStaticData();
+		$joinSelection = $joinSelection;
 		// Dynamic data
 		if (campaign == undefined) {
 			campaign = initializeStore(crowdtainerId);
@@ -44,80 +70,75 @@
 		}
 	});
 
+	// CrowdtainerId -> totalSum
+	const totalSum: Readable<number> = derived(joinSelection, ($joinSelection) => {
+		if (
+			campaignStaticUI === undefined ||
+			crowdtainerId === undefined ||
+			campaignStaticUI.descriptions === undefined ||
+			campaignStaticUI.prices === undefined
+		) {
+			return 0;
+		}
+		let totalSum = 0;
+		let selection = $joinSelection.get(crowdtainerId);
+		if (selection === undefined) {
+			selection = new Array<number>(campaignStaticUI.descriptions.length).fill(0);
+			return 0;
+		}
+		for (var i = 0; i < selection.length; i++) {
+			totalSum += selection[i] * campaignStaticUI.prices[i];
+		}
+		return totalSum;
+	});
+
 	async function loadStaticData() {
+		staticDataLoadStatus = LoadStatus.Loading;
 		let result = await fetchStaticData(crowdtainerId);
 		if (result.isOk()) {
-			campaignStatic = prepareForUI(result.unwrap());
+			campaignStatic = result.unwrap();
+			campaignStaticUI = prepareForUI(campaignStatic);
 			// set initial price
-			currentPrice = campaignStatic.prices[currentSelection];
-			campaignStaticDataLoaded = true;
+			currentPrice = campaignStaticUI.prices[currentSelection];
+			staticDataLoadStatus = LoadStatus.Loaded;
 		} else {
-			throw new Error('Unable to load project.');
+			campaignStatic = campaignStaticUI = undefined;
+			staticDataLoadStatus = LoadStatus.FetchFailed;
 		}
 	}
 
-	function tokenSymbolPretty(name: string | undefined): string {
-		if (name) {
-			return name;
-		} else {
-			return '-';
+	function setRaisedAmount() {
+		if (staticDataLoadStatus !== LoadStatus.FetchFailed) {
+			let decimals = campaignStaticUI ? campaignStaticUI.tokenDecimals : undefined;
+			raised = toHuman($campaign?.raised, decimals);
+			tweenedRaised.set(raised);
 		}
 	}
 
-	function prettyDescription(descriptions: string[] | undefined): string[] {
-		if (descriptions == undefined) {
-			let emptyDescriptions: string[] = [];
-			emptyDescriptions.fill('');
-			return emptyDescriptions;
-		}
-		return descriptions;
-	}
+	function setPercentages() {
+		if (staticDataLoadStatus !== LoadStatus.FetchFailed) {
+			let percentage = campaignStaticUI
+				? Number(calculatePercentageRaised(raised.toString(), campaignStaticUI.minimum))
+				: undefined;
 
-	function calculatePercentageRaised(raised: string): string {
-			if (campaignStaticDataLoaded) {
-				let raisedNumber = Number(raised);
-				if (raisedNumber === NaN) {
-					return '';
-				}
-				return `${raisedNumber / Number(campaignStatic.minimum)}`;
+			if (percentage !== undefined) {
+				tweenedPercentageRaised.set(percentage);
+				tweenedPercentageWidth.set(calculatePercentageWidth(percentage));
 			}
-			return '';
+		}
 	}
 
 	// dynamic
-	$: stateString = stateToString($campaign?.status);
-	$: raised = campaignStaticDataLoaded
-		? toHuman($campaign?.raised, campaignStatic.tokenDecimals)
-		: 'Loading..';
-	$: percentageRaised = calculatePercentageRaised(raised);
+	$: stateString =
+		staticDataLoadStatus !== LoadStatus.FetchFailed &&
+		$campaign !== undefined &&
+		campaignStatic !== undefined
+			? toStateString($campaign, campaignStatic)
+			: loadingString;
 
-	type UIFields = {
-		serviceProviderAddress: string;
-		startDateString: string;
-		endDateString: string;
-		endDate: Date;
-		minimum: string;
-		maximum: string;
-		tokenSymbol: string;
-		tokenDecimals: number;
-		prices: number[];
-		descriptions: string[];
-	};
-
-	function prepareForUI(data: CrowdtainerStaticModel): UIFields {
-		return {
-			serviceProviderAddress: prettifyAddress(data.serviceProvider),
-			startDateString: toFormattedDate(data.startDate),
-			endDateString: toFormattedDate(data.endDate),
-			endDate: toDate(data.endDate),
-			minimum: toHuman(data.minimumGoal, data.tokenDecimals),
-			maximum: toHuman(data.maximumGoal, data.tokenDecimals),
-			tokenSymbol: tokenSymbolPretty(data.tokenSymbol),
-			tokenDecimals: data.tokenDecimals ? data.tokenDecimals : 0, // TODO
-			prices: toHumanPrices(data.prices, data.tokenDecimals),
-			descriptions: prettyDescription(data.productDescription)
-		};
-	}
+	$: $campaign, setRaisedAmount();
+	$: $campaign, setPercentages();
+	$: loadingAnimation = staticDataLoadStatus === LoadStatus.Loading;
 
 	function updateCurrentSelection(index: number, price: number) {
 		currentSelection = index;
@@ -125,7 +146,7 @@
 	}
 
 	function addProduct() {
-		if (!campaignStaticDataLoaded) {
+		if (staticDataLoadStatus === LoadStatus.FetchFailed || campaignStaticUI === undefined) {
 			return;
 		}
 		let updatedQuantity = $joinSelection.get(crowdtainerId);
@@ -134,7 +155,7 @@
 			$joinSelection.set(crowdtainerId, updatedQuantity);
 			$joinSelection = $joinSelection;
 		} else {
-			let quantities: number[] = new Array<number>(campaignStatic.prices.length).fill(0);
+			let quantities: number[] = new Array<number>(campaignStaticUI.prices.length).fill(0);
 			quantities[currentSelection]++;
 			$joinSelection.set(crowdtainerId, quantities);
 			$joinSelection = $joinSelection;
@@ -143,93 +164,120 @@
 </script>
 
 <div class="max-w-10xl mx-auto py-1 sm:px-6 lg:px-8">
-	<div class="max-w-lg mx-auto bg-white rounded-xl shadow-md overflow-hidden md:max-w-7xl my-8">
+	<div class="max-w-lg mx-auto white overflow-hidden md:max-w-7xl my-8">
 		<div class="md:flex">
 			<div class="md:shrink-0">
 				<img
-					class="w-full object-cover md:h-full md:w-96 blur-[3px]"
+					class="w-full object-cover md:h-full md:w-96"
 					src={projectImageURL}
 					alt="Coffee"
 				/>
 			</div>
-			<form on:submit|preventDefault={() => addProduct()} class="mt-10">
-				<div class="p-8">
-					<div class="uppercase tracking-wide text-base text-indigo-500 font-semibold">
-						{title}
-					</div>
-					<a
-						href="#"
-						class="block mt-1 text-2xl leading-tight font-medium text-black hover:underline"
-						>{subtitle}</a
-					>
-					<p class="mt-5 text-slate-500">
-						{@html description}
-					</p>
+			<div class="p-8">
+				<div class="font-mono uppercase tracking-wide text-base text-red-600 font-semibold">
+					{title}
+				</div>
+				<a href={projectURL} class="block mt-1 text-2xl leading-tight font-medium hover:underline"
+					>{subtitle}</a
+				>
+				<p class="mt-5 text-slate-500">
+					{@html description}
+				</p>
 
-					{#await loadStaticData()}
-						<p class="my-6">Loading data..</p>
-					{:then}
-						<div class="">
-							<div class="my-6 bg-gray-200 rounded-md w-full">
-								<div
-									class="bg-blue-600 text-xs font-medium text-white text-center p-2 leading-normal rounded-l-md"
-									style="width: {percentageRaised}%"
-								>
-									{percentageRaised}%
-								</div>
+				{#if staticDataLoadStatus === LoadStatus.Loaded || staticDataLoadStatus === LoadStatus.Loading}
+					<div class:animate-pulse={loadingAnimation}>
+						<div class="my-6 bg-gray-300 rounded-md w-full">
+							<div
+								class="bg-sky-600 text-sm font-medium text-white text-center p-1 leading-normal rounded-md"
+								style="width: {$tweenedPercentageWidth}%"
+							>
+								{$tweenedPercentageRaised.toFixed(0)}%
 							</div>
+						</div>
 
-							<!-- Main Status -->
-							<div class="flex items-center justify-between px-2 gap-5">
-								<div class="">
-									<p class="text-blue-600 text-3xl">{stateString}</p>
-									<p class="text-base">Status</p>
-								</div>
-								<div class="">
-									<p class="text-blue-600 text-3xl">{campaignStatic.tokenSymbol} {raised}</p>
-									<p class="text-base">raised of {campaignStatic.minimum} goal</p>
-								</div>
-								<div class="">
-									<p class="text-blue-600 text-3xl">
-										<TimeLeft endTime={campaignStatic.endDate} />
+						<!-- Main Status -->
+						<div class="flex items-center justify-between px-2 gap-5">
+							<div>
+								<p class="projectStatus">{stateString}</p>
+								<p class="projectDataSubtitle">Status</p>
+							</div>
+							<div class="">
+								<p class="projectStatus">
+									{moneyFormatter.format($tweenedRaised)}
+									{campaignStaticUI ? campaignStaticUI.tokenSymbol : ''}
+								</p>
+								{#if campaignStaticUI}
+									<p class="projectDataSubtitle">
+										raised of {moneyFormatter.format(Number(campaignStaticUI.minimum))} goal
 									</p>
-									<p class="text-base">to go</p>
-								</div>
+								{:else}
+									<p class="projectDataSubtitle">raised</p>
+								{/if}
 							</div>
+							<div class="">
+								{#if campaignStaticUI}
+									<p class="projectStatus">
+										<TimeLeft endTime={campaignStaticUI.endDate} />
+									</p>
+									<p class="projectDataSubtitle">to go</p>
+								{:else}
+									<p class="projectData">
+										{loadingString}
+									</p>
+									<p class="projectDataSubtitle">-</p>
+								{/if}
+							</div>
+						</div>
 
-							<!-- Dates -->
-							<div class="flex px-2 py-8 items-center justify-between gap-12">
-								<div class="">
-									<p class="text-xl"><b>{campaignStatic.startDateString}</b></p>
-									<p class="text-base">Start</p>
-								</div>
-								<div class="">
-									<p class="text-xl"><b>{campaignStatic.endDateString}</b></p>
-									<p class="text-base">End</p>
-								</div>
+						<!-- Dates -->
+						<div class="flex px-2 py-8 items-center justify-between gap-12">
+							<div class="">
+								<p class="projectData">
+									{campaignStaticUI ? campaignStaticUI.startDateString : loadingString}
+								</p>
+								<p class="projectDataSubtitle">Start</p>
 							</div>
-							<p class="px-2 text-xl text-gray-900">{currentPrice} {campaignStatic.tokenSymbol}</p>
-							<div class="flex px-2 items-center justify-between">
-								<h3 class="text-sm text-gray-900 font-medium">Price</h3>
+							<div class="">
+								<p class="projectData">
+									{campaignStaticUI ? campaignStaticUI.endDateString : loadingString}
+								</p>
+								<p class="projectDataSubtitle">End</p>
 							</div>
-							<fieldset class="mt-4">
-								<legend class="sr-only">Choose a product</legend>
-								<div class="grid grid-cols-4 gap-4 sm:grid-cols-8 lg:grid-cols-4">
-									{#each campaignStatic.prices as price, index}
+						</div>
+
+						<div class="pt-4">
+							{#if staticDataLoadStatus === LoadStatus.Loaded}
+								<p class="px-2 productPrice">
+									{currentPrice}
+									{campaignStaticUI ? campaignStaticUI.tokenSymbol : ''}
+								</p>
+							{:else}
+								<p class="px-2 productPrice">{loadingString}</p>
+							{/if}
+							<div class="flex px-2">
+								<h3 class="projectDataSubtitle">Price</h3>
+							</div>
+						</div>
+
+						<fieldset class="mt-4 font-mono">
+							<legend class="sr-only">Choose a product</legend>
+							{#if campaignStaticUI !== undefined}
+							<div class="grid grid-cols-2 gap-4">
+									{#each campaignStaticUI.prices as price, index}
 										<label
 											class:ring-2={currentSelection === index}
 											class:ring-indigo-500={currentSelection === index}
-											class="ring-2 ring-indigo-500 group relative border rounded-md py-3 px-4 flex items-center justify-center text-sm font-medium uppercase hover:bg-gray-50 focus:outline-none sm:flex-1 sm:py-6 bg-white shadow-sm text-gray-900 cursor-pointer"
+											class="ring-sky-500 group relative border rounded-md py-3 px-5 flex items-center justify-center text-sm font-medium uppercase hover:bg-gray-50 focus:outline-none sm:flex-1 sm:py-4 bg-white shadow-sm text-gray-900 cursor-pointer"
 										>
 											<input
 												type="radio"
 												name="size-choice"
 												on:click={() => updateCurrentSelection(index, price)}
-												value={campaignStatic.descriptions[index]}
+												value={campaignStaticUI.descriptions[index]}
 												class="sr-only"
 												aria-labelledby="size-choice-1-label"
 											/>
-											<span id="size-choice-1-label"> {campaignStatic.descriptions[index]} </span>
+											<span id="size-choice-1-label"> {campaignStaticUI.descriptions[index]} </span>
 											<span
 												class="absolute -inset-px rounded-md pointer-events-none"
 												aria-hidden="true"
@@ -237,30 +285,61 @@
 										</label>
 									{/each}
 								</div>
-							</fieldset>
-							<!-- </div> -->
-						</div>
-						<button
-							type="submit"
-							class="mt-10 w-1/5 bg-gray-700 border border-transparent rounded-md py-3 px-8 flex items-center justify-center text-base font-medium text-white hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-						>
-							Add
-						</button>
-					{:catch error}
-						<p class="my-6 text-red-800">{error} Please reload the page.</p>
-					{/await}
-				</div>
-			</form>
+								{:else}
+								<div class="grid grid-cols-1 gap-4">
+									{#each [loadingString, loadingString] as text}
+									<label
+										class="ring-sky-500 group relative border rounded-md py-3 px-5 flex items-center justify-center text-sm font-medium uppercase hover:bg-gray-50 focus:outline-none sm:flex-1 sm:py-4 bg-white shadow-sm text-gray-900 cursor-pointer"
+									>
+										<input
+											type="radio"
+											name="size-choice"
+											value={text}
+											class="sr-only"
+											aria-labelledby="size-choice-1-label"
+										/>
+										<span id="size-choice-1-label"> {text} </span>
+										<span
+											class="absolute -inset-px rounded-md pointer-events-none"
+											aria-hidden="true"
+										/>
+									</label>
+									{/each}
+								</div>
+								{/if}
+						</fieldset>
+					</div>
+
+					<div class="flex justify-left">
+					<button
+						on:click={() => {
+							addProduct();
+						}}
+						class="mt-10 w-1/5 bg-sky-800 border border-transparent rounded-md py-3 px-8 flex items-center justify-center text-base font-medium text-white hover:bg-sky-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+					>
+						Add
+					</button>
+					</div>
+				{:else}
+					<p class="my-6 text-red-800">Error fetching data. Please reload the page.</p>
+				{/if}
+			</div>
 		</div>
-		<div>
-			{#if campaignStaticDataLoaded}
-				<Join
-					tokenSymbol={campaignStatic.tokenSymbol}
-					prices={campaignStatic.prices}
-					descriptions={campaignStatic.descriptions}
-					{crowdtainerId}
-				/>
-			{/if}
-		</div>
+		{#if $totalSum > 0}
+			<div transition:slide={{ duration: 300 }}>
+				{#if campaignStaticUI === undefined}
+					<Join totalSum={$totalSum} />
+				{:else}
+					<Join tokenSymbol={campaignStaticUI.tokenSymbol} totalSum={$totalSum}>
+						<ProductQuantity
+							prices={campaignStaticUI.prices}
+							descriptions={campaignStaticUI.descriptions}
+							{crowdtainerId}
+							tokenSymbol={campaignStaticUI.tokenSymbol}
+						/>
+					</Join>
+				{/if}
+			</div>
+		{/if}
 	</div>
 </div>

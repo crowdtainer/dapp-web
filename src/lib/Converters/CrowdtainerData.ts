@@ -1,19 +1,40 @@
 import { BigNumber, ethers } from "ethers";
+import type {
+    CrowdtainerStaticModel,
+    CrowdtainerDynamicModel
+} from '$lib/Model/CrowdtainerModel';
 
 const loadingString = 'Loading...';
-export function stateToString(state: number | undefined): string {
-    if (state === undefined) {
+export function toStateString(dynamicData: CrowdtainerDynamicModel, staticData: CrowdtainerStaticModel): string {
+    if (dynamicData.status === undefined || dynamicData.raised === undefined || staticData.minimumGoal === undefined) {
         return 'Loading..';
     }
-    switch (state) {
+    let nowInMs = (new Date).getTime();
+    let startInMs = toDate(staticData.startDate).getTime();
+    let endInMs = toDate(staticData.endDate).getTime();
+    let raised = Number(ethers.utils.formatUnits(dynamicData.raised, staticData.tokenDecimals));
+    let minimumGoal = Number(ethers.utils.formatUnits(staticData.minimumGoal, staticData.tokenDecimals));
+    switch (dynamicData.status) {
         case 0:
             return 'Uninitialized';
-        case 1:
-            return 'Funding'; // TODO: Handle initialized + opening time not reached yet.
-        case 2:
-            return 'Delivery';
-        case 3:
-            return 'Failed';
+        case 1: // Funding
+            {
+                if(nowInMs < startInMs) {
+                    return 'Opening soon.. 👀'
+                }
+                // Given the raised value and current time, we can derive the contract's next state
+                if(nowInMs > endInMs && raised < minimumGoal) {
+                    return 'Failed';
+                }
+                if(nowInMs > endInMs && raised > minimumGoal) {
+                    return 'Successful 🎉';
+                }
+                return 'Funding'
+            }
+        case 2: // Delivery triggered by service provider
+            return 'Successful 🎉';
+        case 3: // Failed to raise minimum amount
+            return 'Failed 🙈';
         default:
             throw ('Error: Unknown state.');
     }
@@ -42,11 +63,11 @@ export function toFormattedDate(epoch: BigNumber | undefined): string {
     return date.toLocaleString("en-GB", {dateStyle: 'short', timeStyle: 'short'});
 }
 
-export function toHuman(value: BigNumber | undefined, decimals: number | undefined): string {
+export function toHuman(value: BigNumber | undefined, decimals: number | undefined): number {
     if (value === undefined || decimals === undefined)  {
-        return loadingString;
+        return 0;
     }
-    return ethers.utils.formatUnits(value, decimals);
+    return Number(ethers.utils.formatUnits(value, decimals));
 }
 
 export function toHumanPrices(value: BigNumber[] | undefined, decimals: number | undefined): number[] {
@@ -62,4 +83,67 @@ export function toHumanPrices(value: BigNumber[] | undefined, decimals: number |
         prices.push(priceValue);
     });
     return prices;
+}
+
+export function tokenSymbolPretty(name: string | undefined): string {
+    if (name) {
+        return name;
+    } else {
+        return '-';
+    }
+}
+
+export function prettyDescription(descriptions: string[] | undefined): string[] {
+    if (descriptions == undefined) {
+        let emptyDescriptions: string[] = [];
+        emptyDescriptions.fill('');
+        return emptyDescriptions;
+    }
+    return descriptions;
+}
+
+export function calculatePercentageRaised(raised: string, minimum: string): string {
+            let raisedNumber = Number(raised);
+            if (Number.isNaN(raisedNumber) || Number.isNaN(Number(minimum))) {
+                return '';
+            }
+            return `${(raisedNumber * 100 / Number(minimum))}`;
+}
+
+export function calculatePercentageWidth(raised: number): number {
+    if(raised > 100) {
+        return 100;
+    } else {
+        return raised;
+    }
+}
+
+export type UIFields = {
+    serviceProviderAddress: string;
+    startDateString: string;
+    endDateString: string;
+    startDate: Date;
+    endDate: Date;
+    minimum: string;
+    maximum: string;
+    tokenSymbol: string;
+    tokenDecimals: number;
+    prices: number[];
+    descriptions: string[];
+};
+
+export function prepareForUI(data: CrowdtainerStaticModel): UIFields {
+    return {
+        serviceProviderAddress: prettifyAddress(data.serviceProvider),
+        startDateString: toFormattedDate(data.startDate),
+        endDateString: toFormattedDate(data.endDate),
+        startDate: toDate(data.startDate),
+        endDate: toDate(data.endDate),
+        minimum: toHuman(data.minimumGoal, data.tokenDecimals).toString(),
+        maximum: toHuman(data.maximumGoal, data.tokenDecimals).toString(),
+        tokenSymbol: tokenSymbolPretty(data.tokenSymbol),
+        tokenDecimals: data.tokenDecimals ? data.tokenDecimals : 0, // TODO
+        prices: toHumanPrices(data.prices, data.tokenDecimals),
+        descriptions: prettyDescription(data.productDescription)
+    };
 }

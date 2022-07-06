@@ -85,7 +85,7 @@ async function disconnectWallet() {
           <div class="hidden sm:block sm:ml-6">
             <div class="flex space-x-4" >
               <a href="/" class="{path === '/' ? "active-btn" : "inactive-btn"}" aria-current="page">Campaigns</a>
-              <a href="/Cart" class="{path === '/Cart' ? "active-btn" : "inactive-btn"}">Cart</a>
+              <a href="/Wallet" class="{path === '/Wallet' ? "active-btn" : "inactive-btn"}">Wallet</a>
             </div>
           </div>
         </div>
@@ -127,7 +127,7 @@ async function disconnectWallet() {
         <div class="px-2 pt-2 pb-3 space-y-1">
           <!-- Current: "bg-gray-900 text-white", Default: "text-gray-300 hover:bg-gray-700 hover:text-white" -->
           <a href="/" class="{path === '/' ? "mobile-active-btn" : "mobile-inactive-btn"}" aria-current="page">Campaigns</a>
-          <a href="/Cart" class="{path === '/Cart' ? "mobile-active-btn" : "mobile-inactive-btn"}">Cart</a>
+          <a href="/Wallet" class="{path === '/Wallet' ? "mobile-active-btn" : "mobile-inactive-btn"}">Wallet</a>
         </div>
       </div>
     {/if}

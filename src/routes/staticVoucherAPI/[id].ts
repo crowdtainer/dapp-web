@@ -11,7 +11,7 @@ import { type Result, Ok, Err } from "@sniptt/monads";
 // Internal
 import type { RequestHandler } from './__types/[id]'
 import type { CrowdtainerStaticModel, Error } from '$lib/Model/CrowdtainerModel';
-import { Vouchers721Address, MetadataServiceV1Address } from '../data/projects.json';
+import { Vouchers721Address } from '../data/projects.json';
 import { Coin__factory } from '../data/typechain';
 import { crowdtainerStaticDataMap } from '../../hooks/cache';
 

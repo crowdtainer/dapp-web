@@ -21,7 +21,7 @@
         let day = days === 0 ? '' : `${days}d`;
         let hour = hours === 0 ? '' : `${hours}h`;
         // outputString = `${day} ${hour} ${minutes}m ${seconds}s`;
-        outputString = `${day} ${hour} ${minutes}m`;
+        outputString = `${day} ${hour} ${minutes}min`;
     }
 
 	onInterval(update, interval);

@@ -1,5 +1,5 @@
 
-<header class="bg-black">
+<header class="divider">
 	<div class="max-w-7xl mx-auto py-4 px-4 sm:px-6 lg:px-8">
 		<h1 class="text-2xl font-bold text-white">Your Campaigns</h1>
 	</div>
@@ -7,7 +7,7 @@
 
 <!-- Project Container start -->
 <div class="max-w-10xl mx-auto py-1 sm:px-2 lg:px-8">
-    <div class="max-w-lg mx-auto bg-white rounded-xl shadow-md overflow-hidden md:max-w-7xl my-8">
+    <div class="max-w-lg mx-auto bg-white drop-shadow-lg overflow-hidden md:max-w-7xl my-8">
         <div class="md:flex">
             <div class="">
                 <img
@@ -50,7 +50,7 @@
                                     <img width="30" height="30" src="Transfer.svg" alt="Transfer participation proof to another wallet">
                                 </div>
                                 <p class="text-lg my-5">Transfer</p>                            
-                                <p class="text-xs">Transfer your participation proof (NFT) to another wallet</p>
+                                <p class="text-xs">Transfer participation proof (NFT) to another wallet</p>
                             </span>
                         </button>
                     </div>
