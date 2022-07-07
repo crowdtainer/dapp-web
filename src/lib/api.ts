@@ -20,6 +20,7 @@ export async function fetchStaticData(projectIds: number[]): Promise<Result<Crow
 	}
 
 	const response = await fetch(`staticVoucherAPI/${params}`);
+
 	const jsonResponse = await response.json();
 	if (response.status != 200) {
 		return Err({ code: response.status, message: jsonResponse.error });

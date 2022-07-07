@@ -39,7 +39,7 @@
 
 	const loadingString = 'Loading...';
 
-	let campaign: Readable<CrowdtainerDynamicModel> | undefined;
+	let campaignDynamicData: Readable<CrowdtainerDynamicModel> | undefined;
 
 	let currentSelection = 0;
 	let currentPrice: number;
@@ -57,10 +57,10 @@
 	onMount(async () => {
 		$joinSelection = $joinSelection;
 		// Dynamic data
-		if (campaign == undefined) {
-			campaign = initializeStore(crowdtainerId);
+		if (campaignDynamicData == undefined) {
+			campaignDynamicData = initializeStore(crowdtainerId);
 		} else {
-			campaign = campaignStores.get(crowdtainerId);
+			campaignDynamicData = campaignStores.get(crowdtainerId);
 		}
 		if(campaignStaticUI !== undefined ) updateCurrentSelection(0, campaignStaticUI.prices[0]);
 	});
@@ -91,7 +91,7 @@
 	function setRaisedAmount() {
 		if (staticDataLoadStatus !== LoadStatus.FetchFailed) {
 			let decimals = campaignStaticUI ? campaignStaticUI.tokenDecimals : undefined;
-			raised = toHuman($campaign?.raised, decimals);
+			raised = toHuman($campaignDynamicData?.raised, decimals);
 			tweenedRaised.set(raised);
 		}
 	}
@@ -112,13 +112,13 @@
 	// dynamic
 	$: stateString =
 		staticDataLoadStatus !== LoadStatus.FetchFailed &&
-		$campaign !== undefined &&
+		$campaignDynamicData !== undefined &&
 		campaignStaticData !== undefined
-			? toStateString($campaign, campaignStaticData)
+			? toStateString($campaignDynamicData, campaignStaticData)
 			: loadingString;
 
-	$: $campaign, setRaisedAmount();
-	$: $campaign, setPercentages();
+	$: $campaignDynamicData, setRaisedAmount();
+	$: $campaignDynamicData, setPercentages();
 	$: loadingAnimation = staticDataLoadStatus === LoadStatus.Loading;
 
 	function updateCurrentSelection(index: number, price: number) {
@@ -145,7 +145,7 @@
 </script>
 
 <div class="max-w-10xl mx-auto py-1 sm:px-6 lg:px-8">
-	<div class="max-w-lg mx-auto white overflow-hidden md:max-w-7xl my-8">
+	<div class="border-2  rounded-2xl max-w-lg mx-auto white overflow-hidden md:max-w-7xl my-8">
 		<div class="md:flex">
 			<div class="md:shrink-0">
 				<img class="w-full object-cover md:h-full md:w-96" src={projectImageURL} alt="Coffee" />
@@ -244,7 +244,7 @@
 										<label
 											class:ring-2={currentSelection === index}
 											class:ring-indigo-500={currentSelection === index}
-											class="ring-sky-500 group relative border rounded-md py-3 px-5 flex items-center justify-center text-sm font-medium uppercase hover:bg-gray-50 focus:outline-none sm:flex-1 sm:py-4 bg-white shadow-sm text-gray-900 cursor-pointer"
+											class="ring-gray-800 group relative border rounded-md py-3 px-5 flex items-center justify-center text-sm font-medium uppercase hover:bg-gray-50 focus:outline-none sm:flex-1 sm:py-4 bg-white shadow-sm text-gray-900 cursor-pointer"
 										>
 											<input
 												type="radio"
@@ -266,7 +266,7 @@
 								<div class="grid grid-cols-1 gap-4">
 									{#each [loadingString, loadingString] as text}
 										<label
-											class="ring-sky-500 group relative border rounded-md py-3 px-5 flex items-center justify-center text-sm font-medium uppercase hover:bg-gray-50 focus:outline-none sm:flex-1 sm:py-4 bg-white shadow-sm text-gray-900 cursor-pointer"
+											class="ring-gray-800 group relative border rounded-md py-3 px-5 flex items-center justify-center text-sm font-medium uppercase hover:bg-gray-50 focus:outline-none sm:flex-1 sm:py-4 bg-white shadow-sm text-gray-900 cursor-pointer"
 										>
 											<input
 												type="radio"
@@ -287,14 +287,14 @@
 						</fieldset>
 					</div>
 
-					<div class="flex justify-left">
+					<div class="flex">
 						<button
 							on:click={() => {
 								addProduct();
 							}}
-							class="mt-10 w-1/5 bg-sky-800 border border-transparent rounded-md py-3 px-8 flex items-center justify-center text-base font-medium text-white hover:bg-sky-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+							class="px-2 mt-10 w-full md:w-4/6 lg:w-2/6 bg-gray-900 font-medium text-white hover:bg-gray-700 hover:shadow-lg border border-transparent rounded-3xl py-3 flex items-center justify-center text-lg focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
 						>
-							Add
+							Add to pre-order
 						</button>
 					</div>
 				{:else}

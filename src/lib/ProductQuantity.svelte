@@ -65,7 +65,7 @@
 						<div class="">
 							<button
 								type="button"
-								class="m-3 py-2 px-3 border-2 border-gray-800 text-gray-800 font-medium text-xs leading-tight uppercase rounded hover:bg-black hover:bg-opacity-5 focus:outline-none focus:ring-0"
+								class="m-3 py-2 px-3 border-2 border-gray-600 text-gray-800 font-medium rounded-3xl text-xs leading-tight uppercase hover:bg-black hover:bg-opacity-5 focus:outline-none focus:ring-0"
 								on:click={() => {
 									decrementProduct(index);
 								}}
@@ -79,7 +79,7 @@
 						<div class="">
 							<button
 								type="button"
-								class="m-3 py-2 px-3 border-2 border-gray-800 text-gray-800 font-medium text-xs leading-tight uppercase rounded hover:bg-black hover:bg-opacity-5 focus:outline-none focus:ring-0"
+								class="m-3 py-2 px-3 border-2 border-gray-600 text-gray-800 font-medium rounded-3xl text-xs leading-tight uppercase hover:bg-black hover:bg-opacity-5 focus:outline-none focus:ring-0"
 								on:click={() => {
 									incrementProduct(index);
 								}}
