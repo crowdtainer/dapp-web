@@ -7,7 +7,6 @@
 
 	import Join from '$lib/Join.svelte';
 
-	import { fetchStaticData } from '$lib/api';
 	import { initializeStore, campaignStores } from '$lib/campaignStore';
 	import ProductQuantity from '$lib/ProductQuantity.svelte';
 	import { joinSelection } from '$lib/userStore';
@@ -20,10 +19,12 @@
 	import {
 		toHuman,
 		toStateString,
+		toState,
 		calculatePercentageRaised,
 		calculatePercentageWidth,
 		type UIFields,
-		prepareForUI
+		LoadStatus,
+		ProjectStatusUI
 	} from '$lib/Converters/CrowdtainerData';
 
 	export let crowdtainerId: number;
@@ -33,18 +34,13 @@
 	export let projectURL: string;
 	export let projectImageURL: string;
 
+	export let campaignStaticData: CrowdtainerStaticModel | undefined;
+	export let campaignStaticUI: UIFields | undefined;
+	export let staticDataLoadStatus: LoadStatus = LoadStatus.Loading;
+
 	const loadingString = 'Loading...';
 
-	enum LoadStatus {
-		Loading,
-		Loaded,
-		FetchFailed
-	}
-
-	let campaign: Readable<CrowdtainerDynamicModel> | undefined;
-	let campaignStatic: CrowdtainerStaticModel | undefined;
-	let campaignStaticUI: UIFields | undefined;
-	let staticDataLoadStatus: LoadStatus = LoadStatus.Loading;
+	let campaignDynamicData: Readable<CrowdtainerDynamicModel> | undefined;
 
 	let currentSelection = 0;
 	let currentPrice: number;
@@ -60,14 +56,14 @@
 	});
 
 	onMount(async () => {
-		await loadStaticData();
 		$joinSelection = $joinSelection;
 		// Dynamic data
-		if (campaign == undefined) {
-			campaign = initializeStore(crowdtainerId);
+		if (campaignDynamicData == undefined) {
+			campaignDynamicData = initializeStore(crowdtainerId);
 		} else {
-			campaign = campaignStores.get(crowdtainerId);
+			campaignDynamicData = campaignStores.get(crowdtainerId);
 		}
+		if (campaignStaticUI !== undefined) updateCurrentSelection(0, campaignStaticUI.prices[0]);
 	});
 
 	// CrowdtainerId -> totalSum
@@ -80,6 +76,7 @@
 		) {
 			return 0;
 		}
+
 		let totalSum = 0;
 		let selection = $joinSelection.get(crowdtainerId);
 		if (selection === undefined) {
@@ -92,25 +89,10 @@
 		return totalSum;
 	});
 
-	async function loadStaticData() {
-		staticDataLoadStatus = LoadStatus.Loading;
-		let result = await fetchStaticData(crowdtainerId);
-		if (result.isOk()) {
-			campaignStatic = result.unwrap();
-			campaignStaticUI = prepareForUI(campaignStatic);
-			// set initial price
-			currentPrice = campaignStaticUI.prices[currentSelection];
-			staticDataLoadStatus = LoadStatus.Loaded;
-		} else {
-			campaignStatic = campaignStaticUI = undefined;
-			staticDataLoadStatus = LoadStatus.FetchFailed;
-		}
-	}
-
 	function setRaisedAmount() {
 		if (staticDataLoadStatus !== LoadStatus.FetchFailed) {
 			let decimals = campaignStaticUI ? campaignStaticUI.tokenDecimals : undefined;
-			raised = toHuman($campaign?.raised, decimals);
+			raised = toHuman($campaignDynamicData?.raised, decimals);
 			tweenedRaised.set(raised);
 		}
 	}
@@ -128,16 +110,28 @@
 		}
 	}
 
+	// Failed,                 // Failed to raise minimum amount in time.
+	// SuccessfulyFunded,      // Minimum funding reached in time.
+	// Delivery,               // Service provider accepted orders and will deliver products.
+	// ServiceProviderDeclined // Minimum funding amount was reached in time, but the service provided decided to not go foward. Funds are available for withdrawal by participants.
+
 	// dynamic
+	$: state = toState($campaignDynamicData, campaignStaticData);
+	$: disableJoinView = !(
+		state === ProjectStatusUI.Failed ||
+		state === ProjectStatusUI.SuccessfulyFunded ||
+		state === ProjectStatusUI.Delivery ||
+		state === ProjectStatusUI.ServiceProviderDeclined);
+
 	$: stateString =
 		staticDataLoadStatus !== LoadStatus.FetchFailed &&
-		$campaign !== undefined &&
-		campaignStatic !== undefined
-			? toStateString($campaign, campaignStatic)
+		$campaignDynamicData !== undefined &&
+		campaignStaticData !== undefined
+			? toStateString($campaignDynamicData, campaignStaticData)
 			: loadingString;
 
-	$: $campaign, setRaisedAmount();
-	$: $campaign, setPercentages();
+	$: $campaignDynamicData, setRaisedAmount();
+	$: $campaignDynamicData, setPercentages();
 	$: loadingAnimation = staticDataLoadStatus === LoadStatus.Loading;
 
 	function updateCurrentSelection(index: number, price: number) {
@@ -164,14 +158,10 @@
 </script>
 
 <div class="max-w-10xl mx-auto py-1 sm:px-6 lg:px-8">
-	<div class="max-w-lg mx-auto white overflow-hidden md:max-w-7xl my-8">
+	<div class="border-2  rounded-2xl max-w-lg mx-auto white overflow-hidden md:max-w-7xl my-8">
 		<div class="md:flex">
 			<div class="md:shrink-0">
-				<img
-					class="w-full object-cover md:h-full md:w-96"
-					src={projectImageURL}
-					alt="Coffee"
-				/>
+				<img class="w-full object-cover md:h-full md:w-96" src={projectImageURL} alt="Coffee" />
 			</div>
 			<div class="p-8">
 				<div class="font-mono uppercase tracking-wide text-base text-red-600 font-semibold">
@@ -245,81 +235,87 @@
 							</div>
 						</div>
 
-						<div class="pt-4">
-							{#if staticDataLoadStatus === LoadStatus.Loaded}
-								<p class="px-2 productPrice">
-									{currentPrice}
-									{campaignStaticUI ? campaignStaticUI.tokenSymbol : ''}
-								</p>
-							{:else}
-								<p class="px-2 productPrice">{loadingString}</p>
-							{/if}
-							<div class="flex px-2">
-								<h3 class="projectDataSubtitle">Price</h3>
-							</div>
-						</div>
-
-						<fieldset class="mt-4 font-mono">
-							<legend class="sr-only">Choose a product</legend>
-							{#if campaignStaticUI !== undefined}
-							<div class="grid grid-cols-2 gap-4">
-									{#each campaignStaticUI.prices as price, index}
-										<label
-											class:ring-2={currentSelection === index}
-											class:ring-indigo-500={currentSelection === index}
-											class="ring-sky-500 group relative border rounded-md py-3 px-5 flex items-center justify-center text-sm font-medium uppercase hover:bg-gray-50 focus:outline-none sm:flex-1 sm:py-4 bg-white shadow-sm text-gray-900 cursor-pointer"
-										>
-											<input
-												type="radio"
-												name="size-choice"
-												on:click={() => updateCurrentSelection(index, price)}
-												value={campaignStaticUI.descriptions[index]}
-												class="sr-only"
-												aria-labelledby="size-choice-1-label"
-											/>
-											<span id="size-choice-1-label"> {campaignStaticUI.descriptions[index]} </span>
-											<span
-												class="absolute -inset-px rounded-md pointer-events-none"
-												aria-hidden="true"
-											/>
-										</label>
-									{/each}
-								</div>
+						{#if disableJoinView}
+							<div class="pt-4">
+								{#if staticDataLoadStatus === LoadStatus.Loaded && currentPrice !== undefined}
+									<p class="px-2 productPrice">
+										{currentPrice}
+										{campaignStaticUI ? campaignStaticUI.tokenSymbol : ''}
+									</p>
 								{:else}
-								<div class="grid grid-cols-1 gap-4">
-									{#each [loadingString, loadingString] as text}
-									<label
-										class="ring-sky-500 group relative border rounded-md py-3 px-5 flex items-center justify-center text-sm font-medium uppercase hover:bg-gray-50 focus:outline-none sm:flex-1 sm:py-4 bg-white shadow-sm text-gray-900 cursor-pointer"
-									>
-										<input
-											type="radio"
-											name="size-choice"
-											value={text}
-											class="sr-only"
-											aria-labelledby="size-choice-1-label"
-										/>
-										<span id="size-choice-1-label"> {text} </span>
-										<span
-											class="absolute -inset-px rounded-md pointer-events-none"
-											aria-hidden="true"
-										/>
-									</label>
-									{/each}
-								</div>
+									<p class="px-2 productPrice">{loadingString}</p>
 								{/if}
-						</fieldset>
+								<div class="flex px-2">
+									<h3 class="projectDataSubtitle">Price</h3>
+								</div>
+							</div>
+
+							<fieldset class="mt-4 font-mono">
+								<legend class="sr-only">Choose a product</legend>
+								{#if campaignStaticUI !== undefined}
+									<div class="grid grid-cols-2 gap-4">
+										{#each campaignStaticUI.prices as price, index}
+											<label
+												class:ring-2={currentSelection === index}
+												class:ring-indigo-500={currentSelection === index}
+												class="ring-gray-800 group relative border rounded-md py-3 px-5 flex items-center justify-center text-sm font-medium uppercase hover:bg-gray-50 focus:outline-none sm:flex-1 sm:py-4 bg-white shadow-sm text-gray-900 cursor-pointer"
+											>
+												<input
+													type="radio"
+													name="size-choice"
+													on:click={() => updateCurrentSelection(index, price)}
+													value={campaignStaticUI.descriptions[index]}
+													class="sr-only"
+													aria-labelledby="size-choice-1-label"
+												/>
+												<span id="size-choice-1-label">
+													{campaignStaticUI.descriptions[index]}
+												</span>
+												<span
+													class="absolute -inset-px rounded-md pointer-events-none"
+													aria-hidden="true"
+												/>
+											</label>
+										{/each}
+									</div>
+								{:else}
+									<div class="grid grid-cols-1 gap-4">
+										{#each [loadingString, loadingString] as text}
+											<label
+												class="ring-gray-800 group relative border rounded-md py-3 px-5 flex items-center justify-center text-sm font-medium uppercase hover:bg-gray-50 focus:outline-none sm:flex-1 sm:py-4 bg-white shadow-sm text-gray-900 cursor-pointer"
+											>
+												<input
+													type="radio"
+													name="size-choice"
+													value={text}
+													class="sr-only"
+													aria-labelledby="size-choice-1-label"
+												/>
+												<span id="size-choice-1-label"> {text} </span>
+												<span
+													class="absolute -inset-px rounded-md pointer-events-none"
+													aria-hidden="true"
+												/>
+											</label>
+										{/each}
+									</div>
+								{/if}
+							</fieldset>
+						{/if}
 					</div>
 
-					<div class="flex justify-left">
-					<button
-						on:click={() => {
-							addProduct();
-						}}
-						class="mt-10 w-1/5 bg-sky-800 border border-transparent rounded-md py-3 px-8 flex items-center justify-center text-base font-medium text-white hover:bg-sky-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-					>
-						Add
-					</button>
-					</div>
+					{#if disableJoinView}
+						<div class="flex">
+							<button
+								on:click={() => {
+									addProduct();
+								}}
+								class="px-2 mt-10 w-full md:w-4/6 lg:w-2/6 bg-gray-900 font-medium text-white hover:bg-gray-700 hover:shadow-lg border border-transparent rounded-3xl py-3 flex items-center justify-center text-lg focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+							>
+								Add to pre-order
+							</button>
+						</div>
+					{/if}
 				{:else}
 					<p class="my-6 text-red-800">Error fetching data. Please reload the page.</p>
 				{/if}

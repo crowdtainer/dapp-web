@@ -4,10 +4,30 @@ import type {
     CrowdtainerDynamicModel
 } from '$lib/Model/CrowdtainerModel';
 
+export enum LoadStatus {
+    Loading,
+    Loaded,
+    FetchFailed
+}
+
+export enum ProjectStatusUI {
+    Loading,                // Project status still loading.
+    Uninitialized,          // Project not yet initialized by service provider.
+    OpeningSoon,            // Waiting for funding start time to be reached.
+    Funding,                // Within funding period.
+    Failed,                 // Failed to raise minimum amount in time.
+    SuccessfulyFunded,      // Minimum funding reached in time.
+    Delivery,               // Service provider accepted orders and will deliver products.
+    ServiceProviderDeclined // Minimum funding amount was reached in time, but the service provided decided to not go foward. Funds are available for withdrawal by participants.
+}
+
 const loadingString = 'Loading...';
-export function toStateString(dynamicData: CrowdtainerDynamicModel, staticData: CrowdtainerStaticModel): string {
-    if (dynamicData.status === undefined || dynamicData.raised === undefined || staticData.minimumGoal === undefined) {
-        return 'Loading..';
+export function toState(dynamicData: CrowdtainerDynamicModel | undefined, staticData: CrowdtainerStaticModel | undefined): ProjectStatusUI {
+    if (staticData === undefined || dynamicData === undefined) {
+        return ProjectStatusUI.Loading;
+    }
+    if (dynamicData.raised === undefined) {
+        return ProjectStatusUI.Loading;
     }
     let nowInMs = (new Date).getTime();
     let startInMs = toDate(staticData.startDate).getTime();
@@ -16,27 +36,64 @@ export function toStateString(dynamicData: CrowdtainerDynamicModel, staticData: 
     let minimumGoal = Number(ethers.utils.formatUnits(staticData.minimumGoal, staticData.tokenDecimals));
     switch (dynamicData.status) {
         case 0:
-            return 'Uninitialized';
+            return ProjectStatusUI.Uninitialized;
         case 1: // Funding
             {
-                if(nowInMs < startInMs) {
-                    return 'Opening soon.. 👀'
+                if (nowInMs < startInMs) {
+                    return ProjectStatusUI.OpeningSoon; //'Opening soon.. 👀'
                 }
                 // Given the raised value and current time, we can derive the contract's next state
-                if(nowInMs > endInMs && raised < minimumGoal) {
-                    return 'Failed';
+                if (nowInMs > endInMs && raised < minimumGoal) {
+                    return ProjectStatusUI.Failed; //'Failed';
                 }
-                if(nowInMs > endInMs && raised > minimumGoal) {
-                    return 'Successful 🎉';
+                if (nowInMs > endInMs && raised > minimumGoal) {
+                    return ProjectStatusUI.SuccessfulyFunded // 'Successful 🎉';
                 }
-                return 'Funding'
+                return ProjectStatusUI.Funding;
             }
         case 2: // Delivery triggered by service provider
-            return 'Successful 🎉';
-        case 3: // Failed to raise minimum amount
-            return 'Failed 🙈';
+            return ProjectStatusUI.Delivery;
+        case 3: // Failed
+            {
+                if(raised > minimumGoal) {
+                    return ProjectStatusUI.ServiceProviderDeclined;
+                }
+                return ProjectStatusUI.Failed;
+            }
         default:
-            throw ('Error: Unknown state.');
+            throw ('Error: Unknown crowdtainer state.');
+    }
+}
+
+export function toStateString(dynamicData: CrowdtainerDynamicModel, staticData: CrowdtainerStaticModel): string {
+    if (dynamicData.status === undefined || dynamicData.raised === undefined || staticData.minimumGoal === undefined) {
+        return 'Loading..';
+    }
+    switch (toState(dynamicData, staticData)) {
+        case ProjectStatusUI.Uninitialized: {
+            return 'Uninitialized';
+        }
+        case ProjectStatusUI.OpeningSoon: {
+            return 'Opening soon.. 👀';
+        }
+        case ProjectStatusUI.Funding: {
+            return 'Funding';
+        }
+        case ProjectStatusUI.Failed: {
+            return 'Failed 🙈';
+        }
+        case ProjectStatusUI.SuccessfulyFunded: {
+            return 'Successful 🎉';
+        }
+        case ProjectStatusUI.Delivery: {
+            return 'Delivery 📦';
+        }
+        case ProjectStatusUI.ServiceProviderDeclined: {
+            return 'Declined by service provider';
+        }
+        case ProjectStatusUI.Loading: {
+            return loadingString;
+        }
     }
 }
 
@@ -49,22 +106,22 @@ export function prettifyAddress(address: string | undefined): string {
 }
 
 export function toDate(epoch: BigNumber | undefined): Date {
-    if(epoch === undefined) {
+    if (epoch === undefined) {
         throw Error("Invalid date input");
     }
-    return new Date(BigNumber.from(epoch).toNumber()*1000);
+    return new Date(BigNumber.from(epoch).toNumber() * 1000);
 }
 
 export function toFormattedDate(epoch: BigNumber | undefined): string {
-    if(epoch === undefined) {
+    if (epoch === undefined) {
         return loadingString;
     }
-    let date = new Date(BigNumber.from(epoch).toNumber()*1000);
-    return date.toLocaleString("en-GB", {dateStyle: 'short', timeStyle: 'short'});
+    let date = new Date(BigNumber.from(epoch).toNumber() * 1000);
+    return date.toLocaleString("en-GB", { dateStyle: 'short', timeStyle: 'short' });
 }
 
 export function toHuman(value: BigNumber | undefined, decimals: number | undefined): number {
-    if (value === undefined || decimals === undefined)  {
+    if (value === undefined || decimals === undefined) {
         return 0;
     }
     return Number(ethers.utils.formatUnits(value, decimals));
@@ -72,7 +129,7 @@ export function toHuman(value: BigNumber | undefined, decimals: number | undefin
 
 export function toHumanPrices(value: BigNumber[] | undefined, decimals: number | undefined): number[] {
     let prices: number[];
-    if (value === undefined || decimals === undefined)  {
+    if (value === undefined || decimals === undefined) {
         prices = new Array(value?.length);
         prices.fill(0);
         return prices;
@@ -103,15 +160,15 @@ export function prettyDescription(descriptions: string[] | undefined): string[] 
 }
 
 export function calculatePercentageRaised(raised: string, minimum: string): string {
-            let raisedNumber = Number(raised);
-            if (Number.isNaN(raisedNumber) || Number.isNaN(Number(minimum))) {
-                return '';
-            }
-            return `${(raisedNumber * 100 / Number(minimum))}`;
+    let raisedNumber = Number(raised);
+    if (Number.isNaN(raisedNumber) || Number.isNaN(Number(minimum))) {
+        return '';
+    }
+    return `${(raisedNumber * 100 / Number(minimum))}`;
 }
 
 export function calculatePercentageWidth(raised: number): number {
-    if(raised > 100) {
+    if (raised > 100) {
         return 100;
     } else {
         return raised;

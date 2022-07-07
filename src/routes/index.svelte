@@ -1,6 +1,72 @@
- <script lang="ts">
+<script lang="ts">
+	import { onMount } from 'svelte';
+
 	import { projects } from './data/projects.json';
 	import Project from '$lib/Project.svelte';
+	import { fetchStaticData } from '$lib/api';
+
+	import { LoadStatus, prepareForUI, toDate, type UIFields } from '$lib/Converters/CrowdtainerData';
+	import type { CrowdtainerStaticModel } from '$lib/Model/CrowdtainerModel';
+import EmptySection from '$lib/EmptySection.svelte';
+
+	let campaignStaticData = new Map<number, CrowdtainerStaticModel>();
+	let campaignStaticUI: Map<number, UIFields> = new Map<number, UIFields>();
+	let staticDataLoadStatus: LoadStatus = LoadStatus.Loading;
+
+	let activeProjects: number[] = [];
+	let upcomingProjects: number[] = [];
+	let pastProjects: number[] = [];
+
+	function projectIds(): number[] {
+		let projectIds: number[] = [];
+		for (let project of projects) {
+			projectIds.push(project.crowdtainerId);
+		}
+		return projectIds;
+	}
+
+	function sortProjects() {
+		let nowInMs = new Date().getTime();
+		for (let [crowdtainerId, data] of campaignStaticData.entries()) {
+			let startInMs = toDate(data.startDate).getTime();
+			let endInMs = toDate(data.endDate).getTime();
+			if (nowInMs < startInMs) {
+				upcomingProjects = [...upcomingProjects, crowdtainerId];
+			} else if (nowInMs < endInMs) {
+				activeProjects = [...activeProjects, crowdtainerId];
+			} else {
+				pastProjects = [...pastProjects, crowdtainerId];
+			}
+		}
+	}
+
+	function projectFromCrowdtainerId(id: number) {
+		let filtered = projects.filter((element) => {
+			return element.crowdtainerId === id;
+		});
+		return filtered[0];
+	}
+
+	onMount(async () => {
+		try {
+			let result = await fetchStaticData(projectIds());
+			if (result.isOk()) {
+				let data = result.unwrap();
+				for (let index = 0; index < data.length; index++) {
+					campaignStaticData.set(projects[index].crowdtainerId, data[index]);
+					campaignStaticUI.set(projects[index].crowdtainerId, prepareForUI(data[index]));
+				}
+				staticDataLoadStatus = LoadStatus.Loaded;
+			} else {
+				// TODO: Show user UI/pop-up with error.
+				console.log(result.unwrapErr());
+				staticDataLoadStatus = LoadStatus.FetchFailed;
+			}
+			sortProjects();
+		} catch (error) {
+			console.log(`Error: ${error}`);
+		}
+	});
 </script>
 
 <svelte:head>
@@ -13,20 +79,28 @@
 	</div>
 </header>
 
-<main class="">	<!-- Project Container start -->
+<main class="">
 	<header class="campaignSection">
 		<div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
 			<h1 class="font-mono  text-2xl font-bold">Active</h1>
 		</div>
 	</header>
 
-	{#each projects as project}
-
-	<Project  {...project}/>
-
+	{#each activeProjects as project, index}
+		{#if index !== 0}
+			<div class="border-t-2 border-dashed" />
+		{/if}
+		<Project
+			{...projectFromCrowdtainerId(project)}
+			{staticDataLoadStatus}
+			campaignStaticData={campaignStaticData.get(project)}
+			campaignStaticUI={campaignStaticUI.get(project)}
+		/>
 	{/each}
 
-	<!-- Project Container End -->
+	{#if activeProjects.length === 0}
+		<EmptySection emptyMessage="Nothing to see here yet."/>
+	{/if}
 
 	<header class="campaignSection">
 		<div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
@@ -34,25 +108,41 @@
 		</div>
 	</header>
 
-	<div class="max-w-7xl mx-auto py-6 sm:px-0 lg:px-0">
-		<div class="px-2 py-6 sm:px-0">
-			<div class="mx-6 border-2 border-dashed border-gray-200 rounded-lg h-20">
-				<p class="text-center m-5">More projects coming soon.</p>
-			</div>
-		</div>
-	</div>
+	{#each upcomingProjects as project, index}
+		{#if index !== 0}
+			<div class="border-t-2 border-dashed" />
+		{/if}
+		<Project
+			{...projectFromCrowdtainerId(project)}
+			{staticDataLoadStatus}
+			campaignStaticData={campaignStaticData.get(project)}
+			campaignStaticUI={campaignStaticUI.get(project)}
+		/>
+	{/each}
+
+	{#if upcomingProjects.length === 0}
+	<EmptySection emptyMessage="More projects coming soon."/>
+	{/if}
 
 	<header class="campaignSection">
 		<div class="font-mono max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
-			<h1 class="text-2xl font-bold">Expired / Previous</h1>
+			<h1 class="text-2xl font-bold">Previous</h1>
 		</div>
 	</header>
 
-	<div class="max-w-7xl mx-auto py-6 sm:px-0 lg:px-0">
-		<div class="px-2 py-6 sm:px-0">
-			<div class="mx-6 border-2 border-dashed border-gray-200 rounded-lg h-20">
-				<p class="text-center m-5">Nothing to see here yet.</p>
-			</div>
-		</div>
-	</div>
+	{#each pastProjects as project, index}
+		{#if index !== 0}
+			<div class="border-t-2 border-dashed" />
+		{/if}
+		<Project
+			{...projectFromCrowdtainerId(project)}
+			{staticDataLoadStatus}
+			campaignStaticData={campaignStaticData.get(project)}
+			campaignStaticUI={campaignStaticUI.get(project)}
+		/>
+	{/each}
+
+	{#if pastProjects.length === 0}
+		<EmptySection emptyMessage="Nothing to see here yet."/>
+	{/if}
 </main>
