@@ -126,7 +126,7 @@ import EmptySection from '$lib/EmptySection.svelte';
 
 	<header class="campaignSection">
 		<div class="font-mono max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
-			<h1 class="text-2xl font-bold">Expired / Previous</h1>
+			<h1 class="text-2xl font-bold">Previous</h1>
 		</div>
 	</header>
 

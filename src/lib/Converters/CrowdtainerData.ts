@@ -11,6 +11,7 @@ export enum LoadStatus {
 }
 
 export enum ProjectStatusUI {
+    Loading,                // Project status still loading.
     Uninitialized,          // Project not yet initialized by service provider.
     OpeningSoon,            // Waiting for funding start time to be reached.
     Funding,                // Within funding period.
@@ -21,9 +22,12 @@ export enum ProjectStatusUI {
 }
 
 const loadingString = 'Loading...';
-export function toState(dynamicData: CrowdtainerDynamicModel, staticData: CrowdtainerStaticModel): ProjectStatusUI {
+export function toState(dynamicData: CrowdtainerDynamicModel | undefined, staticData: CrowdtainerStaticModel | undefined): ProjectStatusUI {
+    if (staticData === undefined || dynamicData === undefined) {
+        return ProjectStatusUI.Loading;
+    }
     if (dynamicData.raised === undefined) {
-        throw Error('Invalid toState() input');
+        return ProjectStatusUI.Loading;
     }
     let nowInMs = (new Date).getTime();
     let startInMs = toDate(staticData.startDate).getTime();
@@ -86,6 +90,9 @@ export function toStateString(dynamicData: CrowdtainerDynamicModel, staticData: 
         }
         case ProjectStatusUI.ServiceProviderDeclined: {
             return 'Declined by service provider';
+        }
+        case ProjectStatusUI.Loading: {
+            return loadingString;
         }
     }
 }

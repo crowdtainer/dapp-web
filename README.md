@@ -56,7 +56,7 @@ npm run preview
         - Can be a static list/item for MVP.
     - ✅ All information used during deployment (opening and closing time, etc).
         - Use `ICrowdtainer.CampaignData`.
-    - ◻️ Check the project status (Funding, Expired, Delivery, Finalized).
+    - ✅ Check the project status (Funding, Expired, Delivery, Finalized).
         - Use `Crowdtainer.crowdtainerState()`.
     - ✅ If active, percentage of goal so far (progress bar).
         - Use `Crowdtainer.totalValueRaised()` and `CampaignData.targetMinimum().` to calculate percentage.
