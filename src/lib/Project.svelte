@@ -181,7 +181,7 @@
 								<p class="projectDataSubtitle">Status</p>
 							</div>
 
-							<MoneyInContract {raised} {campaignStaticUI} />
+							<MoneyInContract {raised} {campaignStaticUI} {state}/>
 
 							<div class="">
 								{#if campaignStaticUI}
