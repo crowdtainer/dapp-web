@@ -21,7 +21,8 @@ export enum ProjectStatusUI {
     ServiceProviderDeclined // Minimum funding amount was reached in time, but the service provided decided to not go foward. Funds are available for withdrawal by participants.
 }
 
-const loadingString = 'Loading...';
+export const loadingString = 'Loading...';
+
 export function toState(dynamicData: CrowdtainerDynamicModel | undefined, staticData: CrowdtainerStaticModel | undefined): ProjectStatusUI {
     if (staticData === undefined || dynamicData === undefined) {
         return ProjectStatusUI.Loading;

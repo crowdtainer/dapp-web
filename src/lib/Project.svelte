@@ -24,6 +24,7 @@
 		calculatePercentageWidth,
 		type UIFields,
 		LoadStatus,
+		loadingString,
 		ProjectStatusUI
 	} from '$lib/Converters/CrowdtainerData';
 
@@ -37,8 +38,6 @@
 	export let campaignStaticData: CrowdtainerStaticModel | undefined;
 	export let campaignStaticUI: UIFields | undefined;
 	export let staticDataLoadStatus: LoadStatus = LoadStatus.Loading;
-
-	const loadingString = 'Loading...';
 
 	let campaignDynamicData: Readable<CrowdtainerDynamicModel> | undefined;
 
