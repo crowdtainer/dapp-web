@@ -71,7 +71,7 @@ npm run preview
 - ✅ I'd like to view if the project's goal was reached, so that I can decide to either withdrawl my funds or wait for product delivery.
     - Use `Crowdtainer.crowdtainerState()`.
 
-- ◻️ Allow connection/disconnection to WalletConnect and properly manage its state (localStore to remember connection).
+- ✅ Allow connection/disconnection to WalletConnect and properly manage its state (localStore to remember connection).
 
 - ◻️ Button to effectively 'join' the project.
     - To join the project call `ICrowdtainer.join()`.
