@@ -5,13 +5,20 @@
 	import Project from '$lib/Project.svelte';
 	import { fetchStaticData } from '$lib/api';
 
-	import { LoadStatus, prepareForUI, toDate, type UIFields } from '$lib/Converters/CrowdtainerData';
+	import {
+		LoadStatus,
+		loadingString,
+		prepareForUI,
+		toDate,
+		type UIFields
+	} from '$lib/Converters/CrowdtainerData';
 	import type { CrowdtainerStaticModel } from '$lib/Model/CrowdtainerModel';
-import EmptySection from '$lib/EmptySection.svelte';
+	import EmptySection from '$lib/EmptySection.svelte';
 
 	let campaignStaticData = new Map<number, CrowdtainerStaticModel>();
 	let campaignStaticUI: Map<number, UIFields> = new Map<number, UIFields>();
 	let staticDataLoadStatus: LoadStatus = LoadStatus.Loading;
+	let networkFailedMessage = 'Error loading data.';
 
 	let activeProjects: number[] = [];
 	let upcomingProjects: number[] = [];
@@ -59,7 +66,7 @@ import EmptySection from '$lib/EmptySection.svelte';
 				staticDataLoadStatus = LoadStatus.Loaded;
 			} else {
 				// TODO: Show user UI/pop-up with error.
-				console.log(result.unwrapErr());
+				console.log('Error: %o', result.unwrapErr());
 				staticDataLoadStatus = LoadStatus.FetchFailed;
 			}
 			sortProjects();
@@ -98,8 +105,12 @@ import EmptySection from '$lib/EmptySection.svelte';
 		/>
 	{/each}
 
-	{#if activeProjects.length === 0}
-		<EmptySection emptyMessage="Nothing to see here yet."/>
+	{#if staticDataLoadStatus === LoadStatus.Loading}
+		<EmptySection emptyMessage={loadingString} />
+	{:else if staticDataLoadStatus === LoadStatus.FetchFailed}
+		<EmptySection emptyMessage={networkFailedMessage} isError={true} />
+	{:else if activeProjects.length === 0}
+		<EmptySection emptyMessage="No active projects currently." />
 	{/if}
 
 	<header class="campaignSection">
@@ -120,8 +131,12 @@ import EmptySection from '$lib/EmptySection.svelte';
 		/>
 	{/each}
 
-	{#if upcomingProjects.length === 0}
-	<EmptySection emptyMessage="More projects coming soon."/>
+	{#if staticDataLoadStatus === LoadStatus.Loading}
+		<EmptySection emptyMessage={loadingString} />
+	{:else if staticDataLoadStatus === LoadStatus.FetchFailed}
+		<EmptySection emptyMessage={networkFailedMessage} isError={true} />
+	{:else if upcomingProjects.length === 0}
+		<EmptySection emptyMessage="More projects coming soon." />
 	{/if}
 
 	<header class="campaignSection">
@@ -142,7 +157,11 @@ import EmptySection from '$lib/EmptySection.svelte';
 		/>
 	{/each}
 
-	{#if pastProjects.length === 0}
-		<EmptySection emptyMessage="Nothing to see here yet."/>
+	{#if staticDataLoadStatus === LoadStatus.Loading}
+		<EmptySection emptyMessage={loadingString} />
+	{:else if staticDataLoadStatus === LoadStatus.FetchFailed}
+		<EmptySection emptyMessage={networkFailedMessage} isError={true} />
+	{:else if pastProjects.length === 0}
+		<EmptySection emptyMessage="Nothing to see here yet." />
 	{/if}
 </main>

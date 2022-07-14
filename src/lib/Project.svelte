@@ -11,6 +11,7 @@
 	import ProductQuantity from '$lib/ProductQuantity.svelte';
 	import { joinSelection } from '$lib/userStore';
 	import TimeLeft from './TimeLeft.svelte';
+	import MoneyInContract from './MoneyInContract.svelte';
 
 	import type {
 		CrowdtainerDynamicModel,
@@ -24,6 +25,7 @@
 		calculatePercentageWidth,
 		type UIFields,
 		LoadStatus,
+		loadingString,
 		ProjectStatusUI
 	} from '$lib/Converters/CrowdtainerData';
 
@@ -38,22 +40,14 @@
 	export let campaignStaticUI: UIFields | undefined;
 	export let staticDataLoadStatus: LoadStatus = LoadStatus.Loading;
 
-	const loadingString = 'Loading...';
-
 	let campaignDynamicData: Readable<CrowdtainerDynamicModel> | undefined;
 
 	let currentSelection = 0;
 	let currentPrice: number;
 	let raised: number;
 	let tweeningDuration = 650;
-	let tweenedRaised = tweened(0, { duration: tweeningDuration, easing: cubicOut });
 	let tweenedPercentageWidth = tweened(0, { duration: tweeningDuration, easing: cubicOut });
 	let tweenedPercentageRaised = tweened(0, { duration: tweeningDuration, easing: cubicOut });
-	let moneyFormatter = new Intl.NumberFormat('en-GB', {
-		style: 'decimal',
-		minimumFractionDigits: 0,
-		maximumFractionDigits: 0
-	});
 
 	onMount(async () => {
 		$joinSelection = $joinSelection;
@@ -93,7 +87,6 @@
 		if (staticDataLoadStatus !== LoadStatus.FetchFailed) {
 			let decimals = campaignStaticUI ? campaignStaticUI.tokenDecimals : undefined;
 			raised = toHuman($campaignDynamicData?.raised, decimals);
-			tweenedRaised.set(raised);
 		}
 	}
 
@@ -110,18 +103,14 @@
 		}
 	}
 
-	// Failed,                 // Failed to raise minimum amount in time.
-	// SuccessfulyFunded,      // Minimum funding reached in time.
-	// Delivery,               // Service provider accepted orders and will deliver products.
-	// ServiceProviderDeclined // Minimum funding amount was reached in time, but the service provided decided to not go foward. Funds are available for withdrawal by participants.
-
 	// dynamic
 	$: state = toState($campaignDynamicData, campaignStaticData);
 	$: disableJoinView = !(
 		state === ProjectStatusUI.Failed ||
 		state === ProjectStatusUI.SuccessfulyFunded ||
 		state === ProjectStatusUI.Delivery ||
-		state === ProjectStatusUI.ServiceProviderDeclined);
+		state === ProjectStatusUI.ServiceProviderDeclined
+	);
 
 	$: stateString =
 		staticDataLoadStatus !== LoadStatus.FetchFailed &&
@@ -191,19 +180,9 @@
 								<p class="projectStatus">{stateString}</p>
 								<p class="projectDataSubtitle">Status</p>
 							</div>
-							<div class="">
-								<p class="projectStatus">
-									{moneyFormatter.format($tweenedRaised)}
-									{campaignStaticUI ? campaignStaticUI.tokenSymbol : ''}
-								</p>
-								{#if campaignStaticUI}
-									<p class="projectDataSubtitle">
-										raised of {moneyFormatter.format(Number(campaignStaticUI.minimum))} goal
-									</p>
-								{:else}
-									<p class="projectDataSubtitle">raised</p>
-								{/if}
-							</div>
+
+							<MoneyInContract {raised} {campaignStaticUI} {state}/>
+
 							<div class="">
 								{#if campaignStaticUI}
 									<p class="projectStatus">
