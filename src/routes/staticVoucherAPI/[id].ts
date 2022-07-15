@@ -27,7 +27,7 @@ async function fetchData(crowdtainerId: BigNumber): Promise<Result<CrowdtainerSt
 
       let crowdtainerStaticData: CrowdtainerStaticModel | undefined = crowdtainerStaticDataMap.get(crowdtainerId.toHexString());
 
-      if (crowdtainerStaticData !== undefined) {
+      if (crowdtainerStaticData) {
          return Ok(crowdtainerStaticData);
       }
 

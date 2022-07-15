@@ -45,4 +45,35 @@
     @apply text-xl font-medium;
   }
 
+  .toastBox {
+    @apply text-white;
+    @apply p-2 m-1;
+    @apply mt-2;
+    @apply rounded-md;
+    @apply flex flex-row;
+    /* @apply ; */
+  }
+
+  .toastButton {
+    @apply fill-white;
+    @apply bg-none;
+    @apply inline-block;
+    @apply px-2;
+  }
+
+  .warningToast {
+    @apply mx-2;
+    @apply bg-red-500;
+  }
+
+  .infoToast {
+    @apply mx-2;
+    @apply bg-sky-500;
+  }
+
+  .successToast {
+    @apply mx-2;
+    @apply bg-green-600;
+  }
+
 }

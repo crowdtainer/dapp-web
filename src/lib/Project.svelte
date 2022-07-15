@@ -57,7 +57,7 @@
 		} else {
 			campaignDynamicData = campaignStores.get(crowdtainerId);
 		}
-		if (campaignStaticUI !== undefined) updateCurrentSelection(0, campaignStaticUI.prices[0]);
+		if (campaignStaticUI) updateCurrentSelection(0, campaignStaticUI.prices[0]);
 	});
 
 	// CrowdtainerId -> totalSum
@@ -96,7 +96,7 @@
 				? Number(calculatePercentageRaised(raised.toString(), campaignStaticUI.minimum))
 				: undefined;
 
-			if (percentage !== undefined) {
+			if (percentage) {
 				tweenedPercentageRaised.set(percentage);
 				tweenedPercentageWidth.set(calculatePercentageWidth(percentage));
 			}
@@ -133,7 +133,7 @@
 			return;
 		}
 		let updatedQuantity = $joinSelection.get(crowdtainerId);
-		if (updatedQuantity !== undefined) {
+		if (updatedQuantity) {
 			updatedQuantity[currentSelection]++;
 			$joinSelection.set(crowdtainerId, updatedQuantity);
 			$joinSelection = $joinSelection;
@@ -216,7 +216,7 @@
 
 						{#if disableJoinView}
 							<div class="pt-4">
-								{#if staticDataLoadStatus === LoadStatus.Loaded && currentPrice !== undefined}
+								{#if staticDataLoadStatus === LoadStatus.Loaded && currentPrice}
 									<p class="px-2 productPrice">
 										{currentPrice}
 										{campaignStaticUI ? campaignStaticUI.tokenSymbol : ''}
@@ -231,7 +231,7 @@
 
 							<fieldset class="mt-4 font-mono">
 								<legend class="sr-only">Choose a product</legend>
-								{#if campaignStaticUI !== undefined}
+								{#if campaignStaticUI}
 									<div class="grid grid-cols-2 gap-4">
 										{#each campaignStaticUI.prices as price, index}
 											<label

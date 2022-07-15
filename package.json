@@ -40,7 +40,6 @@
 	"dependencies": {
 		"@sniptt/monads": "^0.5.10",
 		"dotenv": "^16.0.1",
-		"svelte-ethers-store": "^2.3.3",
 		"typechain": "^8.1.0"
 	}
 }
