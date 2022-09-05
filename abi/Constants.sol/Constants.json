@@ -10,44 +10,44 @@
   },
   "ast": {
     "absolutePath": "src/contracts/Constants.sol",
-    "id": 22628,
+    "id": 24784,
     "exportedSymbols": {
       "MAX_NUMBER_OF_PRODUCTS": [
-        22624
+        24780
       ],
       "MAX_NUMBER_OF_PURCHASED_ITEMS": [
-        22627
+        24783
       ],
       "SAFETY_MAX_REFERRAL_RATE": [
-        22621
+        24777
       ],
       "SAFETY_TIME_RANGE": [
-        22618
+        24774
       ]
     },
     "nodeType": "SourceUnit",
-    "src": "36:579:22",
+    "src": "36:579:27",
     "nodes": [
       {
-        "id": 22615,
+        "id": 24771,
         "nodeType": "PragmaDirective",
-        "src": "36:24:22",
+        "src": "36:24:27",
         "literals": [
           "solidity",
           "^",
           "0.8",
-          ".11"
+          ".16"
         ]
       },
       {
-        "id": 22618,
+        "id": 24774,
         "nodeType": "VariableDeclaration",
-        "src": "211:44:22",
+        "src": "211:44:27",
         "constant": true,
         "mutability": "constant",
         "name": "SAFETY_TIME_RANGE",
-        "nameLocation": "228:17:22",
-        "scope": 22628,
+        "nameLocation": "228:17:27",
+        "scope": 24784,
         "stateVariable": false,
         "storageLocation": "default",
         "typeDescriptions": {
@@ -55,10 +55,10 @@
           "typeString": "uint256"
         },
         "typeName": {
-          "id": 22616,
+          "id": 24772,
           "name": "uint256",
           "nodeType": "ElementaryTypeName",
-          "src": "211:7:22",
+          "src": "211:7:27",
           "typeDescriptions": {
             "typeIdentifier": "t_uint256",
             "typeString": "uint256"
@@ -66,14 +66,14 @@
         },
         "value": {
           "hexValue": "31",
-          "id": 22617,
+          "id": 24773,
           "isConstant": false,
           "isLValue": false,
           "isPure": true,
           "kind": "number",
           "lValueRequested": false,
           "nodeType": "Literal",
-          "src": "248:7:22",
+          "src": "248:7:27",
           "subdenomination": "hours",
           "typeDescriptions": {
             "typeIdentifier": "t_rational_3600_by_1",
@@ -84,14 +84,14 @@
         "visibility": "internal"
       },
       {
-        "id": 22621,
+        "id": 24777,
         "nodeType": "VariableDeclaration",
-        "src": "317:46:22",
+        "src": "317:46:27",
         "constant": true,
         "mutability": "constant",
         "name": "SAFETY_MAX_REFERRAL_RATE",
-        "nameLocation": "334:24:22",
-        "scope": 22628,
+        "nameLocation": "334:24:27",
+        "scope": 24784,
         "stateVariable": false,
         "storageLocation": "default",
         "typeDescriptions": {
@@ -99,10 +99,10 @@
           "typeString": "uint256"
         },
         "typeName": {
-          "id": 22619,
+          "id": 24775,
           "name": "uint256",
           "nodeType": "ElementaryTypeName",
-          "src": "317:7:22",
+          "src": "317:7:27",
           "typeDescriptions": {
             "typeIdentifier": "t_uint256",
             "typeString": "uint256"
@@ -110,14 +110,14 @@
         },
         "value": {
           "hexValue": "3530",
-          "id": 22620,
+          "id": 24776,
           "isConstant": false,
           "isLValue": false,
           "isPure": true,
           "kind": "number",
           "lValueRequested": false,
           "nodeType": "Literal",
-          "src": "361:2:22",
+          "src": "361:2:27",
           "typeDescriptions": {
             "typeIdentifier": "t_rational_50_by_1",
             "typeString": "int_const 50"
@@ -127,14 +127,14 @@
         "visibility": "internal"
       },
       {
-        "id": 22624,
+        "id": 24780,
         "nodeType": "VariableDeclaration",
-        "src": "449:43:22",
+        "src": "449:43:27",
         "constant": true,
         "mutability": "constant",
         "name": "MAX_NUMBER_OF_PRODUCTS",
-        "nameLocation": "466:22:22",
-        "scope": 22628,
+        "nameLocation": "466:22:27",
+        "scope": 24784,
         "stateVariable": false,
         "storageLocation": "default",
         "typeDescriptions": {
@@ -142,10 +142,10 @@
           "typeString": "uint256"
         },
         "typeName": {
-          "id": 22622,
+          "id": 24778,
           "name": "uint256",
           "nodeType": "ElementaryTypeName",
-          "src": "449:7:22",
+          "src": "449:7:27",
           "typeDescriptions": {
             "typeIdentifier": "t_uint256",
             "typeString": "uint256"
@@ -153,14 +153,14 @@
         },
         "value": {
           "hexValue": "34",
-          "id": 22623,
+          "id": 24779,
           "isConstant": false,
           "isLValue": false,
           "isPure": true,
           "kind": "number",
           "lValueRequested": false,
           "nodeType": "Literal",
-          "src": "491:1:22",
+          "src": "491:1:27",
           "typeDescriptions": {
             "typeIdentifier": "t_rational_4_by_1",
             "typeString": "int_const 4"
@@ -170,14 +170,14 @@
         "visibility": "internal"
       },
       {
-        "id": 22627,
+        "id": 24783,
         "nodeType": "VariableDeclaration",
-        "src": "561:52:22",
+        "src": "561:52:27",
         "constant": true,
         "mutability": "constant",
         "name": "MAX_NUMBER_OF_PURCHASED_ITEMS",
-        "nameLocation": "578:29:22",
-        "scope": 22628,
+        "nameLocation": "578:29:27",
+        "scope": 24784,
         "stateVariable": false,
         "storageLocation": "default",
         "typeDescriptions": {
@@ -185,10 +185,10 @@
           "typeString": "uint256"
         },
         "typeName": {
-          "id": 22625,
+          "id": 24781,
           "name": "uint256",
           "nodeType": "ElementaryTypeName",
-          "src": "561:7:22",
+          "src": "561:7:27",
           "typeDescriptions": {
             "typeIdentifier": "t_uint256",
             "typeString": "uint256"
@@ -196,14 +196,14 @@
         },
         "value": {
           "hexValue": "323030",
-          "id": 22626,
+          "id": 24782,
           "isConstant": false,
           "isLValue": false,
           "isPure": true,
           "kind": "number",
           "lValueRequested": false,
           "nodeType": "Literal",
-          "src": "610:3:22",
+          "src": "610:3:27",
           "typeDescriptions": {
             "typeIdentifier": "t_rational_200_by_1",
             "typeString": "int_const 200"
@@ -215,5 +215,5 @@
     ],
     "license": "GPL-3.0"
   },
-  "id": 22
+  "id": 27
 }
