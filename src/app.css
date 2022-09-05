@@ -16,4 +16,64 @@
     @apply text-gray-300 hover:bg-gray-700 hover:text-white block px-3 py-2 rounded-md text-base font-medium;
   }
 
+  .ct-divider {
+    @apply bg-gradient-to-r from-gray-800 to-blue-400;
+  }
+
+  .campaignSection {
+    @apply border-b-2 border-blue-300;
+    @apply text-black;
+  }
+
+  .projectStatus {
+    @apply font-mono;
+    @apply text-sky-800 text-xl font-medium;
+  }
+
+  .projectData {
+    @apply font-mono;
+    @apply text-black text-base font-medium;
+  }
+
+  .projectDataSubtitle {
+    @apply font-mono;
+    @apply text-gray-700 text-xs font-light;
+  }
+
+  .productPrice {
+    @apply font-mono;
+    @apply text-xl font-medium;
+  }
+
+  .toastBox {
+    @apply text-white;
+    @apply p-2 m-1;
+    @apply mt-2;
+    @apply rounded-md;
+    @apply flex flex-row;
+    /* @apply ; */
+  }
+
+  .toastButton {
+    @apply fill-white;
+    @apply bg-none;
+    @apply inline-block;
+    @apply px-2;
+  }
+
+  .warningToast {
+    @apply mx-2;
+    @apply bg-red-500;
+  }
+
+  .infoToast {
+    @apply mx-2;
+    @apply bg-sky-500;
+  }
+
+  .successToast {
+    @apply mx-2;
+    @apply bg-green-600;
+  }
+
 }
