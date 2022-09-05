@@ -1,5 +1,5 @@
 import WalletConnectProvider from '@walletconnect/web3-provider/dist/umd/index.min.js';
-import { providers } from 'ethers';
+import { providers, Signer } from 'ethers';
 
 import { writable, derived } from 'svelte/store';
 
@@ -8,6 +8,9 @@ import { MessageType } from './Toast/MessageType';
 
 export const walletState = createWalletStore();
 export const connected = derived(walletState, $walletState => $walletState.connectionState === ConnectionState.Connected);
+export const accountAddress = derived(walletState, $walletState => {
+    return ($walletState.account) ? $walletState.account : ''
+});
 export const shortenedAccount = derived(walletState, $walletState => {
     return ($walletState.account) ? $walletState.account?.slice(0,6) + '...' + $walletState.account?.slice(-6): ''
 });
@@ -81,7 +84,8 @@ function createWalletStore() {
     };
 }
 
-let wcProvider: WalletConnectProvider;
+export let web3Provider: providers.Web3Provider;
+export let wcProvider: WalletConnectProvider;
 
 async function setupWalletConnect() {
     wcProvider = new WalletConnectProvider({
@@ -116,7 +120,7 @@ async function setupWalletConnect() {
     });
 
     //  Wrap with Web3Provider from ethers.js
-    const web3Provider = new providers.Web3Provider(wcProvider);
+    web3Provider = new providers.Web3Provider(wcProvider);
     await wcProvider.enable();
 }
 
@@ -171,4 +175,18 @@ export async function tearDownWallet() {
     walletState.persistState();
     resetWalletConnectCallbacks();
     updatesCallbackFunction = undefined;
+}
+
+export function getSigner() : Signer | undefined {
+    if(connected) {
+        return web3Provider.getSigner();
+    }
+    return undefined;
+}
+
+export async function getAccountAddress() : Promise<string | undefined> {
+    if(connected) {
+        return await web3Provider.getSigner().getAddress();
+    }
+    return undefined;
 }

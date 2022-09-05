@@ -1,5 +1,5 @@
 
-<header class="divider">
+<header class="ct-divider">
 	<div class="max-w-7xl mx-auto py-4 px-4 sm:px-6 lg:px-8">
 		<h1 class="text-2xl font-bold text-white">Your Campaigns</h1>
 	</div>
@@ -13,7 +13,7 @@
                 <img
                     class="my-16 mx-2 h-auto max-h-96 w-full md:h-full md:w-96 blur-[2px]"
                     src="VoucherDemo.svg"
-                    alt="Voucher Image"
+                    alt="Voucher"
                 />
 
             </div>

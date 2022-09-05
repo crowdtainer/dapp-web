@@ -1,15 +1,13 @@
 <script lang="ts">
-	import { derived, type Readable } from 'svelte/store';
 	import { onMount } from 'svelte';
 	import { tweened } from 'svelte/motion';
 	import { cubicOut } from 'svelte/easing';
-	import { slide } from 'svelte/transition';
 
-	import Join from '$lib/Join.svelte';
+	import PreOrder from '$lib/PreOrder.svelte';
 
 	import { initializeStore, campaignStores } from '$lib/campaignStore';
-	import ProductQuantity from '$lib/ProductQuantity.svelte';
 	import { joinSelection } from '$lib/userStore';
+
 	import TimeLeft from './TimeLeft.svelte';
 	import MoneyInContract from './MoneyInContract.svelte';
 
@@ -58,29 +56,6 @@
 			campaignDynamicData = campaignStores.get(crowdtainerId);
 		}
 		if (campaignStaticUI) updateCurrentSelection(0, campaignStaticUI.prices[0]);
-	});
-
-	// CrowdtainerId -> totalSum
-	const totalSum: Readable<number> = derived(joinSelection, ($joinSelection) => {
-		if (
-			campaignStaticUI === undefined ||
-			crowdtainerId === undefined ||
-			campaignStaticUI.descriptions === undefined ||
-			campaignStaticUI.prices === undefined
-		) {
-			return 0;
-		}
-
-		let totalSum = 0;
-		let selection = $joinSelection.get(crowdtainerId);
-		if (selection === undefined) {
-			selection = new Array<number>(campaignStaticUI.descriptions.length).fill(0);
-			return 0;
-		}
-		for (var i = 0; i < selection.length; i++) {
-			totalSum += selection[i] * campaignStaticUI.prices[i];
-		}
-		return totalSum;
 	});
 
 	function setRaisedAmount() {
@@ -156,7 +131,9 @@
 				<div class="font-mono uppercase tracking-wide text-base text-red-600 font-semibold">
 					{title}
 				</div>
-				<a href={projectURL} class="block mt-1 text-2xl leading-tight font-medium hover:underline"
+				<a
+					href={projectURL}
+					class="text-black block mt-1 text-2xl leading-tight font-medium hover:underline"
 					>{subtitle}</a
 				>
 				<p class="mt-5 text-slate-500">
@@ -181,7 +158,7 @@
 								<p class="projectDataSubtitle">Status</p>
 							</div>
 
-							<MoneyInContract {raised} {campaignStaticUI} {state}/>
+							<MoneyInContract {raised} {campaignStaticUI} {state} />
 
 							<div class="">
 								{#if campaignStaticUI}
@@ -217,7 +194,7 @@
 						{#if disableJoinView}
 							<div class="pt-4">
 								{#if staticDataLoadStatus === LoadStatus.Loaded && currentPrice}
-									<p class="px-2 productPrice">
+									<p class="text-blue-500 px-2 productPrice">
 										{currentPrice}
 										{campaignStaticUI ? campaignStaticUI.tokenSymbol : ''}
 									</p>
@@ -300,21 +277,8 @@
 				{/if}
 			</div>
 		</div>
-		{#if $totalSum > 0}
-			<div transition:slide={{ duration: 300 }}>
-				{#if campaignStaticUI === undefined}
-					<Join totalSum={$totalSum} />
-				{:else}
-					<Join tokenSymbol={campaignStaticUI.tokenSymbol} totalSum={$totalSum}>
-						<ProductQuantity
-							prices={campaignStaticUI.prices}
-							descriptions={campaignStaticUI.descriptions}
-							{crowdtainerId}
-							tokenSymbol={campaignStaticUI.tokenSymbol}
-						/>
-					</Join>
-				{/if}
-			</div>
-		{/if}
+
+		<PreOrder {campaignStaticUI} {crowdtainerId} />
+
 	</div>
 </div>

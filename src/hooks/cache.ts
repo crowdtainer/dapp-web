@@ -1,3 +1,7 @@
+import dotenv from 'dotenv';
+
+dotenv.config();
+
 import type { CrowdtainerStaticModel } from "$lib/Model/CrowdtainerModel";
 
 // Static data is always the same for a given CrowdtainerId, so we can safely cache it without expiration logic.

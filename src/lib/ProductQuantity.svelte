@@ -41,7 +41,7 @@
 	};
 </script>
 
-<div>
+<div class="text-black">
 	<!-- Header -->
 	<div id="header" class="text-center flex items-center bg-gray-100 h-10 px-4">
 		<div class="w-5/12 font-semibold">Description</div>
@@ -53,7 +53,7 @@
 	<div id="body" class="px-4 spacey-y-4">
 		{#each descriptions as product, index}
 		{#if $selection[index] > 0}
-			<div transition:slide|local="{{ duration: 100 }}">
+			<div transition:slide|local="{{ duration: 250 }}">
 				<div class="flex">
 					<!-- Row start -->
 					<div class="w-5/12">
@@ -73,8 +73,8 @@
 								-
 							</button>
 						</div>
-						<div transition:fade class="my-2 py-2 ">
-							<p transition:fade>{$selection[index]}</p>
+						<div in:fade class="my-2 py-2 ">
+							<p in:fade>{$selection[index]}</p>
 						</div>
 						<div class="">
 							<button

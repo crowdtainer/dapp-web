@@ -10,13 +10,39 @@ Web-based (Svelte) application to interact with the [Crowdtainer solidity contra
 To run everything locally, follow the instructions in [Crowdtainer solidity contracts](https://github.com/crowdtainer/dapp-contracts) to run and deploy the contracts (`npx hardhat node`).
 Once a blockchain or RPC can be connected to, proceed setting up this frontend per instructions below.
 
+### Environment variables
+```bash
+# Copy and make sure to set appropriate values.
+cp .env.example .env
+```
+
 ### Install dependencies:
 
 ```bash
+# node dependencies:
 npm install
+
+# install local redis instance:
+brew install redis # MacOS
+
+# For other OS's see: https://redis.io/docs/getting-started/installation/
 ```
 
+> Note: Redis and E-mail service are only required for service providers using CCIP-Read for off-chain verification rules (i.e., signer != address(0) in the deployed project). If the project doesn't require CCIP-Read, Redis is not required. Allowing projects without CCIP-Read is still work to be done in this frontend, but should be trivial as we just need to remove all steps when "joining" a project, and instead call join() in the smart-contract directly.
+
+
+---
 ### To start a development server:
+
+ Run redis server:
+ ```bash
+redis-server
+
+# Alternatively, to run as a MacOS service:
+brew services start redis
+ ```
+
+ Run frontend:
 
 ```bash
 npm run dev
@@ -25,6 +51,8 @@ npm run dev
 
 npm run dev -- --open #open in browser
 ```
+
+---
 
 ### Building for production:
 
@@ -72,6 +100,11 @@ npm run preview
     - Use `Crowdtainer.crowdtainerState()`.
 
 - ✅ Allow connection/disconnection to WalletConnect and properly manage its state (localStore to remember connection).
+
+- ◻️ CCIP-Read support to allow arbitrary off-chain verifications before joining a project (meet law requirements).
+    - ✅ Add requirement of participant signing Terms and Conditions with their wallet.
+    - ◻️ E-mail / code verification.
+    - ◻️ Server checks if code + Terms & Conditions signature are valid.
 
 - ◻️ Button to effectively 'join' the project.
     - To join the project call `ICrowdtainer.join()`.

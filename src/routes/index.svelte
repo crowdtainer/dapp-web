@@ -80,7 +80,7 @@
 	<title>Crowdtainer</title>
 </svelte:head>
 
-<header class="divider">
+<header class="ct-divider">
 	<div class="max-w-7xl mx-auto py-4 px-4 sm:px-6 lg:px-8">
 		<h1 class="text-2xl font-bold text-white">Campaigns</h1>
 	</div>
