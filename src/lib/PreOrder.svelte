@@ -15,6 +15,13 @@
 	import { derived, type Readable } from 'svelte/store';
 	import ProductQuantity from './ProductQuantity.svelte';
 
+	// API
+	import {
+		sendChallengeCodeAPI,
+		requestEmailAuthorizationAPI,
+		requestWalletAuthorizationAPI
+	} from '$lib/api';
+
 	// Terms and Conditions signing data
 	import { signTermsAndConditions } from './Model/SignTerms';
 
@@ -93,32 +100,6 @@
 			// TODO: Check if this wallet already joined, if yes: preOrderStep = 3;
 		}
 	});
-
-	async function sendChallengeCodeAPI(email: string): Promise<boolean> {
-		const result = await fetch(`challengeCodeAPI/${email}`);
-		return result.ok;
-	}
-
-	async function requestEmailAuthorizationAPI(email: string, code: string): Promise<string> {
-		let result: Response;
-
-		result = await fetch(`authorizeEmailAPI/${email}`, {
-			method: 'POST',
-			body: JSON.stringify({ code: code })
-		});
-		return result.text();
-	}
-
-	async function requestWalletAuthorizationAPI(wallet:string, email: string, sigHash: string): Promise<string> {	
-		let result: Response;
-
-		result = await fetch(`authorizeWalletAPI/${wallet}`, {
-			method: 'POST',
-			body: JSON.stringify({ email: email, signatureHash: sigHash })
-		});
-		return result.text();
-	}
-
 </script>
 
 <!-- Modal dialog -->
@@ -365,19 +346,22 @@
 							if (signResult.isOk()) {
 								let sigHash = signResult.unwrap();
 								console.log(`Success: ${sigHash}`);
-								
-								let requestResult = await requestWalletAuthorizationAPI($accountAddress, userEmail, sigHash);
 
-								if(requestResult === "OK") {
+								let requestResult = await requestWalletAuthorizationAPI(
+									$accountAddress,
+									userEmail,
+									sigHash
+								);
+
+								if (requestResult === 'OK') {
 									termsAccepted = true;
-								} else{
-									console.log(`what went wrong? ${requestResult}`);	
+								} else {
+									console.log(`what went wrong? ${requestResult}`);
 								}
 							} else {
 								console.log(`Failure!? ${signResult.unwrapErr()}`);
 							}
 							waitingForUser = false;
-
 						}}
 					>
 						{#if termsAccepted}
@@ -450,9 +434,7 @@
 					type="button"
 					class="bg-sky-600 text-white hover:bg-sky-500 hover:shadow-lg px-16 mt-6 py-4 font-medium text-sm leading-tight uppercase rounded-xl shadow-md  focus:shadow-lg focus:outline-none focus:ring-0 active:shadow-lg"
 					on:click={() => {
-
 						// TODO: Continue here; Finally make the call to smart contract's join()
-
 
 						preOrderStep++;
 					}}

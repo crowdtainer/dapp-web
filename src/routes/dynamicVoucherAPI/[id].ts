@@ -1,6 +1,6 @@
 // Typechain
-import { Vouchers721__factory } from '../data/typechain/factories/Vouchers721__factory';
-import { Crowdtainer__factory } from '../data/typechain/factories/Crowdtainer__factory';
+import { Vouchers721__factory } from '../../out/typechain/factories/Vouchers721__factory';
+import { Crowdtainer__factory } from '../../out/typechain/factories/Crowdtainer.sol/Crowdtainer__factory';
 
 // Ethers
 import { ethers, BigNumber } from 'ethers';
