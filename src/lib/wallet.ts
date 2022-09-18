@@ -15,8 +15,9 @@ export const shortenedAccount = derived(walletState, $walletState => {
     return ($walletState.account) ? $walletState.account?.slice(0,6) + '...' + $walletState.account?.slice(-6): ''
 });
 
-let supportedNetworks: number[] = [10];
-const RPC_BACKEND: string = import.meta.env.VITE_RPC_BACKEND;
+// let supportedNetworks: number[] = [10];
+let supportedNetworks: number[] = [420];
+const RPC_BACKEND: string = import.meta.env.VITE_WALLET_CONNECT_RPC;
 
 let updatesCallbackFunction: ((message: string, type: MessageType) => void) | undefined;
 
@@ -90,9 +91,11 @@ export let wcProvider: WalletConnectProvider;
 async function setupWalletConnect() {
     wcProvider = new WalletConnectProvider({
         rpc: {
-            10: RPC_BACKEND
+            //10: RPC_BACKEND
+            420: RPC_BACKEND
         },
-        chainId: 10
+        // chainId: 10
+        chainId: 420
     });
     walletState.setWalletType(WalletType.WalletConnect);
     wcProvider.on('accountsChanged', (accounts: string[]) => {

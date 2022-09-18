@@ -1,6 +1,8 @@
 <script lang="ts">
 	export let campaignStaticUI: UIFields | undefined;
 	export let crowdtainerId: number;
+	export let crowdtainerAddress: string | undefined;
+	export let vouchers721Address: string | undefined;
 
 	import { onMount } from 'svelte';
 	import { slide } from 'svelte/transition';
@@ -15,6 +17,10 @@
 	import { derived, type Readable } from 'svelte/store';
 	import ProductQuantity from './ProductQuantity.svelte';
 
+	// node rpc calls
+	import { BigNumber } from 'ethers';
+	import { joinProject } from '$lib/ethersCalls/rpcRequests';
+
 	// API
 	import {
 		sendChallengeCodeAPI,
@@ -26,7 +32,7 @@
 	import { signTermsAndConditions } from './Model/SignTerms';
 
 	// Wallet management
-	import { getSigner } from '$lib/wallet';
+	import { getSigner, wcProvider } from '$lib/wallet';
 	import {
 		walletState,
 		accountAddress,
@@ -34,10 +40,23 @@
 		connect,
 		disconnect,
 		setupWallet,
-		tearDownWallet
+		tearDownWallet,
+		web3Provider
 	} from '$lib/wallet';
 	import { WalletType } from '$lib/walletStorage';
 	import { validEmail } from './Validation/utils';
+
+	// User product selection
+	$: productListLength = campaignStaticUI ? campaignStaticUI?.descriptions.length : 0;
+	var selection: Readable<number[]> = derived(joinSelection, ($joinSelection) => {
+		let storeSelection = $joinSelection.get(crowdtainerId);
+		let noSelection = Array(productListLength).fill(0);
+		if (storeSelection === undefined) {
+			return noSelection;
+		} else {
+			return storeSelection;
+		}
+	});
 
 	// TODO: Clear all state if wallet is disconnected
 
@@ -433,10 +452,18 @@
 				<button
 					type="button"
 					class="bg-sky-600 text-white hover:bg-sky-500 hover:shadow-lg px-16 mt-6 py-4 font-medium text-sm leading-tight uppercase rounded-xl shadow-md  focus:shadow-lg focus:outline-none focus:ring-0 active:shadow-lg"
-					on:click={() => {
-						// TODO: Continue here; Finally make the call to smart contract's join()
-
-						preOrderStep++;
+					on:click={async () => {
+						// Finally make the call to smart contract's join() method.
+						if (crowdtainerAddress && vouchers721Address) {
+							let signer = getSigner();
+							if (signer) {
+								console.log('Signer exists.');
+							}
+							joinProject(signer, vouchers721Address, crowdtainerAddress, $selection);
+							preOrderStep++;
+						} else {
+							console.log('crowdtainerAddress || vouchers721Address missing!');
+						}
 					}}
 				>
 					Confirm & Join

@@ -11,7 +11,7 @@
 		"check:watch": "svelte-check --tsconfig ./tsconfig.json --watch",
 		"lint": "prettier --check --plugin-search-dir=. . && eslint .",
 		"format": "prettier --write --plugin-search-dir=. .",
-		"build-types": "typechain --target ethers-v5 \"./abi/**/*.json\" --out-dir=src/out/typechain/",
+		"build-types": "typechain --target ethers-v5 \"./abi/**/*.json\" --out-dir=src/routes/typechain/",
 		"postinstall": "npm run build-types"
 	},
 	"devDependencies": {
@@ -42,6 +42,7 @@
 	"type": "module",
 	"dependencies": {
 		"@sniptt/monads": "^0.5.10",
+		"alchemy-sdk": "^2.0.3",
 		"daisyui": "^2.24.0",
 		"dotenv": "^16.0.1",
 		"ioredis": "^5.2.3",

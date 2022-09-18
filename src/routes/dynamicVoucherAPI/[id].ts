@@ -1,6 +1,6 @@
 // Typechain
-import { Vouchers721__factory } from '../../out/typechain/factories/Vouchers721__factory';
-import { Crowdtainer__factory } from '../../out/typechain/factories/Crowdtainer.sol/Crowdtainer__factory';
+import { Vouchers721__factory } from '../typechain/factories/Vouchers721__factory';
+import { Crowdtainer__factory } from '../typechain/factories/Crowdtainer.sol/Crowdtainer__factory';
 
 // Ethers
 import { ethers, BigNumber } from 'ethers';
@@ -14,10 +14,20 @@ import type { CrowdtainerDynamicModel, CrowdtainerStaticModel, Error } from '$li
 import { Vouchers721Address } from '../data/projects.json';
 import { crowdtainerStaticDataMap } from '../../hooks/cache';
 
-const provider = new ethers.providers.JsonRpcBatchProvider(import.meta.env.RPC_BACKEND);
+import { Network, Alchemy } from 'alchemy-sdk';
+
+const settings = {
+   apiKey: import.meta.env.VITE_RPC_API_KEY,
+   network: import.meta.env.VITE_RPC_BACKEND
+ };
+const alchemy = new Alchemy(settings);
+const provider =await alchemy.config.getProvider();
+
+// const provider = new ethers.providers.JsonRpcProvider(import.meta.env.RPC_BACKEND);
 
 async function fetchData(crowdtainerId: BigNumber): Promise<Result<CrowdtainerDynamicModel, Error>> {
    try {
+
       let crowdtainerAddress: string;
       let crowdtainerStaticData: CrowdtainerStaticModel | undefined = crowdtainerStaticDataMap.get(crowdtainerId.toHexString());
       const vouchers721Contract = Vouchers721__factory.connect(Vouchers721Address, provider);

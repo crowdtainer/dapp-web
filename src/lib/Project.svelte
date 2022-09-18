@@ -2,6 +2,7 @@
 	import { onMount } from 'svelte';
 	import { tweened } from 'svelte/motion';
 	import { cubicOut } from 'svelte/easing';
+	import type { Readable } from 'svelte/store';
 
 	import PreOrder from '$lib/PreOrder.svelte';
 
@@ -27,6 +28,7 @@
 		ProjectStatusUI
 	} from '$lib/Converters/CrowdtainerData';
 
+	export let vouchers721Address: string;
 	export let crowdtainerId: number;
 	export let title: string;
 	export let subtitle: string;
@@ -278,7 +280,7 @@
 			</div>
 		</div>
 
-		<PreOrder {campaignStaticUI} {crowdtainerId} />
+		<PreOrder {vouchers721Address} crowdtainerAddress={campaignStaticData?.contractAddress} {campaignStaticUI} {crowdtainerId} />
 
 	</div>
 </div>

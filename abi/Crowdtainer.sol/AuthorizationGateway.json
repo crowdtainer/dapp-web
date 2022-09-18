@@ -53,7 +53,7 @@
   "methodIdentifiers": {
     "getSignedJoinApproval(address,address,uint256[4],bool,address)": "08b70706"
   },
-  "rawMetadata": "{\"compiler\":{\"version\":\"0.8.16+commit.07a7930e\"},\"language\":\"Solidity\",\"output\":{\"abi\":[{\"inputs\":[{\"internalType\":\"address\",\"name\":\"crowdtainerAddress\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"addr\",\"type\":\"address\"},{\"internalType\":\"uint256[4]\",\"name\":\"quantities\",\"type\":\"uint256[4]\"},{\"internalType\":\"bool\",\"name\":\"_enableReferral\",\"type\":\"bool\"},{\"internalType\":\"address\",\"name\":\"_referrer\",\"type\":\"address\"}],\"name\":\"getSignedJoinApproval\",\"outputs\":[{\"internalType\":\"bytes\",\"name\":\"signature\",\"type\":\"bytes\"}],\"stateMutability\":\"view\",\"type\":\"function\"}],\"devdoc\":{\"kind\":\"dev\",\"methods\":{},\"version\":1},\"userdoc\":{\"kind\":\"user\",\"methods\":{},\"version\":1}},\"settings\":{\"compilationTarget\":{\"src/contracts/Crowdtainer.sol\":\"AuthorizationGateway\"},\"evmVersion\":\"london\",\"libraries\":{},\"metadata\":{\"bytecodeHash\":\"ipfs\"},\"optimizer\":{\"enabled\":true,\"runs\":500000},\"remappings\":[\":@openzeppelin/=node_modules/@openzeppelin/\",\":ds-test/=lib/ds-test/src/\",\":forge-std/=lib/forge-std/src/\"]},\"sources\":{\"node_modules/@openzeppelin/contracts/proxy/utils/Initializable.sol\":{\"keccak256\":\"0x2a21b14ff90012878752f230d3ffd5c3405e5938d06c97a7d89c0a64561d0d66\",\"license\":\"MIT\",\"urls\":[\"bzz-raw://3313a8f9bb1f9476857c9050067b31982bf2140b83d84f3bc0cec1f62bbe947f\",\"dweb:/ipfs/Qma17Pk8NRe7aB4UD3jjVxk7nSFaov3eQyv86hcyqkwJRV\"]},\"node_modules/@openzeppelin/contracts/security/ReentrancyGuard.sol\":{\"keccak256\":\"0x0e9621f60b2faabe65549f7ed0f24e8853a45c1b7990d47e8160e523683f3935\",\"license\":\"MIT\",\"urls\":[\"bzz-raw://287a2f8d5814dd0f05f22b740f18ca8321acc21c9bd03a6cb2203ea626e2f3f2\",\"dweb:/ipfs/QmZRQv9iuwU817VuqkA2WweiaibKii69x9QxYBBEfbNEud\"]},\"node_modules/@openzeppelin/contracts/token/ERC20/IERC20.sol\":{\"keccak256\":\"0x9750c6b834f7b43000631af5cc30001c5f547b3ceb3635488f140f60e897ea6b\",\"license\":\"MIT\",\"urls\":[\"bzz-raw://5a7d5b1ef5d8d5889ad2ed89d8619c09383b80b72ab226e0fe7bde1636481e34\",\"dweb:/ipfs/QmebXWgtEfumQGBdVeM6c71McLixYXQP5Bk6kKXuoY4Bmr\"]},\"node_modules/@openzeppelin/contracts/token/ERC20/extensions/draft-IERC20Permit.sol\":{\"keccak256\":\"0xf41ca991f30855bf80ffd11e9347856a517b977f0a6c2d52e6421a99b7840329\",\"license\":\"MIT\",\"urls\":[\"bzz-raw://b2717fd2bdac99daa960a6de500754ea1b932093c946388c381da48658234b95\",\"dweb:/ipfs/QmP6QVMn6UeA3ByahyJbYQr5M6coHKBKsf3ySZSfbyA8R7\"]},\"node_modules/@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol\":{\"keccak256\":\"0x032807210d1d7d218963d7355d62e021a84bf1b3339f4f50be2f63b53cccaf29\",\"license\":\"MIT\",\"urls\":[\"bzz-raw://11756f42121f6541a35a8339ea899ee7514cfaa2e6d740625fcc844419296aa6\",\"dweb:/ipfs/QmekMuk6BY4DAjzeXr4MSbKdgoqqsZnA8JPtuyWc6CwXHf\"]},\"node_modules/@openzeppelin/contracts/utils/Address.sol\":{\"keccak256\":\"0xd6153ce99bcdcce22b124f755e72553295be6abcd63804cfdffceb188b8bef10\",\"license\":\"MIT\",\"urls\":[\"bzz-raw://35c47bece3c03caaa07fab37dd2bb3413bfbca20db7bd9895024390e0a469487\",\"dweb:/ipfs/QmPGWT2x3QHcKxqe6gRmAkdakhbaRgx3DLzcakHz5M4eXG\"]},\"node_modules/@openzeppelin/contracts/utils/Strings.sol\":{\"keccak256\":\"0xaf159a8b1923ad2a26d516089bceca9bdeaeacd04be50983ea00ba63070f08a3\",\"license\":\"MIT\",\"urls\":[\"bzz-raw://6f2cf1c531122bc7ca96b8c8db6a60deae60441e5223065e792553d4849b5638\",\"dweb:/ipfs/QmPBdJmBBABMDCfyDjCbdxgiqRavgiSL88SYPGibgbPas9\"]},\"node_modules/@openzeppelin/contracts/utils/cryptography/ECDSA.sol\":{\"keccak256\":\"0xdb7f5c28fc61cda0bd8ab60ce288e206b791643bcd3ba464a70cbec18895a2f5\",\"license\":\"MIT\",\"urls\":[\"bzz-raw://bf52bdf22a33263f5ca6227a35faeac3b81e7d2c692fbcc6a079d488710c5900\",\"dweb:/ipfs/QmcmsjkP4yq3UhiJbvyzwufaY2EKh1zhHaRK8ATag2cpD2\"]},\"src/contracts/Constants.sol\":{\"keccak256\":\"0xb9e35c0f7f7080c26dc9819ccae1e9a439aded1aaff4e097fe4fdfa6aca3d142\",\"license\":\"GPL-3.0\",\"urls\":[\"bzz-raw://f7de4c2bee3840a8d41aa222ed82c738b6411f376f777056244ca10781a9fe7a\",\"dweb:/ipfs/QmR61F5KtbmeBXdZxUHjXNLEEv13ALtQAfXR7TQcRTiiH5\"]},\"src/contracts/Crowdtainer.sol\":{\"keccak256\":\"0x7c4eaf2547dc9222c59f6526cc2c7fa25c237ba57248bab6ef5148ce36d29f55\",\"license\":\"GPL-3.0\",\"urls\":[\"bzz-raw://2b6b5f074905d156be36e9b16f62de7adfaa8008a5d454b6206e87f1ea861f23\",\"dweb:/ipfs/QmSUKkgEMjjgwkzAUCWENv5GU8Vx3t3AtJVnVkBYfZnZxg\"]},\"src/contracts/Errors.sol\":{\"keccak256\":\"0xfbd869b747cd81d9e83d0fc673475369c720d70899400f88d9c0019ad0cd8481\",\"license\":\"GPL-3.0\",\"urls\":[\"bzz-raw://69d029028b06fe1625c7e1bf49d653772c6bf8ad63174cb8a1ee67777807be12\",\"dweb:/ipfs/QmS3mtymb8BPXe2d6rYPN4U4ATKFHvP3PucYKGCJCrycvc\"]},\"src/contracts/ICrowdtainer.sol\":{\"keccak256\":\"0x7b48c8ec2fca22d2816905d9a74007f9a9cf6b7f4b4022a3eb6924aa48e3fef2\",\"license\":\"GPL-3.0\",\"urls\":[\"bzz-raw://a3d60d12523cd6e17cc37700036d2743df2797f0e6047e6e5c0377b743872b6e\",\"dweb:/ipfs/QmPVa5DWua86mnDTox4FyYgaiC6gn25ULmZu5A1PHbnQN8\"]},\"src/contracts/States.sol\":{\"keccak256\":\"0x4b39603e89df7543e139af9aadf2d6848c3781983565168007f72caeee77ba9d\",\"license\":\"GPL-3.0\",\"urls\":[\"bzz-raw://500fbec6ed28e05bb490d47ac3289d52c54a580bc4229d83f2bb80d8a594967a\",\"dweb:/ipfs/QmTabgoMdELzUHcnKR3j3oS9gandDEcitkn7iKETnyyRys\"]}},\"version\":1}",
+  "rawMetadata": "{\"compiler\":{\"version\":\"0.8.16+commit.07a7930e\"},\"language\":\"Solidity\",\"output\":{\"abi\":[{\"inputs\":[{\"internalType\":\"address\",\"name\":\"crowdtainerAddress\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"addr\",\"type\":\"address\"},{\"internalType\":\"uint256[4]\",\"name\":\"quantities\",\"type\":\"uint256[4]\"},{\"internalType\":\"bool\",\"name\":\"_enableReferral\",\"type\":\"bool\"},{\"internalType\":\"address\",\"name\":\"_referrer\",\"type\":\"address\"}],\"name\":\"getSignedJoinApproval\",\"outputs\":[{\"internalType\":\"bytes\",\"name\":\"signature\",\"type\":\"bytes\"}],\"stateMutability\":\"view\",\"type\":\"function\"}],\"devdoc\":{\"kind\":\"dev\",\"methods\":{},\"version\":1},\"userdoc\":{\"kind\":\"user\",\"methods\":{},\"version\":1}},\"settings\":{\"compilationTarget\":{\"src/contracts/Crowdtainer.sol\":\"AuthorizationGateway\"},\"evmVersion\":\"london\",\"libraries\":{},\"metadata\":{\"bytecodeHash\":\"ipfs\"},\"optimizer\":{\"enabled\":true,\"runs\":500000},\"remappings\":[\":@openzeppelin/=node_modules/@openzeppelin/\",\":ds-test/=lib/ds-test/src/\",\":forge-std/=lib/forge-std/src/\"]},\"sources\":{\"node_modules/@openzeppelin/contracts/proxy/utils/Initializable.sol\":{\"keccak256\":\"0x2a21b14ff90012878752f230d3ffd5c3405e5938d06c97a7d89c0a64561d0d66\",\"license\":\"MIT\",\"urls\":[\"bzz-raw://3313a8f9bb1f9476857c9050067b31982bf2140b83d84f3bc0cec1f62bbe947f\",\"dweb:/ipfs/Qma17Pk8NRe7aB4UD3jjVxk7nSFaov3eQyv86hcyqkwJRV\"]},\"node_modules/@openzeppelin/contracts/security/ReentrancyGuard.sol\":{\"keccak256\":\"0x0e9621f60b2faabe65549f7ed0f24e8853a45c1b7990d47e8160e523683f3935\",\"license\":\"MIT\",\"urls\":[\"bzz-raw://287a2f8d5814dd0f05f22b740f18ca8321acc21c9bd03a6cb2203ea626e2f3f2\",\"dweb:/ipfs/QmZRQv9iuwU817VuqkA2WweiaibKii69x9QxYBBEfbNEud\"]},\"node_modules/@openzeppelin/contracts/token/ERC20/IERC20.sol\":{\"keccak256\":\"0x9750c6b834f7b43000631af5cc30001c5f547b3ceb3635488f140f60e897ea6b\",\"license\":\"MIT\",\"urls\":[\"bzz-raw://5a7d5b1ef5d8d5889ad2ed89d8619c09383b80b72ab226e0fe7bde1636481e34\",\"dweb:/ipfs/QmebXWgtEfumQGBdVeM6c71McLixYXQP5Bk6kKXuoY4Bmr\"]},\"node_modules/@openzeppelin/contracts/token/ERC20/extensions/draft-IERC20Permit.sol\":{\"keccak256\":\"0xf41ca991f30855bf80ffd11e9347856a517b977f0a6c2d52e6421a99b7840329\",\"license\":\"MIT\",\"urls\":[\"bzz-raw://b2717fd2bdac99daa960a6de500754ea1b932093c946388c381da48658234b95\",\"dweb:/ipfs/QmP6QVMn6UeA3ByahyJbYQr5M6coHKBKsf3ySZSfbyA8R7\"]},\"node_modules/@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol\":{\"keccak256\":\"0x032807210d1d7d218963d7355d62e021a84bf1b3339f4f50be2f63b53cccaf29\",\"license\":\"MIT\",\"urls\":[\"bzz-raw://11756f42121f6541a35a8339ea899ee7514cfaa2e6d740625fcc844419296aa6\",\"dweb:/ipfs/QmekMuk6BY4DAjzeXr4MSbKdgoqqsZnA8JPtuyWc6CwXHf\"]},\"node_modules/@openzeppelin/contracts/utils/Address.sol\":{\"keccak256\":\"0xd6153ce99bcdcce22b124f755e72553295be6abcd63804cfdffceb188b8bef10\",\"license\":\"MIT\",\"urls\":[\"bzz-raw://35c47bece3c03caaa07fab37dd2bb3413bfbca20db7bd9895024390e0a469487\",\"dweb:/ipfs/QmPGWT2x3QHcKxqe6gRmAkdakhbaRgx3DLzcakHz5M4eXG\"]},\"node_modules/@openzeppelin/contracts/utils/Strings.sol\":{\"keccak256\":\"0xaf159a8b1923ad2a26d516089bceca9bdeaeacd04be50983ea00ba63070f08a3\",\"license\":\"MIT\",\"urls\":[\"bzz-raw://6f2cf1c531122bc7ca96b8c8db6a60deae60441e5223065e792553d4849b5638\",\"dweb:/ipfs/QmPBdJmBBABMDCfyDjCbdxgiqRavgiSL88SYPGibgbPas9\"]},\"node_modules/@openzeppelin/contracts/utils/cryptography/ECDSA.sol\":{\"keccak256\":\"0xdb7f5c28fc61cda0bd8ab60ce288e206b791643bcd3ba464a70cbec18895a2f5\",\"license\":\"MIT\",\"urls\":[\"bzz-raw://bf52bdf22a33263f5ca6227a35faeac3b81e7d2c692fbcc6a079d488710c5900\",\"dweb:/ipfs/QmcmsjkP4yq3UhiJbvyzwufaY2EKh1zhHaRK8ATag2cpD2\"]},\"src/contracts/Constants.sol\":{\"keccak256\":\"0xb9e35c0f7f7080c26dc9819ccae1e9a439aded1aaff4e097fe4fdfa6aca3d142\",\"license\":\"GPL-3.0\",\"urls\":[\"bzz-raw://f7de4c2bee3840a8d41aa222ed82c738b6411f376f777056244ca10781a9fe7a\",\"dweb:/ipfs/QmR61F5KtbmeBXdZxUHjXNLEEv13ALtQAfXR7TQcRTiiH5\"]},\"src/contracts/Crowdtainer.sol\":{\"keccak256\":\"0x7c4eaf2547dc9222c59f6526cc2c7fa25c237ba57248bab6ef5148ce36d29f55\",\"license\":\"GPL-3.0\",\"urls\":[\"bzz-raw://2b6b5f074905d156be36e9b16f62de7adfaa8008a5d454b6206e87f1ea861f23\",\"dweb:/ipfs/QmSUKkgEMjjgwkzAUCWENv5GU8Vx3t3AtJVnVkBYfZnZxg\"]},\"src/contracts/Errors.sol\":{\"keccak256\":\"0xfbd869b747cd81d9e83d0fc673475369c720d70899400f88d9c0019ad0cd8481\",\"license\":\"GPL-3.0\",\"urls\":[\"bzz-raw://69d029028b06fe1625c7e1bf49d653772c6bf8ad63174cb8a1ee67777807be12\",\"dweb:/ipfs/QmS3mtymb8BPXe2d6rYPN4U4ATKFHvP3PucYKGCJCrycvc\"]},\"src/contracts/ICrowdtainer.sol\":{\"keccak256\":\"0xba8095219a93994f66e90f75b2799f63448b8b6bd0d37af73d4332c5fa6a2e95\",\"license\":\"GPL-3.0\",\"urls\":[\"bzz-raw://2b9c87858b12b8f87736885c6d4337ade4a6924ed475788b6df4767706aa42a5\",\"dweb:/ipfs/Qmbb7AZcxALaJcBcwyE4nT3m5qMTx3aPbr3CfZVcCaeyGB\"]},\"src/contracts/States.sol\":{\"keccak256\":\"0x4b39603e89df7543e139af9aadf2d6848c3781983565168007f72caeee77ba9d\",\"license\":\"GPL-3.0\",\"urls\":[\"bzz-raw://500fbec6ed28e05bb490d47ac3289d52c54a580bc4229d83f2bb80d8a594967a\",\"dweb:/ipfs/QmTabgoMdELzUHcnKR3j3oS9gandDEcitkn7iKETnyyRys\"]}},\"version\":1}",
   "metadata": {
     "compiler": {
       "version": "0.8.16+commit.07a7930e"
@@ -220,10 +220,10 @@
         "license": "GPL-3.0"
       },
       "src/contracts/ICrowdtainer.sol": {
-        "keccak256": "0x7b48c8ec2fca22d2816905d9a74007f9a9cf6b7f4b4022a3eb6924aa48e3fef2",
+        "keccak256": "0xba8095219a93994f66e90f75b2799f63448b8b6bd0d37af73d4332c5fa6a2e95",
         "urls": [
-          "bzz-raw://a3d60d12523cd6e17cc37700036d2743df2797f0e6047e6e5c0377b743872b6e",
-          "dweb:/ipfs/QmPVa5DWua86mnDTox4FyYgaiC6gn25ULmZu5A1PHbnQN8"
+          "bzz-raw://2b9c87858b12b8f87736885c6d4337ade4a6924ed475788b6df4767706aa42a5",
+          "dweb:/ipfs/Qmbb7AZcxALaJcBcwyE4nT3m5qMTx3aPbr3CfZVcCaeyGB"
         ],
         "license": "GPL-3.0"
       },
@@ -255,7 +255,7 @@
         26374
       ],
       "CrowdtainerState": [
-        27881
+        27892
       ],
       "ECDSA": [
         24595
@@ -264,7 +264,7 @@
         26537
       ],
       "ICrowdtainer": [
-        27277
+        27288
       ],
       "IERC20": [
         21903
@@ -367,7 +367,7 @@
         "file": "./ICrowdtainer.sol",
         "nameLocation": "-1:-1:-1",
         "scope": 26375,
-        "sourceUnit": 27278,
+        "sourceUnit": 27289,
         "symbolAliases": [],
         "unitAlias": ""
       },
@@ -713,7 +713,7 @@
             "stateVariable": true,
             "storageLocation": "default",
             "typeDescriptions": {
-              "typeIdentifier": "t_enum$_CrowdtainerState_$27881",
+              "typeIdentifier": "t_enum$_CrowdtainerState_$27892",
               "typeString": "enum CrowdtainerState"
             },
             "typeName": {
@@ -726,13 +726,13 @@
                   "1099:16:28"
                 ],
                 "nodeType": "IdentifierPath",
-                "referencedDeclaration": 27881,
+                "referencedDeclaration": 27892,
                 "src": "1099:16:28"
               },
-              "referencedDeclaration": 27881,
+              "referencedDeclaration": 27892,
               "src": "1099:16:28",
               "typeDescriptions": {
-                "typeIdentifier": "t_enum$_CrowdtainerState_$27881",
+                "typeIdentifier": "t_enum$_CrowdtainerState_$27892",
                 "typeString": "enum CrowdtainerState"
               }
             },
@@ -1612,7 +1612,7 @@
                         "referencedDeclaration": 24908,
                         "src": "3803:13:28",
                         "typeDescriptions": {
-                          "typeIdentifier": "t_enum$_CrowdtainerState_$27881",
+                          "typeIdentifier": "t_enum$_CrowdtainerState_$27892",
                           "typeString": "enum CrowdtainerState"
                         }
                       }
@@ -1620,7 +1620,7 @@
                     "expression": {
                       "argumentTypes": [
                         {
-                          "typeIdentifier": "t_enum$_CrowdtainerState_$27881",
+                          "typeIdentifier": "t_enum$_CrowdtainerState_$27892",
                           "typeString": "enum CrowdtainerState"
                         }
                       ],
@@ -1631,7 +1631,7 @@
                       "referencedDeclaration": 24946,
                       "src": "3790:12:28",
                       "typeDescriptions": {
-                        "typeIdentifier": "t_function_internal_view$_t_enum$_CrowdtainerState_$27881_$returns$__$",
+                        "typeIdentifier": "t_function_internal_view$_t_enum$_CrowdtainerState_$27892_$returns$__$",
                         "typeString": "function (enum CrowdtainerState) view"
                       }
                     },
@@ -1686,7 +1686,7 @@
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
-                    "typeIdentifier": "t_enum$_CrowdtainerState_$27881",
+                    "typeIdentifier": "t_enum$_CrowdtainerState_$27892",
                     "typeString": "enum CrowdtainerState"
                   },
                   "typeName": {
@@ -1699,13 +1699,13 @@
                         "3748:16:28"
                       ],
                       "nodeType": "IdentifierPath",
-                      "referencedDeclaration": 27881,
+                      "referencedDeclaration": 27892,
                       "src": "3748:16:28"
                     },
-                    "referencedDeclaration": 27881,
+                    "referencedDeclaration": 27892,
                     "src": "3748:16:28",
                     "typeDescriptions": {
-                      "typeIdentifier": "t_enum$_CrowdtainerState_$27881",
+                      "typeIdentifier": "t_enum$_CrowdtainerState_$27892",
                       "typeString": "enum CrowdtainerState"
                     }
                   },
@@ -1792,7 +1792,7 @@
                 {
                   "condition": {
                     "commonType": {
-                      "typeIdentifier": "t_enum$_CrowdtainerState_$27881",
+                      "typeIdentifier": "t_enum$_CrowdtainerState_$27892",
                       "typeString": "enum CrowdtainerState"
                     },
                     "id": 24931,
@@ -1808,7 +1808,7 @@
                       "referencedDeclaration": 24827,
                       "src": "4061:16:28",
                       "typeDescriptions": {
-                        "typeIdentifier": "t_enum$_CrowdtainerState_$27881",
+                        "typeIdentifier": "t_enum$_CrowdtainerState_$27892",
                         "typeString": "enum CrowdtainerState"
                       }
                     },
@@ -1822,7 +1822,7 @@
                       "referencedDeclaration": 24926,
                       "src": "4081:13:28",
                       "typeDescriptions": {
-                        "typeIdentifier": "t_enum$_CrowdtainerState_$27881",
+                        "typeIdentifier": "t_enum$_CrowdtainerState_$27892",
                         "typeString": "enum CrowdtainerState"
                       }
                     },
@@ -1846,7 +1846,7 @@
                           "referencedDeclaration": 24827,
                           "src": "4150:16:28",
                           "typeDescriptions": {
-                            "typeIdentifier": "t_enum$_CrowdtainerState_$27881",
+                            "typeIdentifier": "t_enum$_CrowdtainerState_$27892",
                             "typeString": "enum CrowdtainerState"
                           }
                         }
@@ -1854,7 +1854,7 @@
                       "expression": {
                         "argumentTypes": [
                           {
-                            "typeIdentifier": "t_enum$_CrowdtainerState_$27881",
+                            "typeIdentifier": "t_enum$_CrowdtainerState_$27892",
                             "typeString": "enum CrowdtainerState"
                           }
                         ],
@@ -1881,7 +1881,7 @@
                         "referencedDeclaration": 26534,
                         "src": "4115:26:28",
                         "typeDescriptions": {
-                          "typeIdentifier": "t_function_error_pure$_t_enum$_CrowdtainerState_$27881_$returns$__$",
+                          "typeIdentifier": "t_function_error_pure$_t_enum$_CrowdtainerState_$27892_$returns$__$",
                           "typeString": "function (enum CrowdtainerState) pure"
                         }
                       },
@@ -1915,7 +1915,7 @@
                     "arguments": [
                       {
                         "commonType": {
-                          "typeIdentifier": "t_enum$_CrowdtainerState_$27881",
+                          "typeIdentifier": "t_enum$_CrowdtainerState_$27892",
                           "typeString": "enum CrowdtainerState"
                         },
                         "id": 24942,
@@ -1931,7 +1931,7 @@
                           "referencedDeclaration": 24827,
                           "src": "4186:16:28",
                           "typeDescriptions": {
-                            "typeIdentifier": "t_enum$_CrowdtainerState_$27881",
+                            "typeIdentifier": "t_enum$_CrowdtainerState_$27892",
                             "typeString": "enum CrowdtainerState"
                           }
                         },
@@ -1945,7 +1945,7 @@
                           "referencedDeclaration": 24926,
                           "src": "4206:13:28",
                           "typeDescriptions": {
-                            "typeIdentifier": "t_enum$_CrowdtainerState_$27881",
+                            "typeIdentifier": "t_enum$_CrowdtainerState_$27892",
                             "typeString": "enum CrowdtainerState"
                           }
                         },
@@ -2020,7 +2020,7 @@
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
-                    "typeIdentifier": "t_enum$_CrowdtainerState_$27881",
+                    "typeIdentifier": "t_enum$_CrowdtainerState_$27892",
                     "typeString": "enum CrowdtainerState"
                   },
                   "typeName": {
@@ -2033,13 +2033,13 @@
                         "4001:16:28"
                       ],
                       "nodeType": "IdentifierPath",
-                      "referencedDeclaration": 27881,
+                      "referencedDeclaration": 27892,
                       "src": "4001:16:28"
                     },
-                    "referencedDeclaration": 27881,
+                    "referencedDeclaration": 27892,
                     "src": "4001:16:28",
                     "typeDescriptions": {
-                      "typeIdentifier": "t_enum$_CrowdtainerState_$27881",
+                      "typeIdentifier": "t_enum$_CrowdtainerState_$27892",
                       "typeString": "enum CrowdtainerState"
                     }
                   },
@@ -7389,7 +7389,7 @@
                       "referencedDeclaration": 24827,
                       "src": "11917:16:28",
                       "typeDescriptions": {
-                        "typeIdentifier": "t_enum$_CrowdtainerState_$27881",
+                        "typeIdentifier": "t_enum$_CrowdtainerState_$27892",
                         "typeString": "enum CrowdtainerState"
                       }
                     },
@@ -7401,10 +7401,10 @@
                         "name": "CrowdtainerState",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 27881,
+                        "referencedDeclaration": 27892,
                         "src": "11936:16:28",
                         "typeDescriptions": {
-                          "typeIdentifier": "t_type$_t_enum$_CrowdtainerState_$27881_$",
+                          "typeIdentifier": "t_type$_t_enum$_CrowdtainerState_$27892_$",
                           "typeString": "type(enum CrowdtainerState)"
                         }
                       },
@@ -7416,16 +7416,16 @@
                       "memberLocation": "11953:7:28",
                       "memberName": "Funding",
                       "nodeType": "MemberAccess",
-                      "referencedDeclaration": 27878,
+                      "referencedDeclaration": 27889,
                       "src": "11936:24:28",
                       "typeDescriptions": {
-                        "typeIdentifier": "t_enum$_CrowdtainerState_$27881",
+                        "typeIdentifier": "t_enum$_CrowdtainerState_$27892",
                         "typeString": "enum CrowdtainerState"
                       }
                     },
                     "src": "11917:43:28",
                     "typeDescriptions": {
-                      "typeIdentifier": "t_enum$_CrowdtainerState_$27881",
+                      "typeIdentifier": "t_enum$_CrowdtainerState_$27892",
                       "typeString": "enum CrowdtainerState"
                     }
                   },
@@ -7686,10 +7686,10 @@
                       "name": "CrowdtainerState",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
-                      "referencedDeclaration": 27881,
+                      "referencedDeclaration": 27892,
                       "src": "9311:16:28",
                       "typeDescriptions": {
-                        "typeIdentifier": "t_type$_t_enum$_CrowdtainerState_$27881_$",
+                        "typeIdentifier": "t_type$_t_enum$_CrowdtainerState_$27892_$",
                         "typeString": "type(enum CrowdtainerState)"
                       }
                     },
@@ -7701,10 +7701,10 @@
                     "memberLocation": "9328:13:28",
                     "memberName": "Uninitialized",
                     "nodeType": "MemberAccess",
-                    "referencedDeclaration": 27877,
+                    "referencedDeclaration": 27888,
                     "src": "9311:30:28",
                     "typeDescriptions": {
-                      "typeIdentifier": "t_enum$_CrowdtainerState_$27881",
+                      "typeIdentifier": "t_enum$_CrowdtainerState_$27892",
                       "typeString": "enum CrowdtainerState"
                     }
                   }
@@ -7979,6 +7979,9 @@
                 }
               ]
             },
+            "baseFunctions": [
+              27268
+            ],
             "documentation": {
               "id": 25423,
               "nodeType": "StructuredDocumentation",
@@ -8977,7 +8980,7 @@
               ]
             },
             "baseFunctions": [
-              27271
+              27282
             ],
             "documentation": {
               "id": 25444,
@@ -9027,10 +9030,10 @@
                       "name": "CrowdtainerState",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
-                      "referencedDeclaration": 27881,
+                      "referencedDeclaration": 27892,
                       "src": "14214:16:28",
                       "typeDescriptions": {
-                        "typeIdentifier": "t_type$_t_enum$_CrowdtainerState_$27881_$",
+                        "typeIdentifier": "t_type$_t_enum$_CrowdtainerState_$27892_$",
                         "typeString": "type(enum CrowdtainerState)"
                       }
                     },
@@ -9042,10 +9045,10 @@
                     "memberLocation": "14231:7:28",
                     "memberName": "Funding",
                     "nodeType": "MemberAccess",
-                    "referencedDeclaration": 27878,
+                    "referencedDeclaration": 27889,
                     "src": "14214:24:28",
                     "typeDescriptions": {
-                      "typeIdentifier": "t_enum$_CrowdtainerState_$27881",
+                      "typeIdentifier": "t_enum$_CrowdtainerState_$27892",
                       "typeString": "enum CrowdtainerState"
                     }
                   }
@@ -10831,10 +10834,10 @@
                       "name": "CrowdtainerState",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
-                      "referencedDeclaration": 27881,
+                      "referencedDeclaration": 27892,
                       "src": "15776:16:28",
                       "typeDescriptions": {
-                        "typeIdentifier": "t_type$_t_enum$_CrowdtainerState_$27881_$",
+                        "typeIdentifier": "t_type$_t_enum$_CrowdtainerState_$27892_$",
                         "typeString": "type(enum CrowdtainerState)"
                       }
                     },
@@ -10846,10 +10849,10 @@
                     "memberLocation": "15793:7:28",
                     "memberName": "Funding",
                     "nodeType": "MemberAccess",
-                    "referencedDeclaration": 27878,
+                    "referencedDeclaration": 27889,
                     "src": "15776:24:28",
                     "typeDescriptions": {
-                      "typeIdentifier": "t_enum$_CrowdtainerState_$27881",
+                      "typeIdentifier": "t_enum$_CrowdtainerState_$27892",
                       "typeString": "enum CrowdtainerState"
                     }
                   }
@@ -16011,7 +16014,7 @@
               ]
             },
             "baseFunctions": [
-              27276
+              27287
             ],
             "documentation": {
               "id": 25971,
@@ -16061,10 +16064,10 @@
                       "name": "CrowdtainerState",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
-                      "referencedDeclaration": 27881,
+                      "referencedDeclaration": 27892,
                       "src": "21773:16:28",
                       "typeDescriptions": {
-                        "typeIdentifier": "t_type$_t_enum$_CrowdtainerState_$27881_$",
+                        "typeIdentifier": "t_type$_t_enum$_CrowdtainerState_$27892_$",
                         "typeString": "type(enum CrowdtainerState)"
                       }
                     },
@@ -16076,10 +16079,10 @@
                     "memberLocation": "21790:7:28",
                     "memberName": "Funding",
                     "nodeType": "MemberAccess",
-                    "referencedDeclaration": 27878,
+                    "referencedDeclaration": 27889,
                     "src": "21773:24:28",
                     "typeDescriptions": {
-                      "typeIdentifier": "t_enum$_CrowdtainerState_$27881",
+                      "typeIdentifier": "t_enum$_CrowdtainerState_$27892",
                       "typeString": "enum CrowdtainerState"
                     }
                   }
@@ -16423,7 +16426,7 @@
                       "referencedDeclaration": 24827,
                       "src": "23853:16:28",
                       "typeDescriptions": {
-                        "typeIdentifier": "t_enum$_CrowdtainerState_$27881",
+                        "typeIdentifier": "t_enum$_CrowdtainerState_$27892",
                         "typeString": "enum CrowdtainerState"
                       }
                     },
@@ -16435,10 +16438,10 @@
                         "name": "CrowdtainerState",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 27881,
+                        "referencedDeclaration": 27892,
                         "src": "23872:16:28",
                         "typeDescriptions": {
-                          "typeIdentifier": "t_type$_t_enum$_CrowdtainerState_$27881_$",
+                          "typeIdentifier": "t_type$_t_enum$_CrowdtainerState_$27892_$",
                           "typeString": "type(enum CrowdtainerState)"
                         }
                       },
@@ -16450,16 +16453,16 @@
                       "memberLocation": "23889:8:28",
                       "memberName": "Delivery",
                       "nodeType": "MemberAccess",
-                      "referencedDeclaration": 27879,
+                      "referencedDeclaration": 27890,
                       "src": "23872:25:28",
                       "typeDescriptions": {
-                        "typeIdentifier": "t_enum$_CrowdtainerState_$27881",
+                        "typeIdentifier": "t_enum$_CrowdtainerState_$27892",
                         "typeString": "enum CrowdtainerState"
                       }
                     },
                     "src": "23853:44:28",
                     "typeDescriptions": {
-                      "typeIdentifier": "t_enum$_CrowdtainerState_$27881",
+                      "typeIdentifier": "t_enum$_CrowdtainerState_$27892",
                       "typeString": "enum CrowdtainerState"
                     }
                   },
@@ -16734,10 +16737,10 @@
                       "name": "CrowdtainerState",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
-                      "referencedDeclaration": 27881,
+                      "referencedDeclaration": 27892,
                       "src": "23526:16:28",
                       "typeDescriptions": {
-                        "typeIdentifier": "t_type$_t_enum$_CrowdtainerState_$27881_$",
+                        "typeIdentifier": "t_type$_t_enum$_CrowdtainerState_$27892_$",
                         "typeString": "type(enum CrowdtainerState)"
                       }
                     },
@@ -16749,10 +16752,10 @@
                     "memberLocation": "23543:7:28",
                     "memberName": "Funding",
                     "nodeType": "MemberAccess",
-                    "referencedDeclaration": 27878,
+                    "referencedDeclaration": 27889,
                     "src": "23526:24:28",
                     "typeDescriptions": {
-                      "typeIdentifier": "t_enum$_CrowdtainerState_$27881",
+                      "typeIdentifier": "t_enum$_CrowdtainerState_$27892",
                       "typeString": "enum CrowdtainerState"
                     }
                   }
@@ -16832,7 +16835,7 @@
                       "referencedDeclaration": 24827,
                       "src": "24544:16:28",
                       "typeDescriptions": {
-                        "typeIdentifier": "t_enum$_CrowdtainerState_$27881",
+                        "typeIdentifier": "t_enum$_CrowdtainerState_$27892",
                         "typeString": "enum CrowdtainerState"
                       }
                     },
@@ -16844,10 +16847,10 @@
                         "name": "CrowdtainerState",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 27881,
+                        "referencedDeclaration": 27892,
                         "src": "24563:16:28",
                         "typeDescriptions": {
-                          "typeIdentifier": "t_type$_t_enum$_CrowdtainerState_$27881_$",
+                          "typeIdentifier": "t_type$_t_enum$_CrowdtainerState_$27892_$",
                           "typeString": "type(enum CrowdtainerState)"
                         }
                       },
@@ -16859,16 +16862,16 @@
                       "memberLocation": "24580:6:28",
                       "memberName": "Failed",
                       "nodeType": "MemberAccess",
-                      "referencedDeclaration": 27880,
+                      "referencedDeclaration": 27891,
                       "src": "24563:23:28",
                       "typeDescriptions": {
-                        "typeIdentifier": "t_enum$_CrowdtainerState_$27881",
+                        "typeIdentifier": "t_enum$_CrowdtainerState_$27892",
                         "typeString": "enum CrowdtainerState"
                       }
                     },
                     "src": "24544:42:28",
                     "typeDescriptions": {
-                      "typeIdentifier": "t_enum$_CrowdtainerState_$27881",
+                      "typeIdentifier": "t_enum$_CrowdtainerState_$27892",
                       "typeString": "enum CrowdtainerState"
                     }
                   },
@@ -16926,10 +16929,10 @@
                       "name": "CrowdtainerState",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
-                      "referencedDeclaration": 27881,
+                      "referencedDeclaration": 27892,
                       "src": "24483:16:28",
                       "typeDescriptions": {
-                        "typeIdentifier": "t_type$_t_enum$_CrowdtainerState_$27881_$",
+                        "typeIdentifier": "t_type$_t_enum$_CrowdtainerState_$27892_$",
                         "typeString": "type(enum CrowdtainerState)"
                       }
                     },
@@ -16941,10 +16944,10 @@
                     "memberLocation": "24500:7:28",
                     "memberName": "Funding",
                     "nodeType": "MemberAccess",
-                    "referencedDeclaration": 27878,
+                    "referencedDeclaration": 27889,
                     "src": "24483:24:28",
                     "typeDescriptions": {
-                      "typeIdentifier": "t_enum$_CrowdtainerState_$27881",
+                      "typeIdentifier": "t_enum$_CrowdtainerState_$27892",
                       "typeString": "enum CrowdtainerState"
                     }
                   }
@@ -17175,7 +17178,7 @@
                 {
                   "condition": {
                     "commonType": {
-                      "typeIdentifier": "t_enum$_CrowdtainerState_$27881",
+                      "typeIdentifier": "t_enum$_CrowdtainerState_$27892",
                       "typeString": "enum CrowdtainerState"
                     },
                     "id": 26181,
@@ -17191,7 +17194,7 @@
                       "referencedDeclaration": 24827,
                       "src": "24938:16:28",
                       "typeDescriptions": {
-                        "typeIdentifier": "t_enum$_CrowdtainerState_$27881",
+                        "typeIdentifier": "t_enum$_CrowdtainerState_$27892",
                         "typeString": "enum CrowdtainerState"
                       }
                     },
@@ -17203,10 +17206,10 @@
                         "name": "CrowdtainerState",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 27881,
+                        "referencedDeclaration": 27892,
                         "src": "24958:16:28",
                         "typeDescriptions": {
-                          "typeIdentifier": "t_type$_t_enum$_CrowdtainerState_$27881_$",
+                          "typeIdentifier": "t_type$_t_enum$_CrowdtainerState_$27892_$",
                           "typeString": "type(enum CrowdtainerState)"
                         }
                       },
@@ -17218,10 +17221,10 @@
                       "memberLocation": "24975:13:28",
                       "memberName": "Uninitialized",
                       "nodeType": "MemberAccess",
-                      "referencedDeclaration": 27877,
+                      "referencedDeclaration": 27888,
                       "src": "24958:30:28",
                       "typeDescriptions": {
-                        "typeIdentifier": "t_enum$_CrowdtainerState_$27881",
+                        "typeIdentifier": "t_enum$_CrowdtainerState_$27892",
                         "typeString": "enum CrowdtainerState"
                       }
                     },
@@ -17245,7 +17248,7 @@
                           "referencedDeclaration": 24827,
                           "src": "25044:16:28",
                           "typeDescriptions": {
-                            "typeIdentifier": "t_enum$_CrowdtainerState_$27881",
+                            "typeIdentifier": "t_enum$_CrowdtainerState_$27892",
                             "typeString": "enum CrowdtainerState"
                           }
                         }
@@ -17253,7 +17256,7 @@
                       "expression": {
                         "argumentTypes": [
                           {
-                            "typeIdentifier": "t_enum$_CrowdtainerState_$27881",
+                            "typeIdentifier": "t_enum$_CrowdtainerState_$27892",
                             "typeString": "enum CrowdtainerState"
                           }
                         ],
@@ -17280,7 +17283,7 @@
                         "referencedDeclaration": 26534,
                         "src": "25009:26:28",
                         "typeDescriptions": {
-                          "typeIdentifier": "t_function_error_pure$_t_enum$_CrowdtainerState_$27881_$returns$__$",
+                          "typeIdentifier": "t_function_error_pure$_t_enum$_CrowdtainerState_$27892_$returns$__$",
                           "typeString": "function (enum CrowdtainerState) pure"
                         }
                       },
@@ -17312,7 +17315,7 @@
                 {
                   "condition": {
                     "commonType": {
-                      "typeIdentifier": "t_enum$_CrowdtainerState_$27881",
+                      "typeIdentifier": "t_enum$_CrowdtainerState_$27892",
                       "typeString": "enum CrowdtainerState"
                     },
                     "id": 26192,
@@ -17328,7 +17331,7 @@
                       "referencedDeclaration": 24827,
                       "src": "25077:16:28",
                       "typeDescriptions": {
-                        "typeIdentifier": "t_enum$_CrowdtainerState_$27881",
+                        "typeIdentifier": "t_enum$_CrowdtainerState_$27892",
                         "typeString": "enum CrowdtainerState"
                       }
                     },
@@ -17340,10 +17343,10 @@
                         "name": "CrowdtainerState",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 27881,
+                        "referencedDeclaration": 27892,
                         "src": "25097:16:28",
                         "typeDescriptions": {
-                          "typeIdentifier": "t_type$_t_enum$_CrowdtainerState_$27881_$",
+                          "typeIdentifier": "t_type$_t_enum$_CrowdtainerState_$27892_$",
                           "typeString": "type(enum CrowdtainerState)"
                         }
                       },
@@ -17355,10 +17358,10 @@
                       "memberLocation": "25114:8:28",
                       "memberName": "Delivery",
                       "nodeType": "MemberAccess",
-                      "referencedDeclaration": 27879,
+                      "referencedDeclaration": 27890,
                       "src": "25097:25:28",
                       "typeDescriptions": {
-                        "typeIdentifier": "t_enum$_CrowdtainerState_$27881",
+                        "typeIdentifier": "t_enum$_CrowdtainerState_$27892",
                         "typeString": "enum CrowdtainerState"
                       }
                     },
@@ -17382,7 +17385,7 @@
                           "referencedDeclaration": 24827,
                           "src": "25178:16:28",
                           "typeDescriptions": {
-                            "typeIdentifier": "t_enum$_CrowdtainerState_$27881",
+                            "typeIdentifier": "t_enum$_CrowdtainerState_$27892",
                             "typeString": "enum CrowdtainerState"
                           }
                         }
@@ -17390,7 +17393,7 @@
                       "expression": {
                         "argumentTypes": [
                           {
-                            "typeIdentifier": "t_enum$_CrowdtainerState_$27881",
+                            "typeIdentifier": "t_enum$_CrowdtainerState_$27892",
                             "typeString": "enum CrowdtainerState"
                           }
                         ],
@@ -17417,7 +17420,7 @@
                         "referencedDeclaration": 26534,
                         "src": "25143:26:28",
                         "typeDescriptions": {
-                          "typeIdentifier": "t_function_error_pure$_t_enum$_CrowdtainerState_$27881_$returns$__$",
+                          "typeIdentifier": "t_function_error_pure$_t_enum$_CrowdtainerState_$27892_$returns$__$",
                           "typeString": "function (enum CrowdtainerState) pure"
                         }
                       },
@@ -17628,7 +17631,7 @@
                         "referencedDeclaration": 24827,
                         "src": "25474:16:28",
                         "typeDescriptions": {
-                          "typeIdentifier": "t_enum$_CrowdtainerState_$27881",
+                          "typeIdentifier": "t_enum$_CrowdtainerState_$27892",
                           "typeString": "enum CrowdtainerState"
                         }
                       },
@@ -17640,10 +17643,10 @@
                           "name": "CrowdtainerState",
                           "nodeType": "Identifier",
                           "overloadedDeclarations": [],
-                          "referencedDeclaration": 27881,
+                          "referencedDeclaration": 27892,
                           "src": "25493:16:28",
                           "typeDescriptions": {
-                            "typeIdentifier": "t_type$_t_enum$_CrowdtainerState_$27881_$",
+                            "typeIdentifier": "t_type$_t_enum$_CrowdtainerState_$27892_$",
                             "typeString": "type(enum CrowdtainerState)"
                           }
                         },
@@ -17655,16 +17658,16 @@
                         "memberLocation": "25510:6:28",
                         "memberName": "Failed",
                         "nodeType": "MemberAccess",
-                        "referencedDeclaration": 27880,
+                        "referencedDeclaration": 27891,
                         "src": "25493:23:28",
                         "typeDescriptions": {
-                          "typeIdentifier": "t_enum$_CrowdtainerState_$27881",
+                          "typeIdentifier": "t_enum$_CrowdtainerState_$27892",
                           "typeString": "enum CrowdtainerState"
                         }
                       },
                       "src": "25474:42:28",
                       "typeDescriptions": {
-                        "typeIdentifier": "t_enum$_CrowdtainerState_$27881",
+                        "typeIdentifier": "t_enum$_CrowdtainerState_$27892",
                         "typeString": "enum CrowdtainerState"
                       }
                     },
@@ -17676,7 +17679,7 @@
                 {
                   "condition": {
                     "commonType": {
-                      "typeIdentifier": "t_enum$_CrowdtainerState_$27881",
+                      "typeIdentifier": "t_enum$_CrowdtainerState_$27892",
                       "typeString": "enum CrowdtainerState"
                     },
                     "id": 26220,
@@ -17692,7 +17695,7 @@
                       "referencedDeclaration": 24827,
                       "src": "25531:16:28",
                       "typeDescriptions": {
-                        "typeIdentifier": "t_enum$_CrowdtainerState_$27881",
+                        "typeIdentifier": "t_enum$_CrowdtainerState_$27892",
                         "typeString": "enum CrowdtainerState"
                       }
                     },
@@ -17704,10 +17707,10 @@
                         "name": "CrowdtainerState",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 27881,
+                        "referencedDeclaration": 27892,
                         "src": "25551:16:28",
                         "typeDescriptions": {
-                          "typeIdentifier": "t_type$_t_enum$_CrowdtainerState_$27881_$",
+                          "typeIdentifier": "t_type$_t_enum$_CrowdtainerState_$27892_$",
                           "typeString": "type(enum CrowdtainerState)"
                         }
                       },
@@ -17719,10 +17722,10 @@
                       "memberLocation": "25568:6:28",
                       "memberName": "Failed",
                       "nodeType": "MemberAccess",
-                      "referencedDeclaration": 27880,
+                      "referencedDeclaration": 27891,
                       "src": "25551:23:28",
                       "typeDescriptions": {
-                        "typeIdentifier": "t_enum$_CrowdtainerState_$27881",
+                        "typeIdentifier": "t_enum$_CrowdtainerState_$27892",
                         "typeString": "enum CrowdtainerState"
                       }
                     },
@@ -19056,10 +19059,10 @@
                       "name": "CrowdtainerState",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
-                      "referencedDeclaration": 27881,
+                      "referencedDeclaration": 27892,
                       "src": "26469:16:28",
                       "typeDescriptions": {
-                        "typeIdentifier": "t_type$_t_enum$_CrowdtainerState_$27881_$",
+                        "typeIdentifier": "t_type$_t_enum$_CrowdtainerState_$27892_$",
                         "typeString": "type(enum CrowdtainerState)"
                       }
                     },
@@ -19071,10 +19074,10 @@
                     "memberLocation": "26486:8:28",
                     "memberName": "Delivery",
                     "nodeType": "MemberAccess",
-                    "referencedDeclaration": 27879,
+                    "referencedDeclaration": 27890,
                     "src": "26469:25:28",
                     "typeDescriptions": {
-                      "typeIdentifier": "t_enum$_CrowdtainerState_$27881",
+                      "typeIdentifier": "t_enum$_CrowdtainerState_$27892",
                       "typeString": "enum CrowdtainerState"
                     }
                   }
@@ -19126,7 +19129,7 @@
                 {
                   "condition": {
                     "commonType": {
-                      "typeIdentifier": "t_enum$_CrowdtainerState_$27881",
+                      "typeIdentifier": "t_enum$_CrowdtainerState_$27892",
                       "typeString": "enum CrowdtainerState"
                     },
                     "id": 26336,
@@ -19142,7 +19145,7 @@
                       "referencedDeclaration": 24827,
                       "src": "26972:16:28",
                       "typeDescriptions": {
-                        "typeIdentifier": "t_enum$_CrowdtainerState_$27881",
+                        "typeIdentifier": "t_enum$_CrowdtainerState_$27892",
                         "typeString": "enum CrowdtainerState"
                       }
                     },
@@ -19154,10 +19157,10 @@
                         "name": "CrowdtainerState",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 27881,
+                        "referencedDeclaration": 27892,
                         "src": "26992:16:28",
                         "typeDescriptions": {
-                          "typeIdentifier": "t_type$_t_enum$_CrowdtainerState_$27881_$",
+                          "typeIdentifier": "t_type$_t_enum$_CrowdtainerState_$27892_$",
                           "typeString": "type(enum CrowdtainerState)"
                         }
                       },
@@ -19169,10 +19172,10 @@
                       "memberLocation": "27009:13:28",
                       "memberName": "Uninitialized",
                       "nodeType": "MemberAccess",
-                      "referencedDeclaration": 27877,
+                      "referencedDeclaration": 27888,
                       "src": "26992:30:28",
                       "typeDescriptions": {
-                        "typeIdentifier": "t_enum$_CrowdtainerState_$27881",
+                        "typeIdentifier": "t_enum$_CrowdtainerState_$27892",
                         "typeString": "enum CrowdtainerState"
                       }
                     },
@@ -19699,7 +19702,7 @@
                 "849:12:28"
               ],
               "nodeType": "IdentifierPath",
-              "referencedDeclaration": 27277,
+              "referencedDeclaration": 27288,
               "src": "849:12:28"
             },
             "id": 24813,
@@ -19751,7 +19754,7 @@
           26374,
           21785,
           21825,
-          27277
+          27288
         ],
         "name": "Crowdtainer",
         "nameLocation": "834:11:28",
