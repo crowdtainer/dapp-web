@@ -16,22 +16,22 @@
 ### As an observer (anyone, including page loaded without any wallet connected):
 
 - I'd like to be able to get basic information of a crowdtainer project deployed, such as:
-    - ◻️ See a list of active crowdtainer projects
+    - ✅ See a list of active crowdtainer projects
         - Can be a static list/item for MVP.
-    - ◻️ All information used during deployment (opening and closing time, etc).
+    - ✅ All information used during deployment (opening and closing time, etc).
         - Use `ICrowdtainer.CampaignData`.
-    - ◻️ Check the project status (Funding, Expired, Delivery, Finalized).
+    - ✅ Check the project status (Funding, Expired, Delivery, Finalized).
         - Use `Crowdtainer.crowdtainerState()`.
-    - ◻️ If active, percentage of goal so far (progress bar).
+    - ✅ If active, percentage of goal so far (progress bar).
         - Use `Crowdtainer.totalValueRaised()` and `CampaignData.targetMinimum().` to calculate percentage.
     - ◻️ IPFS/Swarm hash which points to the legal sale contract agreement documents.
 
 ### As a buyer/participant
 
 - ◻️ Once I open one of the listed projects (from screen of observer user stories above), I'd like to see the product list and prices, so that I can specify my order and sign a transaction to participate in the group buying.
-    - The product name can be read from `Vouchers721.productDescription[crowdtainerId]()`.
-    - Prices can be read from `Crowdtainer.unitPricePerType()`.
-    - To join the project call `ICrowdtainer.join()`.
+    - ✅ The product name can be read from `Vouchers721.productDescription[crowdtainerId]()`.
+    - ✅ Prices can be read from `Crowdtainer.unitPricePerType()`.
+    - ◻️ WIP -> To join the project call `ICrowdtainer.join()`.
 
 - ◻️ After joining, I'd like to see my own purchase/voucher details, as a SVG image.
     - Use `Vouchers721.tokenUri()` to get the generated image.
@@ -41,12 +41,13 @@ Not available in first version:
 - ◻️ When joining, I'd like to additionally specify:
     - ◻️ whether I'd like to be eligible to share referral code so that I can get rewards for my friend's purchases (check-box).
     - ◻️ a friend's referral code, so that I can get a discount on my own purchase (address/ENS text input field).
+
 #### Dashboard view (viewable components only if wallet is connected)
 
 - ◻️ I’d like an interface/button to view and withdrawl my deposits in a running project, so that I can quit if no longer interested, or if the crowdfunding failed.
     - This would call `leave()` smart contract method.
 
-- ◻️ I'd like to view if the project's goal was reached, so that I can decide to either withdrawl my funds or wait for product delivery.
+- ✅ I'd like to view if the project's goal was reached, so that I can decide to either withdrawl my funds or wait for product delivery.
     - Use `Crowdtainer.crowdtainerState()`.
 
 - ◻️ I'd like an interface/button to claim refunds if the sale was not successful.
@@ -63,6 +64,7 @@ Not present in first version (rewards functionality):
 
 - ◻️ I'd like an interface to view how much rewards I acquired due sharing of personal referral code, if the project succeeds.
     - Use `Crowdtainer.accumulatedRewardsOf()` method.
+
 ### As a service provider (lower priority for MVP)
 
 - ◻️ I must be able to create a project by specifying the following variables so that I can start a crowdtainer for my product or service:

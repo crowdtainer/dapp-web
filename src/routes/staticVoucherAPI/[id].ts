@@ -21,10 +21,10 @@ const settings = {
    apiKey: import.meta.env.VITE_RPC_API_KEY,
    network: import.meta.env.VITE_RPC_BACKEND
  };
-const alchemy = new Alchemy(settings);
-const provider =await alchemy.config.getProvider();
+// const alchemy = new Alchemy(settings);
+// const provider =await alchemy.config.getProvider();
 
-// const provider = new ethers.providers.JsonRpcBatchProvider(import.meta.env.RPC_BACKEND);
+const provider = new ethers.providers.JsonRpcBatchProvider(import.meta.env.RPC_BACKEND);
 
 async function fetchData(crowdtainerId: BigNumber): Promise<Result<CrowdtainerStaticModel, Error>> {
    try {

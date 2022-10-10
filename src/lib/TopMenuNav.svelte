@@ -159,7 +159,6 @@
 						>
 							{#if $connected}
 								<a
-									href="#"
 									on:click={async () => {
 										await disconnect();
 										profileMenuOpen = false;
@@ -171,7 +170,6 @@
 								>
 							{:else}
 								<a
-									href="#"
 									on:click={async () => {
 										await connect(WalletType.WalletConnect);
 										profileMenuOpen = false;
@@ -183,7 +181,6 @@
 								>
 								{#if import.meta.env.MODE === "development"}
 								<a
-									href="#"
 									on:click={async () => {
 										await connect(WalletType.Injected);
 										profileMenuOpen = false;

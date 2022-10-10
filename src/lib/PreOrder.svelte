@@ -459,8 +459,12 @@
 							if (signer) {
 								console.log('Signer exists.');
 							}
-							joinProject(signer, vouchers721Address, crowdtainerAddress, $selection);
-							preOrderStep++;
+							let joinSuccess = await joinProject(signer, vouchers721Address, crowdtainerAddress, $selection);
+							if(joinSuccess) {
+								preOrderStep++;
+							} else {
+								// TODO
+							}
 						} else {
 							console.log('crowdtainerAddress || vouchers721Address missing!');
 						}

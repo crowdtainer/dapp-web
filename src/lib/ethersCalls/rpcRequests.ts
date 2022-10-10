@@ -1,6 +1,6 @@
 import { Vouchers721__factory } from '../../routes/typechain/factories/Vouchers721__factory';
 import { Crowdtainer__factory } from '../../routes/typechain/factories/Crowdtainer.sol/Crowdtainer__factory';
-import { IERC721Enumerable__factory } from '../../routes/typechain/factories/IERC721Enumerable__factory';
+// import { IERC721Enumerable__factory } from '../../routes/typechain/factories/IERC721Enumerable__factory';
 import { BigNumber, ethers } from 'ethers';
 import { IERC20__factory } from '../../routes/typechain/factories/IERC20__factory';
 
@@ -28,44 +28,51 @@ export async function joinProject(provider: ethers.Signer | undefined,
     ];
 
     try {
-        // TODO: Continue here; Check permit value, request permit if needed, call join()
+        // TODO: Continue here;
+        // - Split this function into smaller parts;
+        // - Adapt frontend to react to smart contract state updates:
+        //      - ERC20 Approval status.
+        //      - Join button enabled when approval is granted.
+        //      - Frontend should hide "add to pre-order button" if user already joined.
+        //      - Frontend should show button to direct user to wallet tab when already joined.
         const erc20Address = await crowdtainerContract.token();
         const erc20Contract = IERC20__factory.connect(erc20Address, provider);
 
         const signerAddress = await provider.getAddress();
         
-        let totalCost = 0;
+        let totalCost = BigNumber.from(0) ;
         for (let index = 0; index < 4; index++) {
-            totalCost += (await crowdtainerContract.unitPricePerType(index)).toNumber() * arrayOfBigNumbers[index].toNumber();
+            totalCost = totalCost.add((await crowdtainerContract.unitPricePerType(index)).mul(arrayOfBigNumbers[index]));
         }
-        
-        let balance = (await erc20Contract.balanceOf(signerAddress)).toNumber();
+
+        let balance = (await erc20Contract.balanceOf(signerAddress));
         console.log(`Current wallet balance: ${balance}`);
-        
+
         if (balance < totalCost) {
             console.log(`Not enough funds. Required: ${totalCost}, available: ${balance}`);
             return false;
         }
 
-        let currentAllowance = (await erc20Contract.allowance(signerAddress, crowdtainerAddress)).toNumber();
+        let currentAllowance = (await erc20Contract.allowance(signerAddress, crowdtainerAddress));
         console.log(`permit Value: ${currentAllowance}`);
 
+        let approvalTx = 0;
         if (currentAllowance < totalCost) {
             console.log(`Not enough spend allowance. Required: ${totalCost}, current: ${currentAllowance}.`);
             console.log("Requesting permit..");
-            // await erc20Contract.approve(crowdtainerAddress, totalCost);
+            await erc20Contract.approve(crowdtainerAddress, totalCost);
         }
-        await erc20Contract.approve(crowdtainerAddress, totalCost * 10^3);
 
-        currentAllowance = (await erc20Contract.allowance(signerAddress, crowdtainerAddress)).toNumber();
+        currentAllowance = await erc20Contract.allowance(signerAddress, crowdtainerAddress);
 
         if (currentAllowance < totalCost) {
             console.log("Unable to request permit.");
             return false;
         }
 
-        const result = await vouchers721Contract['join(address,uint256[4])'](crowdtainerAddress, arrayOfBigNumbers, { gasLimit: 9999999999 });
-        console.log(`Result: ${result}`);
+        console.log("Going to call join..");
+        const result = await vouchers721Contract['join(address,uint256[4])'](crowdtainerAddress, arrayOfBigNumbers);
+        console.log(`Result: ${result.toString()}`);
 
         // const abi = ["function join(address _crowdtainer, uint256[4] _quantities) external returns (uint256)"];
         // const contract = new ethers.Contract(vouchers721Address, abi, provider);
