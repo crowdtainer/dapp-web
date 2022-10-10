@@ -106,7 +106,7 @@ npm run preview
     - ◻️ E-mail / code verification.
     - ◻️ Server checks if code + Terms & Conditions signature are valid.
 
-- ◻️ Button to effectively 'join' the project.
+- ◻️ WIP - Button to effectively 'join' the project.
     - To join the project call `ICrowdtainer.join()`.
 
 - ◻️ Button to 'leave' the project.
