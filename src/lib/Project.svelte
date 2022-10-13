@@ -6,7 +6,7 @@
 
 	import PreOrder from '$lib/PreOrder.svelte';
 
-	import { initializeStore, campaignStores } from '$lib/campaignStore';
+	import { initializeStore as initializeCampaignStores, campaignStores } from '$lib/campaignStore';
 	import { joinSelection } from '$lib/userStore';
 
 	import TimeLeft from './TimeLeft.svelte';
@@ -27,6 +27,7 @@
 		loadingString,
 		ProjectStatusUI
 	} from '$lib/Converters/CrowdtainerData';
+	import type { UserStoreModel } from './Model/UserStoreModel';
 
 	export let vouchers721Address: string;
 	export let crowdtainerId: number;
@@ -53,11 +54,12 @@
 		$joinSelection = $joinSelection;
 		// Dynamic data
 		if (campaignDynamicData == undefined) {
-			campaignDynamicData = initializeStore(crowdtainerId);
+			campaignDynamicData = initializeCampaignStores(crowdtainerId);
 		} else {
 			campaignDynamicData = campaignStores.get(crowdtainerId);
 		}
 		if (campaignStaticUI) updateCurrentSelection(0, campaignStaticUI.prices[0]);
+
 	});
 
 	function setRaisedAmount() {

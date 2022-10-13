@@ -16,7 +16,7 @@ export const shortenedAccount = derived(walletState, $walletState => {
 });
 
 // 10: Optimism; 31337: hardhat local node; 5: Ethereum Goerli; 420: Optimism Goerli
-let supportedNetworks: number[] = [420, 31337];
+let supportedNetworks: number[] = [420,5, 31337];
 const RPC_BACKEND: string = import.meta.env.VITE_WALLET_CONNECT_RPC;
 
 interface Window {

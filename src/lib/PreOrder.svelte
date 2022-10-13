@@ -13,13 +13,15 @@
 
 	import type { UIFields } from './Converters/CrowdtainerData';
 	import Quantity from '$lib/Quantity.svelte';
-	import { joinSelection } from '$lib/userStore';
 	import { derived, type Readable } from 'svelte/store';
 	import ProductQuantity from './ProductQuantity.svelte';
 
+	import { initializeStore, joinSelection } from '$lib/userStore';
+
+	import type { IERC20 } from "src/routes/typechain/IERC20";
+
 	// node rpc calls
 	import { BigNumber } from 'ethers';
-	import { joinProject } from '$lib/ethersCalls/rpcRequests';
 
 	// API
 	import {
@@ -32,7 +34,7 @@
 	import { signTermsAndConditions } from './Model/SignTerms';
 
 	// Wallet management
-	import { getSigner, wcProvider } from '$lib/wallet';
+	import { getAccountAddress, getSigner, wcProvider } from '$lib/wallet';
 	import {
 		walletState,
 		accountAddress,
@@ -45,6 +47,8 @@
 	} from '$lib/wallet';
 	import { WalletType } from '$lib/walletStorage';
 	import { validEmail } from './Validation/utils';
+	import type { UserStoreModel } from './Model/UserStoreModel';
+	import { joinProject, requestAllowance } from './ethersCalls/rpcRequests';
 
 	// User product selection
 	$: productListLength = campaignStaticUI ? campaignStaticUI?.descriptions.length : 0;
@@ -67,6 +71,8 @@
 		FinalConfirmation,
 		ThankYouMessage
 	}
+
+	let userStore: Readable<UserStoreModel> | undefined;
 
 	let preOrderStep = JoinStep.FinalConfirmation;
 	let alreadyJoined = false;
@@ -112,12 +118,40 @@
 		return totalSum;
 	});
 
+	$: {
+		console.log(`erc20Balance is: ${$userStore?.erc20Balance}`);
+	}
+	$: {
+		console.log(`erc20Allowance is: ${$userStore?.erc20Allowance}`);
+	}
+
+	// UserStore
+	$: enoughFunds =
+		$userStore?.erc20Balance !== undefined && $userStore?.erc20Balance.lt(BigNumber.from($totalSum))
+			? false
+			: true;
+	$: enoughAllowance =
+		$userStore?.erc20Allowance !== undefined && campaignStaticUI !== undefined &&
+		$userStore?.erc20Allowance.lt(BigNumber.from($totalSum).mul(campaignStaticUI.tokenDecimals))
+			? false
+			: true;
+
 	onMount(async () => {
 		$joinSelection = $joinSelection;
 
 		if (connected) {
 			// TODO: Check if this wallet already joined, if yes: preOrderStep = 3;
 		}
+
+		if (crowdtainerAddress === undefined) {
+			console.log('Error: crowdtainerAddress not defined.');
+			return;
+		}
+
+		console.log('WEIRD');
+
+		userStore = initializeStore(crowdtainerId, crowdtainerAddress);
+		console.log('Wat???');
 	});
 </script>
 
@@ -448,32 +482,106 @@
 				</Quantity>
 			{/if}
 
-			<div class="flex justify-center">
-				<button
-					type="button"
-					class="bg-sky-600 text-white hover:bg-sky-500 hover:shadow-lg px-16 mt-6 py-4 font-medium text-sm leading-tight uppercase rounded-xl shadow-md  focus:shadow-lg focus:outline-none focus:ring-0 active:shadow-lg"
-					on:click={async () => {
-						// Finally make the call to smart contract's join() method.
-						if (crowdtainerAddress && vouchers721Address) {
-							let signer = getSigner();
-							if (signer) {
-								console.log('Signer exists.');
-							}
-							let joinSuccess = await joinProject(signer, vouchers721Address, crowdtainerAddress, $selection);
-							if(joinSuccess) {
-								preOrderStep++;
-							} else {
-								// TODO
-							}
-						} else {
-							console.log('crowdtainerAddress || vouchers721Address missing!');
-						}
-					}}
-				>
-					Confirm & Join
-				</button>
-			</div>
+			{#if $connected}
+				<div class="flex justify-center">
+					<div class="max-w-xs">
+						<div class="grid  grid-flow-col auto-cols-1">
+							{#if enoughFunds}
+								✅ Enough funds.
+							{:else}
+								⚠ Not enough funds. Please top up your wallet.
+							{/if}
+						</div>
+						<div class="grid  grid-flow-col auto-cols-1">
+							{#if enoughAllowance}
+								✅ Enough spend allowance.
+							{:else}
+								⚠ Not enough spend allowance.
+							{/if}
+						</div>
 
+						{#if enoughFunds && enoughAllowance}
+							<button
+								type="button"
+								class="bg-sky-600 text-white hover:bg-sky-500 hover:shadow-lg px-16 mt-6 py-4 font-medium text-sm leading-tight uppercase rounded-xl shadow-md  focus:shadow-lg focus:outline-none focus:ring-0 active:shadow-lg"
+								on:click={async () => {
+									// Finally make the call to smart contract's join() method.
+									if (crowdtainerAddress && vouchers721Address) {
+										if (campaignStaticUI === undefined) {
+											console.log('campaignStaticUI not fully loaded');
+											return;
+										}
+
+										let totalCost = BigNumber.from($totalSum).mul(campaignStaticUI.tokenDecimals);
+
+										let joinSuccess = await joinProject(
+											getSigner(),
+											vouchers721Address,
+											crowdtainerAddress,
+											$selection
+										);
+										if (joinSuccess) {
+											preOrderStep++;
+										} else {
+											// TODO
+											console.log("ERROR!");
+										}
+									} else {
+										console.log('crowdtainerAddress || vouchers721Address missing!');
+									}
+								}}
+							>
+								Confirm & Join
+							</button>
+						{:else if enoughFunds && !enoughAllowance}
+							<button
+								type="button"
+								class="bg-sky-600 text-white hover:bg-sky-500 hover:shadow-lg px-16 mt-6 py-4 font-medium text-sm leading-tight uppercase rounded-xl shadow-md  focus:shadow-lg focus:outline-none focus:ring-0 active:shadow-lg"
+								on:click={async () => {
+									let erc20Contract = $userStore?.erc20Contract;
+									let accountAddress = await getAccountAddress();
+									if(erc20Contract === undefined || accountAddress === undefined || crowdtainerAddress === undefined) {
+										// TODO
+										return;
+									}
+
+									// let totalCost = BigNumber.from($totalSum).mul(campaignStaticUI.tokenDecimals);
+
+									let allowance = await requestAllowance(String(accountAddress), erc20Contract, crowdtainerAddress, BigNumber.from($totalSum));
+									
+								}}
+							>
+								Request allowance
+							</button>
+						{:else}
+							<button
+								type="button"
+								disabled={true}
+								class="btn btn-outline w-42 mt-6 py-4"
+								on:click={async () => {}}
+							>
+								Confirm & Join
+							</button>
+						{/if}
+					</div>
+				</div>
+			{:else}
+				<p class="text-center mx-2 my-2">
+					Please connect your wallet in order to join the project.
+				</p>
+				<br />
+
+				<div class="flex justify-center ">
+					<button
+						class="btn btn-outline"
+						on:click={() => {
+							connect(WalletType.WalletConnect);
+						}}
+					>
+						Connect Wallet
+					</button>
+				</div>
+			{/if}
 			<div class="flex justify-center py-12">
 				<button
 					class="btn btn-outline"
@@ -484,7 +592,7 @@
 			</div>
 		{:else if preOrderStep === JoinStep.ThankYouMessage}
 			<p class="text-md text-xl text-center">Thank you for joining this project!</p>
-			<p class="text-md text-md text-center mt-2">
+			<p class="text-md text-md text-center mt-6 mb-6">
 				When the minimum funding is reached, you will be able to enter your delivery address here.
 			</p>
 		{/if}
