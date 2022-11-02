@@ -67,7 +67,11 @@ function createWalletStore() {
                 : ConnectionState.ConnectedToUnsupportedNetwork;
             if (connected === ConnectionState.Connected) {
                 dispatchMessage("Network connected.", MessageType.Success);
-            } else {
+            } else if (chainId == 1337) {
+                dispatchMessage(`For development / local node, please configure your wallet to chain ID 31337.`, MessageType.Info);                
+                dispatchMessage(`Wallet configured with unsupported network: ` + chainId + `.`, MessageType.Warning);                
+            }
+            else {
                 dispatchMessage(`Wallet configured with unsupported network: ` + chainId + `.`, MessageType.Warning);
             }
             wallet.connectionState = connected;

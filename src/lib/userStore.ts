@@ -14,10 +14,10 @@ export const joinSelection = writable(new Map<number, number[]>());
 // Data with user balances and allowance per project
 export let userStores = new Map<number, Readable<UserStoreModel>>;
 
-const fetchInterval: number = 5000;
+const fetchInterval: number = 6000;
 
 let defaultData: UserStoreModel = {
-    erc20Address: undefined,
+    erc20Contract: undefined,
     erc20Balance: undefined,
     erc20Allowance: undefined
 }
@@ -38,9 +38,9 @@ async function fetchUserData(campaignId: number, crowdtainerAddress: string): Pr
     let erc20Balance = await erc20Contract.unwrap().balanceOf(signerAddress);
     let erc20Allowance = await erc20Contract.unwrap().allowance(signerAddress, crowdtainerAddress)
 
-    // console.log(`Fetched data. Balance: ${erc20Balance}; Allowance: ${erc20Allowance}`);
+    console.log(`Fetched data. Balance: ${erc20Balance}; Allowance: ${erc20Allowance}, for ${signerAddress}`);
 
-    return Ok({ erc20Address: erc20Contract.unwrap().address, erc20Balance: erc20Balance, erc20Allowance: erc20Allowance });
+    return Ok({ erc20Contract: erc20Contract.unwrap(), erc20Balance: erc20Balance, erc20Allowance: erc20Allowance });
 }
 
 export const initializeStore = (campaignId: number, crowdtainerAddress: string): Readable<UserStoreModel> | undefined => {

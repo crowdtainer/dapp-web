@@ -1,8 +1,8 @@
 <script lang="ts">
 	export let campaignStaticUI: UIFields | undefined;
 	export let crowdtainerId: number;
-	export let crowdtainerAddress: string | undefined;
 	export let vouchers721Address: string | undefined;
+	export let crowdtainerAddress: string | undefined;
 
 	import { onMount } from 'svelte';
 	import { slide } from 'svelte/transition';
@@ -119,10 +119,10 @@
 	});
 
 	$: {
-		console.log(`erc20Balance is: ${$userStore?.erc20Balance}`);
+		console.log(`erc20 balance is: ${$userStore?.erc20Balance}`);
 	}
 	$: {
-		console.log(`erc20Allowance is: ${$userStore?.erc20Allowance}`);
+		console.log(`erc20 allowance is: ${$userStore?.erc20Allowance}`);
 	}
 
 	// UserStore
@@ -148,10 +148,7 @@
 			return;
 		}
 
-		console.log('WEIRD');
-
 		userStore = initializeStore(crowdtainerId, crowdtainerAddress);
-		console.log('Wat???');
 	});
 </script>
 

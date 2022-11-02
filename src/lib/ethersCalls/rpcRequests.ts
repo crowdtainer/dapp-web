@@ -99,8 +99,8 @@ export async function requestAllowance(signerAddress: string,
 }
 
 export async function joinProject(provider: ethers.Signer | undefined,
-    crowdtainerAddress: string,
     vouchers721Address: string,
+    crowdtainerAddress: string,
     quantities: number[]): Promise<Result<string, string>> {
 
     if (!provider) {
@@ -117,8 +117,12 @@ export async function joinProject(provider: ethers.Signer | undefined,
             BigNumber.from(quantities[3])
         ];
 
-        const result = await vouchers721Contract['join(address,uint256[4])'](crowdtainerAddress, arrayOfBigNumbers);
-        console.log(`Result: ${result.toString()}`);
+        console.log("calling it..");
+        const result = await vouchers721Contract['join(address,uint256[4])'](vouchers721Address, arrayOfBigNumbers);
+        result.wait(2);
+        console.log(`Confirmations: ${result.confirmations}; hash: ${result.hash}`);
+
+        console.log(`Result: ${result}`);
 
         return Ok("Success!");
 
