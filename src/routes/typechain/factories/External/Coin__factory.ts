@@ -5,12 +5,9 @@ import {
   Signer,
   utils,
   Contract,
-  ContractFactory,
+  ContractFactory
 } from "ethers";
-import type {
-  BigNumberish,
-  Overrides
-} from "ethers";
+import type { BigNumberish, Overrides } from "ethers";
 import type { Provider, TransactionRequest } from "@ethersproject/providers";
 import type { PromiseOrValue } from "../../common";
 import type { Coin, CoinInterface } from "../../External/Coin";

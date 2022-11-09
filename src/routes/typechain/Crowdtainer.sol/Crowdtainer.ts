@@ -79,6 +79,7 @@ export interface CrowdtainerInterface extends utils.Interface {
     "accumulatedRewardsOf(address)": FunctionFragment;
     "claimFunds()": FunctionFragment;
     "claimRewards()": FunctionFragment;
+    "costForWallet(address)": FunctionFragment;
     "crowdtainerState()": FunctionFragment;
     "discountForUser(address)": FunctionFragment;
     "expireTime()": FunctionFragment;
@@ -116,6 +117,7 @@ export interface CrowdtainerInterface extends utils.Interface {
       | "accumulatedRewardsOf"
       | "claimFunds"
       | "claimRewards"
+      | "costForWallet"
       | "crowdtainerState"
       | "discountForUser"
       | "expireTime"
@@ -165,6 +167,10 @@ export interface CrowdtainerInterface extends utils.Interface {
   encodeFunctionData(
     functionFragment: "claimRewards",
     values?: undefined
+  ): string;
+  encodeFunctionData(
+    functionFragment: "costForWallet",
+    values: [PromiseOrValue<string>]
   ): string;
   encodeFunctionData(
     functionFragment: "crowdtainerState",
@@ -300,6 +306,10 @@ export interface CrowdtainerInterface extends utils.Interface {
   decodeFunctionResult(functionFragment: "claimFunds", data: BytesLike): Result;
   decodeFunctionResult(
     functionFragment: "claimRewards",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "costForWallet",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
@@ -586,6 +596,11 @@ export interface Crowdtainer extends BaseContract {
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<ContractTransaction>;
 
+    costForWallet(
+      arg0: PromiseOrValue<string>,
+      overrides?: CallOverrides
+    ): Promise<[BigNumber]>;
+
     crowdtainerState(overrides?: CallOverrides): Promise<[number]>;
 
     discountForUser(
@@ -717,6 +732,11 @@ export interface Crowdtainer extends BaseContract {
     overrides?: Overrides & { from?: PromiseOrValue<string> }
   ): Promise<ContractTransaction>;
 
+  costForWallet(
+    arg0: PromiseOrValue<string>,
+    overrides?: CallOverrides
+  ): Promise<BigNumber>;
+
   crowdtainerState(overrides?: CallOverrides): Promise<number>;
 
   discountForUser(
@@ -841,6 +861,11 @@ export interface Crowdtainer extends BaseContract {
     claimFunds(overrides?: CallOverrides): Promise<void>;
 
     claimRewards(overrides?: CallOverrides): Promise<void>;
+
+    costForWallet(
+      arg0: PromiseOrValue<string>,
+      overrides?: CallOverrides
+    ): Promise<BigNumber>;
 
     crowdtainerState(overrides?: CallOverrides): Promise<number>;
 
@@ -1080,6 +1105,11 @@ export interface Crowdtainer extends BaseContract {
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<BigNumber>;
 
+    costForWallet(
+      arg0: PromiseOrValue<string>,
+      overrides?: CallOverrides
+    ): Promise<BigNumber>;
+
     crowdtainerState(overrides?: CallOverrides): Promise<BigNumber>;
 
     discountForUser(
@@ -1212,6 +1242,11 @@ export interface Crowdtainer extends BaseContract {
 
     claimRewards(
       overrides?: Overrides & { from?: PromiseOrValue<string> }
+    ): Promise<PopulatedTransaction>;
+
+    costForWallet(
+      arg0: PromiseOrValue<string>,
+      overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
 
     crowdtainerState(overrides?: CallOverrides): Promise<PopulatedTransaction>;

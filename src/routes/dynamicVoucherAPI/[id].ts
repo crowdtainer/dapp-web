@@ -23,7 +23,7 @@ const settings = {
 // const alchemy = new Alchemy(settings);
 // const provider =await alchemy.config.getProvider();
 
-const provider = new ethers.providers.JsonRpcProvider(import.meta.env.RPC_BACKEND);
+const provider = new ethers.providers.JsonRpcProvider(import.meta.env.VITE_RPC_BACKEND);
 
 async function fetchData(crowdtainerId: BigNumber): Promise<Result<CrowdtainerDynamicModel, Error>> {
    try {

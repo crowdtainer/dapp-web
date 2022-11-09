@@ -10,8 +10,8 @@
 
 	let moneyFormatter = new Intl.NumberFormat('en-GB', {
 		style: 'decimal',
-		minimumFractionDigits: 0,
-		maximumFractionDigits: 0
+		minimumFractionDigits: 1,
+		maximumFractionDigits: 1
 	});
 
 	let tweeningDuration = 650;

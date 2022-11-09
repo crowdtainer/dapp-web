@@ -12,7 +12,7 @@ let defaultData: CrowdtainerDynamicModel = {
 	raised: undefined,
 }
 
-export const initializeStore = (campaignId: number): Readable<CrowdtainerDynamicModel> | undefined => {
+export const initializeCampaignStores = (campaignId: number): Readable<CrowdtainerDynamicModel> | undefined => {
 
 	if (campaignStores.has(campaignId)) {
 		return campaignStores.get(campaignId);

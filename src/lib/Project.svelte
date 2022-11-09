@@ -1,16 +1,19 @@
 <script lang="ts">
-	import { onMount } from 'svelte';
+	import { onDestroy, onMount } from 'svelte';
 	import { tweened } from 'svelte/motion';
 	import { cubicOut } from 'svelte/easing';
 	import type { Readable } from 'svelte/store';
 
 	import PreOrder from '$lib/PreOrder.svelte';
 
-	import { initializeStore as initializeCampaignStores, campaignStores } from '$lib/campaignStore';
+	import { initializeCampaignStores, campaignStores } from '$lib/campaignStore';
 	import { joinSelection } from '$lib/userStore';
+	import { walletFundsInCrowdtainer } from './ethersCalls/rpcRequests';
+	import { BigNumber, ethers } from 'ethers';
 
 	import TimeLeft from './TimeLeft.svelte';
 	import MoneyInContract from './MoneyInContract.svelte';
+	import CampaignActions from './CampaignActions.svelte';
 
 	import type {
 		CrowdtainerDynamicModel,
@@ -27,7 +30,14 @@
 		loadingString,
 		ProjectStatusUI
 	} from '$lib/Converters/CrowdtainerData';
-	import type { UserStoreModel } from './Model/UserStoreModel';
+
+	import { connected, getSigner, accountAddress } from '$lib/wallet';
+	import ModalDialog, {
+		ModalAnimation,
+		ModalIcon,
+		ModalType,
+		type ModalDialogData
+	} from './ModalDialog.svelte';
 
 	export let vouchers721Address: string;
 	export let crowdtainerId: number;
@@ -49,6 +59,44 @@
 	let tweeningDuration = 650;
 	let tweenedPercentageWidth = tweened(0, { duration: tweeningDuration, easing: cubicOut });
 	let tweenedPercentageRaised = tweened(0, { duration: tweeningDuration, easing: cubicOut });
+	let userFundsInCrowdtainer: BigNumber = BigNumber.from(0);
+
+	// Modal Dialog
+	let dialog: ModalDialogData = {
+		visible: false,
+		title: '',
+		body: '',
+		animation: ModalAnimation.Circle2,
+		icon: ModalIcon.DeviceMobile,
+		type: ModalType.ActionRequest
+	};
+
+	function initializeReadLoop(callback: () => void, milliseconds: number | undefined) {
+		const interval = setInterval(callback, milliseconds);
+		onDestroy(() => {
+			clearInterval(interval);
+		});
+	}
+
+	const readDataForConnectedWallet = async () => {
+		if (!$connected || campaignStaticData === undefined) {
+			return;
+		}
+
+		let funds = await walletFundsInCrowdtainer(
+			getSigner(),
+			campaignStaticData?.contractAddress,
+			$accountAddress
+		);
+		if (funds.isErr()) {
+			console.log(`${funds.unwrapErr()}`);
+			return;
+		}
+
+		userFundsInCrowdtainer = funds.unwrap();
+	};
+
+	initializeReadLoop(readDataForConnectedWallet, 13000);
 
 	onMount(async () => {
 		$joinSelection = $joinSelection;
@@ -59,7 +107,6 @@
 			campaignDynamicData = campaignStores.get(crowdtainerId);
 		}
 		if (campaignStaticUI) updateCurrentSelection(0, campaignStaticUI.prices[0]);
-
 	});
 
 	function setRaisedAmount() {
@@ -82,26 +129,6 @@
 		}
 	}
 
-	// dynamic
-	$: state = toState($campaignDynamicData, campaignStaticData);
-	$: disableJoinView = !(
-		state === ProjectStatusUI.Failed ||
-		state === ProjectStatusUI.SuccessfulyFunded ||
-		state === ProjectStatusUI.Delivery ||
-		state === ProjectStatusUI.ServiceProviderDeclined
-	);
-
-	$: stateString =
-		staticDataLoadStatus !== LoadStatus.FetchFailed &&
-		$campaignDynamicData !== undefined &&
-		campaignStaticData !== undefined
-			? toStateString($campaignDynamicData, campaignStaticData)
-			: loadingString;
-
-	$: $campaignDynamicData, setRaisedAmount();
-	$: $campaignDynamicData, setPercentages();
-	$: loadingAnimation = staticDataLoadStatus === LoadStatus.Loading;
-
 	function updateCurrentSelection(index: number, price: number) {
 		currentSelection = index;
 		currentPrice = price;
@@ -123,7 +150,56 @@
 			$joinSelection = $joinSelection;
 		}
 	}
+
+	function handleCampaignJoinedEvent(event: CustomEvent) {
+		console.log(`Detected event of type: ${event.type} : detail: ${event.detail.text}`);
+		dialog.visible = true;
+		dialog.title = 'You have succesfully joined the project! 🎉';
+		dialog.animation = ModalAnimation.None;
+		dialog.icon = ModalIcon.BadgeCheck;
+		dialog.type = ModalType.Information;
+		dialog.body =
+			'If the minimum funding is reached, you will be able to enter your delivery address on this site. Otherwise, you can get your pre-payment back.';
+	}
+
+	function handleCampaignLeftEvent(event: CustomEvent) {
+		if (campaignStaticUI !== undefined) {
+			let quantities: number[] = new Array<number>(campaignStaticUI.prices.length).fill(0);
+			$joinSelection.set(crowdtainerId, quantities);
+			$joinSelection = $joinSelection;
+		}
+
+		console.log(`Detected event of type: ${event.type} : detail: ${event.detail.text}`);
+		dialog.visible = true;
+		dialog.title = 'Success';
+		dialog.animation = ModalAnimation.None;
+		dialog.icon = ModalIcon.BadgeCheck;
+		dialog.type = ModalType.Information;
+		dialog.body = 'You have left the project and the pre-payment has been returned to your wallet.';
+	}
+
+	// dynamic
+	$: state = toState($campaignDynamicData, campaignStaticData);
+	$: joinViewEnabled =
+		(state === ProjectStatusUI.Funding || state === ProjectStatusUI.SuccessfulyFunded) &&
+		userFundsInCrowdtainer.isZero();
+
+	$: stateString =
+		staticDataLoadStatus !== LoadStatus.FetchFailed &&
+		$campaignDynamicData !== undefined &&
+		campaignStaticData !== undefined
+			? toStateString($campaignDynamicData, campaignStaticData)
+			: loadingString;
+
+	$: $campaignDynamicData, setRaisedAmount();
+	$: $campaignDynamicData, setPercentages();
+	$: loadingAnimation = staticDataLoadStatus === LoadStatus.Loading;
+
+	// Immediatelly update UI elements related to connected wallet on wallet or connection change
+	$: $connected, $accountAddress, readDataForConnectedWallet();
 </script>
+
+<ModalDialog modalDialogData={dialog} />
 
 <div class="max-w-10xl mx-auto py-1 sm:px-6 lg:px-8">
 	<div class="border-2  rounded-2xl max-w-lg mx-auto white overflow-hidden md:max-w-7xl my-8">
@@ -156,7 +232,7 @@
 						</div>
 
 						<!-- Main Status -->
-						<div class="flex items-center justify-between px-2 gap-5">
+						<div class="flex justify-between px-2 gap-5">
 							<div>
 								<p class="projectStatus">{stateString}</p>
 								<p class="projectDataSubtitle">Status</p>
@@ -180,7 +256,7 @@
 						</div>
 
 						<!-- Dates -->
-						<div class="flex px-2 py-8 items-center justify-between gap-12">
+						<div class="flex px-2 py-8 justify-between gap-12">
 							<div class="">
 								<p class="projectData">
 									{campaignStaticUI ? campaignStaticUI.startDateString : loadingString}
@@ -195,7 +271,7 @@
 							</div>
 						</div>
 
-						{#if disableJoinView}
+						{#if joinViewEnabled}
 							<div class="pt-4">
 								{#if staticDataLoadStatus === LoadStatus.Loaded && currentPrice}
 									<p class="text-blue-500 px-2 productPrice">
@@ -264,7 +340,7 @@
 						{/if}
 					</div>
 
-					{#if disableJoinView}
+					{#if joinViewEnabled}
 						<div class="flex">
 							<button
 								on:click={() => {
@@ -277,12 +353,39 @@
 						</div>
 					{/if}
 				{:else}
-					<p class="my-6 text-red-800">Error fetching data. Please reload the page.</p>
+					<p class="my-6 text-red-800">Error fetching data.</p>
+				{/if}
+				{#if !userFundsInCrowdtainer.isZero() && campaignStaticUI !== undefined}
+					<p class="text-md text-lg text-left mt-3 mb-6">
+						You have joined this project with a contribution of {ethers.utils.formatUnits(
+							`${userFundsInCrowdtainer}`,
+							BigNumber.from(campaignStaticUI.tokenDecimals)
+						)}
+						{campaignStaticUI.tokenSymbol}.
+					</p>
+					<div class="w-auto flex ">
+						{#if campaignStaticData !== undefined}
+							<CampaignActions
+								{vouchers721Address}
+								crowdtainerAddress={campaignStaticData?.contractAddress}
+								projectStatusUI={state}
+								tokenSymbol={campaignStaticUI.tokenSymbol}
+								on:userLeftCrowdtainerEvent={handleCampaignLeftEvent}
+							/>
+						{/if}
+					</div>
 				{/if}
 			</div>
 		</div>
 
-		<PreOrder {vouchers721Address} crowdtainerAddress={campaignStaticData?.contractAddress} {campaignStaticUI} {crowdtainerId} />
-
+		{#if joinViewEnabled && campaignStaticData !== undefined}
+			<PreOrder
+				{vouchers721Address}
+				crowdtainerAddress={campaignStaticData?.contractAddress}
+				{campaignStaticUI}
+				{crowdtainerId}
+				on:userJoinedCrowdtainerEvent={handleCampaignJoinedEvent}
+			/>
+		{/if}
 	</div>
 </div>

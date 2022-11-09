@@ -1,26 +1,45 @@
 import { Vouchers721__factory } from '../../routes/typechain/factories/Vouchers721__factory';
 import { Crowdtainer__factory } from '../../routes/typechain/factories/Crowdtainer.sol/Crowdtainer__factory';
-// import { IERC721Enumerable__factory } from '../../routes/typechain/factories/IERC721Enumerable__factory';
-import { BigNumber, ethers } from 'ethers';
+import { BigNumber, ethers, type BigNumberish, type ContractTransaction } from 'ethers';
 import { IERC20__factory } from '../../routes/typechain/factories/IERC20__factory';
 
 import { type Result, Ok, Err } from "@sniptt/monads";
 import type { IERC20 } from 'src/routes/typechain/IERC20';
+import type { UserStoreModel } from '$lib/Model/UserStoreModel';
 
-// TODO: Continue here;
-// - Split this function into smaller parts;
+// TODO: next steps:
 // - Adapt frontend to react to smart contract state updates:
-//      - ERC20 Approval status.
-//      - Join button enabled when approval is granted.
-//      - Frontend should hide "add to pre-order button" if user already joined.
+//      - ERC20 Approval status. ✅
+//      - Join button enabled when approval is granted. ✅
+//      - Frontend should hide "add to pre-order button" if user already joined. ✅
+//      - Implement "Leave" when campaign is in 'Funding' state. ✅
+//      - Implement "JoinWithSignature". TODO: Continue here;
+//      - Implement "My wallet" page, showing all participation proofs with its details.
+//      - Implement "Transfer to another wallet" button.
 //      - Frontend should show button to direct user to wallet tab when already joined.
+//      - Implement "Checkout" button (add delivery address, persist in backend).
+//      - Implement "Claim funds" for failed projects (in my wallet page).
+//      - Implement "Download invoice" button.
 
-// function totalCost(crowdtainerContract: Crowdtainer, quantities: number[]): BigNumber {
-//     let totalCost = BigNumber.from(0);
-//     for (let index = 0; index < 4; index++) {
-//         totalCost = totalCost.add((await crowdtainerContract.unitPricePerType(index)).mul(arrayOfBigNumbers[index]));
-//     }
-// }
+export async function walletFundsInCrowdtainer(provider: ethers.Signer | undefined,
+    crowdtainerAddress: string,
+    wallet: string): Promise<Result<BigNumber, string>> {
+
+    if (!provider) {
+        return Err("Provider not available.");
+    }
+
+    let fundsInCrowdtainer: BigNumber;
+    try {
+        const crowdtainerContract = Crowdtainer__factory.connect(crowdtainerAddress, provider);
+        fundsInCrowdtainer = await crowdtainerContract.costForWallet(wallet);
+
+    } catch (error) {
+        return Err(`${error}`);
+    }
+
+    return Ok(fundsInCrowdtainer);
+}
 
 export async function getERC20Contract(provider: ethers.Signer | undefined, crowdtainerAddress: string): Promise<Result<IERC20, string>> {
 
@@ -28,11 +47,15 @@ export async function getERC20Contract(provider: ethers.Signer | undefined, crow
         return Err("Provider not available.");
     }
 
-    const crowdtainerContract = Crowdtainer__factory.connect(crowdtainerAddress, provider);
-    console.log(`Crowdtainer address is: ${crowdtainerAddress}`);
-
-    const erc20Address = await crowdtainerContract.token();
-    const erc20Contract = IERC20__factory.connect(erc20Address, provider);
+    let erc20Address: string;
+    let erc20Contract: IERC20;
+    try {
+        const crowdtainerContract = Crowdtainer__factory.connect(crowdtainerAddress, provider);
+        erc20Address = await crowdtainerContract.token();
+        erc20Contract = IERC20__factory.connect(erc20Address, provider);
+    } catch (error) {
+        return Err(`${error}`);
+    }
 
     return Ok(erc20Contract);
 }
@@ -44,52 +67,62 @@ export async function hasEnoughFunds(erc20Contract: IERC20, signerAddress: strin
     console.log(`Current wallet balance: ${balance}`);
 
     if (balance.lt(totalCost)) {
-        // return Err(`Not enough funds. Required: ${totalCost}, available: ${balance}`);
-        return Err({current: balance, required: totalCost});
+        return Err({ current: balance, required: totalCost });
     }
     return Ok(balance);
 }
 
-export async function hasEnoughSpendAllowance(erc20Contract: IERC20, signerAddress: string, crowdtainerAddress:string, totalCost: BigNumber): Promise<Result<boolean, string>> {
-    let currentAllowance: BigNumber;
+export async function leaveProject(provider: ethers.Signer | undefined,
+    vouchers721Address: string,
+    crowdtainerAddress: string): Promise<Result<ContractTransaction, string>> {
+
+    // 1- Get token ids for connected wallet
+    // 2- Filter by the crowdtainer project
+    // 3- Call leave function
+
+    if (provider === undefined) {
+        return Err("Provider not available.");
+    }
+
     try {
-        currentAllowance = await erc20Contract.allowance(signerAddress, crowdtainerAddress);
-        console.log(`permit Value: ${currentAllowance}`);
+
+        const vouchers721Contract = Vouchers721__factory.connect(vouchers721Address, provider);
+
+        let wallet = await provider.getAddress();
+        let totalTokens = (await vouchers721Contract.balanceOf(wallet)).toNumber();
+        let foundTokenId: BigNumberish;
+
+        for (let index = 0; index < totalTokens; index++) {
+            const element = await vouchers721Contract.tokenOfOwnerByIndex(wallet, BigNumber.from(index));
+            let crowdtainerId = await vouchers721Contract.tokenIdToCrowdtainerId(element);
+            let foundCrowdtainerAddress = await vouchers721Contract.crowdtainerIdToAddress(crowdtainerId);
+            console.log(`Wallet ${wallet} is owner of tokenId: ${element}, from crowdtainerId ${crowdtainerId} @ address ${foundCrowdtainerAddress}`);
+
+            if (crowdtainerAddress === foundCrowdtainerAddress) {
+                foundTokenId = element;
+                console.log(`Found tokenId: ${element} of wallet ${wallet} for crowdtainer ${crowdtainerAddress}`);
+                let leaveTransaction = await vouchers721Contract.leave(foundTokenId);
+                return Ok(leaveTransaction);
+            }
+        }
+
     } catch (error) {
         return Err(`${error}`);
     }
 
-    if (currentAllowance.lt(totalCost)) {
-        console.log(`Not enough spend allowance. Required: ${totalCost}, current: ${currentAllowance}.`);
-        return Ok(false);
-    } else {
-        return Ok(true);
-    }
+    return Err("Did not find token for given wallet.")
 }
 
-export async function requestAllowance(signerAddress: string,
+export async function checkAllowance(signerAddress: string,
     erc20Contract: IERC20,
     crowdtainerAddress: string,
     totalCost: BigNumber): Promise<Result<string, string>> {
 
     try {
-        // let enoughFunds = await hasEnoughFunds(erc20Contract, signerAddress, totalCost);
-        // if(enoughFunds.isErr()){
-        //     return Err(`${enoughFunds.unwrapErr()}`);
-        // }
-
-        // let enoughAllowance = await hasEnoughSpendAllowance(erc20Contract, signerAddress, crowdtainerAddress, totalCost);
-
-        // if (!enoughAllowance.isErr && enoughAllowance.unwrap() === false) {
-            // console.log("Requesting permit..");
-            let approvalTx = await erc20Contract.approve(crowdtainerAddress, totalCost);
-            approvalTx.wait(1);
-        // }
-
         let currentAllowance = await erc20Contract.allowance(signerAddress, crowdtainerAddress);
 
         if (currentAllowance.lt(totalCost)) {
-            return Err("Unable to request needed allowance.");
+            return Err(`Unable to request needed allowance. Required: ${totalCost}, current: ${currentAllowance}`);
         }
         return Ok(`Allowance available for ${crowdtainerAddress}.`);
 
@@ -101,9 +134,9 @@ export async function requestAllowance(signerAddress: string,
 export async function joinProject(provider: ethers.Signer | undefined,
     vouchers721Address: string,
     crowdtainerAddress: string,
-    quantities: number[]): Promise<Result<string, string>> {
+    quantities: number[]): Promise<Result<ContractTransaction, string>> {
 
-    if (!provider) {
+    if (provider === undefined) {
         return Err("Provider not available.");
     }
     console.log(`Vouchers721 address is: ${vouchers721Address}`);
@@ -117,16 +150,34 @@ export async function joinProject(provider: ethers.Signer | undefined,
             BigNumber.from(quantities[3])
         ];
 
-        console.log("calling it..");
-        const result = await vouchers721Contract['join(address,uint256[4])'](vouchers721Address, arrayOfBigNumbers);
-        result.wait(2);
-        console.log(`Confirmations: ${result.confirmations}; hash: ${result.hash}`);
-
+        console.log(`Attempting to join.. voucher @ ${vouchers721Address}; Crowdtainer @ ${crowdtainerAddress}`);
+        const result = await vouchers721Contract['join(address,uint256[4])'](crowdtainerAddress, arrayOfBigNumbers);
         console.log(`Result: ${result}`);
 
-        return Ok("Success!");
+        return Ok(result);
 
     } catch (error) {
         return Err(`Error :( ${error}`);
     }
+}
+
+export async function fetchUserBalancesData(provider: ethers.Signer | undefined,
+    crowdtainerAddress: string): Promise<Result<UserStoreModel, string>> {
+
+    if (!provider) {
+        return Err('Missing signer.');
+    }
+
+    const signerAddress = await provider.getAddress();
+    let erc20Contract = await getERC20Contract(provider, crowdtainerAddress);
+    if (erc20Contract.isErr()) {
+        return Err(erc20Contract.unwrapErr());
+    }
+
+    let erc20Balance = await erc20Contract.unwrap().balanceOf(signerAddress);
+    let erc20Allowance = await erc20Contract.unwrap().allowance(signerAddress, crowdtainerAddress)
+
+    console.log(`Fetched data. Balance: ${erc20Balance}; Allowance: ${erc20Allowance}, for ${signerAddress}`);
+
+    return Ok({ erc20Contract: erc20Contract.unwrap(), erc20Balance: erc20Balance, erc20Allowance: erc20Allowance });
 }

@@ -1,5 +1,5 @@
 import { writable } from "svelte/store";
-import type { MessageType } from "./MessageType";
+import { MessageType } from "./MessageType";
 
 export const toasts = writable(new Array<ToastData>());
 
@@ -10,6 +10,19 @@ export type ToastData = {
   timeout: number,
   message: string
 };
+
+export const showWarningToast = (message: string) => {
+  let toast = {
+    id: Math.floor(Math.random() * 10000),
+    type: MessageType.Warning,
+    dismissible: true,
+    timeout: 7000,
+    message: message
+  };
+
+  toasts.update((all) => [{ ...toast }, ...all]);
+  if (toast.timeout > 0) setTimeout(() => dismissToast(toast.id), toast.timeout);
+}
 
 export const addToast = (toast: ToastData) => {
   toasts.update((all) => [{ ...toast }, ...all]);
