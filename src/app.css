@@ -16,6 +16,14 @@
     @apply text-gray-300 hover:bg-gray-700 hover:text-white block px-3 py-2 rounded-md text-base font-medium;
   }
 
+  .red-action-btn {
+    @apply text-white bg-red-700 hover:bg-red-500  hover:shadow-lg px-16 mt-6 py-4 font-medium text-sm leading-tight uppercase rounded-xl shadow-md  focus:shadow-lg focus:outline-none focus:ring-0 active:shadow-lg;
+  }
+
+  .sky-btn {
+    @apply bg-sky-600 text-white hover:bg-sky-500 hover:shadow-lg px-16 mt-6 py-4 font-medium text-sm leading-tight uppercase rounded-xl shadow-md  focus:shadow-lg focus:outline-none focus:ring-0 active:shadow-lg;
+  }
+
   .ct-divider {
     @apply bg-gradient-to-r from-gray-800 to-blue-400;
   }
@@ -23,6 +31,14 @@
   .campaignSection {
     @apply border-b-2 border-blue-300;
     @apply text-black;
+  }
+
+  .tooltip {
+    @apply invisible absolute;
+  }
+  
+  .has-tooltip:hover .tooltip {
+    @apply visible z-50;
   }
 
   .projectStatus {

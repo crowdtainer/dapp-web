@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 
-	import { projects } from './data/projects.json';
+	import { projects, Vouchers721Address } from './data/projects.json';
 	import Project from '$lib/Project.svelte';
 	import { fetchStaticData } from '$lib/api';
 
@@ -89,7 +89,7 @@
 <main class="">
 	<header class="campaignSection">
 		<div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
-			<h1 class="font-mono  text-2xl font-bold">Active</h1>
+			<h1 class="font-mono text-2xl font-bold">Active</h1>
 		</div>
 	</header>
 
@@ -98,6 +98,7 @@
 			<div class="border-t-2 border-dashed" />
 		{/if}
 		<Project
+			vouchers721Address={Vouchers721Address}
 			{...projectFromCrowdtainerId(project)}
 			{staticDataLoadStatus}
 			campaignStaticData={campaignStaticData.get(project)}
@@ -124,6 +125,7 @@
 			<div class="border-t-2 border-dashed" />
 		{/if}
 		<Project
+			vouchers721Address={Vouchers721Address}
 			{...projectFromCrowdtainerId(project)}
 			{staticDataLoadStatus}
 			campaignStaticData={campaignStaticData.get(project)}
@@ -150,6 +152,7 @@
 			<div class="border-t-2 border-dashed" />
 		{/if}
 		<Project
+			vouchers721Address={Vouchers721Address}
 			{...projectFromCrowdtainerId(project)}
 			{staticDataLoadStatus}
 			campaignStaticData={campaignStaticData.get(project)}

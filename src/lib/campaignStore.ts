@@ -1,19 +1,18 @@
 import { readable, type Readable } from 'svelte/store';
 
 import type { CrowdtainerDynamicModel } from '$lib/Model/CrowdtainerModel';
-
 import { fetchDynamicData, type Error } from '$lib/api';
 
 const fetchInterval : number = ( import.meta.env.DEV ? 10000 : 18000);
 
-export let campaignStores: Map<number, Readable<CrowdtainerDynamicModel>> = new Map;
+export let campaignStores = new Map<number, Readable<CrowdtainerDynamicModel>>;
 
 let defaultData: CrowdtainerDynamicModel = {
 	status: undefined,
 	raised: undefined,
 }
 
-export const initializeStore = (campaignId: number): Readable<CrowdtainerDynamicModel> | undefined => {
+export const initializeCampaignStores = (campaignId: number): Readable<CrowdtainerDynamicModel> | undefined => {
 
 	if (campaignStores.has(campaignId)) {
 		return campaignStores.get(campaignId);

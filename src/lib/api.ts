@@ -27,3 +27,30 @@ export async function fetchStaticData(projectIds: number[]): Promise<Result<Crow
 	}
 	return Ok(jsonResponse);
 }
+
+// Pre-order steps
+
+export async function sendChallengeCodeAPI(email: string): Promise<boolean> {
+	const result = await fetch(`challengeCodeAPI/${email}`);
+	return result.ok;
+}
+
+export async function requestEmailAuthorizationAPI(email: string, code: string): Promise<string> {
+	let result: Response;
+
+	result = await fetch(`authorizeEmailAPI/${email}`, {
+		method: 'POST',
+		body: JSON.stringify({ code: code })
+	});
+	return result.text();
+}
+
+export async function requestWalletAuthorizationAPI(wallet:string, email: string, sigHash: string): Promise<string> {	
+	let result: Response;
+
+	result = await fetch(`authorizeWalletAPI/${wallet}`, {
+		method: 'POST',
+		body: JSON.stringify({ email: email, signatureHash: sigHash })
+	});
+	return result.text();
+}

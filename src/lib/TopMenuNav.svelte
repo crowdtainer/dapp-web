@@ -48,6 +48,7 @@
 	onMount(() => {
 		setupWallet();
 		walletState.setUpdatesCallback(updatesCallbackFunction);
+		console.log(`import.meta.env.MODE: ` + import.meta.env.MODE);
 	});
 
 	onDestroy(() => {
@@ -56,6 +57,7 @@
 	});
 
 	$: path = $page.url.pathname;
+
 </script>
 
 <Toasts />
@@ -157,7 +159,6 @@
 						>
 							{#if $connected}
 								<a
-									href="#"
 									on:click={async () => {
 										await disconnect();
 										profileMenuOpen = false;
@@ -169,7 +170,6 @@
 								>
 							{:else}
 								<a
-									href="#"
 									on:click={async () => {
 										await connect(WalletType.WalletConnect);
 										profileMenuOpen = false;
@@ -179,6 +179,18 @@
 									tabindex="-1"
 									id="user-menu-item-0">Connect wallet</a
 								>
+								{#if import.meta.env.MODE === "development"}
+								<a
+									on:click={async () => {
+										await connect(WalletType.Injected);
+										profileMenuOpen = false;
+									}}
+									class="block px-4 py-2 text-sm text-gray-700"
+									role="menuitem"
+									tabindex="-1"
+									id="user-menu-item-0">Connect to injected wallet</a
+								>
+								{/if}
 							{/if}
 						</div>
 					{/if}

@@ -101,16 +101,19 @@ npm run preview
 
 - ✅ Allow connection/disconnection to WalletConnect and properly manage its state (localStore to remember connection).
 
+
+- ✅ - Button to effectively 'join' the project.
+    - To join the project call `ICrowdtainer.join()`.
+
+- ✅ Button to 'leave' the project.
+    - This would call `ICrowdtainer.leave()` smart contract method.
+
 - ◻️ CCIP-Read support to allow arbitrary off-chain verifications before joining a project (meet law requirements).
     - ✅ Add requirement of participant signing Terms and Conditions with their wallet.
     - ◻️ E-mail / code verification.
     - ◻️ Server checks if code + Terms & Conditions signature are valid.
-
-- ◻️ Button to effectively 'join' the project.
-    - To join the project call `ICrowdtainer.join()`.
-
-- ◻️ Button to 'leave' the project.
-    - This would call `ICrowdtainer.leave()` smart contract method.
+    - ◻️ Button to effectively 'join' the project via CCIP-Read method.
+        - To join the project call `ICrowdtainer.joinWithSignature()`.
 
 - ◻️ I'd like an interface/button to claim refunds if the sale was not successful.
     - Only possible if the project is in `Failed` state.

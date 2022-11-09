@@ -1,13 +1,3 @@
-import { onDestroy } from 'svelte';
-
-export function onInterval(callback: () => void, milliseconds: number) {
-  const interval = setInterval(callback, milliseconds);
-
-  onDestroy(() => {
-    clearInterval(interval);
-  });
-}
-
 export function getTimeRemaining(endtime: Date): [number, number, number, number] {
   let nowInMs = (new Date).getTime();
   let endInMs = endtime.getTime();
