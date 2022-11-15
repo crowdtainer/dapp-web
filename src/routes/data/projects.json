@@ -1,10 +1,18 @@
 {
-    "MetadataServiceV1Address": "0xB88b5C6eeb8d2Ef553Ccf2936853d5517E043c5D",
-    "Vouchers721Address": "0xf13137C1B79b0Ef4b81AC45bfdE730bFD53a07d5",
+    "MetadataServiceV1Address": "0x992C85144F64C662BD09730fEF227a4EDa5af5A4",
+    "Vouchers721Address": "0x73f0141EA354968f18Db120bfc2Dabeff2EC2D95",
     "projects": [
         {
-            "crowdtainerId": 3,
-            "title": "FILTER COFFEE BEANS",
+            "crowdtainerId": 5,
+            "title": "WITH SIGNATURE",
+            "subtitle": "Santa Teresa & Santa Inacia Farm",
+            "description": "Years of experience come into play to make the best out of each coffee bean, and in that regard, coffee tradition is in the family as far as they can tell about their past - Alencar is a 3rd generation family-run coffee producer of small scale.",
+            "projectURL": "https://crowdtainer.io/farmers",
+            "projectImageURL": "CoffeeBag.png"
+        },
+        {
+            "crowdtainerId": 10,
+            "title": "WITHOUT SIGNATURE",
             "subtitle": "Santa Teresa & Santa Inacia Farm",
             "description": "Years of experience come into play to make the best out of each coffee bean, and in that regard, coffee tradition is in the family as far as they can tell about their past - Alencar is a 3rd generation family-run coffee producer of small scale.",
             "projectURL": "https://crowdtainer.io/farmers",

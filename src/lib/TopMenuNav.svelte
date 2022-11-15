@@ -8,7 +8,7 @@
 	// Wallet management
 	import {
 		walletState,
-		shortenedAccount,
+		shortOrENSNamedAccount,
 		connected,
 		connect,
 		disconnect,
@@ -57,7 +57,6 @@
 	});
 
 	$: path = $page.url.pathname;
-
 </script>
 
 <Toasts />
@@ -130,7 +129,13 @@
 				{#if !$connected}
 					<p class="bg-black pt-1 pr-4 text-right text-sm text-green-400">Disconnected.</p>
 				{:else}
-					<p class="bg-black pr-4 text-right text-sm text-green-400">{$shortenedAccount}</p>
+					<p class="bg-black pr-4 text-right text-sm text-green-400">
+						{#await $shortOrENSNamedAccount}
+							"Loading"
+						{:then address}
+							{address}
+						{/await}
+					</p>
 				{/if}
 				<div class="ml-3 relative">
 					<div>
@@ -179,17 +184,17 @@
 									tabindex="-1"
 									id="user-menu-item-0">Connect wallet</a
 								>
-								{#if import.meta.env.MODE === "development"}
-								<a
-									on:click={async () => {
-										await connect(WalletType.Injected);
-										profileMenuOpen = false;
-									}}
-									class="block px-4 py-2 text-sm text-gray-700"
-									role="menuitem"
-									tabindex="-1"
-									id="user-menu-item-0">Connect to injected wallet</a
-								>
+								{#if import.meta.env.MODE === 'development'}
+									<a
+										on:click={async () => {
+											await connect(WalletType.Injected);
+											profileMenuOpen = false;
+										}}
+										class="block px-4 py-2 text-sm text-gray-700"
+										role="menuitem"
+										tabindex="-1"
+										id="user-menu-item-0">Connect to injected wallet</a
+									>
 								{/if}
 							{/if}
 						</div>

@@ -152,6 +152,7 @@ export async function joinProject(provider: ethers.Signer | undefined,
 
         console.log(`Attempting to join.. voucher @ ${vouchers721Address}; Crowdtainer @ ${crowdtainerAddress}`);
         const result = await vouchers721Contract['join(address,uint256[4])'](crowdtainerAddress, arrayOfBigNumbers);
+        result.wait();
         console.log(`Result: ${result}`);
 
         return Ok(result);
