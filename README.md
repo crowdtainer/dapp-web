@@ -110,8 +110,8 @@ npm run preview
 
 - ◻️ CCIP-Read support to allow arbitrary off-chain verifications before joining a project (meet law requirements).
     - ✅ Add requirement of participant signing Terms and Conditions with their wallet.
-    - ◻️ E-mail / code verification.
-    - ◻️ Server checks if code + Terms & Conditions signature are valid.
+    - ✅ E-mail / code verification.
+    - ✅ Server checks if code + Terms & Conditions signature are valid.
     - ◻️ Button to effectively 'join' the project via CCIP-Read method.
         - To join the project call `ICrowdtainer.joinWithSignature()`.
 
