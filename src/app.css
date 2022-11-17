@@ -24,6 +24,10 @@
     @apply bg-sky-600 text-white hover:bg-sky-500 hover:shadow-lg px-16 mt-6 py-4 font-medium text-sm leading-tight uppercase rounded-xl shadow-md  focus:shadow-lg focus:outline-none focus:ring-0 active:shadow-lg;
   }
 
+  .gray-btn {
+    @apply bg-gray-400 text-white hover:bg-gray-400 hover:shadow-lg px-16 mt-6 py-4 font-medium text-sm leading-tight uppercase rounded-xl shadow-md  focus:shadow-lg focus:outline-none focus:ring-0 active:shadow-lg;
+  }
+
   .ct-divider {
     @apply bg-gradient-to-r from-gray-800 to-blue-400;
   }

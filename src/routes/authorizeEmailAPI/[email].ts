@@ -1,4 +1,3 @@
-import { randomInt } from "crypto";                     // Random number
 import redis from "$lib/Database/redis";                // Database
 import { type Result, Ok, Err } from "@sniptt/monads";  // Monads
 import type { RequestHandler } from './__types/[email]' // Internal

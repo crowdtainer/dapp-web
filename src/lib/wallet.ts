@@ -1,5 +1,5 @@
 import WalletConnectProvider from '@walletconnect/web3-provider/dist/umd/index.min.js';
-import { providers, Signer } from 'ethers';
+import { providers, Signer, type Transaction } from 'ethers';
 
 import { writable, derived } from 'svelte/store';
 
@@ -12,11 +12,31 @@ export const accountAddress = derived(walletState, $walletState => {
     return ($walletState.account) ? $walletState.account : ''
 });
 export const shortenedAccount = derived(walletState, $walletState => {
-    return ($walletState.account) ? $walletState.account?.slice(0, 6) + '...' + $walletState.account?.slice(-6) : ''
+    return shortenAddress($walletState.account);
 });
 
+export const shortOrENSNamedAccount = derived(walletState, async $walletState => {
+    if ($walletState === undefined) return '---';
+    let signer = getSigner();
+    if ($walletState.account === undefined || signer === undefined || signer.provider === undefined) return '---';
+    let reversedResolve: string | null;
+    try {
+        reversedResolve = await signer.provider?.lookupAddress($walletState.account);
+    } catch (error) {
+        console.log(`${error}`);
+        return shortenAddress($walletState.account);
+    }
+    // fallback to shortenedAccount format
+    if(reversedResolve === null) return shortenAddress($walletState.account);
+    return reversedResolve;
+});
+
+function shortenAddress(walletAddress: string | undefined) : string {
+    return (walletAddress) ? walletAddress.slice(0, 6) + '...' + walletAddress.slice(-6) : '---';
+}
+
 // 10: Optimism; 31337: hardhat local node; 5: Ethereum Goerli; 420: Optimism Goerli
-let supportedNetworks: number[] = [420,5, 31337];
+let supportedNetworks: number[] = [420, 5, 31337];
 const RPC_BACKEND: string = import.meta.env.VITE_WALLET_CONNECT_RPC;
 
 interface Window {
@@ -68,8 +88,8 @@ function createWalletStore() {
             if (connected === ConnectionState.Connected) {
                 dispatchMessage("Wallet connected.", MessageType.Success);
             } else if (chainId == 1337) {
-                dispatchMessage(`For development / local node, please configure your wallet to chain ID 31337.`, MessageType.Info);                
-                dispatchMessage(`Wallet configured with unsupported network: ` + chainId + `.`, MessageType.Warning);                
+                dispatchMessage(`For development / local node, please configure your wallet to chain ID 31337.`, MessageType.Info);
+                dispatchMessage(`Wallet configured with unsupported network: ` + chainId + `.`, MessageType.Warning);
             }
             else {
                 dispatchMessage(`Wallet configured with unsupported network: ` + chainId + `.`, MessageType.Warning);
@@ -266,10 +286,11 @@ export async function tearDownWallet() {
 }
 
 export function getSigner(): Signer | undefined {
-    if (connected) {
-        return web3Provider.getSigner();
+
+    if (!connected || web3Provider === undefined) {
+        return undefined;
     }
-    return undefined;
+    return web3Provider.getSigner();
 }
 
 export async function getAccountAddress(): Promise<string | undefined> {

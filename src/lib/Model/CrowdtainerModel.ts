@@ -19,4 +19,5 @@ export type CrowdtainerStaticModel = {
 	token: string;
 	tokenDecimals: number;
 	tokenSymbol: string;
+	signer: string;
 }

@@ -59,6 +59,11 @@
 
 		userLeftCrowdtainer();
 	};
+
+	let callClaimFunds = async () => {
+		// TODO
+	}
+
 </script>
 
 <slot>
@@ -110,7 +115,7 @@
 		{/if}
 
 		<!-- Transfer participation proof -->
-		{#if projectStatusUI === ProjectStatusUI.Delivery || projectStatusUI === ProjectStatusUI.Failed}
+		{#if projectStatusUI === ProjectStatusUI.Delivery}
 			<div class="p-0.5 mb-2 m-2 has-tooltip">
 				<span class="tooltip rounded shadow-lg p-1 bg-gray-100 mt-40">
 					Transfer participation proof to another wallet
@@ -153,6 +158,29 @@
 							<img width="30" height="30" src="Exit.svg" alt="Leave campaign" />
 						</div>
 						<p class="text-lg mt-5">Leave</p>
+					</span>
+				</button>
+				<div />
+			</div>
+		{/if}
+
+		{#if projectStatusUI === ProjectStatusUI.Failed || projectStatusUI === ProjectStatusUI.ServiceProviderDeclined}
+			<!-- Get pre-payment back -->
+			<div class="p-0.5 mb-2 m-2 has-tooltip">
+				<span class="tooltip rounded shadow-lg p-1 bg-gray-100 text-red-500 mt-40">
+					Withdrawl {tokenSymbol} back
+				</span>
+				<button
+					class="relative inline-flex items-center justify-center overflow-hidden text-sm font-medium text-gray-900 rounded-lg group bg-gradient-to-br from-pink-500 to-orange-400 group-hover:from-cyan-500 group-hover:to-blue-500 focus:ring-4 focus:outline-none focus:ring-red-400"
+					on:click={callClaimFunds}
+				>
+					<span
+						class="h-auto w-36 relative px-5 py-6 transition-all ease-in duration-75 bg-white rounded-md group-hover:bg-opacity-0"
+					>
+						<div class="flex justify-center items-center">
+							<img width="30" height="30" src="Exit.svg" alt="Leave campaign" />
+						</div>
+						<p class="text-lg mt-5">Claim funds</p>
 					</span>
 				</button>
 				<div />

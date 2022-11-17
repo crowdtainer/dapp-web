@@ -4,7 +4,7 @@
 	import { cubicOut } from 'svelte/easing';
 	import type { Readable } from 'svelte/store';
 
-	import PreOrder from '$lib/PreOrder.svelte';
+	import PreOrderSigBased from '$lib/PreOrderSigBased.svelte';
 
 	import { initializeCampaignStores, campaignStores } from '$lib/campaignStore';
 	import { joinSelection } from '$lib/userStore';
@@ -38,6 +38,7 @@
 		ModalType,
 		type ModalDialogData
 	} from './ModalDialog.svelte';
+	import PreOrder from './PreOrder.svelte';
 
 	export let vouchers721Address: string;
 	export let crowdtainerId: number;
@@ -357,11 +358,19 @@
 				{/if}
 				{#if !userFundsInCrowdtainer.isZero() && campaignStaticUI !== undefined}
 					<p class="text-md text-lg text-left mt-3 mb-6">
-						You have joined this project with a contribution of {ethers.utils.formatUnits(
-							`${userFundsInCrowdtainer}`,
-							BigNumber.from(campaignStaticUI.tokenDecimals)
-						)}
-						{campaignStaticUI.tokenSymbol}.
+						{#if state === ProjectStatusUI.Failed}
+							You can withdrawl {ethers.utils.formatUnits(
+								`${userFundsInCrowdtainer}`,
+								BigNumber.from(campaignStaticUI.tokenDecimals)
+							)}
+							{campaignStaticUI.tokenSymbol} from this campaign.
+						{:else}
+							You have joined this project with a contribution of {ethers.utils.formatUnits(
+								`${userFundsInCrowdtainer}`,
+								BigNumber.from(campaignStaticUI.tokenDecimals)
+							)}
+							{campaignStaticUI.tokenSymbol}.
+						{/if}
 					</p>
 					<div class="w-auto flex ">
 						{#if campaignStaticData !== undefined}
@@ -379,13 +388,23 @@
 		</div>
 
 		{#if joinViewEnabled && campaignStaticData !== undefined}
-			<PreOrder
-				{vouchers721Address}
-				crowdtainerAddress={campaignStaticData?.contractAddress}
-				{campaignStaticUI}
-				{crowdtainerId}
-				on:userJoinedCrowdtainerEvent={handleCampaignJoinedEvent}
-			/>
+			{#if campaignStaticData.signer === '0x0000000000000000000000000000000000000000'}
+				<PreOrder
+					{vouchers721Address}
+					crowdtainerAddress={campaignStaticData?.contractAddress}
+					{campaignStaticUI}
+					{crowdtainerId}
+					on:userJoinedCrowdtainerEvent={handleCampaignJoinedEvent}
+				/>
+			{:else}
+				<PreOrderSigBased
+					{vouchers721Address}
+					crowdtainerAddress={campaignStaticData?.contractAddress}
+					{campaignStaticUI}
+					{crowdtainerId}
+					on:userJoinedCrowdtainerEvent={handleCampaignJoinedEvent}
+				/>
+			{/if}
 		{/if}
 	</div>
 </div>

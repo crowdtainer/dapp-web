@@ -1,6 +1,5 @@
 import type { Signer } from 'ethers';
 import { ethers } from 'ethers';
-import { SiweMessage } from 'siwe';
 import { getAccountAddress } from '$lib/wallet';
 
 // Monads
