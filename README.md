@@ -28,8 +28,7 @@ brew install redis # MacOS
 # For other OS's see: https://redis.io/docs/getting-started/installation/
 ```
 
-> Note: Redis and E-mail service are only required for service providers using CCIP-Read for off-chain verification rules (i.e., signer != address(0) in the deployed project). If the project doesn't require CCIP-Read, Redis is not required. Allowing projects without CCIP-Read is still work to be done in this frontend, but should be trivial as we just need to remove all steps when "joining" a project, and instead call join() in the smart-contract directly.
-
+> Note: Redis and E-mail service are only required for service providers using CCIP-Read for off-chain verification rules (i.e., signer != address(0) in the deployed project). If the project doesn't require CCIP-Read, Redis is not required.
 
 ---
 ### To start a development server:
@@ -73,7 +72,13 @@ npm run preview
 
 ---
 
-## User Stories
+## Known issues
+
+- Typechain (our tool to generate bindings between EVM/Solidity ABI and typescript) has a bug where it generates a few imports wrongly (without typescript's "type" specifier). For this reason, these files are not git ignored (included in the '.gitignore' list), so that we can quickly revert changes done by the generator (bindings are generated post install, or with npm run build).
+
+---
+
+## User Stories / Development progress
 
 - ✅ for completed items, ◻️ otherwise.
 
@@ -101,14 +106,13 @@ npm run preview
 
 - ✅ Allow connection/disconnection to WalletConnect and properly manage its state (localStore to remember connection).
 
-
 - ✅ - Button to effectively 'join' the project.
     - To join the project call `ICrowdtainer.join()`.
 
 - ✅ Button to 'leave' the project.
     - This would call `ICrowdtainer.leave()` smart contract method.
 
-- ◻️ CCIP-Read support to allow arbitrary off-chain verifications before joining a project (meet law requirements).
+- ✅ CCIP-Read support to allow arbitrary off-chain verifications before joining a project (meet law requirements).
     - ✅ Add requirement of participant signing Terms and Conditions with their wallet.
     - ✅ E-mail / code verification.
     - ✅ Server checks if code + Terms & Conditions signature are valid.
@@ -122,13 +126,19 @@ npm run preview
 - ◻️ After joining, I'd like to see my own purchase/voucher details, as a SVG image.
     - Use `Vouchers721.tokenUri()` to get the generated image.
 
-- ◻️ I'd like an interface to see how much I bought for each type of product, to get an overview of my own order.
+- ◻️ I'd like an interface to see how much I bought for each type of product, to get an overview of my own orders.
 
-- ◻️ Possibility of transfering NFT/participation proof ownership to another wallet.
+- ◻️ Button to transfer NFT/participation proof ownership to another wallet.
 
 - ◻️ "Checkout" button (available once funded/suceeded) to conclude the order with service provider (providing delivery address details).
 
 - ◻️ "Download Invoice" button (available once "Checkout" succeeded).
+
+- ◻️ Worker service to dispatch emails (pull job from redis):
+    - Verification/validation code
+    - Send invoice
+
+- ◻️ Browser-side encryption (assymetric, using service provider's PubKey) before pushing sensitive data to redis.
 
 ##### Out of scope for MVP:
 - ◻️ When joining, I'd like to additionally specify:
