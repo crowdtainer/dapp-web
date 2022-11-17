@@ -188,6 +188,7 @@ export type UIFields = {
     tokenDecimals: number;
     prices: number[];
     descriptions: string[];
+    signer: string;
 };
 
 export function prepareForUI(data: CrowdtainerStaticModel): UIFields {
@@ -202,6 +203,7 @@ export function prepareForUI(data: CrowdtainerStaticModel): UIFields {
         tokenSymbol: tokenSymbolPretty(data.tokenSymbol),
         tokenDecimals: data.tokenDecimals ? data.tokenDecimals : 0, // TODO
         prices: toHumanPrices(data.prices, data.tokenDecimals),
-        descriptions: prettyDescription(data.productDescription)
+        descriptions: prettyDescription(data.productDescription),
+        signer: prettifyAddress(data.signer),
     };
 }

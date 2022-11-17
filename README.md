@@ -112,8 +112,8 @@ npm run preview
     - ✅ Add requirement of participant signing Terms and Conditions with their wallet.
     - ✅ E-mail / code verification.
     - ✅ Server checks if code + Terms & Conditions signature are valid.
-    - ◻️ Button to effectively 'join' the project via CCIP-Read method.
-        - To join the project call `ICrowdtainer.joinWithSignature()`.
+    - ✅ Button to effectively 'join' the project via CCIP-Read method.
+        - ✅ To join the project call `ICrowdtainer.joinWithSignature()`.
 
 - ◻️ I'd like an interface/button to claim refunds if the sale was not successful.
     - Only possible if the project is in `Failed` state.
@@ -126,7 +126,7 @@ npm run preview
 
 - ◻️ Possibility of transfering NFT/participation proof ownership to another wallet.
 
-- ◻️ "Checkout" button (available once funded/suceeded) to conclude the order with service provider.
+- ◻️ "Checkout" button (available once funded/suceeded) to conclude the order with service provider (providing delivery address details).
 
 - ◻️ "Download Invoice" button (available once "Checkout" succeeded).
 

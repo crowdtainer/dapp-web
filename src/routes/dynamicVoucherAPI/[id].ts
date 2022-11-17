@@ -14,7 +14,7 @@ import type { CrowdtainerDynamicModel, CrowdtainerStaticModel, Error } from '$li
 import { Vouchers721Address } from '../data/projects.json';
 import { crowdtainerStaticDataMap } from '../../hooks/cache';
 
-import { Network, Alchemy } from 'alchemy-sdk';
+// import { Network, Alchemy } from 'alchemy-sdk';
 
 const settings = {
    apiKey: import.meta.env.VITE_RPC_API_KEY,

@@ -21,7 +21,9 @@
 		let response = await fetchUserBalancesData(getSigner(), crowdtainerAddress);
 		if (response.isOk()) {
 			walletData = response.unwrap();
-			console.log(`crowdtainerAddress: ${crowdtainerAddress} allowance: ${walletData.erc20Allowance}, balance: ${walletData.erc20Balance}`);
+			console.log(
+				`crowdtainerAddress: ${crowdtainerAddress} allowance: ${walletData.erc20Allowance}, balance: ${walletData.erc20Balance}`
+			);
 		} else {
 			console.log(`hm, ${response.unwrapErr()}`);
 		}
@@ -60,31 +62,27 @@
 			{/if}
 		</div>
 
-		{#if enoughFunds && enoughAllowance}
-			<button type="button" class="sky-btn" on:click={callJoinProjectHandler}>
-				Confirm & Join
-			</button>
-		{:else if enoughFunds && !enoughAllowance}
-			<button
-				type="button"
-				disabled={!actionButtonEnabled}
-				class="sky-btn"
-				on:click={callApproveSpendingHandler}
-			>
-				{#if actionButtonEnabled}
-					{#if tokenSymbol !== undefined}
-						Authorize spending ({totalSum} {tokenSymbol})
-					{:else}
-						Authorize spending
-					{/if}
+		<button
+			type="button"
+			disabled={!actionButtonEnabled || !enoughFunds}
+			class={actionButtonEnabled && enoughFunds ? 'sky-btn' : 'gray-btn'}
+			on:click={() => {
+				if (enoughFunds && enoughAllowance) {
+					callJoinProjectHandler();
+				} else if (enoughFunds && !enoughAllowance) {
+					callApproveSpendingHandler();
+				}
+			}}
+		>
+			{#if actionButtonEnabled && enoughFunds && !enoughAllowance}
+				{#if tokenSymbol !== undefined}
+					Authorize spending ({totalSum} {tokenSymbol})
 				{:else}
-					Waiting for confirmation..
+					Authorize spending
 				{/if}
-			</button>
-		{:else}
-			<button type="button" disabled={true} class="btn btn-outline w-42 mt-6 py-4">
-				Confirm & Join
-			</button>
-		{/if}
+			{:else}
+				Confirm and Join
+			{/if}
+		</button>
 	</div>
 </div>

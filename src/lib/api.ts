@@ -45,7 +45,7 @@ export async function requestEmailAuthorizationAPI(email: string, code: string):
 	return result.text();
 }
 
-export async function requestWalletAuthorizationAPI(wallet:string, email: string, sigHash: string): Promise<string> {	
+export async function requestWalletAuthorizationAPI(wallet: string, email: string, sigHash: string): Promise<string> {
 	let result: Response;
 
 	result = await fetch(`authorizeWalletAPI/${wallet}`, {
@@ -53,4 +53,36 @@ export async function requestWalletAuthorizationAPI(wallet:string, email: string
 		body: JSON.stringify({ email: email, signatureHash: sigHash })
 	});
 	return result.text();
+}
+
+// Note: This function can be removed once ethers supports EIP-3668. Until then, parameters
+// needs to be generated / encoded manually, then joinWithSignature() called directly with authorization payload.
+import { AuthorizationGateway__factory } from '../routes/typechain/factories/Crowdtainer.sol/AuthorizationGateway__factory';
+import { ethers } from "ethers";
+export async function requestAuthorizationProof(wallet: string,
+	crowdtainerAddress: string,
+	quantities: Number[],
+	enableReferral: boolean,
+	referralAddress: string
+): Promise<Result<[string, string], string>> {
+
+	const abiInterface = new ethers.utils.Interface(JSON.stringify(AuthorizationGateway__factory.abi));
+	const calldata = abiInterface.encodeFunctionData('getSignedJoinApproval',
+		[crowdtainerAddress, wallet, quantities, enableReferral, referralAddress]);
+
+	let result: Response = await fetch(`authProofAPI/${wallet}`, {
+		method: 'POST',
+		body: JSON.stringify({ calldata: calldata })
+	});
+
+	if(!result.ok) {
+		return Err(await result.text());
+	}
+
+	let response: [string, string];
+	let signedCalldata = await result.text();
+
+	response = [calldata, signedCalldata];
+
+	return Ok(response);
 }

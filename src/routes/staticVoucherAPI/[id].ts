@@ -73,7 +73,8 @@ async function fetchData(crowdtainerId: BigNumber): Promise<Result<CrowdtainerSt
          prices: prices,
          token: await crowdtainerContract.token(),
          tokenDecimals: tokenDecimals,
-         tokenSymbol: await ERC20Contract.symbol()
+         tokenSymbol: await ERC20Contract.symbol(),
+         signer: await crowdtainerContract.getSigner()
       }
 
       crowdtainerStaticDataMap.set(crowdtainerId.toHexString(), crowdtainerData);
