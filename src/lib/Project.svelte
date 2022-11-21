@@ -56,7 +56,7 @@
 
 	let currentSelection = 0;
 	let currentPrice: number;
-	let raised: number;
+	let fundsInContract: number | undefined;
 	let tweeningDuration = 650;
 	let tweenedPercentageWidth = tweened(0, { duration: tweeningDuration, easing: cubicOut });
 	let tweenedPercentageRaised = tweened(0, { duration: tweeningDuration, easing: cubicOut });
@@ -113,14 +113,14 @@
 	function setRaisedAmount() {
 		if (staticDataLoadStatus !== LoadStatus.FetchFailed) {
 			let decimals = campaignStaticUI ? campaignStaticUI.tokenDecimals : undefined;
-			raised = toHuman($campaignDynamicData?.raised, decimals);
+			fundsInContract = toHuman($campaignDynamicData?.fundsInContract, decimals);
 		}
 	}
 
 	function setPercentages() {
-		if (staticDataLoadStatus !== LoadStatus.FetchFailed) {
+		if (staticDataLoadStatus !== LoadStatus.FetchFailed && fundsInContract !== undefined) {
 			let percentage = campaignStaticUI
-				? Number(calculatePercentageRaised(raised.toString(), campaignStaticUI.minimum))
+				? Number(calculatePercentageRaised(fundsInContract.toString(), campaignStaticUI.minimum))
 				: undefined;
 
 			if (percentage) {
@@ -177,6 +177,17 @@
 		dialog.icon = ModalIcon.BadgeCheck;
 		dialog.type = ModalType.Information;
 		dialog.body = 'You have left the project and the pre-payment has been returned to your wallet.';
+	}
+
+	function handleUserClaimedFundsEvent(event: CustomEvent) {
+		console.log(`Detected event of type: ${event.type} : detail: ${event.detail.text}`);
+		dialog.visible = true;
+		dialog.title = 'Success';
+		dialog.animation = ModalAnimation.None;
+		dialog.icon = ModalIcon.BadgeCheck;
+		dialog.type = ModalType.Information;
+		dialog.body =
+			'The value equivalent to your pre-payment amount has been returned to your wallet.';
 	}
 
 	// dynamic
@@ -239,7 +250,7 @@
 								<p class="projectDataSubtitle">Status</p>
 							</div>
 
-							<MoneyInContract {raised} {campaignStaticUI} {state} />
+							<MoneyInContract {fundsInContract} {campaignStaticUI} {state} />
 
 							<div class="">
 								{#if campaignStaticUI}
@@ -358,7 +369,7 @@
 				{/if}
 				{#if !userFundsInCrowdtainer.isZero() && campaignStaticUI !== undefined}
 					<p class="text-md text-lg text-left mt-3 mb-6">
-						{#if state === ProjectStatusUI.Failed}
+						{#if state === ProjectStatusUI.Failed || state === ProjectStatusUI.ServiceProviderDeclined}
 							You can withdrawl {ethers.utils.formatUnits(
 								`${userFundsInCrowdtainer}`,
 								BigNumber.from(campaignStaticUI.tokenDecimals)
@@ -380,6 +391,7 @@
 								projectStatusUI={state}
 								tokenSymbol={campaignStaticUI.tokenSymbol}
 								on:userLeftCrowdtainerEvent={handleCampaignLeftEvent}
+								on:userClaimedFundsEvent={handleUserClaimedFundsEvent}
 							/>
 						{/if}
 					</div>

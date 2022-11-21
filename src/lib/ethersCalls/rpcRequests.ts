@@ -24,11 +24,11 @@ import { decodeEthersError } from '$lib/Converters/EthersErrorHandler';
 
 function makeError(error: any): Result<ContractTransaction, string> {
     let errorDecoderResult = decodeEthersError(error);
-        if(errorDecoderResult.isErr()) {
-            return Err(`${errorDecoderResult.unwrapErr()}`);
-        } else {
-            return Err(`${errorDecoderResult.unwrap()}`);
-        }
+    if (errorDecoderResult.isErr()) {
+        return Err(`${errorDecoderResult.unwrapErr()}`);
+    } else {
+        return Err(`${errorDecoderResult.unwrap()}`);
+    }
 }
 
 export async function walletFundsInCrowdtainer(provider: ethers.Signer | undefined,
@@ -43,7 +43,6 @@ export async function walletFundsInCrowdtainer(provider: ethers.Signer | undefin
     try {
         const crowdtainerContract = Crowdtainer__factory.connect(crowdtainerAddress, provider);
         fundsInCrowdtainer = await crowdtainerContract.costForWallet(wallet);
-
     } catch (error) {
         return Err(`${error}`);
     }
@@ -122,6 +121,23 @@ export async function leaveProject(provider: ethers.Signer | undefined,
 
     return Err("Did not find token for given wallet.")
 }
+
+export async function claimFunds(provider: ethers.Signer | undefined,
+    crowdtainerAddress: string): Promise<Result<ContractTransaction, string>> {
+
+    if (provider === undefined) {
+        return Err("Provider not available.");
+    }
+
+    try {
+        const crowdtainerContract = Crowdtainer__factory.connect(crowdtainerAddress, provider);
+        let claimFundsTransaction = await crowdtainerContract.claimFunds();
+        return Ok(claimFundsTransaction);
+    } catch (error) {
+        return makeError(error);
+    }
+}
+
 
 export async function checkAllowance(signerAddress: string,
     erc20Contract: IERC20,

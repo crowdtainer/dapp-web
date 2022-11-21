@@ -15,7 +15,7 @@
 		ModalType,
 		type ModalDialogData
 	} from './ModalDialog.svelte';
-	import { leaveProject } from './ethersCalls/rpcRequests';
+	import { claimFunds, leaveProject } from './ethersCalls/rpcRequests';
 
 	// Wallet management
 	import { getSigner } from '$lib/wallet';
@@ -24,6 +24,12 @@
 
 	function userLeftCrowdtainer() {
 		dispatch('userLeftCrowdtainerEvent', {
+			text: `${crowdtainerAddress}`
+		});
+	}
+
+	function userClaimedFunds() {
+		dispatch('userClaimedFundsEvent', {
 			text: `${crowdtainerAddress}`
 		});
 	}
@@ -61,7 +67,25 @@
 	};
 
 	let callClaimFunds = async () => {
-		// TODO
+		dialog.type = ModalType.ActionRequest;
+		dialog.title = 'Claim funds';
+		dialog.body = 'Please confirm the transaction request in your mobile wallet.';
+		dialog.animation = ModalAnimation.Circle2;
+		dialog.visible = true;
+
+		let signResult = await claimFunds(getSigner(), crowdtainerAddress);
+
+		if (signResult.isErr()) {
+			dialog.visible = true;
+			dialog.title = 'Transaction rejected';
+			dialog.body = 'Your request to leave the project was not completed.';
+			dialog.animation = ModalAnimation.None;
+			dialog.icon = ModalIcon.Exclamation;
+			console.log(`Failure!? ${signResult.unwrapErr()}`);
+			return;
+		}
+
+		userClaimedFunds();
 	}
 
 </script>
