@@ -11,6 +11,7 @@
 		Diamonds
 	}
 	export enum ModalType {
+		DataInput,
 		ActionRequest,
 		Information
 	}
@@ -44,7 +45,7 @@
 <div class="modal {modalDialogData.visible ? 'modal-open' : ''} modal-bottom sm:modal-middle">
 	<div class="modal-box">
 		<h3 class="font-bold text-lg">{modalDialogData.title}</h3>
-		<div class="h-20 flex justify-center my-8">
+		<div class="h-20 flex justify-center mt-8">
 			<div class="flex flex-row">
 				{#if modalDialogData.visible}
 					{#if modalDialogData.animation !== ModalAnimation.None}
@@ -71,20 +72,25 @@
 				{/if}
 			</div>
 		</div>
-		<div class="flex justify-center">
-			<button
-				type="button"
-				class={modalDialogData.type === ModalType.ActionRequest ? 'red-action-btn' : 'active-btn'}
-				on:click={async () => {
-					modalDialogData.visible = false;
-				}}
-			>
-				{#if modalDialogData.type === ModalType.ActionRequest}
-					Close
-				{:else}
-					Ok
-				{/if}
-			</button>
-		</div>
+
+		<slot />
+
+		{#if modalDialogData.type !== ModalType.DataInput}
+			<div class="flex justify-center">
+				<button
+					type="button"
+					class={modalDialogData.type === ModalType.ActionRequest ? 'red-action-btn' : 'active-btn'}
+					on:click={async () => {
+						modalDialogData.visible = false;
+					}}
+				>
+					{#if modalDialogData.type === ModalType.ActionRequest}
+						Close
+					{:else}
+						Ok
+					{/if}
+				</button>
+			</div>
+		{/if}
 	</div>
 </div>

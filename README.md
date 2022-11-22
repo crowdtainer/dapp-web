@@ -119,16 +119,16 @@ npm run preview
     - ✅ Button to effectively 'join' the project via CCIP-Read method.
         - ✅ To join the project call `ICrowdtainer.joinWithSignature()`.
 
-- ◻️ I'd like an interface/button to claim refunds if the sale was not successful.
+- ✅ I'd like an interface/button to claim refunds if the sale was not successful.
     - Only possible if the project is in `Failed` state.
     - Use `Crowdtainer.claimFunds()` method.
 
-- ◻️ After joining, I'd like to see my own purchase/voucher details, as a SVG image.
+- ✅ After joining, I'd like to see my own purchase/voucher details, as a SVG image.
     - Use `Vouchers721.tokenUri()` to get the generated image.
 
-- ◻️ I'd like an interface to see how much I bought for each type of product, to get an overview of my own orders.
+- ✅ I'd like an interface to see how much I bought for each type of product, to get an overview of my own orders.
 
-- ◻️ Button to transfer NFT/participation proof ownership to another wallet.
+- ✅ Button to transfer NFT/participation proof ownership to another wallet.
 
 - ◻️ "Checkout" button (available once funded/suceeded) to conclude the order with service provider (providing delivery address details).
 

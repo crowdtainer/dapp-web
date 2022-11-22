@@ -55,11 +55,9 @@ async function fetchData(crowdtainerId: BigNumber): Promise<Result<CrowdtainerDy
          erc20Contract = erc20ContractResult.unwrap();
       }
 
-      let raised = await crowdtainerContract.totalValueRaised();
-
       let crowdtainerData: CrowdtainerDynamicModel = {
          status: state,
-         raised: raised,
+         raised: await crowdtainerContract.totalValueRaised(),
          fundsInContract: await erc20Contract.balanceOf(crowdtainerAddress)
       }
 
