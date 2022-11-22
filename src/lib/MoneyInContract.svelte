@@ -5,7 +5,7 @@
 	import { ProjectStatusUI } from './Converters/CrowdtainerData';
 
 	export let campaignStaticUI: UIFields | undefined;
-	export let raised: number;
+	export let fundsInContract: number | undefined;
 	export let state: ProjectStatusUI | undefined;
 
 	let moneyFormatter = new Intl.NumberFormat('en-GB', {
@@ -17,11 +17,11 @@
 	let tweeningDuration = 650;
 	let tweenedRaised = tweened(0, { duration: tweeningDuration, easing: cubicOut });
 
-	function setRaisedAmount(raised: number) {
-		tweenedRaised.set(raised);
+	function setRaisedAmount(raised: number | undefined) {
+		raised === undefined ? tweenedRaised.set(0) : tweenedRaised.set(raised);
 	}
 
-	$: setRaisedAmount(raised);
+	$: setRaisedAmount(fundsInContract);
 </script>
 
 <div class="">

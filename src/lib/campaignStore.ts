@@ -3,13 +3,14 @@ import { readable, type Readable } from 'svelte/store';
 import type { CrowdtainerDynamicModel } from '$lib/Model/CrowdtainerModel';
 import { fetchDynamicData, type Error } from '$lib/api';
 
-const fetchInterval : number = ( import.meta.env.DEV ? 10000 : 18000);
+const fetchInterval: number = (import.meta.env.DEV ? 10000 : 18000);
 
 export let campaignStores = new Map<number, Readable<CrowdtainerDynamicModel>>;
 
 let defaultData: CrowdtainerDynamicModel = {
 	status: undefined,
 	raised: undefined,
+	fundsInContract: undefined
 }
 
 export const initializeCampaignStores = (campaignId: number): Readable<CrowdtainerDynamicModel> | undefined => {

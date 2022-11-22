@@ -5,6 +5,7 @@
 	export let crowdtainerAddress: string;
 	export let projectStatusUI: ProjectStatusUI;
 	export let tokenSymbol: string;
+	export let userFundsInCrowdtainer: BigNumber;
 	export const wallet: string | undefined = undefined;
 
 	import { createEventDispatcher } from 'svelte';
@@ -15,15 +16,22 @@
 		ModalType,
 		type ModalDialogData
 	} from './ModalDialog.svelte';
-	import { leaveProject } from './ethersCalls/rpcRequests';
+	import { claimFunds, leaveProject } from './ethersCalls/rpcRequests';
 
 	// Wallet management
 	import { getSigner } from '$lib/wallet';
+	import type { BigNumber } from 'ethers';
 
 	const dispatch = createEventDispatcher();
 
 	function userLeftCrowdtainer() {
 		dispatch('userLeftCrowdtainerEvent', {
+			text: `${crowdtainerAddress}`
+		});
+	}
+
+	function userClaimedFunds() {
+		dispatch('userClaimedFundsEvent', {
 			text: `${crowdtainerAddress}`
 		});
 	}
@@ -61,9 +69,26 @@
 	};
 
 	let callClaimFunds = async () => {
-		// TODO
-	}
+		dialog.type = ModalType.ActionRequest;
+		dialog.title = 'Claim funds';
+		dialog.body = 'Please confirm the transaction request in your mobile wallet.';
+		dialog.animation = ModalAnimation.Circle2;
+		dialog.visible = true;
 
+		let signResult = await claimFunds(getSigner(), crowdtainerAddress);
+
+		if (signResult.isErr()) {
+			dialog.visible = true;
+			dialog.title = 'Transaction rejected';
+			dialog.body = 'Your request to leave the project was not completed.';
+			dialog.animation = ModalAnimation.None;
+			dialog.icon = ModalIcon.Exclamation;
+			console.log(`Failure!? ${signResult.unwrapErr()}`);
+			return;
+		}
+
+		userClaimedFunds();
+	};
 </script>
 
 <slot>
@@ -141,7 +166,7 @@
 			</div>
 		{/if}
 
-		{#if projectStatusUI === ProjectStatusUI.Funding}
+		{#if !userFundsInCrowdtainer.isZero() && projectStatusUI === ProjectStatusUI.Funding}
 			<!-- Get pre-payment back -->
 			<div class="p-0.5 mb-2 m-2 has-tooltip">
 				<span class="tooltip rounded shadow-lg p-1 bg-gray-100 text-red-500 mt-40">
@@ -164,7 +189,7 @@
 			</div>
 		{/if}
 
-		{#if projectStatusUI === ProjectStatusUI.Failed || projectStatusUI === ProjectStatusUI.ServiceProviderDeclined}
+		{#if !userFundsInCrowdtainer.isZero() && (projectStatusUI === ProjectStatusUI.Failed || projectStatusUI === ProjectStatusUI.ServiceProviderDeclined)}
 			<!-- Get pre-payment back -->
 			<div class="p-0.5 mb-2 m-2 has-tooltip">
 				<span class="tooltip rounded shadow-lg p-1 bg-gray-100 text-red-500 mt-40">

@@ -1,5 +1,89 @@
 <script lang="ts">
-	import CampaignActions from '$lib/CampaignActions.svelte';
+	import { fetchStaticData } from '$lib/api';
+	import { LoadStatus, prepareForUI, toDate, type UIFields } from '$lib/Converters/CrowdtainerData';
+	import { findTokenIdsForWallet } from '$lib/ethersCalls/rpcRequests';
+	import type { CrowdtainerStaticModel } from '$lib/Model/CrowdtainerModel';
+	import MyCampaign from '$lib/MyCampaign.svelte';
+
+	import { projects, Vouchers721Address } from './data/projects.json';
+	import { connected, getSigner, accountAddress } from '$lib/wallet';
+	import EmptySection from '$lib/EmptySection.svelte';
+	import { connect } from '$lib/wallet';
+	import { WalletType } from '$lib/walletStorage';
+
+	let tokenIds: number[] = [];
+	let crowdtainerIds: number[] = [];
+
+	let campaignStaticData = new Map<number, CrowdtainerStaticModel>();
+	let campaignStaticUI: Map<number, UIFields> = new Map<number, UIFields>();
+	let staticDataLoadStatus: LoadStatus = LoadStatus.Loading;
+	let loadDataInFlight = false;
+
+	function resetState() {
+		tokenIds = [];
+		crowdtainerIds = [];
+		campaignStaticData = new Map<number, CrowdtainerStaticModel>();
+		campaignStaticUI = new Map<number, UIFields>();
+		staticDataLoadStatus = LoadStatus.Loading;
+	}
+
+	function projectFromCrowdtainerId(id: number) {
+		let filtered = projects.filter((element) => {
+			return element.crowdtainerId === id;
+		});
+		return filtered[0];
+	}
+
+	async function loadUserData() {
+		if (loadDataInFlight) return;
+
+		loadDataInFlight = true;
+		console.log('Running loadUserData');
+		resetState();
+
+		let walletTokensSearch = await findTokenIdsForWallet(getSigner(), Vouchers721Address);
+		if (walletTokensSearch.isErr()) {
+			console.log(`Unable to search wallet tokens: ${walletTokensSearch.unwrapErr()}`);
+			//TODO: inform user
+			loadDataInFlight = false;
+			return;
+		}
+
+		let [foundTokenIds, foundCrowdtainerIds, crowdtainerAddresses] = walletTokensSearch.unwrap();
+		console.log(`Found ${foundCrowdtainerIds.length} crowdtainer ids: ${foundCrowdtainerIds}`);
+
+		if (foundTokenIds.length == 0) {
+			loadDataInFlight = false;
+			console.log('No tokens found.');
+			return;
+		}
+
+		foundTokenIds.forEach((item, index) => {
+			tokenIds.push(item.toNumber());
+			crowdtainerIds.push(foundCrowdtainerIds[index].toNumber());
+		});
+
+		let result = await fetchStaticData(crowdtainerIds);
+		if (result.isOk()) {
+			let data = result.unwrap();
+			for (let index = 0; index < data.length; index++) {
+				campaignStaticData.set(foundCrowdtainerIds[index].toNumber(), data[index]);
+				campaignStaticUI.set(foundCrowdtainerIds[index].toNumber(), prepareForUI(data[index]));
+			}
+			staticDataLoadStatus = LoadStatus.Loaded;
+		} else {
+			// TODO: Show user UI/pop-up with error.
+			console.log('Error: %o', result.unwrapErr());
+			staticDataLoadStatus = LoadStatus.FetchFailed;
+		}
+		// sortProjects();
+
+		loadDataInFlight = false;
+		tokenIds = tokenIds;
+	}
+
+	// Immediatelly update UI elements related to connected wallet on wallet or connection change
+	$: $connected, $accountAddress, loadUserData();
 </script>
 
 <header class="ct-divider">
@@ -8,100 +92,40 @@
 	</div>
 </header>
 
-<!-- Project Container start -->
-<div class="max-w-10xl mx-auto py-1 sm:px-2 lg:px-8">
-	<div class="max-w-lg mx-auto bg-white drop-shadow-lg overflow-hidden md:max-w-7xl my-8">
-		<div class="md:flex">
-			<div class="">
-				<img
-					class="my-16 mx-2 h-auto max-h-96 w-full md:h-full md:w-96 blur-[2px]"
-					src="VoucherDemo.svg"
-					alt="Voucher"
-				/>
-			</div>
+{#if $connected && staticDataLoadStatus == LoadStatus.Loaded}
+	{#each tokenIds as tokenId, index}
+		{#if index !== 0}
+			<div class="border-t-2 border-dashed" />
+		{/if}
+		<MyCampaign
+			{tokenId}
+			vouchers721Address={Vouchers721Address}
+			{...projectFromCrowdtainerId(crowdtainerIds[index])}
+			{staticDataLoadStatus}
+			campaignStaticData={campaignStaticData.get(crowdtainerIds[index])}
+			campaignStaticUI={campaignStaticUI.get(crowdtainerIds[index])}
+		/>
+	{/each}
+{/if}
 
-			<div class="p-5">
-				<div class="uppercase tracking-wide text-sm text-indigo-500 font-semibold">
-					COLOMBIA Finca La Esperanza
-				</div>
-				<a href="#" class="block mt-1 text-lg leading-tight font-medium text-black hover:underline">
-					Voucher
-				</a>
-				<p class="mt-5 text-slate-500">Wallet 0xabcdababa77a6a66d7d7ddd6d6d6d6</p>
-				<p class="my-5 "><b>Status:</b> Ready for checkout.</p>
+{#if tokenIds.length == 0 && $connected}
+	<EmptySection emptyMessage="No campaigns associated with the connected wallet." />
+{/if}
 
-				<div class="flex flex-wrap mt-10">
-					<div class="p-0.5 mb-2 m-2 w-48">
-						<button
-							type="button"
-							class="relative inline-flex items-center justify-center overflow-hidden text-sm font-medium text-gray-900 rounded-lg group bg-gradient-to-br from-teal-300 to-lime-300 group-hover:from-teal-300 group-hover:to-lime-300 dark:text-white dark:hover:text-gray-900 focus:ring-4 focus:outline-none focus:ring-lime-200 dark:focus:ring-lime-800"
-						>
-							<span
-								class="h-48 relative px-5 py-6 transition-all ease-in duration-75 bg-white dark:bg-gray-900 rounded-md group-hover:bg-opacity-0"
-							>
-								<div class="flex justify-center items-center">
-									<img width="30" height="30" src="Cart.svg" alt="Leave campaign" />
-								</div>
-								<p class="text-lg my-5">Checkout</p>
-								<p class="text-xs">Complete purchase by requesting your product delivery</p>
-							</span>
-						</button>
-					</div>
-					<div class="p-0.5 mb-2 m-2 w-48">
-						<button
-							class="relative inline-flex items-center justify-center overflow-hidden text-sm font-medium text-gray-900 rounded-lg group bg-gradient-to-br from-red-200 via-red-300 to-yellow-200 group-hover:from-red-200 group-hover:via-red-300 group-hover:to-yellow-200 dark:text-white dark:hover:text-gray-900 focus:ring-4 focus:outline-none focus:ring-red-100 dark:focus:ring-red-400"
-						>
-							<span
-								class="h-48 relative px-5 py-6 transition-all ease-in duration-75 bg-white dark:bg-gray-900 rounded-md group-hover:bg-opacity-0"
-							>
-								<div class="flex justify-center items-center">
-									<img
-										width="30"
-										height="30"
-										src="Transfer.svg"
-										alt="Transfer participation proof to another wallet"
-									/>
-								</div>
-								<p class="text-lg my-5">Transfer</p>
-								<p class="text-xs">Transfer participation proof (NFT) to another wallet</p>
-							</span>
-						</button>
-					</div>
-					<div class="p-0.5 mb-2 m-2 w-48">
-						<button
-							class="relative inline-flex items-center justify-center overflow-hidden text-sm font-medium text-gray-900 rounded-lg group bg-gradient-to-br from-pink-500 to-orange-400 group-hover:from-cyan-500 group-hover:to-blue-500 hover:text-white dark:text-white focus:ring-4 focus:outline-none focus:ring-cyan-200 dark:focus:ring-cyan-800"
-						>
-							<span
-								class="h-48 relative px-5 py-6 transition-all ease-in duration-75 bg-white dark:bg-gray-900 rounded-md group-hover:bg-opacity-0"
-							>
-								<div class="flex justify-center items-center">
-									<img width="30" height="30" src="Exit.svg" alt="Leave campaign" />
-								</div>
-								<p class="text-lg my-5">Leave</p>
-								<p class="text-xs">Leave the campaign and get USDC back</p>
-							</span>
-						</button>
-						<div />
-					</div>
-					<div class="p-0.5 mb-2 m-2 w-48">
-						<button
-							type="button"
-							class="relative inline-flex items-center justify-center overflow-hidden text-sm font-medium text-gray-900 rounded-lg group bg-gradient-to-br from-teal-300 to-lime-300 group-hover:from-teal-300 group-hover:to-lime-300 dark:text-white dark:hover:text-gray-900 focus:ring-4 focus:outline-none focus:ring-lime-200 dark:focus:ring-lime-800"
-						>
-							<span
-								class="h-48 relative px-5 py-6 transition-all ease-in duration-75 bg-white dark:bg-gray-900 rounded-md group-hover:bg-opacity-0"
-							>
-								<div class="flex justify-center items-center">
-									<img width="30" height="30" src="Download.svg" alt="Download invoice" />
-								</div>
-								<p class="text-lg my-8">Download Invoice</p>
-							</span>
-						</button>
-						<div />
-					</div>
-				</div>
-			</div>
+{#if !$connected}
+	<EmptySection>
+		<p class="text-center mx-2 my-2">Please connect your wallet to continue.</p>
+		<br />
+
+		<div class="flex justify-center ">
+			<button
+				class="btn btn-outline"
+				on:click={() => {
+					connect(WalletType.WalletConnect);
+				}}
+			>
+				Connect Wallet
+			</button>
 		</div>
-	</div>
-</div>
-<!-- Project Container End -->
+	</EmptySection>
+{/if}

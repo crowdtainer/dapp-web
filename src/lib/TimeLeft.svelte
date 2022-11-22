@@ -1,28 +1,35 @@
 <script lang="ts">
-    import { onMount } from 'svelte';
+	import { onMount } from 'svelte';
 	import { onInterval } from '$lib/intervalTimer';
-    import { getTimeRemaining } from '$lib/Converters/time';
+	import { getTimeRemaining } from '$lib/Converters/time';
 
-    export let endTime: Date;
+	export let endTime: Date;
 
-    let interval = 5000;
-    let outputString: string;
+	let interval = 1000;
+	let outputString: string;
 
-    onMount(() => {
-        update();
-    });
+	onMount(() => {
+		update();
+	});
 
-    function update(){
-        const [days, hours, minutes, seconds] = getTimeRemaining(endTime);
-        if(days > 0) {
-            outputString = `${days} days`;
-            return;
-        }
-        let day = days === 0 ? '' : `${days}d`;
-        let hour = hours === 0 ? '' : `${hours}h`;
-        // outputString = `${day} ${hour} ${minutes}m ${seconds}s`;
-        outputString = `${day} ${hour} ${minutes} min`;
-    }
+	function update() {
+		const [days, hours, minutes, seconds] = getTimeRemaining(endTime);
+
+		if (days > 0) {
+			outputString = `${days} days`;
+			return;
+		}
+
+		if (days === 0 && hours === 0 && minutes === 0 && seconds >= 0) {
+			outputString = `${seconds} seconds`;
+			return;
+		}
+
+		let day = days === 0 ? '' : `${days}d`;
+		let hour = hours === 0 ? '' : `${hours}h`;
+		// outputString = `${day} ${hour} ${minutes}m ${seconds}s`;
+		outputString = `${day} ${hour} ${minutes} min`;
+	}
 
 	onInterval(update, interval);
 </script>
