@@ -13,6 +13,7 @@
 
 	import TimeLeft from './TimeLeft.svelte';
 	import MoneyInContract from './MoneyInContract.svelte';
+	import DetailedTokenIdState from './DetailedTokenIdState.svelte';
 	import CampaignActions from './CampaignActions.svelte';
 
 	import type {
@@ -57,6 +58,7 @@
 	let currentSelection = 0;
 	let currentPrice: number;
 	let fundsInContract: number | undefined;
+	let raisedAmount: number | undefined;
 	let tweeningDuration = 650;
 	let tweenedPercentageWidth = tweened(0, { duration: tweeningDuration, easing: cubicOut });
 	let tweenedPercentageRaised = tweened(0, { duration: tweeningDuration, easing: cubicOut });
@@ -114,13 +116,14 @@
 		if (staticDataLoadStatus !== LoadStatus.FetchFailed) {
 			let decimals = campaignStaticUI ? campaignStaticUI.tokenDecimals : undefined;
 			fundsInContract = toHuman($campaignDynamicData?.fundsInContract, decimals);
+			raisedAmount = toHuman($campaignDynamicData?.raised, decimals);
 		}
 	}
 
 	function setPercentages() {
-		if (staticDataLoadStatus !== LoadStatus.FetchFailed && fundsInContract !== undefined) {
+		if (staticDataLoadStatus !== LoadStatus.FetchFailed && raisedAmount !== undefined) {
 			let percentage = campaignStaticUI
-				? Number(calculatePercentageRaised(fundsInContract.toString(), campaignStaticUI.minimum))
+				? Number(calculatePercentageRaised(raisedAmount.toString(), campaignStaticUI.minimum))
 				: undefined;
 
 			if (percentage) {
@@ -203,15 +206,16 @@
 			? toStateString($campaignDynamicData, campaignStaticData)
 			: loadingString;
 
-	$: $campaignDynamicData, setRaisedAmount();
-	$: $campaignDynamicData, setPercentages();
+	$: $campaignDynamicData, setRaisedAmount(), setPercentages();
 	$: loadingAnimation = staticDataLoadStatus === LoadStatus.Loading;
 
 	// Immediatelly update UI elements related to connected wallet on wallet or connection change
 	$: $connected, $accountAddress, readDataForConnectedWallet();
 </script>
 
-<ModalDialog modalDialogData={dialog} />
+{#if dialog.visible}
+	<ModalDialog modalDialogData={dialog} />
+{/if}
 
 <div class="max-w-10xl mx-auto py-1 sm:px-6 lg:px-8">
 	<div class="border-2 max-w-lg mx-auto white overflow-hidden md:max-w-7xl my-8">
@@ -250,7 +254,7 @@
 								<p class="projectDataSubtitle">Status</p>
 							</div>
 
-							<MoneyInContract {fundsInContract} {campaignStaticUI} {state} />
+							<MoneyInContract {fundsInContract} {raisedAmount} {campaignStaticUI} {state} />
 
 							<div class="">
 								{#if campaignStaticUI}
@@ -367,36 +371,27 @@
 				{:else}
 					<p class="my-6 text-red-800">Error fetching data.</p>
 				{/if}
-				{#if !userFundsInCrowdtainer.isZero() && campaignStaticUI !== undefined}
-					<p class="text-md text-lg text-left mt-3 mb-6">
-						{#if state === ProjectStatusUI.Failed || state === ProjectStatusUI.ServiceProviderDeclined}
-							You can withdrawl {ethers.utils.formatUnits(
-								`${userFundsInCrowdtainer}`,
-								BigNumber.from(campaignStaticUI.tokenDecimals)
-							)}
-							{campaignStaticUI.tokenSymbol} from this campaign.
-						{:else}
-							You have joined this project with a contribution of {ethers.utils.formatUnits(
-								`${userFundsInCrowdtainer}`,
-								BigNumber.from(campaignStaticUI.tokenDecimals)
-							)}
-							{campaignStaticUI.tokenSymbol}.
-						{/if}
-					</p>
-					<div class="w-auto flex ">
-						{#if campaignStaticData !== undefined}
-							<CampaignActions
-								{vouchers721Address}
-								crowdtainerAddress={campaignStaticData?.contractAddress}
-								projectStatusUI={state}
-								tokenSymbol={campaignStaticUI.tokenSymbol}
-								{userFundsInCrowdtainer}
-								on:userLeftCrowdtainerEvent={handleCampaignLeftEvent}
-								on:userClaimedFundsEvent={handleUserClaimedFundsEvent}
-							/>
-						{/if}
-					</div>
-				{/if}
+
+				<DetailedTokenIdState
+					{userFundsInCrowdtainer}
+					{campaignStaticUI}
+					{fundsInContract}
+					{raisedAmount}
+					{state}
+				/>
+
+				<div class="w-auto flex ">
+					{#if campaignStaticData !== undefined && campaignStaticUI !== undefined}
+						<CampaignActions
+							{vouchers721Address}
+							crowdtainerAddress={campaignStaticData?.contractAddress}
+							projectStatusUI={state}
+							tokenSymbol={campaignStaticUI.tokenSymbol}
+							{userFundsInCrowdtainer}
+							on:userClaimedFundsEvent={handleUserClaimedFundsEvent}
+						/>
+					{/if}
+				</div>
 			</div>
 		</div>
 

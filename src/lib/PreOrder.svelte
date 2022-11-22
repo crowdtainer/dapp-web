@@ -280,7 +280,9 @@
 	};
 </script>
 
-<ModalDialog {modalDialogData} />
+{#if modalDialogData.visible}
+	<ModalDialog {modalDialogData} />
+{/if}
 
 {#if $totalSum > 0}
 	<div transition:slide={{ duration: 150 }}>

@@ -8,20 +8,6 @@ import type { IERC20 } from 'src/routes/typechain/IERC20';
 import type { UserStoreModel } from '$lib/Model/UserStoreModel';
 import { decodeEthersError } from '$lib/Converters/EthersErrorHandler';
 
-// TODO: next steps:
-// - Adapt frontend to react to smart contract state updates:
-//      - ERC20 Approval status. ✅
-//      - Join button enabled when approval is granted. ✅
-//      - Frontend should hide "add to pre-order button" if user already joined. ✅
-//      - Implement "Leave" when campaign is in 'Funding' state. ✅
-//      - Implement "JoinWithSignature". ✅
-//      - Implement "Claim funds" for failed projects (in my wallet page). ✅
-//      - Implement "My wallet" page, showing all participation proofs with its details. ✅
-//      - Implement "Transfer to another wallet" button. // TODO: Continue here
-//      - Frontend should show button to direct user to wallet tab when already joined.
-//      - Implement "Checkout" button (add delivery address, persist in backend).
-//      - Implement "Download invoice" button.
-
 function makeError(error: any): Result<ContractTransaction, string> {
     let errorDecoderResult = decodeEthersError(error);
     if (errorDecoderResult.isErr()) {
@@ -171,6 +157,21 @@ export async function claimFunds(provider: ethers.Signer | undefined,
     }
 }
 
+export async function transferToken(provider: ethers.Signer | undefined,
+    vouchers721Address: string, targetWallet: string, tokenId: number): Promise<Result<ContractTransaction, string>> {
+
+    if (provider === undefined) {
+        return Err("Provider not available.");
+    }
+
+    try {
+        const vouchers721Contract = Vouchers721__factory.connect(vouchers721Address, provider);
+        let claimFundsTransaction = await vouchers721Contract.transferFrom(provider.getAddress(), targetWallet, BigNumber.from(tokenId));
+        return Ok(claimFundsTransaction);
+    } catch (error) {
+        return makeError(error);
+    }
+}
 
 export async function checkAllowance(signerAddress: string,
     erc20Contract: IERC20,

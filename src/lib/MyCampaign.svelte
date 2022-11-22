@@ -4,9 +4,10 @@
 
 	import { initializeCampaignStores, campaignStores } from '$lib/campaignStore';
 	import { getTokenURI, walletFundsInCrowdtainer } from './ethersCalls/rpcRequests';
-	import { BigNumber, ethers, Signer } from 'ethers';
+	import { BigNumber, Signer } from 'ethers';
 
 	import CampaignActions from './CampaignActions.svelte';
+	import DetailedTokenIdState from './DetailedTokenIdState.svelte';
 
 	import type {
 		CrowdtainerDynamicModel,
@@ -19,7 +20,7 @@
 		type UIFields,
 		LoadStatus,
 		loadingString,
-		ProjectStatusUI
+
 	} from '$lib/Converters/CrowdtainerData';
 
 	import { connected, getSigner, accountAddress } from '$lib/wallet';
@@ -46,6 +47,7 @@
 	let campaignDynamicData: Readable<CrowdtainerDynamicModel> | undefined;
 
 	let fundsInContract: number | undefined;
+	let raisedAmount: number | undefined;
 	let userFundsInCrowdtainer: BigNumber = BigNumber.from(0);
 	let svg: string | undefined;
 
@@ -128,6 +130,7 @@
 		if (staticDataLoadStatus !== LoadStatus.FetchFailed) {
 			let decimals = campaignStaticUI ? campaignStaticUI.tokenDecimals : undefined;
 			fundsInContract = toHuman($campaignDynamicData?.fundsInContract, decimals);
+			raisedAmount = toHuman($campaignDynamicData?.raised, decimals);
 		}
 	}
 
@@ -159,7 +162,9 @@
 	$: $connected, $accountAddress, readDataForConnectedWallet();
 </script>
 
-<ModalDialog modalDialogData={dialog} />
+{#if dialog.visible}
+	<ModalDialog modalDialogData={dialog} />
+{/if}
 
 <div class="max-w-10xl mx-auto py-1 sm:px-6 lg:px-8">
 	<div class="border-2 max-w-lg mx-auto white overflow-hidden md:max-w-7xl my-8">
@@ -207,29 +212,18 @@
 				{:else}
 					<p class="my-6 text-red-800">Error fetching data.</p>
 				{/if}
-				{#if !userFundsInCrowdtainer.isZero() && campaignStaticUI !== undefined}
-					<p class="text-md text-lg text-left mt-3 mb-6">
-						{#if state === ProjectStatusUI.Failed || state === ProjectStatusUI.ServiceProviderDeclined}
-							• You can withdrawl {ethers.utils.formatUnits(
-								`${userFundsInCrowdtainer}`,
-								BigNumber.from(campaignStaticUI.tokenDecimals)
-							)}
-							{campaignStaticUI.tokenSymbol} from this campaign.
-						{:else}
-							• You have joined this project with a contribution of {ethers.utils.formatUnits(
-								`${userFundsInCrowdtainer}`,
-								BigNumber.from(campaignStaticUI.tokenDecimals)
-							)}
-							{campaignStaticUI.tokenSymbol}.
-						{/if}
-						{#if state === ProjectStatusUI.SuccessfulyFunded}
-							<p>• Waiting for service provider confirmation.</p>
-						{/if}
-					</p>
-				{/if}
+				<DetailedTokenIdState
+				{userFundsInCrowdtainer}
+				{campaignStaticUI}
+				{fundsInContract}
+				{raisedAmount}
+				{state}
+			/>
+
 				<div class="w-auto flex ">
 					{#if campaignStaticData !== undefined && campaignStaticUI !== undefined}
 						<CampaignActions
+							{tokenId}
 							{vouchers721Address}
 							crowdtainerAddress={campaignStaticData?.contractAddress}
 							projectStatusUI={state}

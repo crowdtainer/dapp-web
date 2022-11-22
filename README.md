@@ -128,7 +128,7 @@ npm run preview
 
 - ✅ I'd like an interface to see how much I bought for each type of product, to get an overview of my own orders.
 
-- ◻️ Button to transfer NFT/participation proof ownership to another wallet.
+- ✅ Button to transfer NFT/participation proof ownership to another wallet.
 
 - ◻️ "Checkout" button (available once funded/suceeded) to conclude the order with service provider (providing delivery address details).
 
