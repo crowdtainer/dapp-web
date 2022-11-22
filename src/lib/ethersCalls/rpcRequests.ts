@@ -15,9 +15,9 @@ import { decodeEthersError } from '$lib/Converters/EthersErrorHandler';
 //      - Frontend should hide "add to pre-order button" if user already joined. ✅
 //      - Implement "Leave" when campaign is in 'Funding' state. ✅
 //      - Implement "JoinWithSignature". ✅
-//      - Implement "Claim funds" for failed projects (in my wallet page). TODO: Continue here;
-//      - Implement "My wallet" page, showing all participation proofs with its details.
-//      - Implement "Transfer to another wallet" button.
+//      - Implement "Claim funds" for failed projects (in my wallet page). ✅
+//      - Implement "My wallet" page, showing all participation proofs with its details. ✅
+//      - Implement "Transfer to another wallet" button. // TODO: Continue here
 //      - Frontend should show button to direct user to wallet tab when already joined.
 //      - Implement "Checkout" button (add delivery address, persist in backend).
 //      - Implement "Download invoice" button.
@@ -81,36 +81,69 @@ export async function hasEnoughFunds(erc20Contract: IERC20, signerAddress: strin
     return Ok(balance);
 }
 
-export async function leaveProject(provider: ethers.Signer | undefined,
-    vouchers721Address: string,
-    crowdtainerAddress: string): Promise<Result<ContractTransaction, string>> {
-
-    // 1- Get token ids for connected wallet
-    // 2- Filter by the crowdtainer project
-    // 3- Call leave function
+export async function findTokenIdsForWallet(provider: ethers.Signer | undefined,
+    vouchers721Address: string): Promise<Result<[BigNumber[], BigNumber[], string[]], string>> {
 
     if (provider === undefined) {
         return Err("Provider not available.");
     }
 
     try {
-
         const vouchers721Contract = Vouchers721__factory.connect(vouchers721Address, provider);
 
         let wallet = await provider.getAddress();
         let totalTokens = (await vouchers721Contract.balanceOf(wallet)).toNumber();
-        let foundTokenId: BigNumberish;
+
+        let foundTokenIds: BigNumber[] = new Array<BigNumber>();
+        let crowdtainerIds: BigNumber[] = new Array<BigNumber>();
+        let crowdtainerAddresses: string[] = new Array<string>();
 
         for (let index = 0; index < totalTokens; index++) {
-            const element = await vouchers721Contract.tokenOfOwnerByIndex(wallet, BigNumber.from(index));
-            let crowdtainerId = await vouchers721Contract.tokenIdToCrowdtainerId(element);
+            const tokenId = await vouchers721Contract.tokenOfOwnerByIndex(wallet, BigNumber.from(index));
+            let crowdtainerId = await vouchers721Contract.tokenIdToCrowdtainerId(tokenId);
             let foundCrowdtainerAddress = await vouchers721Contract.crowdtainerIdToAddress(crowdtainerId);
-            console.log(`Wallet ${wallet} is owner of tokenId: ${element}, from crowdtainerId ${crowdtainerId} @ address ${foundCrowdtainerAddress}`);
+            console.log(`Wallet ${wallet} is owner of tokenId: ${tokenId}, from crowdtainerId ${crowdtainerId} @ address ${foundCrowdtainerAddress}`);
 
-            if (crowdtainerAddress === foundCrowdtainerAddress) {
-                foundTokenId = element;
-                console.log(`Found tokenId: ${element} of wallet ${wallet} for crowdtainer ${crowdtainerAddress}`);
-                let leaveTransaction = await vouchers721Contract.leave(foundTokenId);
+            foundTokenIds.push(tokenId);
+            crowdtainerIds.push(crowdtainerId);
+            crowdtainerAddresses.push(foundCrowdtainerAddress);
+        }
+
+        let result: [BigNumber[], BigNumber[], string[]] = [foundTokenIds, crowdtainerIds, crowdtainerAddresses];
+        return Ok(result);
+
+    } catch (error) {
+        return Err(`${error}`);
+    }
+}
+
+
+export async function leaveProject(provider: ethers.Signer | undefined,
+    vouchers721Address: string,
+    crowdtainerAddress: string): Promise<Result<ContractTransaction, string>> {
+
+    if (provider === undefined) {
+        return Err("Provider not available.");
+    }
+
+    const vouchers721Contract = Vouchers721__factory.connect(vouchers721Address, provider);
+
+    // 1- Get token ids for connected wallet
+    // 2- Filter by the crowdtainer project
+    // 3- Call leave function
+
+    let searchResult = await findTokenIdsForWallet(provider, vouchers721Address);
+
+    if (searchResult.isErr()) {
+        return Err(searchResult.unwrapErr());
+    }
+
+    let [tokenIds, , crowdtainerAddresses] = searchResult.unwrap();
+
+    try {
+        for (let index = 0; index < tokenIds.length; index++) {
+            if (crowdtainerAddress === crowdtainerAddresses[index]) {
+                let leaveTransaction = await vouchers721Contract.leave(tokenIds[index]);
                 return Ok(leaveTransaction);
             }
         }
@@ -237,4 +270,20 @@ export async function fetchUserBalancesData(provider: ethers.Signer | undefined,
     console.log(`Fetched data. Balance: ${erc20Balance}; Allowance: ${erc20Allowance}, for ${signerAddress}`);
 
     return Ok({ erc20Contract: erc20Contract.unwrap(), erc20Balance: erc20Balance, erc20Allowance: erc20Allowance });
+}
+
+export async function getTokenURI(
+    provider: ethers.Signer | undefined,
+    vouchers721Address: string,
+    tokenId: number): Promise<Result<string, string>> {
+    if (provider === undefined) {
+        return Err("Provider not available.");
+    }
+    try {
+        const vouchers721Contract = Vouchers721__factory.connect(vouchers721Address, provider);
+        let result = await vouchers721Contract.tokenURI(tokenId);
+        return Ok(result);
+    } catch (error) {
+        return Err(`${error}`);
+    }
 }

@@ -4,9 +4,7 @@
 	import { Icon, InformationCircle } from 'svelte-hero-icons';
 </script>
 
-<p class="text-center mx-2 my-2">
-	Please connect your wallet in order to continue.
-</p>
+<p class="text-center mx-2 my-2">Please connect your wallet to continue.</p>
 <br />
 
 <div class="flex justify-center ">

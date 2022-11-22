@@ -214,7 +214,7 @@
 <ModalDialog modalDialogData={dialog} />
 
 <div class="max-w-10xl mx-auto py-1 sm:px-6 lg:px-8">
-	<div class="border-2  rounded-2xl max-w-lg mx-auto white overflow-hidden md:max-w-7xl my-8">
+	<div class="border-2 max-w-lg mx-auto white overflow-hidden md:max-w-7xl my-8">
 		<div class="md:flex">
 			<div class="md:shrink-0">
 				<img class="w-full object-cover md:h-full md:w-96" src={projectImageURL} alt="Coffee" />
@@ -390,6 +390,7 @@
 								crowdtainerAddress={campaignStaticData?.contractAddress}
 								projectStatusUI={state}
 								tokenSymbol={campaignStaticUI.tokenSymbol}
+								{userFundsInCrowdtainer}
 								on:userLeftCrowdtainerEvent={handleCampaignLeftEvent}
 								on:userClaimedFundsEvent={handleUserClaimedFundsEvent}
 							/>

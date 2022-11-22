@@ -5,6 +5,7 @@
 	export let crowdtainerAddress: string;
 	export let projectStatusUI: ProjectStatusUI;
 	export let tokenSymbol: string;
+	export let userFundsInCrowdtainer: BigNumber;
 	export const wallet: string | undefined = undefined;
 
 	import { createEventDispatcher } from 'svelte';
@@ -19,6 +20,7 @@
 
 	// Wallet management
 	import { getSigner } from '$lib/wallet';
+	import type { BigNumber } from 'ethers';
 
 	const dispatch = createEventDispatcher();
 
@@ -86,8 +88,7 @@
 		}
 
 		userClaimedFunds();
-	}
-
+	};
 </script>
 
 <slot>
@@ -165,7 +166,7 @@
 			</div>
 		{/if}
 
-		{#if projectStatusUI === ProjectStatusUI.Funding}
+		{#if !userFundsInCrowdtainer.isZero() && projectStatusUI === ProjectStatusUI.Funding}
 			<!-- Get pre-payment back -->
 			<div class="p-0.5 mb-2 m-2 has-tooltip">
 				<span class="tooltip rounded shadow-lg p-1 bg-gray-100 text-red-500 mt-40">
@@ -188,7 +189,7 @@
 			</div>
 		{/if}
 
-		{#if projectStatusUI === ProjectStatusUI.Failed || projectStatusUI === ProjectStatusUI.ServiceProviderDeclined}
+		{#if !userFundsInCrowdtainer.isZero() && (projectStatusUI === ProjectStatusUI.Failed || projectStatusUI === ProjectStatusUI.ServiceProviderDeclined)}
 			<!-- Get pre-payment back -->
 			<div class="p-0.5 mb-2 m-2 has-tooltip">
 				<span class="tooltip rounded shadow-lg p-1 bg-gray-100 text-red-500 mt-40">
