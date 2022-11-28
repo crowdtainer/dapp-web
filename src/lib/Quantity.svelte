@@ -11,7 +11,7 @@
 		<div class="m-3">
 			<slot />
 			<!-- Summary -->
-			<div class="text-black divide-y divide-dashed text-right mr-4 my-2 py-4">
+			<div class="text-black dark:text-white divide-y divide-dashed text-right mr-4 my-2 py-4">
 				<p class="text-sm">7% tax (USt.) and shipping included</p>
 				<p class="text-sm"><b>(Currently shipping only to Germany)</b></p>
 				{#key totalSum}

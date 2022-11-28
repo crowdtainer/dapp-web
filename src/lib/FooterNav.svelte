@@ -1,4 +1,4 @@
-<footer class="footer p-10 bg-base-300 text-base-content" data-theme="black">
+<footer class="footer p-10 bg-black text-base-content " data-theme="black">
 	<div>
 		<span class="footer-title">Legal</span>
 		<a href="https://" class="link link-hover">Impressum / Imprint</a>

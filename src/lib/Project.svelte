@@ -218,39 +218,44 @@
 {/if}
 
 <div class="max-w-10xl mx-auto py-1 sm:px-6 lg:px-8">
-	<div class="border-2 max-w-lg mx-auto white overflow-hidden md:max-w-7xl my-8">
+	<div
+		class="border-2 border-black dark:border dark:border-white rounded-md max-w-lg mx-auto white overflow-hidden md:max-w-7xl my-8"
+	>
 		<div class="md:flex">
 			<div class="md:shrink-0">
 				<img class="w-full object-cover md:h-full md:w-96" src={projectImageURL} alt="Coffee" />
 			</div>
 			<div class="p-8">
-				<div class="font-mono uppercase tracking-wide text-base text-red-600 font-semibold">
+				<div class="font-mono uppercase tracking-wide text-primary">
 					{title}
 				</div>
 				<a
 					href={projectURL}
-					class="text-black block mt-1 text-2xl leading-tight font-medium hover:underline"
+					class="text-black dark:text-white block mt-1 text-2xl leading-tight font-medium hover:underline"
 					>{subtitle}</a
 				>
-				<p class="mt-5 text-slate-500">
+				<p class="mt-5 text-slate-500 dark:text-gray-300">
 					{@html description}
 				</p>
 
 				{#if staticDataLoadStatus === LoadStatus.Loaded || staticDataLoadStatus === LoadStatus.Loading}
 					<div class:animate-pulse={loadingAnimation}>
-						<div class="my-6 bg-gray-300 rounded-md w-full">
+						<!-- <div class="my-6 bg-gray-300 rounded-md w-full">
 							<div
-								class="bg-sky-600 text-sm font-medium text-white text-center p-1 leading-normal rounded-md"
+								class="progress progress-primary bg-green-600 text-sm font-small text-white text-center p-1 leading-normal rounded-md"
 								style="width: {$tweenedPercentageWidth}%"
 							>
 								{$tweenedPercentageRaised.toFixed(0)}%
 							</div>
+						</div> -->
+						<div class="my-6">
+							<progress class="progress-primary w-full" value={$tweenedPercentageWidth} max="100" />
 						</div>
 
 						<!-- Main Status -->
 						<div class="flex justify-between px-2 gap-5">
 							<div>
-								<p class="projectStatus">{stateString}</p>
+								<p class="projectStatus text-primary">{stateString}</p>
 								<p class="projectDataSubtitle">Status</p>
 							</div>
 
@@ -258,7 +263,7 @@
 
 							<div class="">
 								{#if campaignStaticUI}
-									<p class="projectStatus">
+									<p class="projectStatus text-primary">
 										<TimeLeft endTime={campaignStaticUI.endDate} />
 									</p>
 									<p class="projectDataSubtitle">to go</p>
@@ -290,7 +295,7 @@
 						{#if joinViewEnabled}
 							<div class="pt-4">
 								{#if staticDataLoadStatus === LoadStatus.Loaded && currentPrice}
-									<p class="text-blue-500 px-2 productPrice">
+									<p class="text-primary px-2 productPrice">
 										{currentPrice}
 										{campaignStaticUI ? campaignStaticUI.tokenSymbol : ''}
 									</p>
@@ -309,8 +314,8 @@
 										{#each campaignStaticUI.prices as price, index}
 											<label
 												class:ring-2={currentSelection === index}
-												class:ring-indigo-500={currentSelection === index}
-												class="ring-gray-800 group relative border rounded-md py-3 px-5 flex items-center justify-center text-sm font-medium uppercase hover:bg-gray-50 focus:outline-none sm:flex-1 sm:py-4 bg-white shadow-sm text-gray-900 cursor-pointer"
+												class:ring-green-600={currentSelection === index}
+												class="btn bg-white hover:bg-gray-100 dark:bg-black text-primary"
 											>
 												<input
 													type="radio"
@@ -362,7 +367,7 @@
 								on:click={() => {
 									addProduct();
 								}}
-								class="px-2 mt-10 w-full md:w-4/6 lg:w-2/6 bg-gray-900 font-medium text-white hover:bg-gray-700 hover:shadow-lg border border-transparent rounded-3xl py-3 flex items-center justify-center text-lg focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+								class="px-2 mt-10 w-full md:w-4/6 lg:w-2/6 btn btn-primary"
 							>
 								Add to pre-order
 							</button>
@@ -396,23 +401,25 @@
 		</div>
 
 		{#if joinViewEnabled && campaignStaticData !== undefined}
-			{#if campaignStaticData.signer === '0x0000000000000000000000000000000000000000'}
-				<PreOrder
-					{vouchers721Address}
-					crowdtainerAddress={campaignStaticData?.contractAddress}
-					{campaignStaticUI}
-					{crowdtainerId}
-					on:userJoinedCrowdtainerEvent={handleCampaignJoinedEvent}
-				/>
-			{:else}
-				<PreOrderSigBased
-					{vouchers721Address}
-					crowdtainerAddress={campaignStaticData?.contractAddress}
-					{campaignStaticUI}
-					{crowdtainerId}
-					on:userJoinedCrowdtainerEvent={handleCampaignJoinedEvent}
-				/>
-			{/if}
+			<div class="dark:text-gray-100">
+				{#if campaignStaticData.signer === '0x0000000000000000000000000000000000000000'}
+					<PreOrder
+						{vouchers721Address}
+						crowdtainerAddress={campaignStaticData?.contractAddress}
+						{campaignStaticUI}
+						{crowdtainerId}
+						on:userJoinedCrowdtainerEvent={handleCampaignJoinedEvent}
+					/>
+				{:else}
+					<PreOrderSigBased
+						{vouchers721Address}
+						crowdtainerAddress={campaignStaticData?.contractAddress}
+						{campaignStaticUI}
+						{crowdtainerId}
+						on:userJoinedCrowdtainerEvent={handleCampaignJoinedEvent}
+					/>
+				{/if}
+			</div>
 		{/if}
 	</div>
 </div>

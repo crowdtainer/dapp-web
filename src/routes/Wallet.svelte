@@ -11,6 +11,13 @@
 	import { connect } from '$lib/wallet';
 	import { WalletType } from '$lib/walletStorage';
 
+	import ModalDialog, {
+		ModalAnimation,
+		ModalIcon,
+		ModalType,
+		type ModalDialogData
+	} from '$lib/ModalDialog.svelte';
+
 	let tokenIds: number[] = [];
 	let crowdtainerIds: number[] = [];
 
@@ -18,6 +25,16 @@
 	let campaignStaticUI: Map<number, UIFields> = new Map<number, UIFields>();
 	let staticDataLoadStatus: LoadStatus = LoadStatus.Loading;
 	let loadDataInFlight = false;
+
+	// Modal Dialog
+	let dialog: ModalDialogData = {
+		type: ModalType.ActionRequest,
+		title: '',
+		body: '',
+		animation: ModalAnimation.Circle2,
+		visible: false,
+		icon: ModalIcon.DeviceMobile
+	};
 
 	function resetState() {
 		tokenIds = [];
@@ -34,11 +51,19 @@
 		return filtered[0];
 	}
 
+	function handleUserTransferredParticipationEvent(event: CustomEvent) {
+		console.log(`Detected event of type: ${event.type}`);
+		console.log(`Modal: typeof(detail): ${typeof(event.detail)}`);
+		console.dir(event.detail);
+		dialog = event.detail;
+		// Reload items
+		loadUserData();
+	}
+
 	async function loadUserData() {
 		if (loadDataInFlight) return;
 
 		loadDataInFlight = true;
-		console.log('Running loadUserData');
 		resetState();
 
 		let walletTokensSearch = await findTokenIdsForWallet(getSigner(), Vouchers721Address);
@@ -76,7 +101,6 @@
 			console.log('Error: %o', result.unwrapErr());
 			staticDataLoadStatus = LoadStatus.FetchFailed;
 		}
-		// sortProjects();
 
 		loadDataInFlight = false;
 		tokenIds = tokenIds;
@@ -86,16 +110,26 @@
 	$: $connected, $accountAddress, loadUserData();
 </script>
 
-<header class="ct-divider">
+{#if dialog.visible}
+	<ModalDialog modalDialogData={dialog} />
+{/if}
+
+<!-- <header class="ct-divider">
 	<div class="max-w-7xl mx-auto py-4 px-4 sm:px-6 lg:px-8">
 		<h1 class="text-2xl font-bold text-white">Your Campaigns</h1>
+	</div>
+</header> -->
+
+<header class="campaignSection">
+	<div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
+		<h1 class="font-mono text-2xl font-bold">Your Campaigns</h1>
 	</div>
 </header>
 
 {#if $connected && staticDataLoadStatus == LoadStatus.Loaded}
 	{#each tokenIds as tokenId, index}
 		{#if index !== 0}
-			<div class="border-t-2 border-dashed" />
+			<div class="dashedBorder" />
 		{/if}
 		<MyCampaign
 			{tokenId}
@@ -104,6 +138,7 @@
 			{staticDataLoadStatus}
 			campaignStaticData={campaignStaticData.get(crowdtainerIds[index])}
 			campaignStaticUI={campaignStaticUI.get(crowdtainerIds[index])}
+			on:userTransferredParticipationEvent={handleUserTransferredParticipationEvent}
 		/>
 	{/each}
 {/if}
@@ -114,12 +149,12 @@
 
 {#if !$connected}
 	<EmptySection>
-		<p class="text-center mx-2 my-2">Please connect your wallet to continue.</p>
+		<p class="text-black dark:text-white text-center mx-2 my-4">Please connect your wallet to continue.</p>
 		<br />
 
 		<div class="flex justify-center ">
 			<button
-				class="btn btn-outline"
+				class="btn btn-outline text-black dark:text-white"
 				on:click={() => {
 					connect(WalletType.WalletConnect);
 				}}

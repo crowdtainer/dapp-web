@@ -65,7 +65,7 @@
 		<button
 			type="button"
 			disabled={!actionButtonEnabled || !enoughFunds}
-			class={actionButtonEnabled && enoughFunds ? 'sky-btn' : 'gray-btn'}
+			class={actionButtonEnabled && enoughFunds ? 'btn btn-primary px-12 my-6' : 'gray-btn'}
 			on:click={() => {
 				if (enoughFunds && enoughAllowance) {
 					callJoinProjectHandler();

@@ -80,11 +80,11 @@
 	<title>Crowdtainer</title>
 </svelte:head>
 
-<header class="ct-divider">
+<!-- <header class="ct-divider">
 	<div class="max-w-7xl mx-auto py-4 px-4 sm:px-6 lg:px-8">
 		<h1 class="text-2xl font-bold text-white">Campaigns</h1>
 	</div>
-</header>
+</header> -->
 
 <main class="">
 	<header class="campaignSection">
@@ -95,7 +95,7 @@
 
 	{#each activeProjects as project, index}
 		{#if index !== 0}
-			<div class="border-t-2 border-dashed" />
+			<div class="dashedBorder" />
 		{/if}
 		<Project
 			vouchers721Address={Vouchers721Address}
@@ -122,7 +122,7 @@
 
 	{#each upcomingProjects as project, index}
 		{#if index !== 0}
-			<div class="border-t-2 border-dashed" />
+			<div class="dashedBorder" />
 		{/if}
 		<Project
 			vouchers721Address={Vouchers721Address}
@@ -149,7 +149,7 @@
 
 	{#each pastProjects as project, index}
 		{#if index !== 0}
-			<div class="border-t-2 border-dashed" />
+			<div class="dashedBorder" />
 		{/if}
 		<Project
 			vouchers721Address={Vouchers721Address}

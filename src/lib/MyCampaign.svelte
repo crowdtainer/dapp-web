@@ -120,6 +120,7 @@
 			return ['', ''];
 		}
 
+		console.dir(payload);
 		let [, imageDataInBase64] = payload.split(',');
 		const imageDataJSON = JSON.parse(atob(imageDataInBase64));
 
@@ -167,19 +168,19 @@
 {/if}
 
 <div class="max-w-10xl mx-auto py-1 sm:px-6 lg:px-8">
-	<div class="border-2 max-w-lg mx-auto white overflow-hidden md:max-w-7xl my-8">
+	<div class="border border-black dark:border-white rounded-md max-w-lg mx-auto white overflow-hidden md:max-w-7xl my-8">
 		<div class="md:flex">
 			<div class="md:shrink-0">
 				<!-- <img class="w-full object-cover md:h-full md:w-96" src={projectImageURL} alt="Coffee" /> -->
-				<img class="w-full object-cover md:h-full md:w-96" src={svg} alt="Coffee" />
+				<img class="w-full object-cover md:h-full md:w-96 p-2" src={svg} alt="Coffee" />
 			</div>
 			<div class="p-8">
-				<div class="font-mono uppercase tracking-wide text-base text-red-600 font-semibold">
+				<div class="font-mono uppercase tracking-wide text-base text-red-500 dark:text-green-500 font-semibold">
 					{title}
 				</div>
 				<a
 					href={projectURL}
-					class="text-black block mt-1 text-2xl leading-tight font-medium hover:underline"
+					class="text-black dark:text-white block mt-1 text-2xl leading-tight font-medium hover:underline"
 					>{subtitle}</a
 				>
 
@@ -188,7 +189,7 @@
 						<!-- Main Status -->
 						<div class="flex justify-between pt-8 gap-5">
 							<div>
-								<p class="projectStatus">{stateString}</p>
+								<p class="projectStatus text-sky-800 dark:text-lime-500">{stateString}</p>
 								<p class="projectDataSubtitle">Status</p>
 							</div>
 						</div>
@@ -230,6 +231,7 @@
 							tokenSymbol={campaignStaticUI.tokenSymbol}
 							{userFundsInCrowdtainer}
 							on:userClaimedFundsEvent={handleUserClaimedFundsEvent}
+							on:userTransferredParticipationEvent
 						/>
 					{/if}
 				</div>

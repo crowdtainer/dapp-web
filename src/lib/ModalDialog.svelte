@@ -42,7 +42,7 @@
 </script>
 
 <input type="checkbox" id="my-modal-6" class="modal-toggle" />
-<div class="modal {modalDialogData.visible ? 'modal-open' : ''} modal-bottom sm:modal-middle">
+<div data-theme="cmyk" class="modal {modalDialogData.visible ? 'modal-open' : ''} modal-bottom sm:modal-middle">
 	<div class="modal-box">
 		<h3 class="font-bold text-lg">{modalDialogData.title}</h3>
 		<div class="h-20 flex justify-center mt-8">
