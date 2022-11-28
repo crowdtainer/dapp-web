@@ -410,7 +410,7 @@
 			<li class="step step-primary">Quantity</li>
 			<li class="step {stepTwoActive}">E-mail</li>
 			<li class="step {stepThreeActive}">Terms and Conditions</li>
-			<li class="step {stepFourActive}">Confirmation & Delivery</li>
+			<li class="step {stepFourActive}">Confirmation</li>
 		</ul>
 
 		{#if preOrderStep === JoinStep.QuantitySelection}
@@ -429,7 +429,7 @@
 			<div class="flex justify-center mb-4">
 				<div class="w-32">
 					<button
-						class="sky-btn"
+						class="btn btn-primary px-12"
 						on:click={() => {
 							preOrderStep++;
 						}}>Next</button
@@ -489,7 +489,7 @@
 						</div>
 						<div class="flex justify-center">
 							<button
-								class="sky-btn"
+								class="btn btn-primary m-4 px-12"
 								on:click={() => {
 									preOrderStep++;
 								}}>Next</button
@@ -585,7 +585,7 @@
 						disabled={!deliveryAcknowledged || !termsAcknowledged}
 						class="{modalDialogData.visible
 							? 'hidden'
-							: ''} bg-sky-600 text-white hover:bg-sky-500 hover:shadow-lg btn btn-outline mx-2  my-2 w-28"
+							: ''} btn btn-primary mx-2  my-2 w-28"
 						on:click={callSignTermsAndConditions}
 					>
 						{#if termsAccepted}

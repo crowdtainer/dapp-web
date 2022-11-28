@@ -33,8 +33,8 @@
   }
 
   .campaignSection {
-    @apply border-b-2 border-blue-300;
-    @apply text-black;
+    @apply border-b-4 border-double dark:border-gray-400 border-gray-700;
+    @apply text-black dark:text-white;
   }
 
   .tooltip {
@@ -47,17 +47,17 @@
 
   .projectStatus {
     @apply font-mono;
-    @apply text-sky-800 text-xl font-medium;
+    @apply text-xl font-medium;
   }
 
   .projectData {
     @apply font-mono;
-    @apply text-black text-base font-medium;
+    @apply text-black dark:text-white text-base font-medium;
   }
 
   .projectDataSubtitle {
     @apply font-mono;
-    @apply text-gray-700 text-xs font-light;
+    @apply text-gray-700 dark:text-gray-200 text-sm font-light;
   }
 
   .productPrice {
@@ -94,6 +94,10 @@
   .successToast {
     @apply mx-2;
     @apply bg-green-600;
+  }
+
+  .dashedBorder {
+    /* @apply border-t-2 border-gray-700 border-dashed; */
   }
 
 }

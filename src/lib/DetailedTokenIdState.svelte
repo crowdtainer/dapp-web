@@ -26,12 +26,13 @@
 </script>
 
 {#if userFundsInCrowdtainer !== undefined && !userFundsInCrowdtainer.isZero() && campaignStaticUI !== undefined}
-	<p class="text-md text-lg text-left mt-3 mb-6">
+	<p class="text-black dark:text-gray-200 text-md text-lg text-left mt-3 mb-6">
 		• You have joined this project with a contribution of {ethers.utils.formatUnits(
 			`${userFundsInCrowdtainer}`,
 			BigNumber.from(campaignStaticUI.tokenDecimals)
 		)}
 		{campaignStaticUI.tokenSymbol}.
+		<br/>
 		{#if state === ProjectStatusUI.Failed || state === ProjectStatusUI.ServiceProviderDeclined}
 			• You can withdrawl {ethers.utils.formatUnits(
 				`${userFundsInCrowdtainer}`,

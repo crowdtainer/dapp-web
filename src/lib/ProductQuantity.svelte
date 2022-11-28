@@ -43,7 +43,7 @@
 
 <div class="text-black">
 	<!-- Header -->
-	<div id="header" class="text-center flex items-center bg-gray-100 h-10 px-4">
+	<div id="header" class="text-center flex items-center bg-gray-100 dark:bg-gray-700 dark:text-white h-10 px-4">
 		<div class="w-5/12 font-semibold">Description</div>
 		<div class="w-4/12 font-semibold">Quantity</div>
 		<div class="w-3/12 font-semibold">Subtotal</div>
@@ -57,7 +57,7 @@
 				<div class="flex">
 					<!-- Row start -->
 					<div class="w-5/12">
-						<p class="text-center text-base py-2 m-1">
+						<p class="text-center text-base dark:text-white py-2 m-1">
 							<b>{product}</b>
 						</p>
 					</div>
@@ -65,7 +65,7 @@
 						<div class="">
 							<button
 								type="button"
-								class="m-3 py-2 px-3 border-2 border-gray-600 text-gray-800 font-medium rounded-3xl text-xs leading-tight uppercase hover:bg-black hover:bg-opacity-5 focus:outline-none focus:ring-0"
+								class="m-3 py-2 px-3 border-2 border-gray-600 dark:border-gray-200 text-gray-800 dark:text-white font-medium rounded-3xl text-xs leading-tight uppercase hover:bg-black hover:bg-opacity-5 focus:outline-none focus:ring-0"
 								on:click={() => {
 									decrementProduct(index);
 								}}
@@ -73,13 +73,13 @@
 								-
 							</button>
 						</div>
-						<div in:fade class="my-2 py-2 ">
+						<div in:fade class="my-2 py-2 dark:text-white">
 							<p in:fade>{$selection[index]}</p>
 						</div>
 						<div class="">
 							<button
 								type="button"
-								class="m-3 py-2 px-3 border-2 border-gray-600 text-gray-800 font-medium rounded-3xl text-xs leading-tight uppercase hover:bg-black hover:bg-opacity-5 focus:outline-none focus:ring-0"
+								class="m-3 py-2 px-3 border-2 border-gray-600 dark:border-gray-200 text-gray-800 dark:text-white font-medium rounded-3xl text-xs leading-tight uppercase hover:bg-black hover:bg-opacity-5 focus:outline-none focus:ring-0"
 								on:click={() => {
 									incrementProduct(index);
 								}}
@@ -90,7 +90,7 @@
 					</div>
 					<div class="pl-0 py-4 pr-1 w-3/12">
 						{#key $selection[index]}
-						<p in:fade="{{ duration: 200 }}" class="text-center ">{prices[index] * $selection[index]} {tokenSymbol}</p>
+						<p in:fade="{{ duration: 200 }}" class="text-center dark:text-white">{prices[index] * $selection[index]} {tokenSymbol}</p>
 						{/key}
 					</div>
 					<!-- Row end -->

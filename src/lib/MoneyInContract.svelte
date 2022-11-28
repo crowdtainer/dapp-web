@@ -29,19 +29,19 @@
 
 <div class="">
 	{#if state === ProjectStatusUI.Failed || state === ProjectStatusUI.ServiceProviderDeclined}
-		<p class="projectStatus">
+		<p class="projectStatus text-primary">
 			{moneyFormatter.format($tweenedRaised)}
 			{campaignStaticUI ? campaignStaticUI.tokenSymbol : ''}
 		</p>
 		<p class="projectDataSubtitle">left for withdrawal</p>
 	{:else if state === ProjectStatusUI.Delivery}
-	<p class="projectStatus">
+	<p class="projectStatus text-primary">
 		{moneyFormatter.format($tweenedRaised)}
 		{campaignStaticUI ? campaignStaticUI.tokenSymbol : ''}
 	</p>
 	<p class="projectDataSubtitle">raised</p>
 	{:else}
-		<p class="projectStatus">
+		<p class="projectStatus text-primary">
 			{moneyFormatter.format($tweenedRaised)}
 			{campaignStaticUI ? campaignStaticUI.tokenSymbol : ''}
 		</p>

@@ -37,12 +37,8 @@
 		});
 	}
 
-	function userTransferredParticipation() {
-		//TODO: Catch the event on the upper components, in order to immediatelly
-		// update the tokenIds associated with the connected wallet (instead of requiring refresh).
-		dispatch('userTransferredParticipationEvent', {
-			text: `${transferWalletUserInput}`
-		});
+	function userTransferredParticipation(dialogData: ModalDialogData) {
+		dispatch('userTransferredParticipationEvent', dialogData);
 	}
 
 	// Modal Dialog
@@ -137,8 +133,28 @@
 			return;
 		}
 
-		dialog.visible = false;
-		userTransferredParticipation();
+		let confirmation = await signResult.unwrap().wait();
+
+		let resultDialog: ModalDialogData = {
+			type: ModalType.Information,
+			visible: true,
+			title: '',
+			body: '',
+			icon: ModalIcon.BadgeCheck,
+			animation: ModalAnimation.None
+		};
+
+		if (confirmation.status === 1) {
+			resultDialog.title = 'Success';
+			resultDialog.body = `Transfer complete.`;
+			console.log(`Transfer transaction hash: ${confirmation.transactionHash}`);
+		} else {
+			resultDialog.title = 'Failure';
+			resultDialog.body = `Participation proof transfer Failed.`;
+			resultDialog.icon = ModalIcon.Exclamation;
+		}
+
+		userTransferredParticipation(resultDialog);
 	};
 </script>
 
@@ -193,7 +209,7 @@
 	<!-- Checkout -->
 	{#if projectStatusUI === ProjectStatusUI.Delivery}
 		<div class="p-0.5 mb-2 m-2 has-tooltip">
-			<span class="tooltip rounded shadow-lg p-1 bg-gray-100 mt-40">
+			<span class="tooltip rounded shadow-lg p-1 bg-gray-100 mt-40 text-primary">
 				Complete purchase by requesting your product delivery
 			</span>
 			<button
@@ -292,7 +308,8 @@
 		<!-- Get pre-payment back -->
 		<div class="p-0.5 mb-2 m-2 has-tooltip">
 			<span class="tooltip rounded shadow-lg p-1 bg-gray-100 text-red-500 mt-40">
-				Withdrawl {tokenSymbol} back
+				Withdrawl {tokenSymbol}
+
 			</span>
 			<button
 				class="relative inline-flex items-center justify-center overflow-hidden text-sm font-medium text-gray-900 rounded-lg group bg-gradient-to-br from-pink-500 to-orange-400 group-hover:from-cyan-500 group-hover:to-blue-500 focus:ring-4 focus:outline-none focus:ring-red-400"
