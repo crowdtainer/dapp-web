@@ -81,10 +81,10 @@ export function toStateString(dynamicData: CrowdtainerDynamicModel, staticData: 
             return 'Funding';
         }
         case ProjectStatusUI.Failed: {
-            return 'Failed 🙈';
+            return 'Failed';
         }
         case ProjectStatusUI.SuccessfulyFunded: {
-            return 'Successful 🎉';
+            return 'Successful';
         }
         case ProjectStatusUI.Delivery: {
             return 'Delivery 📦';

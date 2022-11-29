@@ -449,10 +449,10 @@
 								placeholder="E-mail"
 								class="{emailValid
 									? 'border-lime-600 border-2'
-									: ''} input input-info w-full max-w-xs"
+									: ''} input input-primary w-full max-w-xs dark:text-black"
 							/>
 							<button
-								class="btn btn-outline mx-2 w-28"
+								class="btn btn-outline mx-2 w-28 dark:text-white dark:disabled:text-gray-200"
 								disabled={!emailValid || emailSent}
 								on:click={callSendChallengeCodeAPI}
 							>
@@ -471,10 +471,11 @@
 								placeholder={invalidCodeWarning ? 'Invalid code' : 'Confirmation code'}
 								class="{invalidCodeWarning
 									? 'border-red-500 border-2'
-									: ''} input input-bordered input-info w-full max-w-xs"
+									: ''} input input-bordered input-info w-full max-w-xs dark:text-black"
 							/>
 
-							<button class="btn btn-outline mx-2 w-28" on:click={callRequestEmailAuthorizationAPI}>
+							<button class="btn btn-outline mx-2 w-28 dark:text-white dark:disabled:text-gray-200" 
+							on:click={callRequestEmailAuthorizationAPI}>
 								{#if invalidCodeWarning}
 									{codeValidatorError}
 								{:else}
@@ -504,16 +505,12 @@
 							</div>
 							<ul class="list-disc mx-5">
 								<li class="my-2">
-									In case of a successful project, we are required by law to send our customers the
-									invoice in a "durable medium".
+									If the project is succesfully funded, we will send you an e-mail asking you to
+									provide us your delivery address.
 								</li>
 								<li class="my-2">
 									To avoid collecting personal data before knowing for sure we will need it, you do
 									not need to provide us your delivery address at this stage (funding).
-								</li>
-								<li class="my-2">
-									If the project is succesfully funded, we will send you an e-mail asking you to
-									provide us your delivery address.
 								</li>
 								<li class="my-2">
 									We will <b>never</b> use your e-mail or any personal data for purposes other than fulfilling
@@ -526,7 +523,7 @@
 			</div>
 			<div class="flex justify-center py-8">
 				<button
-					class="btn btn-outline"
+					class="btn btn-outline dark:text-white"
 					on:click={() => {
 						preOrderStep--;
 					}}>Back</button
@@ -549,7 +546,7 @@
 							bind:checked={deliveryAcknowledged}
 							class="checkbox checkbox-primary"
 						/>
-						<span class="label-text"
+						<span class="label-text dark:text-white"
 							>I acknowledge that if the project is succesful, I need to return to this website to
 							provide my delivery details.</span
 						>
@@ -564,7 +561,7 @@
 							bind:checked={termsAcknowledged}
 							class="checkbox checkbox-primary"
 						/>
-						<span class="label-text"
+						<span class="label-text dark:text-white"
 							>By clicking "Agree" and cryptographically signing the transaction, I agree to the
 							General Terms and Conditions related to the usage of this webpage.</span
 						>
@@ -585,7 +582,7 @@
 						disabled={!deliveryAcknowledged || !termsAcknowledged}
 						class="{modalDialogData.visible
 							? 'hidden'
-							: ''} btn btn-primary mx-2  my-2 w-28"
+							: ''} btn btn-primary mx-2  my-2 w-28 "
 						on:click={callSignTermsAndConditions}
 					>
 						{#if termsAccepted}
@@ -633,7 +630,7 @@
 
 			<div class="flex justify-center py-16">
 				<button
-					class="btn btn-outline"
+					class="btn btn-outline dark:text-white"
 					on:click={() => {
 						preOrderStep--;
 					}}>Back</button
@@ -668,7 +665,7 @@
 			{/if}
 			<div class="flex justify-center py-12">
 				<button
-					class="btn btn-outline"
+					class="btn btn-outline dark:text-white"
 					on:click={() => {
 						preOrderStep--;
 					}}>Back</button

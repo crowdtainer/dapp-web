@@ -219,9 +219,9 @@
 
 <div class="max-w-10xl mx-auto py-1 sm:px-6 lg:px-8">
 	<div
-		class="border-2 border-black dark:border dark:border-white rounded-md max-w-lg mx-auto white overflow-hidden md:max-w-7xl my-8"
+	class="border-2 border-black dark:border dark:border-white rounded-md max-w-lg mx-auto white overflow-hidden md:max-w-7xl my-8"
 	>
-		<div class="md:flex">
+	<div class="md:flex">
 			<div class="md:shrink-0">
 				<img class="w-full object-cover md:h-full md:w-96" src={projectImageURL} alt="Coffee" />
 			</div>
@@ -240,22 +240,22 @@
 
 				{#if staticDataLoadStatus === LoadStatus.Loaded || staticDataLoadStatus === LoadStatus.Loading}
 					<div class:animate-pulse={loadingAnimation}>
-						<!-- <div class="my-6 bg-gray-300 rounded-md w-full">
+						<div class="my-6 bg-gray-300 rounded-md w-full">
 							<div
-								class="progress progress-primary bg-green-600 text-sm font-small text-white text-center p-1 leading-normal rounded-md"
+								class="progress progress-primary bg-blue-500 text-sm font-small text-white text-center p-1 leading-normal rounded-md"
 								style="width: {$tweenedPercentageWidth}%"
 							>
 								{$tweenedPercentageRaised.toFixed(0)}%
 							</div>
-						</div> -->
-						<div class="my-6">
-							<progress class="progress-primary w-full" value={$tweenedPercentageWidth} max="100" />
 						</div>
+						<!-- <div class="my-6">
+							<progress class="progress-primary w-full" value={$tweenedPercentageWidth} max="100" />
+						</div> -->
 
 						<!-- Main Status -->
 						<div class="flex justify-between px-2 gap-5">
 							<div>
-								<p class="projectStatus text-primary">{stateString}</p>
+								<p class="projectStatus">{stateString}</p>
 								<p class="projectDataSubtitle">Status</p>
 							</div>
 
@@ -263,7 +263,7 @@
 
 							<div class="">
 								{#if campaignStaticUI}
-									<p class="projectStatus text-primary">
+									<p class="projectStatus">
 										<TimeLeft endTime={campaignStaticUI.endDate} />
 									</p>
 									<p class="projectDataSubtitle">to go</p>
@@ -314,8 +314,8 @@
 										{#each campaignStaticUI.prices as price, index}
 											<label
 												class:ring-2={currentSelection === index}
-												class:ring-green-600={currentSelection === index}
-												class="btn bg-white hover:bg-gray-100 dark:bg-black text-primary"
+												class:ring-blue-500={currentSelection === index}
+												class="btn bg-white hover:bg-gray-200 dark:bg-black text-primary"
 											>
 												<input
 													type="radio"

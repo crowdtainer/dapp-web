@@ -14,20 +14,24 @@ module.exports = {
     rtl: false,
     prefix: "",
     darkTheme: "forest",
-    themes: [{
-      garden: {
-        ...require("daisyui/src/colors/themes")["[data-theme=garden]"],
-        secondary: "#456a39",
-       "neutral-content": "#f7f7f7"
+    themes: [
+      {
+        garden: {
+          ...require("daisyui/src/colors/themes")["[data-theme=garden]"],
+          primary: "#325ba9",
+         "neutral-content": "#f7f7f7"
+        },
       },
-    },
     {
       forest: {
         ...require("daisyui/src/colors/themes")["[data-theme=forest]"],
-        primary: "#10b981",
-        secondary: "#2e6b1a",
-        "base-100": "#456a39",
+        primary: "#38accf",
+        secondary: "#c2f7ffff",
+        "primary-content":"#c2f7ffff",
+        "base-100": "#FFFFFF",
+        outline: "#FFFFFF"
       },
-    },"cmyk", "light", "dark", "black", "forest",],
+    },
+    "cmyk", "light", "dark", "black", "forest",],
   },
 }

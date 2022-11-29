@@ -32,7 +32,7 @@ export const shortOrENSNamedAccount = derived(walletState, async $walletState =>
 });
 
 function shortenAddress(walletAddress: string | undefined) : string {
-    return (walletAddress) ? walletAddress.slice(0, 6) + '...' + walletAddress.slice(-6) : '---';
+    return (walletAddress) ? walletAddress.slice(0, 6) + '...' + walletAddress.slice(-4) : '---';
 }
 
 // 10: Optimism; 31337: hardhat local node; 5: Ethereum Goerli; 420: Optimism Goerli
