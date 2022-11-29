@@ -127,9 +127,9 @@
 			>
 				<!-- Profile dropdown -->
 				{#if !$connected}
-					<p class="bg-black pt-1 pr-4 text-right text-sm text-green-400">Disconnected.</p>
+					<p class="bg-black pt-1 pr-4 text-right text-sm text-white">Disconnected.</p>
 				{:else}
-					<p class="bg-black pr-4 text-right text-sm text-green-400">
+					<p class="bg-black pr-4 text-right text-sm text-white">
 						{#await $shortOrENSNamedAccount}
 							"Loading"
 						{:then address}

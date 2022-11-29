@@ -315,7 +315,7 @@
 							bind:checked={deliveryAcknowledged}
 							class="checkbox checkbox-primary"
 						/>
-						<span class="label-text"
+						<span class="label-text dark:text-white"
 							>I acknowledge that if the project is succesful, I need to return to this website to
 							provide my delivery details.</span
 						>
@@ -330,7 +330,7 @@
 							bind:checked={termsAcknowledged}
 							class="checkbox checkbox-primary"
 						/>
-						<span class="label-text"
+						<span class="label-text dark:text-white"
 							>By clicking "Confirm & Join" and cryptographically signing the transaction, I agree
 							to the General Terms and Conditions related to the usage of this webpage.</span
 						>

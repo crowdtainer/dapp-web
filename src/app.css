@@ -47,7 +47,7 @@
 
   .projectStatus {
     @apply font-mono;
-    @apply text-xl font-medium;
+    @apply text-xl font-medium dark:text-white;
   }
 
   .projectData {
@@ -57,7 +57,7 @@
 
   .projectDataSubtitle {
     @apply font-mono;
-    @apply text-gray-700 dark:text-gray-200 text-sm font-light;
+    @apply dark:text-white text-sm font-light;
   }
 
   .productPrice {

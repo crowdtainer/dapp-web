@@ -120,7 +120,6 @@
 			return ['', ''];
 		}
 
-		console.dir(payload);
 		let [, imageDataInBase64] = payload.split(',');
 		const imageDataJSON = JSON.parse(atob(imageDataInBase64));
 
@@ -175,7 +174,7 @@
 				<img class="w-full object-cover md:h-full md:w-96 p-2" src={svg} alt="Coffee" />
 			</div>
 			<div class="p-8">
-				<div class="font-mono uppercase tracking-wide text-base text-red-500 dark:text-green-500 font-semibold">
+				<div class="text-primary font-mono uppercase tracking-wide font-semibold">
 					{title}
 				</div>
 				<a
@@ -189,7 +188,7 @@
 						<!-- Main Status -->
 						<div class="flex justify-between pt-8 gap-5">
 							<div>
-								<p class="projectStatus text-sky-800 dark:text-lime-500">{stateString}</p>
+								<p class="projectStatus">{stateString}</p>
 								<p class="projectDataSubtitle">Status</p>
 							</div>
 						</div>
