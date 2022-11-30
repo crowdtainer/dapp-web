@@ -1,4 +1,4 @@
-import { browser } from '$app/env';
+import { browser } from '$app/environment';
 
 export enum WalletType { Injected, WalletConnect }
 export enum ConnectionState { Disconnected, Connected, ConnectedToUnsupportedNetwork }

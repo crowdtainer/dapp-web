@@ -382,9 +382,11 @@
 	};
 
 	const callRequestEmailAuthorizationAPI = async () => {
-		codeValidatorError = await requestEmailAuthorizationAPI(userEmail, userEmailCode);
-		emailValidated = codeValidatorError === 'OK';
-		if (!emailValidated) {
+		let result = await requestEmailAuthorizationAPI(userEmail, userEmailCode);
+		emailValidated = result === 'OK';
+		if(!emailValidated) {
+			let jsonResult = JSON.parse(result);
+			codeValidatorError = jsonResult.message;
 			invalidCodeWarning = true;
 			setTimeout(function () {
 				invalidCodeWarning = false;
@@ -405,7 +407,7 @@
 {/if}
 
 {#if $totalSum > 0}
-	<div transition:slide={{ duration: 150 }}>
+	<div in:slide={{ duration: 150 }}>
 		<ul class="w-full steps my-5 mb-10">
 			<li class="step step-primary">Quantity</li>
 			<li class="step {stepTwoActive}">E-mail</li>

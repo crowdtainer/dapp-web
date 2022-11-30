@@ -1,7 +1,7 @@
 // Typechain
-import { Vouchers721__factory } from '../typechain/factories/Vouchers721__factory';
-import { Crowdtainer__factory } from '../typechain/factories/Crowdtainer.sol/Crowdtainer__factory';
-import type { IERC20 } from '../typechain';
+import { Vouchers721__factory } from '../../typechain/factories/Vouchers721__factory';
+import { Crowdtainer__factory } from '../../typechain/factories/Crowdtainer.sol/Crowdtainer__factory';
+import type { IERC20 } from '../../typechain';
 
 // Ethers
 import { ethers, BigNumber } from 'ethers';
@@ -10,10 +10,10 @@ import { ethers, BigNumber } from 'ethers';
 import { type Result, Ok, Err } from "@sniptt/monads";
 
 // Internal
-import type { RequestHandler } from './__types/[id]'
+import type { RequestHandler } from './$types';
 import type { CrowdtainerDynamicModel, CrowdtainerStaticModel, Error } from '$lib/Model/CrowdtainerModel';
-import { Vouchers721Address } from '../data/projects.json';
-import { crowdtainerStaticDataMap } from '../../hooks/cache';
+import { Vouchers721Address } from '../../data/projects.json';
+import { crowdtainerStaticDataMap } from '../../../hooks/cache';
 import { getERC20Contract } from '$lib/ethersCalls/rpcRequests';
 
 // import { Network, Alchemy } from 'alchemy-sdk';
@@ -68,20 +68,14 @@ async function fetchData(crowdtainerId: BigNumber): Promise<Result<CrowdtainerDy
    }
 }
 
-export const get: RequestHandler<CrowdtainerDynamicModel | Error> = async ({ params }) => {
+export const GET: RequestHandler = async ({ params }) => {
 
    let crowdtainerId = BigNumber.from(params.id);
    let result = await fetchData(crowdtainerId);
 
    if (result.isOk()) {
-      return {
-         status: 200,
-         body: result.unwrap()
-      }
+      return new Response(JSON.stringify(result.unwrap()));
    } else {
-      return {
-         status: 500,
-         body: result.unwrapErr()
-      };
+      return new Response( JSON.stringify(result.unwrapErr()) );
    }
 }

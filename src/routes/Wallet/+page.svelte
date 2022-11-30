@@ -5,7 +5,7 @@
 	import type { CrowdtainerStaticModel } from '$lib/Model/CrowdtainerModel';
 	import MyCampaign from '$lib/MyCampaign.svelte';
 
-	import { projects, Vouchers721Address } from './data/projects.json';
+	import { projects, Vouchers721Address } from '../data/projects.json';
 	import { connected, getSigner, accountAddress } from '$lib/wallet';
 	import EmptySection from '$lib/EmptySection.svelte';
 	import { connect } from '$lib/wallet';

@@ -1,6 +1,7 @@
+
 // Typechain
-import { Vouchers721__factory } from '../typechain/factories/Vouchers721__factory';
-import { Crowdtainer__factory } from '../typechain/factories/Crowdtainer.sol/Crowdtainer__factory';
+import { Vouchers721__factory } from '../../typechain/factories/Vouchers721__factory';
+import { Crowdtainer__factory } from '../../typechain/factories/Crowdtainer.sol/Crowdtainer__factory';
 
 // Ethers
 import { ethers, BigNumber } from 'ethers';
@@ -9,13 +10,14 @@ import { ethers, BigNumber } from 'ethers';
 import { type Result, Ok, Err } from "@sniptt/monads";
 
 // Internal
-import type { RequestHandler } from './__types/[id]'
+import type { RequestHandler } from './$types';
 import type { CrowdtainerStaticModel, Error } from '$lib/Model/CrowdtainerModel';
-import { Vouchers721Address } from '../data/projects.json';
-import { Coin__factory } from '../typechain/';
-import { crowdtainerStaticDataMap } from '../../hooks/cache';
+import { Vouchers721Address } from '../../data/projects.json';
+import { Coin__factory } from '../../typechain/';
+import { crowdtainerStaticDataMap } from '../../../hooks/cache';
+import { error } from '@sveltejs/kit';
 
-import { Network, Alchemy } from 'alchemy-sdk';
+// import { Network, Alchemy } from 'alchemy-sdk';
 
 const settings = {
    apiKey: import.meta.env.VITE_RPC_API_KEY,
@@ -86,7 +88,7 @@ async function fetchData(crowdtainerId: BigNumber): Promise<Result<CrowdtainerSt
    }
 }
 
-export const get: RequestHandler<any> = async ({ params }) => {
+export const GET: RequestHandler = async ({ params }) => {
    try {
 
       let responses = new Array<CrowdtainerStaticModel>();
@@ -103,23 +105,13 @@ export const get: RequestHandler<any> = async ({ params }) => {
             responses.push(result.unwrap());
          } else {
             // Fail if any id request fails.
-            return {
-               status: 500,
-               body: result.unwrapErr()
-            };
+            throw error(500, `${result.unwrapErr()}`);
          }
       }
 
-      return {
-         status: 200,
-         body: responses
-      };
-
-   } catch (error) {
-      console.log(error);
-      return {
-         status: 500,
-         body: error
-      };
+      return new Response(JSON.stringify(responses));
+   } catch (_error) {
+      console.log(_error);
+      throw error(500, `${_error}`);
    }
 }

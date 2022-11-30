@@ -6,7 +6,7 @@
 // local part may be up to 64 octets long and the domain may have a maximum of 255 octets.[4]
 var tester = /^[-!#$%&'*+\/0-9=?A-Z^_a-z`{|}~](\.?[-!#$%&'*+\/0-9=?A-Z^_a-z`{|}~])*@[a-zA-Z0-9](-*\.?[a-zA-Z0-9])*\.[a-zA-Z](-?[a-zA-Z0-9])+$/;
 export function validEmail(email: string): boolean {
-  if (!email) return false;
+  if (!email || email === '') return false;
   var emailParts = email.split('@');
 
   if(emailParts.length !== 2) return false

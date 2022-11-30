@@ -7,19 +7,14 @@ const config = {
 	// for more information about preprocessors
 	preprocess: preprocess({
 		postcss: true,
-	  }),
+	}),
 
 	kit: {
 		adapter: adapter(),
 		files: {
-      		assets: 'static',
-      		hooks: 'src/hooks',
-      		lib: 'src/lib',
-      		params: 'src/params',
-      		routes: 'src/routes',
-      		serviceWorker: 'src/service-worker',
-      		template: 'src/app.html'
-    }
+			assets: 'static',
+			hooks: { server: 'src/hooks' }
+		}
 	}
 };
 
