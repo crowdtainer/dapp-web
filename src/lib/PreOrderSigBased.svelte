@@ -78,7 +78,7 @@
 		ThankYouMessage
 	}
 
-	let preOrderStep = JoinStep.QuantitySelection;
+	let preOrderStep = JoinStep.TermsAcceptance;
 
 	let actionButtonEnabled = true;
 
@@ -96,6 +96,7 @@
 	let termsAccepted = false;
 	let emailValidated = false;
 	let deliveryAcknowledged = false;
+	let shipmentConditions = false;
 	let termsAcknowledged = false;
 	let userEmail: string = '';
 	let userEmailCode: string = '';
@@ -560,12 +561,26 @@
 						<input
 							type="checkbox"
 							disabled={termsAccepted}
+							bind:checked={shipmentConditions}
+							class="checkbox checkbox-primary"
+						/>
+						<p class="label-text dark:text-white w-full"
+							>I understand that shipping is <b>only possible to Germany</b> at this time.</p
+						>
+					</label>
+				</div>
+
+				<div class="flex justify-center">
+					<label class="label cursor-pointer gap-3 my-4 sm:w-full md:w-4/5 lg:w-4/6 xl:w-3/6">
+						<input
+							type="checkbox"
+							disabled={termsAccepted}
 							bind:checked={termsAcknowledged}
 							class="checkbox checkbox-primary"
 						/>
 						<span class="label-text dark:text-white"
 							>By clicking "Agree" and cryptographically signing the transaction, I agree to the
-							General Terms and Conditions related to the usage of this webpage.</span
+							<b>General Terms and Conditions</b>, <b>Privacy Policy</b>, <b>Refund policy</b>, and <b>Shipping policy</b>.</span
 						>
 					</label>
 				</div>
@@ -581,7 +596,7 @@
 
 				<div class="flex justify-center">
 					<button
-						disabled={!deliveryAcknowledged || !termsAcknowledged}
+						disabled={!deliveryAcknowledged || !termsAcknowledged || !shipmentConditions}
 						class="{modalDialogData.visible
 							? 'hidden'
 							: ''} btn btn-primary mx-2  my-2 w-28 "

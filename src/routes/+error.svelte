@@ -10,14 +10,14 @@
 >
 	<img
 		class="w-24 h-24 md:w-48 md:h-auto md:rounded-none rounded-full mx-auto"
-		src="CrowdtainerLogo.svg"
+		src="/CrowdtainerLogo.svg"
 		alt=""
 		width="384"
 		height="512"
 	/>
 	<div class="pt-6 md:p-8 text-center md:text-left space-y-4">
 		<blockquote>
-			<p class="text-white text-center text-lg font-medium">
+			<p class="dark:text-white text-black text-center text-lg font-medium">
 				{title}
 			</p>
 		</blockquote>

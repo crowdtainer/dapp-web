@@ -29,7 +29,7 @@
   }
 
   .ct-divider {
-    @apply bg-gradient-to-r from-gray-800 to-blue-400;
+    @apply bg-gradient-to-r from-slate-800 to-slate-800 ;
   }
 
   .campaignSection {
@@ -47,7 +47,7 @@
 
   .projectStatus {
     @apply font-mono;
-    @apply text-xl font-medium dark:text-white;
+    @apply text-lg font-medium dark:text-white;
   }
 
   .projectData {
@@ -98,6 +98,13 @@
 
   .dashedBorder {
     /* @apply border-t-2 border-gray-700 border-dashed; */
+  }
+
+  .text-input-form {
+    @apply form-control block w-full px-3 py-1.5 text-base;
+    @apply font-normal text-gray-700 bg-white bg-clip-padding;
+    @apply border border-solid border-gray-300 rounded transition ease-in-out m-0;
+    @apply focus:text-gray-700 focus:bg-white focus:border-blue-600 focus:outline-none;
   }
 
 }

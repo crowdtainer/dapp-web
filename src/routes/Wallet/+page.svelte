@@ -84,16 +84,16 @@
 		}
 
 		foundTokenIds.forEach((item, index) => {
-			tokenIds.push(item.toNumber());
-			crowdtainerIds.push(foundCrowdtainerIds[index].toNumber());
+			tokenIds.push(item);
+			crowdtainerIds.push(foundCrowdtainerIds[index]);
 		});
 
 		let result = await fetchStaticData(crowdtainerIds);
 		if (result.isOk()) {
 			let data = result.unwrap();
 			for (let index = 0; index < data.length; index++) {
-				campaignStaticData.set(foundCrowdtainerIds[index].toNumber(), data[index]);
-				campaignStaticUI.set(foundCrowdtainerIds[index].toNumber(), prepareForUI(data[index]));
+				campaignStaticData.set(foundCrowdtainerIds[index], data[index]);
+				campaignStaticUI.set(foundCrowdtainerIds[index], prepareForUI(data[index]));
 			}
 			staticDataLoadStatus = LoadStatus.Loaded;
 		} else {
@@ -114,23 +114,21 @@
 	<ModalDialog modalDialogData={dialog} />
 {/if}
 
-<!-- <header class="ct-divider">
+<header class="ct-divider">
 	<div class="max-w-7xl mx-auto py-4 px-4 sm:px-6 lg:px-8">
-		<h1 class="text-2xl font-bold text-white">Your Campaigns</h1>
-	</div>
-</header> -->
-
-<header class="campaignSection">
-	<div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
-		<h1 class="font-mono text-2xl font-bold">Your Campaigns</h1>
+		<h1 class="font-mono text-xl text-white">Your Campaigns</h1>
 	</div>
 </header>
 
+<!-- <header class="campaignSection">
+	<div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
+		<h1 class="font-mono text-xl font-bold">Your Campaigns</h1>
+	</div>
+</header> -->
+
 {#if $connected && staticDataLoadStatus == LoadStatus.Loaded}
+<div class="divide-y">
 	{#each tokenIds as tokenId, index}
-		{#if index !== 0}
-			<div class="dashedBorder" />
-		{/if}
 		<MyCampaign
 			{tokenId}
 			vouchers721Address={Vouchers721Address}
@@ -140,7 +138,8 @@
 			campaignStaticUI={campaignStaticUI.get(crowdtainerIds[index])}
 			on:userTransferredParticipationEvent={handleUserTransferredParticipationEvent}
 		/>
-	{/each}
+		{/each}
+	</div>
 {/if}
 
 {#if tokenIds.length == 0 && $connected}
