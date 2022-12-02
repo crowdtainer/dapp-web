@@ -68,7 +68,7 @@ export async function hasEnoughFunds(erc20Contract: IERC20, signerAddress: strin
 }
 
 export async function findTokenIdsForWallet(provider: ethers.Signer | undefined,
-    vouchers721Address: string): Promise<Result<[BigNumber[], BigNumber[], string[]], string>> {
+    vouchers721Address: string): Promise<Result<[number[], number[], string[]], string>> {
 
     if (provider === undefined) {
         return Err("Provider not available.");
@@ -80,8 +80,8 @@ export async function findTokenIdsForWallet(provider: ethers.Signer | undefined,
         let wallet = await provider.getAddress();
         let totalTokens = (await vouchers721Contract.balanceOf(wallet)).toNumber();
 
-        let foundTokenIds: BigNumber[] = new Array<BigNumber>();
-        let crowdtainerIds: BigNumber[] = new Array<BigNumber>();
+        let foundTokenIds: number[] = new Array<number>();
+        let crowdtainerIds: number[] = new Array<number>();
         let crowdtainerAddresses: string[] = new Array<string>();
 
         for (let index = 0; index < totalTokens; index++) {
@@ -90,12 +90,12 @@ export async function findTokenIdsForWallet(provider: ethers.Signer | undefined,
             let foundCrowdtainerAddress = await vouchers721Contract.crowdtainerIdToAddress(crowdtainerId);
             console.log(`Wallet ${wallet} is owner of tokenId: ${tokenId}, from crowdtainerId ${crowdtainerId} @ address ${foundCrowdtainerAddress}`);
 
-            foundTokenIds.push(tokenId);
-            crowdtainerIds.push(crowdtainerId);
+            foundTokenIds.push(tokenId.toNumber());
+            crowdtainerIds.push(crowdtainerId.toNumber());
             crowdtainerAddresses.push(foundCrowdtainerAddress);
         }
 
-        let result: [BigNumber[], BigNumber[], string[]] = [foundTokenIds, crowdtainerIds, crowdtainerAddresses];
+        let result: [number[], number[], string[]] = [foundTokenIds, crowdtainerIds, crowdtainerAddresses];
         return Ok(result);
 
     } catch (error) {

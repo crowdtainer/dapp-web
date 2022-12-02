@@ -103,12 +103,12 @@
 			<div class="flex-1 flex items-center justify-center sm:items-stretch sm:justify-start">
 				<div class="flex-shrink-0 flex items-center">
 					<a href="/">
-						<img class="block lg:hidden h-8 w-auto" src="CrowdtainerLogo.svg" alt="Workflow" />
+						<img class="block lg:hidden h-8 w-auto" src="/CrowdtainerLogo.svg" alt="Workflow" />
 					</a>
 					<a href="/">
 						<img
 							class="hidden lg:block h-8 w-auto"
-							src="crowdtainer_mark_white_text.svg"
+							src="/crowdtainer_mark_white_text.svg"
 							alt="Workflow"
 						/>
 					</a>
@@ -148,7 +148,7 @@
 							aria-haspopup="true"
 						>
 							<span class="sr-only">Open user menu</span>
-							<img class="h-8 w-8 rounded-full" src="ethereum.svg" alt="" />
+							<img class="h-8 w-8 rounded-full" src="/ethereum.svg" alt="" />
 						</button>
 					</div>
 
@@ -163,7 +163,7 @@
 							tabindex="-1"
 						>
 							{#if $connected}
-								<a
+								<a href="#"
 									on:click={async () => {
 										await disconnect();
 										profileMenuOpen = false;
@@ -174,7 +174,7 @@
 									id="user-menu-item-0">Disconnect wallet</a
 								>
 							{:else}
-								<a
+								<a href="#"
 									on:click={async () => {
 										await connect(WalletType.WalletConnect);
 										profileMenuOpen = false;
@@ -185,7 +185,7 @@
 									id="user-menu-item-0">Connect wallet</a
 								>
 								{#if import.meta.env.MODE === 'development'}
-									<a
+									<a href="#"
 										on:click={async () => {
 											await connect(WalletType.Injected);
 											profileMenuOpen = false;

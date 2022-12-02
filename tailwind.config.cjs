@@ -3,7 +3,7 @@ module.exports = {
   theme: {
     extend: {},
   },
-  plugins: [require('daisyui')],
+  plugins: [require('daisyui'),require('@tailwindcss/forms'),],
 
   // daisyUI config (optional)
   daisyui: {
@@ -19,6 +19,7 @@ module.exports = {
         garden: {
           ...require("daisyui/src/colors/themes")["[data-theme=garden]"],
           primary: "#325ba9",
+          secondary: "#000000",
          "neutral-content": "#f7f7f7"
         },
       },

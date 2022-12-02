@@ -130,13 +130,21 @@ npm run preview
 
 - ✅ Button to transfer NFT/participation proof ownership to another wallet.
 
-- ◻️ "Checkout" button (available once funded/suceeded) to conclude the order with service provider (providing delivery address details).
-
-- ◻️ "Download Invoice" button (available once "Checkout" succeeded).
-
-- ◻️ Worker service to dispatch emails (pull job from redis):
+- ◻️ Worker service to dispatch email (pull job from redis):
     - Verification/validation code
-    - Send invoice
+
+- ◻️ "Checkout" button (available once funded/suceeded) to conclude the order with service provider (providing delivery address details).
+    - ◻️ UI/frontend:
+        - ✅ Form / UI for delivery address input.
+        - ◻️ Sign data with wallet PK and send everything to backend endpoint.
+    - ◻️ Backend endpoint validates the input and persist data in redis (create a checkout request).
+
+- ◻️ "Download Invoice" button / E-mail Invoice.
+    - ◻️ Background work to process checkout requests and create invoice dispatch job.
+        - ◻️ Create order in shop system, set checkout request status as claimed for the respecitve wallet.
+    - ◻️ Background work to check order status:
+        - ◻️ Download invoice PDF when ready and send it by email; Set checkout request as complete.
+
 
 - ◻️ Browser-side encryption (assymetric, using service provider's PubKey) before pushing sensitive data to redis.
 

@@ -67,22 +67,23 @@ export async function requestAuthorizationProof(wallet: string,
 ): Promise<Result<[string, string], string>> {
 
 	const abiInterface = new ethers.utils.Interface(JSON.stringify(AuthorizationGateway__factory.abi));
-	const calldata = abiInterface.encodeFunctionData('getSignedJoinApproval',
-		[crowdtainerAddress, wallet, quantities, enableReferral, referralAddress]);
+
+	const calldataValue = abiInterface.encodeFunctionData('getSignedJoinApproval',
+	[crowdtainerAddress, wallet, quantities, enableReferral, referralAddress]);
 
 	let result: Response = await fetch(`authProofAPI/${wallet}`, {
 		method: 'POST',
-		body: JSON.stringify({ calldata: calldata })
+		body: JSON.stringify({ calldata: calldataValue })
 	});
 
 	if(!result.ok) {
-		return Err(await result.text());
+		return Err(`${result.text()}`);
 	}
 
 	let response: [string, string];
 	let signedCalldata = await result.text();
 
-	response = [calldata, signedCalldata];
+	response = [calldataValue, signedCalldata];
 
 	return Ok(response);
 }

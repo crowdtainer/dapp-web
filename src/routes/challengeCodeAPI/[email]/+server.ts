@@ -1,13 +1,14 @@
 // Random number
 import { randomInt } from "crypto";                         // Random number
 import redis from "$lib/Database/redis";                    // Database
-import type { RequestHandler } from './__types/[email]'     // Internal
+import type { RequestHandler, RouteParams, RouteId } from './$types';              // Internal
+import { error } from "@sveltejs/kit";
 
 const maxAPI_hits = 8;
 const codeExpireTime = 1800 // 30 minutes
 const emailWorkerExpiration = 5 * 60 // 5 minutes
 
-export const get: RequestHandler<string> = async ({ params }) => {
+export const GET: RequestHandler = async ({ params }) => {
 
     let userEmail = params.email;
 
@@ -24,10 +25,7 @@ export const get: RequestHandler<string> = async ({ params }) => {
         await redis.expire(apiHits, codeExpireTime);
 
         if (currentCount > maxAPI_hits) {
-            return {
-                status: 429,
-                body: "Please try again later."
-            };
+            throw error(429, "Please try again later.");
         }
 
         let randomNumber = await redis.get(emailCodekey);
@@ -35,17 +33,11 @@ export const get: RequestHandler<string> = async ({ params }) => {
         if (randomNumber != undefined) {
             console.log(`Existing code present for email ${userEmail}`);
 
-            return {
-                status: 200,
-                body: randomNumber
-            };
-
+            return new Response(randomNumber);
         }
-    } catch (error) {
-        return {
-            status: 500,
-            body: "Database failure."
-        };
+    } catch (_error) {
+        console.dir(_error);
+        throw error(500, "Database failure.");
     }
 
     try {
@@ -58,16 +50,11 @@ export const get: RequestHandler<string> = async ({ params }) => {
             .exec();
 
         console.log(`Key -> ${emailCodekey} ; Value -> ${randomNumber}`);
-    } catch (e) {
+    } catch (_error) {
         console.log(`Unable to set user code: ${emailCodekey}:${randomNumber}`);
-        return {
-            status: 500,
-            body: "Database failure."
-        };
+        console.dir(_error);
+        throw error(500, "Database failure.");
     }
 
-    return {
-        status: 200,
-        body: "OK"
-    };
+    return new Response("OK");
 }

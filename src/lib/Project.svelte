@@ -8,7 +8,7 @@
 
 	import { initializeCampaignStores, campaignStores } from '$lib/campaignStore';
 	import { joinSelection } from '$lib/userStore';
-	import { walletFundsInCrowdtainer } from './ethersCalls/rpcRequests';
+	import { findTokenIdsForWallet, walletFundsInCrowdtainer } from './ethersCalls/rpcRequests';
 	import { BigNumber, ethers } from 'ethers';
 
 	import TimeLeft from './TimeLeft.svelte';
@@ -63,6 +63,9 @@
 	let tweenedPercentageWidth = tweened(0, { duration: tweeningDuration, easing: cubicOut });
 	let tweenedPercentageRaised = tweened(0, { duration: tweeningDuration, easing: cubicOut });
 	let userFundsInCrowdtainer: BigNumber = BigNumber.from(0);
+
+	// tokenId is present only if the connected wallet has joined the project
+	let tokenId: number | undefined = undefined;
 
 	// Modal Dialog
 	let dialog: ModalDialogData = {
@@ -130,6 +133,26 @@
 				tweenedPercentageRaised.set(percentage);
 				tweenedPercentageWidth.set(calculatePercentageWidth(percentage));
 			}
+		}
+	}
+
+	async function loadTokenIdsForWallet() {
+		if (staticDataLoadStatus === LoadStatus.Loaded) {
+			let searchResult = await findTokenIdsForWallet(getSigner(), vouchers721Address);
+			if (searchResult.isErr()) {
+				console.log(`loadTokenIdsForWallet: ${searchResult.unwrapErr()}`);
+				return;
+			}
+
+			let [foundTokenIds, crowdtainerIds, crowdtainerAddresses] = searchResult.unwrap();
+			let index = crowdtainerIds.findIndex((element) => element === crowdtainerId);
+
+			if (index === -1) {
+				console.log('Token not found.');
+				return;
+			}
+
+			tokenId = foundTokenIds[index];
 		}
 	}
 
@@ -206,7 +229,7 @@
 			? toStateString($campaignDynamicData, campaignStaticData)
 			: loadingString;
 
-	$: $campaignDynamicData, setRaisedAmount(), setPercentages();
+	$: $campaignDynamicData, setRaisedAmount(), setPercentages(), loadTokenIdsForWallet();
 	$: loadingAnimation = staticDataLoadStatus === LoadStatus.Loading;
 
 	// Immediatelly update UI elements related to connected wallet on wallet or connection change
@@ -219,9 +242,9 @@
 
 <div class="max-w-10xl mx-auto py-1 sm:px-6 lg:px-8">
 	<div
-	class="border-2 border-black dark:border dark:border-white rounded-md max-w-lg mx-auto white overflow-hidden md:max-w-7xl my-8"
+		class="border-2 border-black dark:border dark:border-white rounded-md max-w-lg mx-auto white overflow-hidden md:max-w-7xl my-8"
 	>
-	<div class="md:flex">
+		<div class="md:flex">
 			<div class="md:shrink-0">
 				<img class="w-full object-cover md:h-full md:w-96" src={projectImageURL} alt="Coffee" />
 			</div>
@@ -234,7 +257,7 @@
 					class="text-black dark:text-white block mt-1 text-2xl leading-tight font-medium hover:underline"
 					>{subtitle}</a
 				>
-				<p class="mt-5 text-slate-500 dark:text-gray-300">
+				<p class="my-8 text-slate-700 dark:text-white">
 					{@html description}
 				</p>
 
@@ -242,7 +265,7 @@
 					<div class:animate-pulse={loadingAnimation}>
 						<div class="my-6 bg-gray-300 rounded-md w-full">
 							<div
-								class="progress progress-primary bg-blue-500 text-sm font-small text-white text-center p-1 leading-normal rounded-md"
+								class="progress progress-primary bg-sky-700 text-sm font-small text-white text-center p-1 leading-normal rounded-md"
 								style="width: {$tweenedPercentageWidth}%"
 							>
 								{$tweenedPercentageRaised.toFixed(0)}%
@@ -388,6 +411,7 @@
 				<div class="w-auto flex ">
 					{#if campaignStaticData !== undefined && campaignStaticUI !== undefined}
 						<CampaignActions
+							{tokenId}
 							{vouchers721Address}
 							crowdtainerAddress={campaignStaticData?.contractAddress}
 							projectStatusUI={state}

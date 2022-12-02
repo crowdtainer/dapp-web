@@ -2,23 +2,21 @@ import redis from "$lib/Database/redis";                // Database
 import { ethers } from 'ethers';                        // Ethers
 import { type Result, Ok, Err } from "@sniptt/monads";  // Monads
 import { getMessage } from '$lib/Model/SignTerms';      // internal
-import type { RequestHandler } from './__types/[wallet]'// Internal
+import { error } from '@sveltejs/kit';
+import type { RequestHandler } from './$types';
 
 // POST Inputs: - {
 //                          email: string,      // Participant's email
 //                  signatureHash: hex string   // Terms and conditions
 //                }
-export const post: RequestHandler<string> = async ({ request }) => {
+export const POST: RequestHandler = async ({ request }) => {
 
     let authorizedEmailskey = `authorizedEmails`;
 
     let result = getPayload(await request.json());
 
     if (result.isErr()) {
-        return {
-            status: 400,
-            body: result.unwrapErr()
-        };
+        throw error(400, result.unwrapErr());
     }
 
     let [email, signatureHash] = result.unwrap();
@@ -29,28 +27,19 @@ export const post: RequestHandler<string> = async ({ request }) => {
         signerAddress = await ethers.utils.verifyMessage(getMessage(email), signatureHash);
         console.log(`Derived signer address: ${signerAddress}`);
 
-    } catch (error) {
-        return {
-            status: 500,
-            body: "Invalid message."
-        };
+    } catch (_error) {
+        throw error(500, "Invalid message: verififcation failed.");
     }
 
     if (!ethers.utils.isAddress(signerAddress)) {
-        return {
-            status: 500,
-            body: "Invalid wallet address"
-        };
+        throw error(500, "Invalid wallet address.");
     }
 
     try {
         // Check if email is authorized
         const emailAuthorized = await redis.sismember(authorizedEmailskey, email);
         if (!emailAuthorized) {
-            return {
-                status: 400,
-                body: "E-mail address not validated."
-            };
+            throw error(400, "E-mail address not validated.");
         }
 
         let userSigKey = `userSignature:${signerAddress}`;
@@ -91,16 +80,10 @@ export const post: RequestHandler<string> = async ({ request }) => {
         }
 
     } catch (e) {
-        return {
-            status: 500,
-            body: `Database error.`
-        };
+        throw error(500, "Database error.");
     }
 
-    return {
-        status: 200,
-        body: "OK"
-    };
+    return new Response("OK");
 }
 
 type Error = string;

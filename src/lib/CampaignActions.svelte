@@ -212,21 +212,22 @@
 			<span class="tooltip rounded shadow-lg p-1 bg-gray-100 mt-40 text-primary">
 				Complete purchase by requesting your product delivery
 			</span>
-			<button
-				type="button"
-				class="relative inline-flex items-center justify-center overflow-hidden text-sm font-medium text-gray-900 rounded-lg group bg-gradient-to-br from-teal-300 to-lime-300 group-hover:from-teal-300 group-hover:to-lime-300  focus:ring-4 focus:outline-none focus:ring-lime-200"
-				alt="Complete purchase by requesting your product delivery"
-				on:click={userLeftCrowdtainer}
-			>
-				<span
-					class="h-auto w-36 relative px-5 py-6 transition-all ease-in duration-75 bg-white rounded-md group-hover:bg-opacity-0"
+			<a href="/Checkout?vouchers721Address={vouchers721Address}&voucherId={tokenId}">
+				<button
+					type="button"
+					class="relative inline-flex items-center justify-center overflow-hidden text-sm font-medium text-gray-900 rounded-lg group bg-gradient-to-br from-teal-300 to-lime-300 group-hover:from-teal-300 group-hover:to-lime-300  focus:ring-4 focus:outline-none focus:ring-lime-200"
+					alt="Complete purchase by requesting your product delivery"
 				>
-					<div class="flex justify-center items-center">
-						<img width="30" height="30" src="Cart.svg" alt="Checkout" />
-					</div>
-					<p class="text-lg mt-5">Checkout</p>
-				</span>
-			</button>
+					<span
+						class="h-auto w-36 relative px-5 py-6 transition-all ease-in duration-75 bg-white rounded-md group-hover:bg-opacity-0"
+					>
+						<div class="flex justify-center items-center">
+							<img width="30" height="30" src="Cart.svg" alt="Checkout" />
+						</div>
+						<p class="text-lg mt-5">Checkout</p>
+					</span>
+				</button>
+			</a>
 		</div>
 
 		<!-- Download Invoice -->
@@ -309,7 +310,6 @@
 		<div class="p-0.5 mb-2 m-2 has-tooltip">
 			<span class="tooltip rounded shadow-lg p-1 bg-gray-100 text-red-500 mt-40">
 				Withdrawl {tokenSymbol}
-
 			</span>
 			<button
 				class="relative inline-flex items-center justify-center overflow-hidden text-sm font-medium text-gray-900 rounded-lg group bg-gradient-to-br from-pink-500 to-orange-400 group-hover:from-cyan-500 group-hover:to-blue-500 focus:ring-4 focus:outline-none focus:ring-red-400"

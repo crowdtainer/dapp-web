@@ -19,8 +19,7 @@
 		toState,
 		type UIFields,
 		LoadStatus,
-		loadingString,
-
+		loadingString
 	} from '$lib/Converters/CrowdtainerData';
 
 	import { connected, getSigner, accountAddress } from '$lib/wallet';
@@ -30,6 +29,7 @@
 		ModalType,
 		type ModalDialogData
 	} from './ModalDialog.svelte';
+	import { loadTokenURIRepresentation } from './Converters/tokenURI';
 
 	export let tokenId: number;
 	export let vouchers721Address: string;
@@ -100,31 +100,14 @@
 			return;
 		}
 
-		let [imageDataJSON, svgData] = await loadTokenURIRepresentation(signer, tokenId);
-		svg = svgData;
+		let imageDataJSON = await loadTokenURIRepresentation(signer, vouchers721Address, tokenId);
+		if (imageDataJSON === undefined) {
+			console.log('Unable to decode tokenURI.');
+			return;
+		}
+
+		svg = imageDataJSON.image;
 	});
-
-	async function loadTokenURIRepresentation(
-		signer: Signer,
-		tokenId: number
-	): Promise<[string, string]> {
-		let result = await getTokenURI(signer, vouchers721Address, tokenId);
-		if (result.isErr()) {
-			// TODO: show UI message
-			console.log(`${result.unwrapErr()}`);
-		}
-		let payload = result.unwrap();
-
-		if (!payload.startsWith('data:application/json;base64,')) {
-			console.log('Unrecognized data');
-			return ['', ''];
-		}
-
-		let [, imageDataInBase64] = payload.split(',');
-		const imageDataJSON = JSON.parse(atob(imageDataInBase64));
-
-		return [imageDataJSON, imageDataJSON.image];
-	}
 
 	function setRaisedAmount() {
 		if (staticDataLoadStatus !== LoadStatus.FetchFailed) {
@@ -167,14 +150,18 @@
 {/if}
 
 <div class="max-w-10xl mx-auto py-1 sm:px-6 lg:px-8">
-	<div class="border border-black dark:border-white rounded-md max-w-lg mx-auto white overflow-hidden md:max-w-7xl my-8">
+	<div class="rounded-md max-w-lg mx-auto white overflow-hidden md:max-w-7xl my-8 ">
 		<div class="md:flex">
 			<div class="md:shrink-0">
 				<!-- <img class="w-full object-cover md:h-full md:w-96" src={projectImageURL} alt="Coffee" /> -->
-				<img class="w-full object-cover md:h-full md:w-96 p-2" src={svg} alt="Coffee" />
+				<img
+					class="drop-shadow-md hover:drop-shadow-xl w-full object-cover  md:w-96 p-2"
+					src={svg}
+					alt="Coffee"
+				/>
 			</div>
-			<div class="p-8">
-				<div class="text-primary font-mono uppercase tracking-wide font-semibold">
+			<div class="p-8 w-full">
+				<div class="text-primary drop-shadow-sm font-mono uppercase tracking-wide">
 					{title}
 				</div>
 				<a
@@ -185,27 +172,17 @@
 
 				{#if staticDataLoadStatus !== LoadStatus.FetchFailed}
 					<div class:animate-pulse={loadingAnimation}>
-						<!-- Main Status -->
-						<div class="flex justify-between pt-8 gap-5">
-							<div>
-								<p class="projectStatus">{stateString}</p>
-								<p class="projectDataSubtitle">Status</p>
-							</div>
-						</div>
-
 						<!-- Dates -->
-						<div class="flex  py-4 justify-between gap-12">
-							<div class="">
-								<p class="projectData">
-									{campaignStaticUI ? campaignStaticUI.startDateString : loadingString}
-								</p>
-								<p class="projectDataSubtitle">Start</p>
-							</div>
+						<div class="flex py-6 gap-16">
 							<div class="">
 								<p class="projectData">
 									{campaignStaticUI ? campaignStaticUI.endDateString : loadingString}
 								</p>
-								<p class="projectDataSubtitle">End</p>
+								<p class="projectDataSubtitle">Funding ended</p>
+							</div>
+							<div>
+								<p class="projectStatus">{stateString}</p>
+								<p class="projectDataSubtitle">Status</p>
 							</div>
 						</div>
 					</div>
@@ -213,12 +190,12 @@
 					<p class="my-6 text-red-800">Error fetching data.</p>
 				{/if}
 				<DetailedTokenIdState
-				{userFundsInCrowdtainer}
-				{campaignStaticUI}
-				{fundsInContract}
-				{raisedAmount}
-				{state}
-			/>
+					{userFundsInCrowdtainer}
+					{campaignStaticUI}
+					{fundsInContract}
+					{raisedAmount}
+					{state}
+				/>
 
 				<div class="w-auto flex ">
 					{#if campaignStaticData !== undefined && campaignStaticUI !== undefined}

@@ -33,6 +33,7 @@
 	// Pre-order state
 	let termsAccepted = false;
 	let deliveryAcknowledged = false;
+	let shipmentConditions = false;
 	let termsAcknowledged = false;
 
 	// Wallet management
@@ -164,9 +165,10 @@
 
 			if (!joinTransaction.isOk()) {
 				let errorString = joinTransaction.unwrapErr();
-				let errorDescription = errorString.includes('Unknown') || errorString.includes('{}') || errorString.length === 0
-					? ''
-					: `\n\n Details: ${errorString}`;
+				let errorDescription =
+					errorString.includes('Unknown') || errorString.includes('{}') || errorString.length === 0
+						? ''
+						: `\n\n Details: ${errorString}`;
 				modalDialogData = {
 					type: ModalType.ActionRequest,
 					visible: true,
@@ -327,12 +329,27 @@
 						<input
 							type="checkbox"
 							disabled={termsAccepted}
+							bind:checked={shipmentConditions}
+							class="checkbox checkbox-primary"
+						/>
+						<p class="label-text dark:text-white w-full">
+							I understand that shipping is <b>only possible to Germany</b> at this time.
+						</p>
+					</label>
+				</div>
+
+				<div class="flex justify-center">
+					<label class="label cursor-pointer gap-3 my-4 sm:w-full md:w-4/5 lg:w-4/6 xl:w-3/6">
+						<input
+							type="checkbox"
+							disabled={termsAccepted}
 							bind:checked={termsAcknowledged}
 							class="checkbox checkbox-primary"
 						/>
 						<span class="label-text dark:text-white"
-							>By clicking "Confirm & Join" and cryptographically signing the transaction, I agree
-							to the General Terms and Conditions related to the usage of this webpage.</span
+							>By clicking "Agree" and cryptographically signing the transaction, I agree to the
+							<b>General Terms and Conditions</b>, <b>Privacy Policy</b>, <b>Refund policy</b>, and
+							<b>Shipping policy</b>.</span
 						>
 					</label>
 				</div>
@@ -352,7 +369,10 @@
 						tokenSymbol={campaignStaticUI?.tokenSymbol}
 						totalSum={$totalSum}
 						{totalCostInERCUnits}
-						actionButtonEnabled={termsAcknowledged && deliveryAcknowledged && actionButtonEnabled}
+						actionButtonEnabled={termsAcknowledged &&
+							deliveryAcknowledged &&
+							actionButtonEnabled &&
+							shipmentConditions}
 						callApproveSpendingHandler={callApproveSpending}
 						callJoinProjectHandler={callJoinProject}
 					/>

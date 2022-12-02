@@ -210,7 +210,7 @@ async function setupInjectedProviderWallet() {
             console.log("Wallet disconnected.");
             walletState.setConnected(false);
         } else {
-            console.log(`one: accountsChanged: ${accounts[0]}`);
+            console.log(`accountsChanged: ${accounts[0]}`);
             walletState.setAccount(accounts[0]);
         }
     });
