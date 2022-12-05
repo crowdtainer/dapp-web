@@ -45,12 +45,12 @@ export async function requestEmailAuthorizationAPI(email: string, code: string):
 	return result.text();
 }
 
-export async function requestWalletAuthorizationAPI(wallet: string, email: string, sigHash: string): Promise<string> {
+export async function requestWalletAuthorizationAPI(email: string, message: string, sigHash: string): Promise<string> {
 	let result: Response;
 
-	result = await fetch(`authorizeWalletAPI/${wallet}`, {
+	result = await fetch('authorizeWalletAPI', {
 		method: 'POST',
-		body: JSON.stringify({ email: email, signatureHash: sigHash })
+		body: JSON.stringify({ email: email, message: message, signatureHash: sigHash })
 	});
 	return result.text();
 }

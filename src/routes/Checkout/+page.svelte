@@ -195,7 +195,7 @@
 				/>
 			</div>
 		</div>
-		<DeliveryAddress />
+		<DeliveryAddress walletAddress={loadedWallet}/>
 	</div>
 {:else if projectStatusUI === ProjectStatusUI.Loading}
 	<p class="text-black dark:text-white text-center mx-2 my-4">Loading data..</p>

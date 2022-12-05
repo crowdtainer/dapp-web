@@ -42,6 +42,7 @@
 	},
 	"type": "module",
 	"dependencies": {
+		"@crowdtainer/siwe": "^2.1.5",
 		"@sniptt/monads": "^0.5.10",
 		"alchemy-sdk": "^2.0.3",
 		"daisyui": "^2.24.0",

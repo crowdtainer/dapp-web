@@ -1,13 +1,12 @@
-import redis from "$lib/Database/redis";                // Database
-import { ethers } from 'ethers';                        // Ethers
-import { type Result, Ok, Err } from "@sniptt/monads";  // Monads
-import { getMessage } from '$lib/Model/SignTerms';      // internal
-import { error } from '@sveltejs/kit';
-import type { RequestHandler } from './$types';
+import redis from "$lib/Database/redis";                        // Database
+import { ethers } from 'ethers';                                // Ethers
+import { type Result, Ok, Err } from "@sniptt/monads";          // Monads
+import { getMessage } from '$lib/Model/SignTerms';              // internal
+import { error, type RequestHandler } from '@sveltejs/kit';     // SvelteKit
 
 // POST Inputs: - {
-//                          email: string,      // Participant's email
-//                  signatureHash: hex string   // Terms and conditions
+//                          form.data,                    // Participant's delivery address
+//                  signatureHash: hex string             // signed hash of delivery address
 //                }
 export const POST: RequestHandler = async ({ request }) => {
 
@@ -55,7 +54,7 @@ export const POST: RequestHandler = async ({ request }) => {
             const newData = {
                 email: email,
                 signatureHash: signatureHash,
-                signatureCount: Number(signatureCount)+1
+                signatureCount: Number(signatureCount) + 1
             };
             redis.multi()
                 .hset(`${userSigKey}:${signatureCount}`, currentData)

@@ -2,7 +2,7 @@ import redis from "$lib/Database/redis";                // Database
 import { type Result, Ok, Err } from "@sniptt/monads";  // Monads
 import type { RequestHandler } from './$types';         // Internal
 
-import { BigNumber, ethers } from 'ethers';                        // Ethers
+import { BigNumber, ethers } from 'ethers';             // Ethers
 import { AuthorizationGateway__factory } from '../../../routes/typechain/factories/Crowdtainer.sol/AuthorizationGateway__factory';
 import { error } from "@sveltejs/kit";
 
