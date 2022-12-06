@@ -40,6 +40,7 @@
 		type ModalDialogData
 	} from './ModalDialog.svelte';
 	import PreOrder from './PreOrder.svelte';
+	import { getOrderDetailsAPI, OrderStatus } from './api';
 
 	export let vouchers721Address: string;
 	export let crowdtainerId: number;
@@ -63,6 +64,8 @@
 	let tweenedPercentageWidth = tweened(0, { duration: tweeningDuration, easing: cubicOut });
 	let tweenedPercentageRaised = tweened(0, { duration: tweeningDuration, easing: cubicOut });
 	let userFundsInCrowdtainer: BigNumber = BigNumber.from(0);
+
+	let orderStatus: OrderStatus;
 
 	// tokenId is present only if the connected wallet has joined the project
 	let tokenId: number | undefined = undefined;
@@ -136,6 +139,28 @@
 		}
 	}
 
+	async function loadOrderDetails() {
+		let signer = getSigner();
+		if(!signer) {
+			console.log("Unable to load order details, missing signer.");
+			return;
+		}
+
+		if(!tokenId) {
+			console.log("Unable to load order details, missing tokenId.");
+			return;
+		}
+
+		let result = await getOrderDetailsAPI(await signer.getChainId(), vouchers721Address, tokenId);
+
+		if(result.isErr()) {
+			console.log(`${result.unwrapErr()}`);
+			return;
+		}
+
+		orderStatus = result.unwrap();
+	}
+
 	async function loadTokenIdsForWallet() {
 		if (staticDataLoadStatus === LoadStatus.Loaded) {
 			let searchResult = await findTokenIdsForWallet(getSigner(), vouchers721Address);
@@ -189,22 +214,6 @@
 			'If the minimum funding is reached, you will be able to enter your delivery address on this site. Otherwise, you can get your pre-payment back.';
 	}
 
-	function handleCampaignLeftEvent(event: CustomEvent) {
-		if (campaignStaticUI !== undefined) {
-			let quantities: number[] = new Array<number>(campaignStaticUI.prices.length).fill(0);
-			$joinSelection.set(crowdtainerId, quantities);
-			$joinSelection = $joinSelection;
-		}
-
-		console.log(`Detected event of type: ${event.type} : detail: ${event.detail.text}`);
-		dialog.visible = true;
-		dialog.title = 'Success';
-		dialog.animation = ModalAnimation.None;
-		dialog.icon = ModalIcon.BadgeCheck;
-		dialog.type = ModalType.Information;
-		dialog.body = 'You have left the project and the pre-payment has been returned to your wallet.';
-	}
-
 	function handleUserClaimedFundsEvent(event: CustomEvent) {
 		console.log(`Detected event of type: ${event.type} : detail: ${event.detail.text}`);
 		dialog.visible = true;
@@ -229,7 +238,7 @@
 			? toStateString($campaignDynamicData, campaignStaticData)
 			: loadingString;
 
-	$: $campaignDynamicData, setRaisedAmount(), setPercentages(), loadTokenIdsForWallet();
+	$: $campaignDynamicData, setRaisedAmount(), setPercentages(), loadTokenIdsForWallet(), loadOrderDetails();
 	$: loadingAnimation = staticDataLoadStatus === LoadStatus.Loading;
 
 	// Immediatelly update UI elements related to connected wallet on wallet or connection change
@@ -406,6 +415,7 @@
 					{fundsInContract}
 					{raisedAmount}
 					{state}
+					{orderStatus}
 				/>
 
 				<div class="w-auto flex ">
@@ -417,6 +427,7 @@
 							projectStatusUI={state}
 							tokenSymbol={campaignStaticUI.tokenSymbol}
 							{userFundsInCrowdtainer}
+							{orderStatus}
 							on:userClaimedFundsEvent={handleUserClaimedFundsEvent}
 						/>
 					{/if}

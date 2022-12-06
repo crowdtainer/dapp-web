@@ -1,4 +1,3 @@
-
 // Typechain
 import { Vouchers721__factory } from '../../typechain/factories/Vouchers721__factory';
 import { Crowdtainer__factory } from '../../typechain/factories/Crowdtainer.sol/Crowdtainer__factory';
@@ -22,7 +21,7 @@ import { error } from '@sveltejs/kit';
 const settings = {
    apiKey: import.meta.env.VITE_RPC_API_KEY,
    network: import.meta.env.VITE_RPC_BACKEND
- };
+};
 // const alchemy = new Alchemy(settings);
 // const provider =await alchemy.config.getProvider();
 
@@ -30,8 +29,8 @@ const provider = new ethers.providers.JsonRpcBatchProvider(import.meta.env.VITE_
 
 async function fetchData(crowdtainerId: BigNumber): Promise<Result<CrowdtainerStaticModel, Error>> {
    try {
-      if(crowdtainerId.toNumber() === 0) {
-         return Err({error: `Invalid crowdtainerId: ${crowdtainerId.toNumber()}`});
+      if (crowdtainerId.toNumber() === 0) {
+         return Err({ error: `Invalid crowdtainerId: ${crowdtainerId.toNumber()}` });
       }
 
       const vouchers721Contract = Vouchers721__factory.connect(Vouchers721Address, provider);
@@ -97,7 +96,7 @@ export const GET: RequestHandler = async ({ params }) => {
 
       projectIds = params.id.split(",");
 
-      for(let i=0; i< projectIds.length; i++ ) {
+      for (let i = 0; i < projectIds.length; i++) {
          let crowdtainer = BigNumber.from(Number(projectIds[i]));
          let result = await fetchData(crowdtainer);
 

@@ -8,6 +8,7 @@
 	export let tokenSymbol: string;
 	export let userFundsInCrowdtainer: BigNumber;
 	export const wallet: string | undefined = undefined;
+	export let orderStatus: OrderStatus;
 
 	import { createEventDispatcher } from 'svelte';
 
@@ -22,6 +23,7 @@
 	// Wallet management
 	import { getSigner } from '$lib/wallet';
 	import type { BigNumber } from 'ethers';
+	import { OrderStatus } from './api';
 
 	const dispatch = createEventDispatcher();
 
@@ -207,7 +209,7 @@
 
 <div class="flex flex-wrap justify-center mt-2">
 	<!-- Checkout -->
-	{#if projectStatusUI === ProjectStatusUI.Delivery}
+	{#if projectStatusUI === ProjectStatusUI.Delivery && orderStatus === OrderStatus.WaitingForDeliveryAddress}
 		<div class="p-0.5 mb-2 m-2 has-tooltip">
 			<span class="tooltip rounded shadow-lg p-1 bg-gray-100 mt-40 text-primary">
 				Complete purchase by requesting your product delivery
@@ -255,7 +257,7 @@
 	{/if}
 
 	<!-- Transfer participation proof -->
-	{#if projectStatusUI === ProjectStatusUI.Delivery && tokenId !== undefined}
+	{#if projectStatusUI === ProjectStatusUI.Delivery && tokenId !== undefined && orderStatus === OrderStatus.WaitingForDeliveryAddress}
 		<div class="p-0.5 mb-2 m-2 has-tooltip">
 			<span class="tooltip rounded shadow-lg p-1 bg-gray-100 mt-40">
 				Transfer participation proof to another wallet

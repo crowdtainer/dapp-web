@@ -133,11 +133,11 @@ npm run preview
 - ◻️ Worker service to dispatch email (pull job from redis):
     - Verification/validation code
 
-- ◻️ "Checkout" button (available once funded/suceeded) to conclude the order with service provider (providing delivery address details).
-    - ◻️ UI/frontend:
+- ✅ "Checkout" button (available once funded/suceeded) to conclude the order with service provider (providing delivery address details).
+    - ✅ UI/frontend:
         - ✅ Form / UI for delivery address input.
-        - ◻️ Sign data with wallet PK and send everything to backend endpoint.
-    - ◻️ Backend endpoint validates the input and persist data in redis (create a checkout request).
+        - ✅ Sign data with wallet PK and send everything to backend endpoint.
+    - ✅ Backend endpoint validates the input and persist data in redis (creates a checkout/delivery request).
 
 - ◻️ "Download Invoice" button / E-mail Invoice.
     - ◻️ Background work to process checkout requests and create invoice dispatch job.
@@ -145,8 +145,9 @@ npm run preview
     - ◻️ Background work to check order status:
         - ◻️ Download invoice PDF when ready and send it by email; Set checkout request as complete.
 
+- ◻️ Impressum / legal page.
 
-- ◻️ Browser-side encryption (assymetric, using service provider's PubKey) before pushing sensitive data to redis.
+- ◻️ Browser-side encryption (asymmetric, using service provider's PubKey) before pushing sensitive data to redis.
 
 ##### Out of scope for MVP:
 - ◻️ When joining, I'd like to additionally specify:

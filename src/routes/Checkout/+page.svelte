@@ -31,6 +31,9 @@
 	let loadedWallet: string;
 	let userWalletInvalid: boolean;
 
+	let voucherId: BigNumber;
+	let vouchers721Address: string;
+
 	let tokenValidForWallet: boolean;
 
 	// Modal Dialog
@@ -52,9 +55,6 @@
 				'vouchers721Address'
 			)}`
 		);
-
-		let voucherId: BigNumber;
-		let vouchers721Address: string;
 
 		try {
 			voucherId = BigNumber.from(Number($page.url.searchParams.get('voucherId')));
@@ -179,54 +179,58 @@
 </header>
 
 <div class="max-w-lg mx-auto white overflow-hidden md:max-w-7xl my-8">
-{#if userWalletInvalid}
-	<div class="text-black dark:text-white text-center mx-2 my-4">
-		<p>The wallet was either disconected or changed.</p>
-		<p>Please reconnect the following wallet: {loadedWallet} or restart Checkout.</p>
-	</div>
-{:else if $connected && staticDataLoadStatus == LoadStatus.Loaded && projectStatusUI === ProjectStatusUI.Delivery}
-	<div class="md:flex ">
-		<div class="md:shrink-0">
-			<div class="flex justify-center">
-				<img
-					class="drop-shadow-md sm:mt-10 mt-0 hover:drop-shadow-xl w-34 object-cover md:w-96 p-2"
-					src={svg}
-					alt="Coffee"
-				/>
+	{#if userWalletInvalid}
+		<div class="text-black dark:text-white text-center mx-2 my-4">
+			<p>The wallet was either disconected or changed.</p>
+			<p>Please reconnect the following wallet: {loadedWallet} or restart Checkout.</p>
+		</div>
+	{:else if $connected && staticDataLoadStatus == LoadStatus.Loaded && projectStatusUI === ProjectStatusUI.Delivery}
+		<div class="md:flex ">
+			<div class="md:shrink-0">
+				<div class="flex justify-center">
+					<img
+						class="drop-shadow-md sm:mt-10 mt-0 hover:drop-shadow-xl w-34 object-cover md:w-96 p-2"
+						src={svg}
+						alt="Coffee"
+					/>
+				</div>
 			</div>
+			<DeliveryAddress
+				walletAddress={loadedWallet}
+				{vouchers721Address}
+				voucherId={voucherId.toNumber()}
+			/>
 		</div>
-		<DeliveryAddress walletAddress={loadedWallet}/>
-	</div>
-{:else if projectStatusUI === ProjectStatusUI.Loading}
-	<p class="text-black dark:text-white text-center mx-2 my-4">Loading data..</p>
-{:else if !$connected}
-	<EmptySection>
-		<p class="text-black dark:text-white text-center mx-2 my-4">
-			Please connect your wallet to continue.
-		</p>
-		<br />
+	{:else if projectStatusUI === ProjectStatusUI.Loading}
+		<p class="text-black dark:text-white text-center mx-2 my-4">Loading data..</p>
+	{:else if !$connected}
+		<EmptySection>
+			<p class="text-black dark:text-white text-center mx-2 my-4">
+				Please connect your wallet to continue.
+			</p>
+			<br />
 
-		<div class="flex justify-center ">
-			<button
-				class="btn btn-outline text-black dark:text-white"
-				on:click={() => {
-					connect(WalletType.WalletConnect);
-				}}
-			>
-				Connect Wallet
-			</button>
+			<div class="flex justify-center ">
+				<button
+					class="btn btn-outline text-black dark:text-white"
+					on:click={() => {
+						connect(WalletType.WalletConnect);
+					}}
+				>
+					Connect Wallet
+				</button>
+			</div>
+		</EmptySection>
+	{:else if $connected && !tokenValidForWallet}
+		<div>
+			<p class="text-black dark:text-white text-center mx-2 my-32">
+				The token specified for checkout is either invalid or not owned by the connected wallet.
+			</p>
 		</div>
-	</EmptySection>
-{:else if $connected && !tokenValidForWallet}
-	<div>
+		<br />
+	{:else if projectStatusUI === ProjectStatusUI.SuccessfulyFunded}
 		<p class="text-black dark:text-white text-center mx-2 my-32">
-			The token specified for checkout is either invalid or not owned by the connected wallet.
+			Waiting for service provider confirmation. Please try again in a few minutes.
 		</p>
-	</div>
-	<br />
-{:else if projectStatusUI === ProjectStatusUI.SuccessfulyFunded}
-	<p class="text-black dark:text-white text-center mx-2 my-32">
-		Waiting for service provider confirmation. Please try again in a few minutes.
-	</p>
-{/if}
+	{/if}
 </div>

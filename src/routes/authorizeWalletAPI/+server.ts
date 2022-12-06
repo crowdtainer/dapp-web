@@ -2,7 +2,7 @@ import redis from "$lib/Database/redis";                // Database
 import { ethers } from 'ethers';                        // Ethers
 import { type Result, Ok, Err } from "@sniptt/monads";  // Monads
 
-import { makeStatement, termsURI, domain } from '$lib/Model/SignTerms';
+import { makeAgreeToTermsStatement, domain } from '$lib/Model/SignTerms';
 import { error } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
 
@@ -24,7 +24,7 @@ export const POST: RequestHandler = async ({ request }) => {
     }
 
     let [email, message, signatureHash] = result.unwrap();
-debugger;
+
     // Get wallet public key from signature
     let signerAddress: string;
     try {
@@ -34,13 +34,13 @@ debugger;
         let verifyParams: VerifyParams = { signature: signatureHash, domain };
         let siweResponse = await siweMessage.verify(verifyParams);
 
-        if(!siweResponse.success) {
+        if (!siweResponse.success) {
             console.dir(siweResponse);
             throw error(400, `Invalid message: ${siweResponse.error}`);
         }
 
-                // Check signature
-        let expectedStatement = makeStatement(email);
+        // Check signature
+        let expectedStatement = makeAgreeToTermsStatement(email);
 
         if (siweMessage.statement !== expectedStatement) {
             throw error(400, `Invalid signed statement. Expected: '${expectedStatement}' Received:'${siweMessage.statement}'`);

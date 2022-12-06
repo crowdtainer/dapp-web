@@ -27,11 +27,11 @@ export const shortOrENSNamedAccount = derived(walletState, async $walletState =>
         return shortenAddress($walletState.account);
     }
     // fallback to shortenedAccount format
-    if(reversedResolve === null) return shortenAddress($walletState.account);
+    if (reversedResolve === null) return shortenAddress($walletState.account);
     return reversedResolve;
 });
 
-function shortenAddress(walletAddress: string | undefined) : string {
+export function shortenAddress(walletAddress: string | undefined): string {
     return (walletAddress) ? walletAddress.slice(0, 6) + '...' + walletAddress.slice(-4) : '---';
 }
 

@@ -4,12 +4,14 @@
 	import type { UIFields } from './Converters/CrowdtainerData';
 	import { ProjectStatusUI } from './Converters/CrowdtainerData';
 	import { BigNumber, ethers } from 'ethers';
+	import { OrderStatus } from './api';
 
 	export let userFundsInCrowdtainer: BigNumber | undefined;
 	export let campaignStaticUI: UIFields | undefined;
 	export let fundsInContract: number | undefined;
 	export let raisedAmount: number | undefined;
 	export let state: ProjectStatusUI | undefined;
+	export let orderStatus: OrderStatus;
 
 	let tweeningDuration = 650;
 	let tweenedRaised = tweened(0, { duration: tweeningDuration, easing: cubicOut });
@@ -27,12 +29,14 @@
 
 {#if userFundsInCrowdtainer !== undefined && !userFundsInCrowdtainer.isZero() && campaignStaticUI !== undefined}
 	<p class="text-black dark:text-gray-200 text-md text-md text-left mt-3 mb-6">
-		• You have joined this project with a contribution of <b>{ethers.utils.formatUnits(
-			`${userFundsInCrowdtainer}`,
-			BigNumber.from(campaignStaticUI.tokenDecimals)
-		)}
-		{campaignStaticUI.tokenSymbol} </b>.
-		<br/>
+		• You have joined this project with a contribution of <b
+			>{ethers.utils.formatUnits(
+				`${userFundsInCrowdtainer}`,
+				BigNumber.from(campaignStaticUI.tokenDecimals)
+			)}
+			{campaignStaticUI.tokenSymbol}
+		</b>.
+		<br />
 		{#if state === ProjectStatusUI.Failed || state === ProjectStatusUI.ServiceProviderDeclined}
 			• You can withdrawl {ethers.utils.formatUnits(
 				`${userFundsInCrowdtainer}`,
@@ -42,7 +46,11 @@
 		{:else if state === ProjectStatusUI.SuccessfulyFunded}
 			<p>• Waiting for service provider confirmation.</p>
 		{:else if state === ProjectStatusUI.Delivery}
-			<p>• Please proceed to <b>Checkout</b> to complete your order.</p>
+			{#if orderStatus === OrderStatus.WaitingForDeliveryAddress}
+				<p>• Please proceed to <b>Checkout</b> to complete your order.</p>
+			{:else if orderStatus === OrderStatus.DeliveryAddressReceived}
+				<p>• Your order has been received and is being processed.</p>
+			{/if}
 		{/if}
 	</p>
 {/if}

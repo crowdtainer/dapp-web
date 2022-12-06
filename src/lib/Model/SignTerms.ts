@@ -7,24 +7,47 @@ import { type Result, Ok, Err } from "@sniptt/monads";
 // https://github.com/spruceid/siwe/issues/136#issuecomment-1336364107
 import { SiweMessage } from '@crowdtainer/siwe';
 
-export let domain = import.meta.env.MODE === 'development' ? 'localhost:5173' : 'https://crowdtainer.io'; // TODO: Read from .env
-export let termsPath = 'terms';                        // TODO: Read from .env
+export let domain = import.meta.env.MODE === 'development' ? 'localhost:5173' : import.meta.env.VITE_SIGNATURE_DOMAIN;
+export let termsPath = import.meta.env.VITE_TERMS_OF_AGREEMENT_URI_PATH;
 export let termsURI = `${domain}/${termsPath}`;
 
-export function makeStatement(email: string, _termsURI?: string): string {
+export interface DeliveryDetails {
+    vouchers721Address: string,
+    voucherId: number,
+    chainId: number,
+    country: string,
+    firstName: string,
+    lastName: string,
+    address: string,
+    complement: string,
+    postalCode: string,
+    city: string,
+    email: string
+}
+
+export function makeAgreeToTermsStatement(email: string, _termsURI?: string): string {
     let statement = `I agree to the terms and conditions found in ${_termsURI === undefined ? termsURI : _termsURI}. ` +
         `My e-mail address is: ${email}`;
     return statement;
 }
 
-export function makeMessage(email: string, address: string): string {
+export function makeDeliveryStatement(delivery: DeliveryDetails, _termsURI?: string): string {
+    let statement = `My delivery address is: ` +
+        `${delivery.firstName} ${delivery.lastName} ${delivery.address} ` +
+        `${delivery.complement} ${delivery.postalCode} ${delivery.city} ${delivery.country}. Email for invoice: ${delivery.email}. ` +
+        `I confirm acceptance to the terms and conditions found in ${_termsURI === undefined ? termsURI : _termsURI}. ` +
+        `Proof of payment: ${delivery.vouchers721Address}, token id: ${delivery.voucherId}.`;
+    return statement;
+}
+
+export function makeAgreeToTermsMessage(email: string, walletAddress: string): string {
     const domain = window.location.host;
     const origin = window.location.origin;
 
     const message = new SiweMessage({
         domain,
-        address,
-        statement: makeStatement(email, termsURI),
+        address: walletAddress,
+        statement: makeAgreeToTermsStatement(email, termsURI),
         uri: origin,
         version: '1',
         chainId: 1,
@@ -33,15 +56,29 @@ export function makeMessage(email: string, address: string): string {
     return message.prepareMessage();
 }
 
-export async function signTermsAndConditions(signer: Signer | undefined, email: string): Promise<Result<[message: string, signature: string], string>> {
+export function makeDeliveryRequestMessage(walletAddress: string, deliveryAddress: DeliveryDetails): string {
+    const domain = window.location.host;
+    const origin = window.location.origin;
+
+    const message = new SiweMessage({
+        domain,
+        address: walletAddress,
+        statement: makeDeliveryStatement(deliveryAddress, termsURI),
+        uri: origin,
+        version: '1',
+        chainId: 1,
+        resources: [termsURI]
+    });
+    return message.prepareMessage();
+}
+
+export async function signMessage(signer: Signer | undefined, message: string): Promise<Result<[message: string, signature: string], string>> {
 
     let account = await getAccountAddress();
-    let message: string;
 
     if (signer !== undefined && account !== undefined) {
         let signedMessage: string;
         try {
-            message = makeMessage(email, await signer.getAddress());
             signedMessage = await signer.signMessage(message);
         } catch (error) {
             console.dir(error);
