@@ -1,4 +1,4 @@
-<div style="text-align:center"><img src="static/CrowdtainerLogo.svg" alt="Crowdtainer" height="128px"/>
+<div align="center"><img src="static/images/site/CrowdtainerLogo.svg" alt="Crowdtainer" height="128px"/>
 
 <h1> Crowdtainer Web App </h1> </div>
 <br/>
@@ -22,8 +22,9 @@ cp .env.example .env
 cp example.projects.json src/routes/Data/projects.json
 
 # Copy the sample html files to the appropriate locations and edit them accordingly.
-cp example.legal.html src/routes/data/legal.html
-cp example.imprint.html src/routes/data/imprint.html
+cp example.imprint.svelte src/routes/Legal/Imprint/+page.svelte
+cp example.privacy.svelte src/routes/Legal/PrivacyPolicy/+page.svelte
+cp example.terms.svelte src/routes/Legal/Terms/+page.svelte
 ```
 
 ### Install dependencies:
