@@ -156,7 +156,7 @@ npm run preview
     - ◻️ Background work to check order status:
         - ◻️ Download invoice PDF when ready and send it by email; Set checkout request as complete.
 
-- ◻️ Impressum / legal page.
+- ✅ Impressum / legal page.
 
 - ◻️ Browser-side encryption (asymmetric, using service provider's PubKey) before pushing sensitive data to redis.
 
