@@ -16,6 +16,16 @@ Once a blockchain or RPC can be connected to, proceed setting up this frontend p
 cp .env.example .env
 ```
 
+### Projects & Legal texts
+```bash
+# Copy the projects.json file and edit it accordingly to inform the app about which campaigns should be displayed.
+cp example.projects.json src/routes/Data/projects.json
+
+# Copy the sample html files to the appropriate locations and edit them accordingly.
+cp example.legal.html src/routes/data/legal.html
+cp example.imprint.html src/routes/data/imprint.html
+```
+
 ### Install dependencies:
 
 ```bash

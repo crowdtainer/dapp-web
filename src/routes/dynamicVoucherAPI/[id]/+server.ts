@@ -12,7 +12,7 @@ import { type Result, Ok, Err } from "@sniptt/monads";
 // Internal
 import type { RequestHandler } from './$types';
 import type { CrowdtainerDynamicModel, CrowdtainerStaticModel, Error } from '$lib/Model/CrowdtainerModel';
-import { Vouchers721Address } from '../../data/projects.json';
+import { Vouchers721Address } from '../../Data/projects.json';
 import { crowdtainerStaticDataMap } from '../../../hooks/cache';
 import { getERC20Contract } from '$lib/ethersCalls/rpcRequests';
 

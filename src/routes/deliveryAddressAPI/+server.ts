@@ -4,7 +4,7 @@ import { ethers } from 'ethers';                        // Ethers
 import { type Result, Ok, Err } from "@sniptt/monads";  // Monads
 
 import { domain, makeDeliveryStatement, type DeliveryDetails } from '$lib/Model/SignTerms';
-import { Vouchers721Address } from '../data/projects.json';
+import { Vouchers721Address } from '../Data/projects.json';
 
 import { error } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';

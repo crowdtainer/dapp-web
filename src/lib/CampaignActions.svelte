@@ -224,7 +224,7 @@
 						class="h-auto w-36 relative px-5 py-6 transition-all ease-in duration-75 bg-white rounded-md group-hover:bg-opacity-0"
 					>
 						<div class="flex justify-center items-center">
-							<img width="30" height="30" src="Cart.svg" alt="Checkout" />
+							<img width="30" height="30" src="images/site/Cart.svg" alt="Checkout" />
 						</div>
 						<p class="text-lg mt-5">Checkout</p>
 					</span>
@@ -246,7 +246,7 @@
 						class="h-auto w-36 relative px-5 py-6 transition-all ease-in duration-75 bg-white rounded-md group-hover:bg-opacity-0"
 					>
 						<div class="flex justify-center items-center">
-							<img width="30" height="30" src="Download.svg" alt="Download invoice" />
+							<img width="30" height="30" src="images/site/Download.svg" alt="Download invoice" />
 						</div>
 						<p class="text-lg mt-5">Invoice</p>
 					</span>
@@ -274,7 +274,7 @@
 						<img
 							width="30"
 							height="30"
-							src="Transfer.svg"
+							src="images/site/Transfer.svg"
 							alt="Transfer participation proof to another wallet"
 						/>
 					</div>
@@ -298,7 +298,7 @@
 					class="h-auto w-36 relative px-5 py-6 transition-all ease-in duration-75 bg-white rounded-md group-hover:bg-opacity-0"
 				>
 					<div class="flex justify-center items-center">
-						<img width="30" height="30" src="Exit.svg" alt="Leave campaign" />
+						<img width="30" height="30" src="images/site/Exit.svg" alt="Leave campaign" />
 					</div>
 					<p class="text-lg mt-5">Leave</p>
 				</span>
@@ -321,7 +321,7 @@
 					class="h-auto w-36 relative px-5 py-6 transition-all ease-in duration-75 bg-white rounded-md group-hover:bg-opacity-0"
 				>
 					<div class="flex justify-center items-center">
-						<img width="30" height="30" src="Exit.svg" alt="Leave campaign" />
+						<img width="30" height="30" src="images/site/Exit.svg" alt="Leave campaign" />
 					</div>
 					<p class="text-lg mt-5">Claim funds</p>
 				</span>

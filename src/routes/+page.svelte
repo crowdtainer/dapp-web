@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 
-	import { projects, Vouchers721Address } from './data/projects.json';
+	import { projects, Vouchers721Address } from './Data/projects.json';
 	import Project from '$lib/Project.svelte';
 	import { fetchStaticData } from '$lib/api';
 

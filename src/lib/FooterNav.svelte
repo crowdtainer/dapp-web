@@ -1,10 +1,13 @@
+<script lang="ts">
+	let contactHtml = import.meta.env.VITE_CONTACT_HTML;
+</script>
+
 <footer class="footer p-10 bg-black text-base-content " data-theme="black">
 	<div>
 		<span class="footer-title">Legal</span>
-		<a href="https://" class="link link-hover">Impressum / Imprint</a>
-		<a href="https://" class="link link-hover">Geschäftsbedingungen (DE)</a>
-		<a href="https://" class="link link-hover">Terms & Conditions (EN)</a>
-		<a href="https://" class="link link-hover">Privacy Policy</a>
+		<a href="/Legal/Imprint" class="link link-hover">Impressum / Imprint</a>
+		<a href="/Legal/Terms" class="link link-hover">Geschäftsbedingungen / Terms & Conditions</a>
+		<a href="/Legal/PrivacyPolicy" class="link link-hover">Datenschutzerklärung / Privacy Policy</a>
 	</div>
 	<div>
 		<span class="footer-title">Learn</span>
@@ -63,7 +66,7 @@
 					aria-labelledby="discordTitle"
 					role="img"
 					class="logo-group"
-					><title data-v-ea960c88="" id="discordTitle">Link to Balancer's Discord</title>
+					><title data-v-ea960c88="" id="discordTitle">Link to Crowdtainer's Discord</title>
 					<g data-v-ea960c88="" fill="none" fill-rule="evenodd"
 						><path
 							data-v-ea960c88=""
@@ -106,4 +109,10 @@
 			>
 		</div>
 	</div>
+	{#if contactHtml !== undefined && contactHtml !== ''}
+		<div>
+			<span class="footer-title">Contact</span>
+			{@html contactHtml}
+		</div>
+	{/if}
 </footer>
