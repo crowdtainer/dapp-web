@@ -1,6 +1,6 @@
 import { Vouchers721__factory } from '../../routes/typechain/factories/Vouchers721__factory';
 import { Crowdtainer__factory } from '../../routes/typechain/factories/Crowdtainer.sol/Crowdtainer__factory';
-import { BigNumber, ethers, type BigNumberish, type ContractTransaction } from 'ethers';
+import { BigNumber, ethers, type ContractTransaction } from 'ethers';
 import { IERC20__factory } from '../../routes/typechain/factories/IERC20__factory';
 
 import { type Result, Ok, Err } from "@sniptt/monads";

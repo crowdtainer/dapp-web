@@ -1,13 +1,17 @@
 import redis from "$lib/Database/redis";                // Database
 import { ethers } from 'ethers';                        // Ethers
 import { type Result, Ok, Err } from "@sniptt/monads";  // Monads
-import { getMessage } from '$lib/Model/SignTerms';      // internal
+
+import { makeAgreeToTermsStatement, domain } from '$lib/Model/SignTerms';
 import { error } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
 
+import { SiweMessage, type VerifyParams } from '@crowdtainer/siwe';
+
 // POST Inputs: - {
 //                          email: string,      // Participant's email
-//                  signatureHash: hex string   // Terms and conditions
+//                        message: string,      // SIWE message
+//                  signatureHash: hex string   // statement signature
 //                }
 export const POST: RequestHandler = async ({ request }) => {
 
@@ -19,16 +23,37 @@ export const POST: RequestHandler = async ({ request }) => {
         throw error(400, result.unwrapErr());
     }
 
-    let [email, signatureHash] = result.unwrap();
+    let [email, message, signatureHash] = result.unwrap();
 
     // Get wallet public key from signature
     let signerAddress: string;
     try {
-        signerAddress = await ethers.utils.verifyMessage(getMessage(email), signatureHash);
+        let siweMessage = new SiweMessage(message);
+
+        // Check signature
+        let verifyParams: VerifyParams = { signature: signatureHash, domain };
+        let siweResponse = await siweMessage.verify(verifyParams);
+
+        if (!siweResponse.success) {
+            console.dir(siweResponse);
+            throw error(400, `Invalid message: ${siweResponse.error}`);
+        }
+
+        // Check signature
+        let expectedStatement = makeAgreeToTermsStatement(email);
+
+        if (siweMessage.statement !== expectedStatement) {
+            throw error(400, `Invalid signed statement. Expected: '${expectedStatement}' Received:'${siweMessage.statement}'`);
+        }
+
+        signerAddress = siweMessage.address;
         console.log(`Derived signer address: ${signerAddress}`);
 
+        console.log(`siweMessage.issuedAt: ${siweMessage.issuedAt}`);
+
     } catch (_error) {
-        throw error(500, "Invalid message: verififcation failed.");
+        console.dir(_error);
+        throw error(500, `Invalid message: ${_error}`);
     }
 
     if (!ethers.utils.isAddress(signerAddress)) {
@@ -55,7 +80,7 @@ export const POST: RequestHandler = async ({ request }) => {
             const newData = {
                 email: email,
                 signatureHash: signatureHash,
-                signatureCount: Number(signatureCount)+1
+                signatureCount: Number(signatureCount) + 1
             };
             redis.multi()
                 .hset(`${userSigKey}:${signatureCount}`, currentData)
@@ -88,7 +113,7 @@ export const POST: RequestHandler = async ({ request }) => {
 
 type Error = string;
 
-function getPayload(item: any): Result<[email: string, signatureHash: string], Error> {
+function getPayload(item: any): Result<[email: string, message: string, signatureHash: string], Error> {
 
     if (item == undefined) {
         return Err("Missing payload");
@@ -97,12 +122,17 @@ function getPayload(item: any): Result<[email: string, signatureHash: string], E
     if (item.email == undefined) {
         return Err("Missing 'email' field");
     }
+
+    if (item.message == undefined) {
+        return Err("Missing 'message' field");
+    }
+
     if (item.signatureHash == undefined) {
         return Err("Missing 'signatureHash' field");
     }
 
     try {
-        const result: [string, string] = [item.email, item.signatureHash];
+        const result: [string, string, string] = [item.email, item.message, item.signatureHash];
         return Ok(result);
     } catch (error) {
         return Err("Error decoding input fields");

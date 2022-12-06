@@ -39,7 +39,7 @@
 	} from '$lib/api';
 
 	// Terms and Conditions signing data
-	import { signTermsAndConditions } from './Model/SignTerms';
+	import { makeAgreeToTermsMessage, signMessage } from './Model/SignTerms';
 
 	// Wallet management
 	import { getAccountAddress, getSigner } from '$lib/wallet';
@@ -78,7 +78,7 @@
 		ThankYouMessage
 	}
 
-	let preOrderStep = JoinStep.TermsAcceptance;
+	let preOrderStep = JoinStep.QuantitySelection;
 
 	let actionButtonEnabled = true;
 
@@ -352,12 +352,17 @@
 		modalDialogData.animation = ModalAnimation.Circle2;
 		modalDialogData.visible = true;
 
-		let signResult = await signTermsAndConditions(getSigner(), userEmail);
-		if (signResult.isOk()) {
-			let sigHash = signResult.unwrap();
-			console.log(`Success: ${sigHash}`);
+		let signer = getSigner();
+		if(signer === undefined){
+			console.log("Error: signer undefined");
+			return;
+		}
 
-			let requestResult = await requestWalletAuthorizationAPI($accountAddress, userEmail, sigHash);
+		let message = makeAgreeToTermsMessage(userEmail, await signer.getAddress());
+		let signResult = await signMessage(signer, message );
+		if (signResult.isOk()) {
+			let [message, sigHash] = signResult.unwrap();
+			let requestResult = await requestWalletAuthorizationAPI(userEmail, message, sigHash);
 
 			if (requestResult === 'OK') {
 				termsAccepted = true;

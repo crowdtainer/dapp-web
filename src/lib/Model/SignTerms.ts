@@ -1,42 +1,91 @@
 import type { Signer } from 'ethers';
-import { ethers } from 'ethers';
 import { getAccountAddress } from '$lib/wallet';
 
 // Monads
 import { type Result, Ok, Err } from "@sniptt/monads";
 
-const domain = 'window.location.host';
-const origin = 'window.location.origin';
+// https://github.com/spruceid/siwe/issues/136#issuecomment-1336364107
+import { SiweMessage } from '@crowdtainer/siwe';
 
-export function getMessage(email: string): string {
-    // Disabled until fix is available in a release: https://github.com/spruceid/siwe/pull/115
-    // const message = new SiweMessage({
-    //     domain,
-    //     address,
-    //     statement,
-    //     uri: origin,
-    //     version: '1',
-    //     chainId: 1
-    // });
-    // return message.prepareMessage();
+export let domain = import.meta.env.MODE === 'development' ? 'localhost:5173' : import.meta.env.VITE_SIGNATURE_DOMAIN;
+export let termsPath = import.meta.env.VITE_TERMS_OF_AGREEMENT_URI_PATH;
+export let termsURI = `${domain}/${termsPath}`;
 
-    return `I agree to the terms and conditions found in https://crowdtainer.io/terms` +
-           `\nMy e-mail address is: ${email}`;
+export interface DeliveryDetails {
+    vouchers721Address: string,
+    voucherId: number,
+    chainId: number,
+    country: string,
+    firstName: string,
+    lastName: string,
+    address: string,
+    complement: string,
+    postalCode: string,
+    city: string,
+    email: string
 }
 
-export async function signTermsAndConditions(signer: Signer | undefined, email: string): Promise<Result<string, string>> {
-    let account = await getAccountAddress();
-    console.log(`Detected account: ${account}`);
-    if (signer !== undefined && account !== undefined) {
+export function makeAgreeToTermsStatement(email: string, _termsURI?: string): string {
+    let statement = `I agree to the terms and conditions found in ${_termsURI === undefined ? termsURI : _termsURI}. ` +
+        `My e-mail address is: ${email}`;
+    return statement;
+}
 
+export function makeDeliveryStatement(delivery: DeliveryDetails, _termsURI?: string): string {
+    let statement = `My delivery address is: ` +
+        `${delivery.firstName} ${delivery.lastName} ${delivery.address} ` +
+        `${delivery.complement} ${delivery.postalCode} ${delivery.city} ${delivery.country}. Email for invoice: ${delivery.email}. ` +
+        `I confirm acceptance to the terms and conditions found in ${_termsURI === undefined ? termsURI : _termsURI}. ` +
+        `Proof of payment: ${delivery.vouchers721Address}, token id: ${delivery.voucherId}.`;
+    return statement;
+}
+
+export function makeAgreeToTermsMessage(email: string, walletAddress: string): string {
+    const domain = window.location.host;
+    const origin = window.location.origin;
+
+    const message = new SiweMessage({
+        domain,
+        address: walletAddress,
+        statement: makeAgreeToTermsStatement(email, termsURI),
+        uri: origin,
+        version: '1',
+        chainId: 1,
+        resources: [termsURI]
+    });
+    return message.prepareMessage();
+}
+
+export function makeDeliveryRequestMessage(walletAddress: string, deliveryAddress: DeliveryDetails): string {
+    const domain = window.location.host;
+    const origin = window.location.origin;
+
+    const message = new SiweMessage({
+        domain,
+        address: walletAddress,
+        statement: makeDeliveryStatement(deliveryAddress, termsURI),
+        uri: origin,
+        version: '1',
+        chainId: 1,
+        resources: [termsURI]
+    });
+    return message.prepareMessage();
+}
+
+export async function signMessage(signer: Signer | undefined, message: string): Promise<Result<[message: string, signature: string], string>> {
+
+    let account = await getAccountAddress();
+
+    if (signer !== undefined && account !== undefined) {
         let signedMessage: string;
         try {
-         // TODO: replace with createSiweMessage
-         signedMessage = await signer.signMessage(getMessage(email));
+            signedMessage = await signer.signMessage(message);
         } catch (error) {
+            console.dir(error);
             return Err(`${error}`);
         }
-        return Ok(`${signedMessage}`);
+        let result: [string, string] = [message, signedMessage];
+        return Ok(result);
     } else {
         return Err("Unable to sign message - signer or account not detected.");
     }

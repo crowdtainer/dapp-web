@@ -53,7 +53,7 @@
 
 	function handleUserTransferredParticipationEvent(event: CustomEvent) {
 		console.log(`Detected event of type: ${event.type}`);
-		console.log(`Modal: typeof(detail): ${typeof(event.detail)}`);
+		console.log(`Modal: typeof(detail): ${typeof event.detail}`);
 		console.dir(event.detail);
 		dialog = event.detail;
 		// Reload items
@@ -127,17 +127,17 @@
 </header> -->
 
 {#if $connected && staticDataLoadStatus == LoadStatus.Loaded}
-<div class="divide-y">
-	{#each tokenIds as tokenId, index}
-		<MyCampaign
-			{tokenId}
-			vouchers721Address={Vouchers721Address}
-			{...projectFromCrowdtainerId(crowdtainerIds[index])}
-			{staticDataLoadStatus}
-			campaignStaticData={campaignStaticData.get(crowdtainerIds[index])}
-			campaignStaticUI={campaignStaticUI.get(crowdtainerIds[index])}
-			on:userTransferredParticipationEvent={handleUserTransferredParticipationEvent}
-		/>
+	<div class="divide-y">
+		{#each tokenIds as tokenId, index}
+			<MyCampaign
+				{tokenId}
+				vouchers721Address={Vouchers721Address}
+				{...projectFromCrowdtainerId(crowdtainerIds[index])}
+				{staticDataLoadStatus}
+				campaignStaticData={campaignStaticData.get(crowdtainerIds[index])}
+				campaignStaticUI={campaignStaticUI.get(crowdtainerIds[index])}
+				on:userTransferredParticipationEvent={handleUserTransferredParticipationEvent}
+			/>
 		{/each}
 	</div>
 {/if}
@@ -148,7 +148,9 @@
 
 {#if !$connected}
 	<EmptySection>
-		<p class="text-black dark:text-white text-center mx-2 my-4">Please connect your wallet to continue.</p>
+		<p class="text-black dark:text-white text-center mx-2 my-4">
+			Please connect your wallet to continue.
+		</p>
 		<br />
 
 		<div class="flex justify-center ">

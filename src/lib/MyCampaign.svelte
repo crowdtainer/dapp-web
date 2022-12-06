@@ -30,6 +30,7 @@
 		type ModalDialogData
 	} from './ModalDialog.svelte';
 	import { loadTokenURIRepresentation } from './Converters/tokenURI';
+	import { getOrderDetailsAPI, type OrderStatus } from './api';
 
 	export let tokenId: number;
 	export let vouchers721Address: string;
@@ -43,6 +44,8 @@
 	export let campaignStaticData: CrowdtainerStaticModel | undefined;
 	export let campaignStaticUI: UIFields | undefined;
 	export let staticDataLoadStatus: LoadStatus = LoadStatus.Loading;
+
+	let orderStatus: OrderStatus;
 
 	let campaignDynamicData: Readable<CrowdtainerDynamicModel> | undefined;
 
@@ -107,7 +110,31 @@
 		}
 
 		svg = imageDataJSON.image;
+
+		loadOrderDetails();
 	});
+
+	async function loadOrderDetails() {
+		let signer = getSigner();
+		if (!signer) {
+			console.log('Unable to load order details, missing signer.');
+			return;
+		}
+
+		if (!tokenId) {
+			console.log('Unable to load order details, missing tokenId.');
+			return;
+		}
+
+		let result = await getOrderDetailsAPI(await signer.getChainId(), vouchers721Address, tokenId);
+
+		if (result.isErr()) {
+			console.log(`${result.unwrapErr()}`);
+			return;
+		}
+
+		orderStatus = result.unwrap();
+	}
 
 	function setRaisedAmount() {
 		if (staticDataLoadStatus !== LoadStatus.FetchFailed) {
@@ -178,7 +205,7 @@
 								<p class="projectData">
 									{campaignStaticUI ? campaignStaticUI.endDateString : loadingString}
 								</p>
-								<p class="projectDataSubtitle">Funding ended</p>
+								<p class="projectDataSubtitle">Funding end</p>
 							</div>
 							<div>
 								<p class="projectStatus">{stateString}</p>
@@ -195,6 +222,7 @@
 					{fundsInContract}
 					{raisedAmount}
 					{state}
+					{orderStatus}
 				/>
 
 				<div class="w-auto flex ">
@@ -206,6 +234,7 @@
 							projectStatusUI={state}
 							tokenSymbol={campaignStaticUI.tokenSymbol}
 							{userFundsInCrowdtainer}
+							{orderStatus}
 							on:userClaimedFundsEvent={handleUserClaimedFundsEvent}
 							on:userTransferredParticipationEvent
 						/>
