@@ -7,3 +7,7 @@ node_modules
 .env.*
 !.env.example
 /src/out
+src/route/Data/projects.json
+src/routes/Legal/Imprint/+page.svelte
+src/routes/Legal/PrivacyPolicy/+page.svelte
+src/routes/Legal/Terms/+page.svelte

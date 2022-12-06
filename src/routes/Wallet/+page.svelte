@@ -1,11 +1,11 @@
 <script lang="ts">
 	import { fetchStaticData } from '$lib/api';
-	import { LoadStatus, prepareForUI, toDate, type UIFields } from '$lib/Converters/CrowdtainerData';
+	import { LoadStatus, prepareForUI, type UIFields } from '$lib/Converters/CrowdtainerData';
 	import { findTokenIdsForWallet } from '$lib/ethersCalls/rpcRequests';
 	import type { CrowdtainerStaticModel } from '$lib/Model/CrowdtainerModel';
 	import MyCampaign from '$lib/MyCampaign.svelte';
 
-	import { projects, Vouchers721Address } from '../data/projects.json';
+	import { projects, Vouchers721Address } from '../Data/projects.json';
 	import { connected, getSigner, accountAddress } from '$lib/wallet';
 	import EmptySection from '$lib/EmptySection.svelte';
 	import { connect } from '$lib/wallet';
@@ -149,7 +149,7 @@
 {#if !$connected}
 	<EmptySection>
 		<p class="text-black dark:text-white text-center mx-2 my-4">
-			Please connect your wallet to continue.
+			Please connect your wallet to see your campaigns.
 		</p>
 		<br />
 
