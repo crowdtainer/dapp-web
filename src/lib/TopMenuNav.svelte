@@ -61,7 +61,7 @@
 
 <Toasts />
 
-<nav class="bg-black">
+<nav class="bg-[#172939] dark:bg-[#161B22] z-50">
 	<div class="max-w-7xl mx-auto px-2 sm:px-6 lg:px-8">
 		<div class="relative flex items-center justify-between h-16">
 			<div class="absolute inset-y-0 left-0 flex items-center sm:hidden">
@@ -123,6 +123,7 @@
 							>Campaigns</a
 						>
 						<a href="/Wallet" class={path === '/Wallet' ? 'active-btn' : 'inactive-btn'}>Wallet</a>
+						<a href="/About" class={path === '/About' ? 'active-btn' : 'inactive-btn'}>About</a>
 					</div>
 				</div>
 			</div>
@@ -131,9 +132,9 @@
 			>
 				<!-- Profile dropdown -->
 				{#if !$connected}
-					<p class="bg-black pt-1 pr-4 text-right text-sm text-white">Disconnected.</p>
+					<p class="pt-1 pr-4 text-right text-sm text-white">Disconnected.</p>
 				{:else}
-					<p class="bg-black pr-4 text-right text-sm text-white">
+					<p class="pr-4 text-right text-sm text-white">
 						{#await $shortOrENSNamedAccount}
 							"Loading"
 						{:then address}
@@ -222,10 +223,24 @@
 				<a
 					href="/"
 					class={path === '/' ? 'mobile-active-btn' : 'mobile-inactive-btn'}
-					aria-current="page">Campaigns</a
+					aria-current="page"
+					on:click={() => {
+						mobileMenuOpen = false;
+					}}>Campaigns</a
 				>
-				<a href="/Wallet" class={path === '/Wallet' ? 'mobile-active-btn' : 'mobile-inactive-btn'}
-					>Wallet</a
+				<a
+					href="/Wallet"
+					class={path === '/Wallet' ? 'mobile-active-btn' : 'mobile-inactive-btn'}
+					on:click={() => {
+						mobileMenuOpen = false;
+					}}>Wallet</a
+				>
+				<a
+					href="/About"
+					class={path === '/About' ? 'mobile-active-btn' : 'mobile-inactive-btn'}
+					on:click={() => {
+						mobileMenuOpen = false;
+					}}>About</a
 				>
 			</div>
 		</div>

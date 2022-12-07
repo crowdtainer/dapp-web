@@ -87,84 +87,101 @@
 </header> -->
 
 <main class="">
-	<header class="campaignSection">
-		<div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
-			<h1 class="font-mono text-xl">Active</h1>
+	<div>
+		<div class="campaignSection sticky top-0 bg-[#EFF6FF] dark:bg-[#0D1116] z-40">
+			<div class="max-w-7xl mx-auto py-3 px-4 sm:px-6 lg:px-8">
+				<h1 class="font-mono text-xl">Active</h1>
+			</div>
 		</div>
-	</header>
-
-	{#each activeProjects as project, index}
-		{#if index !== 0}
-			<div class="dashedBorder" />
-		{/if}
-		<Project
-			vouchers721Address={Vouchers721Address}
-			{...projectFromCrowdtainerId(project)}
-			{staticDataLoadStatus}
-			campaignStaticData={campaignStaticData.get(project)}
-			campaignStaticUI={campaignStaticUI.get(project)}
-		/>
-	{/each}
-
-	{#if staticDataLoadStatus === LoadStatus.Loading}
-		<EmptySection emptyMessage={loadingString} />
-	{:else if staticDataLoadStatus === LoadStatus.FetchFailed}
-		<EmptySection emptyMessage={networkFailedMessage} isError={true} />
-	{:else if activeProjects.length === 0}
-		<EmptySection emptyMessage="No active projects currently." />
-	{/if}
-
-	<header class="campaignSection">
-		<div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
-			<h1 class="font-mono text-xl">Upcoming</h1>
+		<div>
+			{#each activeProjects as project, index}
+				{#if index !== 0}
+					<div class="dashedBorder" />
+				{/if}
+				<Project
+					vouchers721Address={Vouchers721Address}
+					{...projectFromCrowdtainerId(project)}
+					{staticDataLoadStatus}
+					campaignStaticData={campaignStaticData.get(project)}
+					campaignStaticUI={campaignStaticUI.get(project)}
+				/>
+			{/each}
 		</div>
-	</header>
 
-	{#each upcomingProjects as project, index}
-		{#if index !== 0}
-			<div class="dashedBorder" />
-		{/if}
-		<Project
-			vouchers721Address={Vouchers721Address}
-			{...projectFromCrowdtainerId(project)}
-			{staticDataLoadStatus}
-			campaignStaticData={campaignStaticData.get(project)}
-			campaignStaticUI={campaignStaticUI.get(project)}
-		/>
-	{/each}
-
-	{#if staticDataLoadStatus === LoadStatus.Loading}
-		<EmptySection emptyMessage={loadingString} />
-	{:else if staticDataLoadStatus === LoadStatus.FetchFailed}
-		<EmptySection emptyMessage={networkFailedMessage} isError={true} />
-	{:else if upcomingProjects.length === 0}
-		<EmptySection emptyMessage="More projects coming soon." />
-	{/if}
-
-	<header class="campaignSection">
-		<div class="font-mono max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
-			<h1 class="text-xl">Previous</h1>
+		<div>
+			{#if staticDataLoadStatus === LoadStatus.Loading}
+				<EmptySection emptyMessage={loadingString} />
+			{:else if staticDataLoadStatus === LoadStatus.FetchFailed}
+				<EmptySection emptyMessage={networkFailedMessage} isError={true} />
+			{:else if activeProjects.length === 0}
+				<EmptySection emptyMessage="No active projects currently." />
+			{/if}
 		</div>
-	</header>
+	</div>
 
-	{#each pastProjects as project, index}
-		{#if index !== 0}
-			<div class="dashedBorder" />
-		{/if}
-		<Project
-			vouchers721Address={Vouchers721Address}
-			{...projectFromCrowdtainerId(project)}
-			{staticDataLoadStatus}
-			campaignStaticData={campaignStaticData.get(project)}
-			campaignStaticUI={campaignStaticUI.get(project)}
-		/>
-	{/each}
+	<div>
+		<div class="campaignSection sticky top-0 bg-[#EFF6FF] dark:bg-[#0D1116] z-40">
+			<div class="max-w-7xl mx-auto py-3 px-4 sm:px-6 lg:px-8">
+				<h1 class="font-mono text-xl">Upcoming</h1>
+			</div>
+		</div>
 
-	{#if staticDataLoadStatus === LoadStatus.Loading}
-		<EmptySection emptyMessage={loadingString} />
-	{:else if staticDataLoadStatus === LoadStatus.FetchFailed}
-		<EmptySection emptyMessage={networkFailedMessage} isError={true} />
-	{:else if pastProjects.length === 0}
-		<EmptySection emptyMessage="Nothing to see here yet." />
-	{/if}
+		<div>
+			{#each upcomingProjects as project, index}
+				{#if index !== 0}
+					<div class="dashedBorder" />
+				{/if}
+				<Project
+					vouchers721Address={Vouchers721Address}
+					{...projectFromCrowdtainerId(project)}
+					{staticDataLoadStatus}
+					campaignStaticData={campaignStaticData.get(project)}
+					campaignStaticUI={campaignStaticUI.get(project)}
+				/>
+			{/each}
+		</div>
+
+		<div>
+			{#if staticDataLoadStatus === LoadStatus.Loading}
+				<EmptySection emptyMessage={loadingString} />
+			{:else if staticDataLoadStatus === LoadStatus.FetchFailed}
+				<EmptySection emptyMessage={networkFailedMessage} isError={true} />
+			{:else if upcomingProjects.length === 0}
+				<EmptySection emptyMessage="More projects coming soon." />
+			{/if}
+		</div>
+	</div>
+
+	<div>
+		<div class="campaignSection sticky top-0 bg-[#EFF6FF] dark:bg-[#0D1116] z-40">
+			<div class="font-mono max-w-7xl mx-auto py-3 px-4 sm:px-6 lg:px-8">
+				<h1 class="text-xl">Previous</h1>
+			</div>
+		</div>
+
+		<div>
+			{#each pastProjects as project, index}
+				{#if index !== 0}
+					<div class="dashedBorder" />
+				{/if}
+				<Project
+					vouchers721Address={Vouchers721Address}
+					{...projectFromCrowdtainerId(project)}
+					{staticDataLoadStatus}
+					campaignStaticData={campaignStaticData.get(project)}
+					campaignStaticUI={campaignStaticUI.get(project)}
+				/>
+			{/each}
+		</div>
+
+		<div>
+			{#if staticDataLoadStatus === LoadStatus.Loading}
+				<EmptySection emptyMessage={loadingString} />
+			{:else if staticDataLoadStatus === LoadStatus.FetchFailed}
+				<EmptySection emptyMessage={networkFailedMessage} isError={true} />
+			{:else if pastProjects.length === 0}
+				<EmptySection emptyMessage="Nothing to see here yet." />
+			{/if}
+		</div>
+	</div>
 </main>

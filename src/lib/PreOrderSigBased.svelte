@@ -521,7 +521,7 @@
 									not need to provide us your delivery address at this stage (funding).
 								</li>
 								<li class="my-2">
-									We will <b>never</b> use your e-mail or any personal data for purposes other than fulfilling
+									We will <b>never</b> use your e-mail or all personal data for purposes other than fulfilling
 									our legal obligations.
 								</li>
 							</ul>

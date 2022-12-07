@@ -29,7 +29,8 @@
   }
 
   .ct-divider {
-    @apply bg-gradient-to-r from-slate-800 to-slate-800 ;
+    /* @apply bg-gradient-to-r from-slate-800 to-slate-800 ; */
+    @apply bg-[#172939] dark:bg-[#0D1116];
   }
 
   .campaignSection {
@@ -97,7 +98,7 @@
   }
 
   .dashedBorder {
-    /* @apply border-t-2 border-gray-700 border-dashed; */
+    @apply border-t-2 border-gray-700 border-dashed;
   }
 
   .text-input-form {

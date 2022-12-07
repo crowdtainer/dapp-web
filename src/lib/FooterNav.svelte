@@ -2,7 +2,11 @@
 	let contactHtml = import.meta.env.VITE_CONTACT_HTML;
 </script>
 
-<footer class="footer p-10 bg-black text-base-content " data-theme="black">
+<footer
+	style="background-image: url('images/site/footerWaves.png');background-size: 100% 130%;"
+	class="footer p-10 bg-black text-base-content"
+	data-theme="black"
+>
 	<div>
 		<span class="footer-title">Legal</span>
 		<a href="/Legal/Imprint" class="link link-hover">Impressum / Imprint</a>
@@ -11,7 +15,7 @@
 	</div>
 	<div>
 		<span class="footer-title">Learn</span>
-		<a href="https://" class="link link-hover">Blog</a>
+		<a href="https://crowdtainer.io/post/" class="link link-hover">Blog</a>
 		<a href="https://" class="link link-hover">Documentation</a>
 	</div>
 	<div>
