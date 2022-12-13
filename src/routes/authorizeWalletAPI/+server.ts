@@ -60,52 +60,48 @@ export const POST: RequestHandler = async ({ request }) => {
         throw error(500, "Invalid wallet address.");
     }
 
-    try {
-        // Check if email is authorized
-        const emailAuthorized = await redis.sismember(authorizedEmailskey, email);
-        if (!emailAuthorized) {
-            throw error(400, "E-mail address not validated.");
-        }
 
-        let userSigKey = `userSignature:${signerAddress}`;
+    // Check if email is authorized
+    const emailAuthorized = await redis.sismember(authorizedEmailskey, email);
+    if (!emailAuthorized) {
+        throw error(400, "E-mail address not validated.");
+    }
 
-        // Check if wallet has already signed the Terms
-        const signatureCount = await redis.hget(userSigKey, "signatureCount");
-        if (signatureCount != null) {
-            // persist current signature as a separate hash key, and reset with new data.
-            const currentData = {
-                email: await redis.hget(userSigKey, "email"),
-                signatureHash: await redis.hget(userSigKey, "signatureHash"),
-            };
-            const newData = {
-                email: email,
-                signatureHash: signatureHash,
-                signatureCount: Number(signatureCount) + 1
-            };
-            redis.multi()
-                .hset(`${userSigKey}:${signatureCount}`, currentData)
-                .hset(userSigKey, newData)
-                .del(authorizedEmailskey)
-                .exec();
-        }
-        else {
-            // Persist signature, email, set wallet as authorized.
-            const payload = {
-                email: email,
-                signatureHash: signatureHash,
-                signatureCount: 0
-            };
+    let userSigKey = `userSignature:${signerAddress}`;
 
-            await redis.multi()
-                .del(authorizedEmailskey)
-                .hset(userSigKey, payload)
-                .exec();
-            console.log(`userSigKey:${userSigKey} ; Value -> ${userSigKey}`);
-            console.log(`Authorized!`);
-        }
+    // Check if wallet has already signed the Terms
+    const signatureCount = await redis.hget(userSigKey, "signatureCount");
+    if (signatureCount != null) {
+        // persist current signature as a separate hash key, and reset with new data.
+        const currentData = {
+            email: await redis.hget(userSigKey, "email"),
+            signatureHash: await redis.hget(userSigKey, "signatureHash"),
+        };
+        const newData = {
+            email: email,
+            signatureHash: signatureHash,
+            signatureCount: Number(signatureCount) + 1
+        };
+        redis.multi()
+            .hset(`${userSigKey}:${signatureCount}`, currentData)
+            .hset(userSigKey, newData)
+            .del(authorizedEmailskey)
+            .exec();
+    }
+    else {
+        // Persist signature, email, set wallet as authorized.
+        const payload = {
+            email: email,
+            signatureHash: signatureHash,
+            signatureCount: 0
+        };
 
-    } catch (e) {
-        throw error(500, "Database error.");
+        await redis.multi()
+            .del(authorizedEmailskey)
+            .hset(userSigKey, payload)
+            .exec();
+        console.log(`userSigKey:${userSigKey} ; Value -> ${userSigKey}`);
+        console.log(`Authorized!`);
     }
 
     return new Response("OK");

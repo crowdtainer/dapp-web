@@ -7,6 +7,7 @@ import { type Result, Ok, Err } from "@sniptt/monads";
 import type { IERC20 } from 'src/routes/typechain/IERC20';
 import type { UserStoreModel } from '$lib/Model/UserStoreModel';
 import { decodeEthersError } from '$lib/Converters/EthersErrorHandler';
+import { getSigner } from '$lib/wallet';
 
 function makeError(error: any): Result<ContractTransaction, string> {
     let errorDecoderResult = decodeEthersError(error);
@@ -36,7 +37,7 @@ export async function walletFundsInCrowdtainer(provider: ethers.Signer | undefin
     return Ok(fundsInCrowdtainer);
 }
 
-export async function getERC20Contract(provider: ethers.Signer | undefined, crowdtainerAddress: string): Promise<Result<IERC20, string>> {
+export async function getERC20Contract(provider: ethers.Signer | ethers.providers.JsonRpcProvider | undefined, crowdtainerAddress: string): Promise<Result<IERC20, string>> {
 
     if (!provider) {
         return Err("Provider not available.");
@@ -78,6 +79,7 @@ export async function findTokenIdsForWallet(provider: ethers.Signer | undefined,
         const vouchers721Contract = Vouchers721__factory.connect(vouchers721Address, provider);
 
         let wallet = await provider.getAddress();
+
         let totalTokens = (await vouchers721Contract.balanceOf(wallet)).toNumber();
 
         let foundTokenIds: number[] = new Array<number>();
@@ -209,15 +211,14 @@ export async function joinProjectWithSignature(provider: ethers.Signer | undefin
         return Err("Provider not available.");
     }
     try {
-        const vouchers721Contract = Vouchers721__factory.connect(vouchers721Address, provider);
-
         console.log(`EIP-3668: join with signature enabled. Vouchers721 @ ${vouchers721Address}; Crowdtainer @ ${crowdtainerAddress}`);
 
-        let result = await vouchers721Contract.joinWithSignature(signedPayload, calldata);
+        const vouchers721Contract = Vouchers721__factory.connect(vouchers721Address, provider);
+        let result: ContractTransaction = await vouchers721Contract.joinWithSignature(signedPayload, calldata);
 
         return Ok(result);
-
     } catch (error) {
+        console.dir(error);
         return makeError(error);
     }
 }
@@ -252,14 +253,18 @@ export async function joinProject(provider: ethers.Signer | undefined,
     }
 }
 
-export async function fetchUserBalancesData(provider: ethers.Signer | undefined,
+export async function fetchUserBalancesData(provider: ethers.providers.JsonRpcProvider | undefined,
     crowdtainerAddress: string): Promise<Result<UserStoreModel, string>> {
 
     if (!provider) {
         return Err('Missing signer.');
     }
 
-    const signerAddress = await provider.getAddress();
+    let signer = getSigner();
+    if (signer === undefined) {
+        return Err('Signer not available.');
+    }
+    const signerAddress = signer.getAddress();
     let erc20Contract = await getERC20Contract(provider, crowdtainerAddress);
     if (erc20Contract.isErr()) {
         return Err(erc20Contract.unwrapErr());

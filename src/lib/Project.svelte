@@ -147,7 +147,6 @@
 		}
 
 		if(!tokenId) {
-			console.log("Unable to load order details, missing tokenId.");
 			return;
 		}
 
@@ -173,7 +172,6 @@
 			let index = crowdtainerIds.findIndex((element) => element === crowdtainerId);
 
 			if (index === -1) {
-				console.log('Token not found.');
 				return;
 			}
 

@@ -68,6 +68,10 @@ export interface Payload2 {
   data: string
 }
 
+function capitalizeFirstLetter(input: string) {
+  return input.charAt(0).toUpperCase() + input.slice(1);
+}
+
 // Conversion functions
 
 let functionSignatures = new Map<string, string>(); // key: function signature (hash) -> value: function name (ABI)
@@ -75,6 +79,8 @@ let errorsABI = new Array<string>();                // Known errors
 let ethersInterface: ethers.utils.Interface;
 
 export function decodeEthersError(error: any): Result<string, string> {
+  // Note: Ethers.js seems to return different error formats depending on the error..
+
   try {
     if (functionSignatures.size === 0) {
       for (var index in CrowdtainerErrors) {
@@ -92,6 +98,7 @@ export function decodeEthersError(error: any): Result<string, string> {
     let errorSignature: string = '';
     let isCustomError: boolean;
     try {
+      // Crowdtainer specific errors
       let ethersError: EthersException = JSON.parse(JSON.stringify(error));
       isCustomError = ethersError.reason.includes('custom error');
       if (isCustomError) {
@@ -137,6 +144,12 @@ export function decodeEthersError(error: any): Result<string, string> {
     }
   } catch (error) {
     return Err(JSON.stringify(error));
+  }
+
+  // Ethers errors - needs rewrite when implementing localisation.
+  if (error.message !== undefined) {
+    let ethersError = error.code.toLowerCase().replaceAll("_", " ");
+    return Ok(`${capitalizeFirstLetter(ethersError)}. ${capitalizeFirstLetter(error.error.message)}.`);
   }
   return Err("Unknown");
 }

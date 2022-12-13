@@ -122,7 +122,6 @@
 		}
 
 		if (!tokenId) {
-			console.log('Unable to load order details, missing tokenId.');
 			return;
 		}
 

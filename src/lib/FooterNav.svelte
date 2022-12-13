@@ -1,8 +1,20 @@
 <script lang="ts">
+	import { onMount } from "svelte";
+
 	let contactHtml = import.meta.env.VITE_CONTACT_HTML;
+	let isDarkMode: boolean;
+
+	onMount(() => {
+		isDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches
+	});
 </script>
 
-<footer class="footer p-10 bg-black text-base-content " data-theme="black">
+<footer
+	style="{!isDarkMode? "background-image: url('images/site/footerWaves.png');" :
+	"background-image: url('images/site/footerWavesDark.png');"} background-size: 100% 130%;"
+	class="footer p-10 bg-black text-base-content"
+	data-theme="black"
+>
 	<div>
 		<span class="footer-title">Legal</span>
 		<a href="/Legal/Imprint" class="link link-hover">Impressum / Imprint</a>
@@ -11,7 +23,7 @@
 	</div>
 	<div>
 		<span class="footer-title">Learn</span>
-		<a href="https://" class="link link-hover">Blog</a>
+		<a href="https://crowdtainer.io/post/" class="link link-hover">Blog</a>
 		<a href="https://" class="link link-hover">Documentation</a>
 	</div>
 	<div>

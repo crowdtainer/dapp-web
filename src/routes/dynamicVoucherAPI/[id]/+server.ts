@@ -18,10 +18,10 @@ import { getERC20Contract } from '$lib/ethersCalls/rpcRequests';
 
 // import { Network, Alchemy } from 'alchemy-sdk';
 
-const settings = {
-   apiKey: import.meta.env.VITE_RPC_API_KEY,
-   network: import.meta.env.VITE_RPC_BACKEND
-};
+// const settings = {
+//    apiKey: import.meta.env.VITE_RPC_API_KEY,
+//    network: Network.OPT_MAINNET
+// };
 // const alchemy = new Alchemy(settings);
 // const provider =await alchemy.config.getProvider();
 
@@ -29,7 +29,6 @@ const provider = new ethers.providers.JsonRpcProvider(import.meta.env.VITE_RPC_B
 
 async function fetchData(crowdtainerId: BigNumber): Promise<Result<CrowdtainerDynamicModel, Error>> {
    try {
-
       let crowdtainerAddress: string;
       let crowdtainerStaticData: CrowdtainerStaticModel | undefined = crowdtainerStaticDataMap.get(crowdtainerId.toHexString());
       const vouchers721Contract = Vouchers721__factory.connect(Vouchers721Address, provider);
@@ -43,8 +42,7 @@ async function fetchData(crowdtainerId: BigNumber): Promise<Result<CrowdtainerDy
       const crowdtainerContract = Crowdtainer__factory.connect(crowdtainerAddress, provider);
 
       let state: number = await crowdtainerContract.crowdtainerState();
-
-      let erc20ContractResult = await getERC20Contract(provider.getSigner(), crowdtainerAddress);
+      let erc20ContractResult = await getERC20Contract(provider, crowdtainerAddress);
       let erc20Contract: IERC20;
 
       if (erc20ContractResult.isErr()) {
@@ -76,6 +74,6 @@ export const GET: RequestHandler = async ({ params }) => {
    if (result.isOk()) {
       return new Response(JSON.stringify(result.unwrap()));
    } else {
-      return new Response( JSON.stringify(result.unwrapErr()) );
+      return new Response(JSON.stringify(result.unwrapErr()));
    }
 }

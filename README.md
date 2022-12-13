@@ -152,7 +152,7 @@ npm run preview
 
 - ◻️ "Download Invoice" button / E-mail Invoice.
     - ◻️ Background work to process checkout requests and create invoice dispatch job.
-        - ◻️ Create order in shop system, set checkout request status as claimed for the respecitve wallet.
+        - ◻️ Create order in shop system, set checkout request status as claimed for the respective wallet.
     - ◻️ Background work to check order status:
         - ◻️ Download invoice PDF when ready and send it by email; Set checkout request as complete.
 
@@ -161,6 +161,8 @@ npm run preview
 - ◻️ Browser-side encryption (asymmetric, using service provider's PubKey) before pushing sensitive data to redis.
 
 ##### Out of scope for MVP:
+
+- ◻️ Support for multiple deployments, each on potentially different chainIDs.
 - ◻️ When joining, I'd like to additionally specify:
     - ◻️ whether I'd like to be eligible to share referral code so that I can get rewards for my friend's purchases (check-box).
     - ◻️ a friend's referral code, so that I can get a discount on my own purchase (address/ENS text input field).

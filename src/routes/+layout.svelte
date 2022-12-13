@@ -6,7 +6,7 @@
 
 <div class="flex flex-col h-screen ">
 	<TopMenuNav />
-	<main class="flex-grow bg-blue-50 dark:bg-gray-900">
+	<main class="flex-grow bg-blue-50 dark:bg-[#0D1116]">
 		<slot />
 	</main>
 	<FooterNav />

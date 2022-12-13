@@ -15,13 +15,20 @@
 	function update() {
 		const [days, hours, minutes, seconds] = getTimeRemaining(endTime);
 
-		if (days > 0) {
+		if (days === 1) {
+			outputString = `${days} day`;
+			return;
+		} else if (days > 1) {
 			outputString = `${days} days`;
 			return;
 		}
 
 		if (days === 0 && hours === 0 && minutes === 0 && seconds >= 0) {
-			outputString = `${seconds} seconds`;
+			if (seconds === 1) {
+				outputString = `${seconds} second`;
+			} else {
+				outputString = `${seconds} seconds`;
+			}
 			return;
 		}
 

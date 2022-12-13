@@ -28,7 +28,7 @@
 	import { joinSelection } from '$lib/userStore';
 
 	// node rpc calls
-	import { BigNumber, ethers } from 'ethers';
+	import { BigNumber, ethers, type ContractReceipt } from 'ethers';
 
 	// API
 	import {
@@ -42,8 +42,8 @@
 	import { makeAgreeToTermsMessage, signMessage } from './Model/SignTerms';
 
 	// Wallet management
-	import { getAccountAddress, getSigner } from '$lib/wallet';
-	import { accountAddress, connected, connect } from '$lib/wallet';
+	import { getAccountAddress, getSigner, web3Provider } from '$lib/wallet';
+	import { accountAddress, walletState, connected, connect } from '$lib/wallet';
 	import { WalletType } from '$lib/walletStorage';
 	import { validEmail } from './Validation/utils';
 	import {
@@ -78,7 +78,7 @@
 		ThankYouMessage
 	}
 
-	let preOrderStep = JoinStep.QuantitySelection;
+	let preOrderStep = JoinStep.FinalConfirmation;
 
 	let actionButtonEnabled = true;
 
@@ -178,24 +178,29 @@
 
 			actionButtonEnabled = false;
 
-			if(userWallet === undefined) {
-				console.log("Error: Missing signer.");
+			if (userWallet === undefined) {
+				console.log('Error: Missing signer.');
 				//TODO: UI error handling
 				return;
 			}
 
 			let userWalletAddress = await userWallet.getAddress();
+			if (userWalletAddress === undefined) {
+				console.log(`Unable to get wallet signer address.`);
+				return;
+			}
+
 			console.log(`userWalletAddress: ${userWalletAddress}`);
 
 			let authorizationResult = await requestAuthorizationProof(
-					await userWalletAddress,
-					crowdtainerAddress,
-					$selection,
-					false,
-					'0x0000000000000000000000000000000000000000'
-				);
+				userWalletAddress,
+				crowdtainerAddress,
+				$selection,
+				false,
+				'0x0000000000000000000000000000000000000000'
+			);
 
-			if(authorizationResult.isErr()) {
+			if (authorizationResult.isErr()) {
 				console.log(`Error: ${authorizationResult.unwrapErr()}`);
 				modalDialogData = {
 					type: ModalType.ActionRequest,
@@ -212,8 +217,14 @@
 			let [calldata, signedPayload] = authorizationResult.unwrap();
 			console.log(`Calldata: ${calldata}; \nsignedPayload: ${signedPayload}`);
 
-			let crowdtainerExtraData = ethers.utils.defaultAbiCoder.encode(["address", "uint256[4]", "bool", "address"], [userWalletAddress, $selection, false, '0x0000000000000000000000000000000000000000']);
-			let extraData = ethers.utils.defaultAbiCoder.encode(["address", "bytes4", "bytes"], [crowdtainerAddress, ethers.utils.hexlify('0x566a2cc2'), crowdtainerExtraData]);
+			let crowdtainerExtraData = ethers.utils.defaultAbiCoder.encode(
+				['address', 'uint256[4]', 'bool', 'address'],
+				[userWalletAddress, $selection, false, '0x0000000000000000000000000000000000000000']
+			);
+			let extraData = ethers.utils.defaultAbiCoder.encode(
+				['address', 'bytes4', 'bytes'],
+				[crowdtainerAddress, ethers.utils.hexlify('0x566a2cc2'), crowdtainerExtraData]
+			);
 
 			let joinTransaction = await joinProjectWithSignature(
 				getSigner(),
@@ -225,9 +236,10 @@
 
 			if (joinTransaction.isErr()) {
 				let errorString = joinTransaction.unwrapErr();
-				let errorDescription = errorString.includes('Unknown') || errorString.includes('{}') || errorString.length === 0
-					? ''
-					: `\n\n Details: ${errorString}`;
+				let errorDescription =
+					errorString.includes('Unknown') || errorString.includes('{}') || errorString.length === 0
+						? ''
+						: `\n\n Details: ${errorString}`;
 				modalDialogData = {
 					type: ModalType.ActionRequest,
 					visible: true,
@@ -313,14 +325,36 @@
 			};
 			addToast(toast);
 			actionButtonEnabled = true;
-			modalDialogData.visible = false;
+			modalDialogData.visible = true;
 			return;
 		}
 
 		modalDialogData.body = `Waiting for transaction confirmation..`;
 		modalDialogData.icon = ModalIcon.None;
 		modalDialogData.animation = ModalAnimation.Diamonds;
-		await permitApproveTx.wait();
+
+		let receipt: ContractReceipt | undefined;
+		let error: string = '';
+		try {
+			receipt = await permitApproveTx.wait();
+		} catch (_error) {
+			error = `${_error}`;
+		}
+
+		if (error !== '' || receipt === undefined || receipt.status === 0) {
+			// tx failed
+			let message = 'Transaction failed';
+			if (error !== '') {
+				message += `. Reason: ${error}`;
+			} else {
+				message += `.`;
+			}
+			modalDialogData.body = message;
+			modalDialogData.icon = ModalIcon.Exclamation;
+			modalDialogData.animation = ModalAnimation.None;
+			modalDialogData.visible = true;
+			return;
+		}
 
 		let checkAllowanceResult = await checkAllowance(
 			String(accountAddress),
@@ -331,6 +365,7 @@
 
 		if (checkAllowanceResult.isErr()) {
 			modalDialogData.body = `Unable to authorize USDC spending.`;
+			modalDialogData.visible = true;
 			console.log(`${checkAllowanceResult.unwrapErr()}`);
 		} else {
 			await refreshWalletData;
@@ -348,31 +383,53 @@
 
 		modalDialogData.type = ModalType.ActionRequest;
 		modalDialogData.title = 'Terms and Conditions confirmation';
-		modalDialogData.body = 'Please confirm the signature request in your mobile wallet.';
+		modalDialogData.body = 'Please read the message and confirm the signature request in your mobile wallet.';
 		modalDialogData.animation = ModalAnimation.Circle2;
 		modalDialogData.visible = true;
 
 		let signer = getSigner();
-		if(signer === undefined){
-			console.log("Error: signer undefined");
+		if (signer === undefined) {
+			console.log('Error: signer undefined');
 			return;
 		}
 
-		let message = makeAgreeToTermsMessage(userEmail, await signer.getAddress());
-		let signResult = await signMessage(signer, message );
+		let account = $walletState.account;
+		if (account === undefined) {
+			console.log('Error: Wallet undefined');
+			return;
+		}
+
+		console.log(account);
+
+		// make sure address is check-summed; Some wallets don't use checksummed addresses (e.g. Metamask mobile)
+		account = ethers.utils.getAddress(account);
+
+		let message = makeAgreeToTermsMessage(userEmail, account);
+		let signResult = await signMessage(signer, message);
 		if (signResult.isOk()) {
 			let [message, sigHash] = signResult.unwrap();
 			let requestResult = await requestWalletAuthorizationAPI(userEmail, message, sigHash);
 
+			let errorDescription: string = '';
+
 			if (requestResult === 'OK') {
 				termsAccepted = true;
 			} else {
+				try {
+					let json = JSON.parse(requestResult);
+					if(json.message) { errorDescription = json.message};
+				} catch (error) {
+					console.log(`Error parsing server error message.`);
+				}
 				console.log(`Error: ${requestResult}`);
+				let message = 'An error ocurred while approving the signature';
+				message = `${message}${(errorDescription !== '' ? `: ${errorDescription}` : `.`)}`;
+
 				modalDialogData = {
 					type: ModalType.ActionRequest,
 					visible: true,
-					title: 'Transaction rejected',
-					body: `An error ocurred when joining the project: ${requestResult}`,
+					title: 'Operation failed',
+					body: message,
 					icon: ModalIcon.Exclamation,
 					animation: ModalAnimation.None
 				};
@@ -390,7 +447,7 @@
 	const callRequestEmailAuthorizationAPI = async () => {
 		let result = await requestEmailAuthorizationAPI(userEmail, userEmailCode);
 		emailValidated = result === 'OK';
-		if(!emailValidated) {
+		if (!emailValidated) {
 			let jsonResult = JSON.parse(result);
 			codeValidatorError = jsonResult.message;
 			invalidCodeWarning = true;
@@ -482,8 +539,10 @@
 									: ''} input input-bordered input-info w-full max-w-xs dark:text-black"
 							/>
 
-							<button class="btn btn-outline mx-2 w-28 dark:text-white dark:disabled:text-gray-200" 
-							on:click={callRequestEmailAuthorizationAPI}>
+							<button
+								class="btn btn-outline mx-2 w-28 dark:text-white dark:disabled:text-gray-200"
+								on:click={callRequestEmailAuthorizationAPI}
+							>
 								{#if invalidCodeWarning}
 									{codeValidatorError}
 								{:else}
@@ -521,7 +580,7 @@
 									not need to provide us your delivery address at this stage (funding).
 								</li>
 								<li class="my-2">
-									We will <b>never</b> use your e-mail or any personal data for purposes other than fulfilling
+									We will <b>never</b> use your e-mail or all personal data for purposes other than fulfilling
 									our legal obligations.
 								</li>
 							</ul>
@@ -569,9 +628,10 @@
 							bind:checked={shipmentConditions}
 							class="checkbox checkbox-primary"
 						/>
-						<p class="label-text dark:text-white w-full"
-							>I understand that shipping is <b>only possible to Germany</b> at this time.</p
-						>
+						<p class="label-text dark:text-white w-full">
+							I understand that shipping is <b>only possible to Germany</b> at this time, and due the
+							experimental nature of this project, delivery can take more than 30 days.
+						</p>
 					</label>
 				</div>
 
@@ -585,7 +645,9 @@
 						/>
 						<span class="label-text dark:text-white"
 							>By clicking "Agree" and cryptographically signing the transaction, I agree to the
-							<b>General Terms and Conditions</b>, <b>Privacy Policy</b>, <b>Refund policy</b>, and <b>Shipping policy</b>.</span
+							<b>General Terms and Conditions</b>, <b>Privacy Policy</b>, <b>Refund policy</b>,
+							<b>Shipping policy</b>, and that I am solely responsible in keeping my cryptographic
+							private keys used to interact with this website safe.</span
 						>
 					</label>
 				</div>
@@ -602,9 +664,7 @@
 				<div class="flex justify-center">
 					<button
 						disabled={!deliveryAcknowledged || !termsAcknowledged || !shipmentConditions}
-						class="{modalDialogData.visible
-							? 'hidden'
-							: ''} btn btn-primary mx-2  my-2 w-28 "
+						class="{modalDialogData.visible ? 'hidden' : ''} btn btn-primary mx-2  my-2 w-28 "
 						on:click={callSignTermsAndConditions}
 					>
 						{#if termsAccepted}
@@ -683,7 +743,7 @@
 					callJoinProjectHandler={callJoinProject}
 				/>
 			{:else}
-				<ConnectWallet/>
+				<ConnectWallet />
 			{/if}
 			<div class="flex justify-center py-12">
 				<button

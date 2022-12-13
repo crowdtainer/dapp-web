@@ -3,7 +3,11 @@ module.exports = {
   theme: {
     extend: {},
   },
-  plugins: [require('daisyui'),require('@tailwindcss/forms'),],
+  plugins: [
+    require('daisyui'),
+    require('@tailwindcss/forms'),
+    require('@tailwindcss/typography'),
+  ],
 
   // daisyUI config (optional)
   daisyui: {

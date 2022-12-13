@@ -4,7 +4,7 @@
 
 	import type { UserStoreModel } from '$lib/Model/UserStoreModel';
 	import { fetchUserBalancesData } from './ethersCalls/rpcRequests';
-	import { getSigner } from './wallet';
+	import { getSigner, web3Provider } from './wallet';
 
 	export let crowdtainerAddress: string;
 	export let tokenSymbol: string | undefined;
@@ -18,7 +18,7 @@
 	let walletData: UserStoreModel;
 
 	export let refreshWalletData = async () => {
-		let response = await fetchUserBalancesData(getSigner(), crowdtainerAddress);
+		let response = await fetchUserBalancesData(web3Provider, crowdtainerAddress);
 		if (response.isOk()) {
 			walletData = response.unwrap();
 			console.log(

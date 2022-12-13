@@ -7,7 +7,7 @@
 	import { onMount } from 'svelte';
 	import { slide } from 'svelte/transition';
 
-	import { Icon, Check, ShieldCheck, InformationCircle } from 'svelte-hero-icons';
+	import { Icon, Check, ShieldCheck } from 'svelte-hero-icons';
 
 	import { createEventDispatcher } from 'svelte';
 	const dispatch = createEventDispatcher();
@@ -39,7 +39,6 @@
 	// Wallet management
 	import { getAccountAddress, getSigner } from '$lib/wallet';
 	import { accountAddress, connected, connect } from '$lib/wallet';
-	import { WalletType } from '$lib/walletStorage';
 	import { joinProject, checkAllowance, getERC20Contract } from './ethersCalls/rpcRequests';
 	import WalletBalances from './WalletBalances.svelte';
 	import refreshWalletData from './WalletBalances.svelte';
