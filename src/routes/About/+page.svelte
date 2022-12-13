@@ -92,6 +92,23 @@
 							all until the minimum target is reached and the bulk sale can be completed "concurrently".
 						</li>
 					</ul>
+					<p>
+						Since I am based in Germany, from a legal perspective, there is a step of "preparation of payment", and a second step
+						of confirmation from the seller side, referencing preparation step as the payment.
+					</p>
+					<p>Customers send a binding order, which I as a seller only confirm if:</p>
+					<ol>
+						<li>
+							<p>The minimum order threshold is reached.</p>
+						</li>
+						<li>
+							<p>
+								All orders are connected to the 'pool address' indicated by this website's
+								interfaces.
+							</p>
+						</li>
+					</ol>
+
 				</div>
 			</article>
 		</div>

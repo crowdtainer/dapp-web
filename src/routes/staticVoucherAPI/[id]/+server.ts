@@ -3,7 +3,7 @@ import { Vouchers721__factory } from '../../typechain/factories/Vouchers721__fac
 import { Crowdtainer__factory } from '../../typechain/factories/Crowdtainer.sol/Crowdtainer__factory';
 
 // Ethers
-import { ethers, BigNumber } from 'ethers';
+import { ethers, BigNumber, Contract } from 'ethers';
 
 // Monads
 import { type Result, Ok, Err } from "@sniptt/monads";
@@ -16,23 +16,27 @@ import { Coin__factory } from '../../typechain/';
 import { crowdtainerStaticDataMap } from '../../../hooks/cache';
 import { error } from '@sveltejs/kit';
 
-// import { Network, Alchemy } from 'alchemy-sdk';
+import { Network, Alchemy } from 'alchemy-sdk';
 
-const settings = {
-   apiKey: import.meta.env.VITE_RPC_API_KEY,
-   network: import.meta.env.VITE_RPC_BACKEND
-};
+// const settings = {
+//    apiKey: import.meta.env.VITE_RPC_API_KEY,
+//    network: Network.OPT_MAINNET
+// };
+// network: import.meta.env.VITE_RPC_BACKEND
+
 // const alchemy = new Alchemy(settings);
 // const provider =await alchemy.config.getProvider();
 
-const provider = new ethers.providers.JsonRpcBatchProvider(import.meta.env.VITE_RPC_BACKEND);
+console.log(`import.meta.env.VITE_RPC_BACKEND: ${import.meta.env.VITE_RPC_BACKEND}`);
+
+const provider = new ethers.providers.JsonRpcProvider(import.meta.env.VITE_RPC_BACKEND);
 
 async function fetchData(crowdtainerId: BigNumber): Promise<Result<CrowdtainerStaticModel, Error>> {
+
    try {
       if (crowdtainerId.toNumber() === 0) {
          return Err({ error: `Invalid crowdtainerId: ${crowdtainerId.toNumber()}` });
       }
-
       const vouchers721Contract = Vouchers721__factory.connect(Vouchers721Address, provider);
 
       let crowdtainerStaticData: CrowdtainerStaticModel | undefined = crowdtainerStaticDataMap.get(crowdtainerId.toHexString());
@@ -40,9 +44,18 @@ async function fetchData(crowdtainerId: BigNumber): Promise<Result<CrowdtainerSt
       if (crowdtainerStaticData) {
          return Ok(crowdtainerStaticData);
       }
+      console.log(`CrowdtainerId: ${crowdtainerId}`);
+      console.log(`vouchers721Contract.address: ${vouchers721Contract.address}`);
+      let crowdtainerAddress: string;
+      let crowdtainerContract: Contract;
+      try {
+         crowdtainerAddress = await vouchers721Contract.crowdtainerForId(crowdtainerId);
 
-      let crowdtainerAddress = await vouchers721Contract.crowdtainerForId(crowdtainerId);
-      const crowdtainerContract = Crowdtainer__factory.connect(crowdtainerAddress, provider);
+      } catch (error) {
+         console.dir(error);
+         return Err({ error: `${error}` });
+      }
+      crowdtainerContract = Crowdtainer__factory.connect(crowdtainerAddress, provider);
 
       let tokenContractAddress = await crowdtainerContract.token();
       const ERC20Contract = Coin__factory.connect(tokenContractAddress, provider);
@@ -82,7 +95,7 @@ async function fetchData(crowdtainerId: BigNumber): Promise<Result<CrowdtainerSt
       return Ok(crowdtainerData);
    } catch (errorMessage) {
       let error: Error = { error: `${errorMessage}` };
-      console.log(`${errorMessage}`);
+      console.dir(errorMessage);
       return Err(error);
    }
 }

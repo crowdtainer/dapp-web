@@ -17,6 +17,7 @@
 		ModalType,
 		type ModalDialogData
 	} from '$lib/ModalDialog.svelte';
+	import { onMount } from 'svelte';
 
 	let tokenIds: number[] = [];
 	let crowdtainerIds: number[] = [];
@@ -65,11 +66,10 @@
 
 		loadDataInFlight = true;
 		resetState();
-
-		let walletTokensSearch = await findTokenIdsForWallet(getSigner(), Vouchers721Address);
+		let signer = getSigner();
+		let walletTokensSearch = await findTokenIdsForWallet(signer, Vouchers721Address);
 		if (walletTokensSearch.isErr()) {
 			console.log(`Unable to search wallet tokens: ${walletTokensSearch.unwrapErr()}`);
-			//TODO: inform user
 			loadDataInFlight = false;
 			return;
 		}
@@ -105,6 +105,10 @@
 		loadDataInFlight = false;
 		tokenIds = tokenIds;
 	}
+
+	onMount(async () => {
+		loadUserData();
+	 });
 
 	// Immediatelly update UI elements related to connected wallet on wallet or connection change
 	$: $connected, $accountAddress, loadUserData();

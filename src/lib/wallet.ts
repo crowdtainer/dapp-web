@@ -1,5 +1,5 @@
 import WalletConnectProvider from '@walletconnect/web3-provider/dist/umd/index.min.js';
-import { providers, Signer, type Transaction } from 'ethers';
+import { ethers, providers, Signer } from 'ethers';
 
 import { writable, derived } from 'svelte/store';
 
@@ -9,19 +9,18 @@ import { MessageType } from './Toast/MessageType';
 export const walletState = createWalletStore();
 export const connected = derived(walletState, $walletState => $walletState.connectionState === ConnectionState.Connected);
 export const accountAddress = derived(walletState, $walletState => {
-    return ($walletState.account) ? $walletState.account : ''
+    return ($walletState.account) ? ethers.utils.getAddress($walletState.account) : '';
 });
 export const shortenedAccount = derived(walletState, $walletState => {
     return shortenAddress($walletState.account);
 });
-
 export const shortOrENSNamedAccount = derived(walletState, async $walletState => {
     if ($walletState === undefined) return '---';
-    let signer = getSigner();
-    if ($walletState.account === undefined || signer === undefined || signer.provider === undefined) return '---';
+
+    if ($walletState.account === undefined || web3Provider === undefined) return '---';
     let reversedResolve: string | null;
     try {
-        reversedResolve = await signer.provider?.lookupAddress($walletState.account);
+        reversedResolve = await web3Provider.lookupAddress($walletState.account);
     } catch (error) {
         console.log(`${error}`);
         return shortenAddress($walletState.account);
@@ -36,8 +35,9 @@ export function shortenAddress(walletAddress: string | undefined): string {
 }
 
 // 10: Optimism; 31337: hardhat local node; 5: Ethereum Goerli; 420: Optimism Goerli
-let supportedNetworks: number[] = [420, 5, 31337];
+let supportedNetworks: number[] = [10, 420, 5, 31337];
 const RPC_BACKEND: string = import.meta.env.VITE_WALLET_CONNECT_RPC;
+const CHAIN_ID: number = import.meta.env.VITE_WALLET_CONNECT_CHAIN_ID;
 
 interface Window {
     ethereum?: import('ethers').providers.ExternalProvider;
@@ -82,6 +82,7 @@ function createWalletStore() {
         },
         setChainId: (chainId: number) => {
             wallet.chainId = chainId;
+            console.log(`Detected chainId: ${chainId}`);
             let connected = supportedNetworks.includes(chainId)
                 ? ConnectionState.Connected
                 : ConnectionState.ConnectedToUnsupportedNetwork;
@@ -151,12 +152,16 @@ export let wcProvider: WalletConnectProvider;
 async function setupWalletConnect() {
     wcProvider = new WalletConnectProvider({
         rpc: {
-            //10: RPC_BACKEND
-            420: RPC_BACKEND
+            // Only one network at a time is supported.
+            // Add all supported networks here; Then configure .env accordingly.
+            10: RPC_BACKEND,
+            420: RPC_BACKEND,
+            5: RPC_BACKEND,
+            31337: RPC_BACKEND,
         },
-        // chainId: 10
-        chainId: 420
+        chainId: CHAIN_ID
     });
+
     walletState.setWalletType(WalletType.WalletConnect);
     wcProvider.on('accountsChanged', (accounts: string[]) => {
         console.log(`accountsChanged: ${accounts}`);

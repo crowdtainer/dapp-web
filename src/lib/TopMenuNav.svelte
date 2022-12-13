@@ -13,7 +13,8 @@
 		connect,
 		disconnect,
 		setupWallet,
-		tearDownWallet
+		tearDownWallet,
+		web3Provider
 	} from '$lib/wallet';
 	import { WalletType } from '$lib/walletStorage';
 

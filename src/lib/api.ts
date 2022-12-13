@@ -112,13 +112,31 @@ export async function requestAuthorizationProof(wallet: string,
 	const calldataValue = abiInterface.encodeFunctionData('getSignedJoinApproval',
 		[crowdtainerAddress, wallet, quantities, enableReferral, referralAddress]);
 
-	let result: Response = await fetch(`authProofAPI/${wallet}`, {
+	// make sure address is check-summed
+	let walletWithChecksum = ethers.utils.getAddress(wallet);
+	let result: Response = await fetch(`authProofAPI/${walletWithChecksum}`, {
 		method: 'POST',
 		body: JSON.stringify({ calldata: calldataValue })
 	});
 
 	if (!result.ok) {
-		return Err(`${result.text()}`);
+
+		let message = '';
+
+		try {
+			let jsonResult = await JSON.parse(await result.text());
+			if (jsonResult.message) {
+				message = jsonResult.message;
+			}
+		} catch (error) {
+			return Err('Unknown server response');
+		}
+
+		if (message) {
+			return Err(message);
+		}
+
+		return Err(`${await result.text()}`);
 	}
 
 	let response: [string, string];
