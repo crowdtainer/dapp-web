@@ -149,7 +149,11 @@ export function decodeEthersError(error: any): Result<string, string> {
   // Ethers errors - needs rewrite when implementing localisation.
   if (error.message !== undefined) {
     let ethersError = error.code.toLowerCase().replaceAll("_", " ");
-    return Ok(`${capitalizeFirstLetter(ethersError)}. ${capitalizeFirstLetter(error.error.message)}.`);
+    let userMessage = `${capitalizeFirstLetter(ethersError)}.`;
+    if (error.error !== undefined && error.error.message !== undefined) {
+      userMessage += ` ${capitalizeFirstLetter(error.error.message)}.`
+    }
+    return Ok(userMessage);
   }
   return Err("Unknown");
 }

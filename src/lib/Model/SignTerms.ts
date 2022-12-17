@@ -28,6 +28,7 @@ export interface DeliveryDetails {
 export function makeAgreeToTermsStatement(email: string, _termsURI?: string): string {
     let statement = `I agree to the terms and conditions found in ${_termsURI === undefined ? termsURI : _termsURI}. ` +
         `My e-mail address is: ${email}`;
+    console.log(`Statement: ${statement}`);
     return statement;
 }
 
@@ -44,6 +45,8 @@ export function makeAgreeToTermsMessage(email: string, walletAddress: string): s
     const domain = window.location.host;
     const origin = window.location.origin;
 
+    console.log(`Domain: ${domain}`);
+
     const message = new SiweMessage({
         domain,
         address: walletAddress,
@@ -53,6 +56,7 @@ export function makeAgreeToTermsMessage(email: string, walletAddress: string): s
         chainId: 1,
         resources: [termsURI]
     });
+    console.log(`prepared message: ${message.prepareMessage()}`);
     return message.prepareMessage();
 }
 
@@ -74,9 +78,8 @@ export function makeDeliveryRequestMessage(walletAddress: string, deliveryAddres
 
 export async function signMessage(signer: Signer | undefined, message: string): Promise<Result<[message: string, signature: string], string>> {
 
-    let account = await getAccountAddress();
 
-    if (signer !== undefined && account !== undefined) {
+    if (signer !== undefined) {
         let signedMessage: string;
         try {
             signedMessage = await signer.signMessage(message);
@@ -87,6 +90,6 @@ export async function signMessage(signer: Signer | undefined, message: string): 
         let result: [string, string] = [message, signedMessage];
         return Ok(result);
     } else {
-        return Err("Unable to sign message - signer or account not detected.");
+        return Err("Unable to sign message - signer or wallet not detected.");
     }
 }

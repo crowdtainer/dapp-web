@@ -162,6 +162,9 @@ async function setupWalletConnect() {
         chainId: CHAIN_ID
     });
 
+    //  Wrap with Web3Provider from ethers.js
+    web3Provider = new providers.Web3Provider(wcProvider);
+
     walletState.setWalletType(WalletType.WalletConnect);
     wcProvider.on('accountsChanged', (accounts: string[]) => {
         console.log(`accountsChanged: ${accounts}`);
@@ -187,9 +190,12 @@ async function setupWalletConnect() {
         walletState.setConnected(false);
     });
 
-    //  Wrap with Web3Provider from ethers.js
-    web3Provider = new providers.Web3Provider(wcProvider);
-    await wcProvider.enable();
+    try {
+        await wcProvider.enable();
+    } catch (error) {
+        console.log(`Error:`)
+        console.dir(error);
+    }
 }
 
 async function setupInjectedProviderWallet() {

@@ -27,8 +27,6 @@ import { Network, Alchemy } from 'alchemy-sdk';
 // const alchemy = new Alchemy(settings);
 // const provider =await alchemy.config.getProvider();
 
-console.log(`import.meta.env.VITE_RPC_BACKEND: ${import.meta.env.VITE_RPC_BACKEND}`);
-
 const provider = new ethers.providers.JsonRpcProvider(import.meta.env.VITE_RPC_BACKEND);
 
 async function fetchData(crowdtainerId: BigNumber): Promise<Result<CrowdtainerStaticModel, Error>> {
