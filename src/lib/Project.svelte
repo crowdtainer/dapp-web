@@ -9,7 +9,7 @@
 	import { initializeCampaignStores, campaignStores } from '$lib/campaignStore';
 	import { joinSelection } from '$lib/userStore';
 	import { findTokenIdsForWallet, walletFundsInCrowdtainer } from './ethersCalls/rpcRequests';
-	import { BigNumber, ethers } from 'ethers';
+	import { BigNumber } from 'ethers';
 
 	import TimeLeft from './TimeLeft.svelte';
 	import MoneyInContract from './MoneyInContract.svelte';
@@ -41,6 +41,7 @@
 	} from './ModalDialog.svelte';
 	import PreOrder from './PreOrder.svelte';
 	import { getOrderDetailsAPI, OrderStatus } from './api';
+	import ProjectDetails from './ProjectDetails.svelte';
 
 	export let vouchers721Address: string;
 	export let crowdtainerId: number;
@@ -141,18 +142,18 @@
 
 	async function loadOrderDetails() {
 		let signer = getSigner();
-		if(!signer) {
-			console.log("Unable to load order details, missing signer.");
+		if (!signer) {
+			console.log('Unable to load order details, missing signer.');
 			return;
 		}
 
-		if(!tokenId) {
+		if (!tokenId) {
 			return;
 		}
 
 		let result = await getOrderDetailsAPI(await signer.getChainId(), vouchers721Address, tokenId);
 
-		if(result.isErr()) {
+		if (result.isErr()) {
 			console.log(`${result.unwrapErr()}`);
 			return;
 		}
@@ -225,9 +226,7 @@
 
 	// dynamic
 	$: state = toState($campaignDynamicData, campaignStaticData);
-	$: joinViewEnabled =
-		(state === ProjectStatusUI.Funding || state === ProjectStatusUI.SuccessfulyFunded) &&
-		userFundsInCrowdtainer.isZero();
+	$: joinViewEnabled = state === ProjectStatusUI.Funding && userFundsInCrowdtainer.isZero();
 
 	$: stateString =
 		staticDataLoadStatus !== LoadStatus.FetchFailed &&
@@ -236,7 +235,11 @@
 			? toStateString($campaignDynamicData, campaignStaticData)
 			: loadingString;
 
-	$: $campaignDynamicData, setRaisedAmount(), setPercentages(), loadTokenIdsForWallet(), loadOrderDetails();
+	$: $campaignDynamicData,
+		setRaisedAmount(),
+		setPercentages(),
+		loadTokenIdsForWallet(),
+		loadOrderDetails();
 	$: loadingAnimation = staticDataLoadStatus === LoadStatus.Loading;
 
 	// Immediatelly update UI elements related to connected wallet on wallet or connection change
@@ -255,7 +258,7 @@
 			<div class="md:shrink-0">
 				<img class="w-full object-cover md:h-full md:w-96" src={projectImageURL} alt="Coffee" />
 			</div>
-			<div class="p-8">
+			<div class="pr-8 pl-8 pt-8 pb-4">
 				<div class="font-mono uppercase tracking-wide text-primary">
 					{title}
 				</div>
@@ -283,7 +286,7 @@
 						</div> -->
 
 						<!-- Main Status -->
-						<div class="flex justify-between px-2 gap-5">
+						<div class="flex flex-wrap justify-between gap-6 ">
 							<div>
 								<p class="projectStatus">{stateString}</p>
 								<p class="projectDataSubtitle">Status</p>
@@ -291,7 +294,7 @@
 
 							<MoneyInContract {fundsInContract} {raisedAmount} {campaignStaticUI} {state} />
 
-							<div class="">
+							<div class="min-w-max">
 								{#if campaignStaticUI}
 									<p class="projectStatus">
 										<TimeLeft endTime={campaignStaticUI.endDate} />
@@ -307,7 +310,7 @@
 						</div>
 
 						<!-- Dates -->
-						<div class="flex px-2 py-8 justify-between gap-12">
+						<div class="flex py-4 justify-between gap-12">
 							<div class="">
 								<p class="projectData">
 									{campaignStaticUI ? campaignStaticUI.startDateString : loadingString}
@@ -322,17 +325,29 @@
 							</div>
 						</div>
 
+						<!-- Smart contract details -->
+						<div class="dark:text-white">
+							<ProjectDetails
+								{vouchers721Address}
+								{crowdtainerId}
+								crowdtainerAddress={campaignStaticData?.contractAddress}
+								serviceProvider={campaignStaticData?.serviceProvider}
+								tokenDecimals={campaignStaticData?.tokenDecimals}
+								signerAddress={campaignStaticData?.signer}
+							/>
+						</div>
+
 						{#if joinViewEnabled}
 							<div class="pt-4">
 								{#if staticDataLoadStatus === LoadStatus.Loaded && currentPrice}
-									<p class="text-primary px-2 productPrice">
+									<p class="text-primary productPrice">
 										{currentPrice}
 										{campaignStaticUI ? campaignStaticUI.tokenSymbol : ''}
 									</p>
 								{:else}
 									<p class="px-2 productPrice">{loadingString}</p>
 								{/if}
-								<div class="flex px-2">
+								<div class="flex">
 									<h3 class="projectDataSubtitle">Price</h3>
 								</div>
 							</div>

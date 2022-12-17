@@ -4,7 +4,7 @@
 
 	import { initializeCampaignStores, campaignStores } from '$lib/campaignStore';
 	import { getTokenURI, walletFundsInCrowdtainer } from './ethersCalls/rpcRequests';
-	import { BigNumber, Signer } from 'ethers';
+	import { BigNumber } from 'ethers';
 
 	import CampaignActions from './CampaignActions.svelte';
 	import DetailedTokenIdState from './DetailedTokenIdState.svelte';
@@ -31,6 +31,7 @@
 	} from './ModalDialog.svelte';
 	import { loadTokenURIRepresentation } from './Converters/tokenURI';
 	import { getOrderDetailsAPI, type OrderStatus } from './api';
+	import ProjectDetails from './ProjectDetails.svelte';
 
 	export let tokenId: number;
 	export let vouchers721Address: string;
@@ -223,6 +224,18 @@
 					{state}
 					{orderStatus}
 				/>
+
+				<!-- Smart contract details -->
+				<div class="dark:text-white">
+					<ProjectDetails
+						{vouchers721Address}
+						{crowdtainerId}
+						crowdtainerAddress={campaignStaticData?.contractAddress}
+						serviceProvider={campaignStaticData?.serviceProvider}
+						tokenDecimals={campaignStaticData?.tokenDecimals}
+						signerAddress={campaignStaticData?.signer}
+					/>
+				</div>
 
 				<div class="w-auto flex ">
 					{#if campaignStaticData !== undefined && campaignStaticUI !== undefined}
