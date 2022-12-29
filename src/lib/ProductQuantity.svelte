@@ -7,6 +7,8 @@
 	export let descriptions: string[];
 	export let crowdtainerId: number;
 	export let tokenSymbol: string;
+	export let basePrices: number[];
+	export let basePriceUnit: string;
 
 	var selection: Readable<number[]> = derived(joinSelection, ($joinSelection) => {
 		let storeSelection = $joinSelection.get(crowdtainerId);
@@ -58,7 +60,7 @@
 					<!-- Row start -->
 					<div class="w-5/12">
 						<p class="text-center text-base dark:text-white py-2 m-1">
-							<b>{product}</b>
+							<b>{`${product} (${prices[index]/basePrices[index]} ${tokenSymbol}/${basePriceUnit})`}</b>
 						</p>
 					</div>
 					<div class="w-4/12 flex justify-center">

@@ -2,28 +2,19 @@
     "Vouchers721Address": "0x0165878A594ca255338adfa4d48449f69242Eb8F",
     "projects": [
         {
-            "crowdtainerId": 3,
+            "crowdtainerId": 1,
             "title": "Roasted Filter Coffee Beans",
             "subtitle": "Santa Teresa & Santa Inacia Farm",
             "description": "Years of experience come into play to make the best out of each coffee bean, and in that regard, coffee tradition is in the family as far as they can tell about their past - Alencar is a 3rd generation family-run coffee producer of small scale.",
             "projectURL": "https://crowdtainer.io/farmers",
-            "projectImageURL": "images/projects/CoffeeBag.png"
-        },
-        {
-            "crowdtainerId": 8,
-            "title": "Roasted Filter Coffee Beans",
-            "subtitle": "Santa Teresa & Santa Inacia Farm",
-            "description": "Years of experience come into play to make the best out of each coffee bean, and in that regard, coffee tradition is in the family as far as they can tell about their past - Alencar is a 3rd generation family-run coffee producer of small scale.",
-            "projectURL": "https://crowdtainer.io/farmers",
-            "projectImageURL": "images/projects/CoffeeBag.png"
-        },
-        {
-            "crowdtainerId": 9,
-            "title": "Roasted Filter Coffee Beans",
-            "subtitle": "Santa Teresa & Santa Inacia Farm",
-            "description": "Years of experience come into play to make the best out of each coffee bean, and in that regard, coffee tradition is in the family as far as they can tell about their past - Alencar is a 3rd generation family-run coffee producer of small scale.",
-            "projectURL": "https://crowdtainer.io/farmers",
-            "projectImageURL": "images/projects/CoffeeBag.png"
+            "projectImageURL": "images/projects/CoffeeBag.png",
+            "basePriceDenominator": [
+                0.25,
+                0.5,
+                1,
+                2
+            ],
+            "basePriceUnit": "kg"
         }
     ]
 }

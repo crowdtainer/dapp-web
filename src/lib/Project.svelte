@@ -50,6 +50,8 @@
 	export let description: string;
 	export let projectURL: string;
 	export let projectImageURL: string;
+	export let basePrices: number[];
+	export let basePriceUnit: string;
 
 	export let campaignStaticData: CrowdtainerStaticModel | undefined;
 	export let campaignStaticUI: UIFields | undefined;
@@ -59,6 +61,7 @@
 
 	let currentSelection = 0;
 	let currentPrice: number;
+	let currentBasePrice: number;
 	let fundsInContract: number | undefined;
 	let raisedAmount: number | undefined;
 	let tweeningDuration = 650;
@@ -183,6 +186,7 @@
 	function updateCurrentSelection(index: number, price: number) {
 		currentSelection = index;
 		currentPrice = price;
+		currentBasePrice = price/basePrices[index];
 	}
 
 	function addProduct() {
@@ -337,12 +341,11 @@
 							/>
 						</div>
 
-						{#if joinViewEnabled}
+						{#if joinViewEnabled && campaignStaticUI}
 							<div class="pt-4">
 								{#if staticDataLoadStatus === LoadStatus.Loaded && currentPrice}
 									<p class="text-primary productPrice">
-										{currentPrice}
-										{campaignStaticUI ? campaignStaticUI.tokenSymbol : ''}
+										{currentPrice} {campaignStaticUI.tokenSymbol} ({`${currentBasePrice} ${campaignStaticUI.tokenSymbol}/${basePriceUnit}`})
 									</p>
 								{:else}
 									<p class="px-2 productPrice">{loadingString}</p>
@@ -456,6 +459,8 @@
 						crowdtainerAddress={campaignStaticData?.contractAddress}
 						{campaignStaticUI}
 						{crowdtainerId}
+						{basePrices}
+						{basePriceUnit}
 						on:userJoinedCrowdtainerEvent={handleCampaignJoinedEvent}
 					/>
 				{:else}
@@ -464,6 +469,8 @@
 						crowdtainerAddress={campaignStaticData?.contractAddress}
 						{campaignStaticUI}
 						{crowdtainerId}
+						{basePrices}
+						{basePriceUnit}
 						on:userJoinedCrowdtainerEvent={handleCampaignJoinedEvent}
 					/>
 				{/if}

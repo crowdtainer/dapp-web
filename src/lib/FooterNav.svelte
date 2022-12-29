@@ -10,8 +10,8 @@
 </script>
 
 <footer
-	style="{!isDarkMode? "background-image: url('images/site/footerWaves.png');" :
-	"background-image: url('images/site/footerWavesDark.png');"} background-size: 100% 130%;"
+	style="{!isDarkMode? "background-image: url('/images/site/footerWaves.png');" :
+	"background-image: url('/images/site/footerWavesDark.png');"} background-size: 100% 130%;"
 	class="footer p-10 bg-black text-base-content"
 	data-theme="black"
 >
