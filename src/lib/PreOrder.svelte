@@ -3,6 +3,8 @@
 	export let crowdtainerId: number;
 	export let vouchers721Address: string | undefined;
 	export let crowdtainerAddress: string;
+	export let basePrices: number[];
+	export let basePriceUnit: string;
 
 	import { onMount } from 'svelte';
 	import { slide } from 'svelte/transition';
@@ -270,7 +272,7 @@
 		);
 
 		if (checkAllowanceResult.isErr()) {
-			modalDialogData.body = `Unable to authorize USDC spending.`;
+			modalDialogData.body = `Unable to authorize ERC20 spending.`;
 			console.log(`${checkAllowanceResult.unwrapErr()}`);
 		} else {
 			await refreshWalletData;
@@ -297,6 +299,8 @@
 						descriptions={campaignStaticUI.descriptions}
 						{crowdtainerId}
 						tokenSymbol={campaignStaticUI.tokenSymbol}
+						{basePrices}
+						{basePriceUnit}
 					/>
 				</Quantity>
 			{/if}
