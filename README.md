@@ -21,10 +21,10 @@ cp .env.example .env
 # Copy the projects.json file and edit it accordingly to inform the app about which campaigns should be displayed.
 cp example.projects.json src/routes/Data/projects.json
 
-# Copy the sample html files to the appropriate locations and edit them accordingly.
-cp example.imprint.svelte src/routes/Legal/Imprint/+page.svelte
-cp example.privacy.svelte src/routes/Legal/PrivacyPolicy/+page.svelte
-cp example.terms.svelte src/routes/Legal/Terms/+page.svelte
+# Edit the privacy policy and other custom pages accordingly:
+src/routes/Legal/Imprint/+page.svelte
+src/routes/Legal/PrivacyPolicy/+page.svelte
+src/routes/Legal/Terms/+page.svelte
 ```
 
 ### Install dependencies:
