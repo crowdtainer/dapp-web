@@ -7,10 +7,15 @@ import { deliveryVoucherKey } from "$lib/Database/schemes";
 
 // Monads
 import { type Result, Ok, Err } from "@sniptt/monads";
-import redis from '$lib/Database/redis';
+import { getDatabase } from '$lib/Database/redis';
 
 async function fetchData(chainId: number, vouchers721Address: string, voucherId: number): Promise<Result<OrderStatus, string>> {
     try {
+        let redis = getDatabase();
+        if (redis === undefined) {
+            throw error(500, `Db connection error.`);
+        }
+
         let key = deliveryVoucherKey(chainId, vouchers721Address, voucherId);
 
         if (await redis.exists(key)) {
@@ -24,7 +29,7 @@ async function fetchData(chainId: number, vouchers721Address: string, voucherId:
 }
 
 export const GET: RequestHandler = async ({ url }) => {
-    
+
     let payload = getPayload(url.searchParams)
 
     if (payload.isErr()) {
@@ -47,7 +52,7 @@ function getPayload(params: URLSearchParams): Result<[chainId: number, vouchers7
         let chainId = params.get('chainId');
         let vouchers721Address = params.get('vouchers721Address');
         let voucherId = params.get('voucherId');
-        
+
         if (chainId == undefined) {
             return Err("Missing 'chainId' field.");
         }

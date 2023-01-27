@@ -1,0 +1,53 @@
+services:
+  redis:
+    hostname: redis
+    image: 'redis:7.0.8-alpine'
+    restart: on-failure
+    volumes:
+      - /var/redis/data:/data
+    networks:
+      - app-network
+
+  crowdtainer-node:
+    hostname: crowdtainerServer
+    container_name: crowdatinerServer
+    depends_on:
+      - redis
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: deploy-node
+    restart: on-failure
+    ports:
+      - 3002:3000
+    networks:
+      - app-network
+    environment:
+      - ORIGIN=${ORIGIN-http://localhost} # https://my.site.example
+      - HOST=${HOST-0.0.0.0}
+      - PORT=${PORT-3000}
+      - REDIS_CONNECTION_STRING=${REDIS_CONNECTION_STRING-redis:6379}
+      - SERVER_ETH_RPC=${SERVER_ETH_RPC}
+      - VITE_DOMAIN=${VITE_DOMAIN} # signature generation and verification
+      - VITE_TERMS_OF_AGREEMENT_PATH=${VITE_TERMS_OF_AGREEMENT_PATH} # signature generation and verificatio
+      - AUTHORIZER_PRIVATE_KEY=${AUTHORIZER_PRIVATE_KEY}
+      - AUTHORIZER_SIGNATURE_EXPIRATION_TIME_IN_SECONDS=${AUTHORIZER_SIGNATURE_EXPIRATION_TIME_IN_SECONDS}
+      - VITE_WALLET_CONNECT_RPC=${VITE_WALLET_CONNECT_RPC}
+      - VITE_WALLET_CONNECT_CHAIN_ID=${VITE_WALLET_CONNECT_CHAIN_ID}
+
+  # For debugging purposes:
+  # e.g.: BUILDKIT_PROGRESS=plain docker compose --env-file .env.production up -d --build debug-web 
+  debug-web:
+    extends: crowdtainer-node
+    build:
+      target: debugger
+    entrypoint: node --inspect=0.0.0.0:5858 build/index.js
+    volumes:
+      - .:/app
+    ports:
+      - "3002:3000"
+      - "5858:5858"
+
+networks:
+  app-network:
+    driver: bridge

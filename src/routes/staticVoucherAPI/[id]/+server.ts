@@ -3,7 +3,7 @@ import { Vouchers721__factory } from '../../typechain/factories/Vouchers721__fac
 import { Crowdtainer__factory } from '../../typechain/factories/Crowdtainer.sol/Crowdtainer__factory';
 
 // Ethers
-import { ethers, BigNumber, Contract } from 'ethers';
+import { BigNumber, Contract } from 'ethers';
 
 // Monads
 import { type Result, Ok, Err } from "@sniptt/monads";
@@ -15,20 +15,7 @@ import { Vouchers721Address } from '../../Data/projects.json';
 import { Coin__factory } from '../../typechain/';
 import { crowdtainerStaticDataMap } from '../../../hooks/cache';
 import { error } from '@sveltejs/kit';
-
-import { SERVER_ETH_RPC } from '$env/static/private';
-
-// import { Network, Alchemy } from 'alchemy-sdk';
-// const settings = {
-//    apiKey: SERVER_ETH_RPC,
-//    network: Network.OPT_MAINNET
-// };
-// const alchemy = new Alchemy(settings);
-// const provider =await alchemy.config.getProvider();
-
-const provider = new ethers.providers.JsonRpcProvider(SERVER_ETH_RPC);
-const url = new URL(SERVER_ETH_RPC);
-console.log(`Backend ETH RPC @ ${url.protocol}//${url.hostname}:${url.port}`);
+import { provider } from '$lib/ethersCalls/provider';
 
 async function fetchData(crowdtainerId: BigNumber): Promise<Result<CrowdtainerStaticModel, Error>> {
 
@@ -36,15 +23,21 @@ async function fetchData(crowdtainerId: BigNumber): Promise<Result<CrowdtainerSt
       if (crowdtainerId.toNumber() === 0) {
          return Err({ error: `Invalid crowdtainerId: ${crowdtainerId.toNumber()}` });
       }
-      const vouchers721Contract = Vouchers721__factory.connect(Vouchers721Address, provider);
 
       let crowdtainerStaticData: CrowdtainerStaticModel | undefined = crowdtainerStaticDataMap.get(crowdtainerId.toHexString());
 
       if (crowdtainerStaticData) {
          return Ok(crowdtainerStaticData);
       }
+
+      console.log(`Fetching static data for Crowdtainer ID ${crowdtainerId}..`);
+      const start = Date.now();
+      await provider.ready;
+      const vouchers721Contract = Vouchers721__factory.connect(Vouchers721Address, provider);
+
       console.log(`CrowdtainerId: ${crowdtainerId}`);
       console.log(`vouchers721Contract.address: ${vouchers721Contract.address}`);
+
       let crowdtainerAddress: string;
       let crowdtainerContract: Contract;
       try {
@@ -91,6 +84,7 @@ async function fetchData(crowdtainerId: BigNumber): Promise<Result<CrowdtainerSt
       }
 
       crowdtainerStaticDataMap.set(crowdtainerId.toHexString(), crowdtainerData);
+      console.log(`Done. Crowdtainer ID ${crowdtainerId} static data fetch took ${(Date.now() - start) / 1000} seconds.`);
       return Ok(crowdtainerData);
    } catch (errorMessage) {
       let error: Error = { error: `${errorMessage}` };

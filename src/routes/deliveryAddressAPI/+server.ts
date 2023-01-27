@@ -1,4 +1,4 @@
-import redis from "$lib/Database/redis";                // Database
+import { getDatabase } from "$lib/Database/redis";                // Database
 
 import { ethers } from 'ethers';                        // Ethers
 import { type Result, Ok, Err } from "@sniptt/monads";  // Monads
@@ -11,9 +11,7 @@ import type { RequestHandler } from './$types';
 
 import { Vouchers721__factory } from "../typechain/factories/Vouchers721__factory";
 import { deliveryVoucherKey } from "$lib/Database/schemes";
-
-import { SERVER_ETH_RPC } from '$env/static/private';
-const provider = new ethers.providers.JsonRpcProvider(SERVER_ETH_RPC);
+import { provider } from '$lib/ethersCalls/provider';
 
 async function isOwnerOf(provider: ethers.Signer | undefined,
     vouchers721Address: string, tokenId: number): Promise<Result<boolean, string>> {
@@ -83,7 +81,7 @@ export const POST: RequestHandler = async ({ request }) => {
         // TODO: validate nonce (i.e., is it in 8 digit range? has it been used (redis))
         // TODO: Filter out unsupported chainIds
 
-        if(!isTimeValid(currentTimeISO)) {
+        if (!isTimeValid(currentTimeISO)) {
             throw error(400, 'Signature timestamp too old or too far in the future.');
         }
 
@@ -94,6 +92,11 @@ export const POST: RequestHandler = async ({ request }) => {
     } catch (_error) {
         console.dir(_error);
         throw error(400, `Invalid message: ${_error}`);
+    }
+
+    let redis = getDatabase();
+    if (redis === undefined) {
+        throw error(500, `Db connection error.`);
     }
 
     try {

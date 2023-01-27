@@ -299,8 +299,7 @@ export async function tearDownWallet() {
 }
 
 export function getSigner(): Signer | undefined {
-
-    if (!connected || web3Provider === undefined) {
+    if (web3Provider === undefined) {
         return undefined;
     }
     return web3Provider.getSigner();

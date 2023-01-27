@@ -4,7 +4,7 @@ import { Crowdtainer__factory } from '../../typechain/factories/Crowdtainer.sol/
 import type { IERC20 } from '../../typechain';
 
 // Ethers
-import { ethers, BigNumber } from 'ethers';
+import { BigNumber } from 'ethers';
 
 // Monads
 import { type Result, Ok, Err } from "@sniptt/monads";
@@ -13,25 +13,31 @@ import { type Result, Ok, Err } from "@sniptt/monads";
 import type { RequestHandler } from './$types';
 import type { CrowdtainerDynamicModel, CrowdtainerStaticModel, Error } from '$lib/Model/CrowdtainerModel';
 import { Vouchers721Address } from '../../Data/projects.json';
-import { crowdtainerStaticDataMap } from '../../../hooks/cache';
+import { crowdtainerStaticDataMap, crowdtainerDynamicDataMap } from '../../../hooks/cache';
 import { getERC20Contract } from '$lib/ethersCalls/rpcRequests';
+import { provider } from '$lib/ethersCalls/provider';
 
-// import { Network, Alchemy } from 'alchemy-sdk';
-// const settings = {
-//    apiKey: SERVER_ETH_RPC,
-//    network: Network.OPT_MAINNET
-// };
-// const alchemy = new Alchemy(settings);
-// const provider =await alchemy.config.getProvider();
-
-import { SERVER_ETH_RPC } from '$env/static/private';
-
-const provider = new ethers.providers.JsonRpcProvider(SERVER_ETH_RPC);
+let lastFetchEpochTimeInMilliseconds = 0;
+const cacheExpirationTimeInMilliseconds = 6 * 1000; // 6 seconds
 
 async function fetchData(crowdtainerId: BigNumber): Promise<Result<CrowdtainerDynamicModel, Error>> {
    try {
+      if (crowdtainerId.toNumber() === 0) {
+         return Err({ error: `Invalid crowdtainerId: ${crowdtainerId.toNumber()}` });
+      }
+
+      let crowdtainerDynamicData: CrowdtainerDynamicModel | undefined = crowdtainerDynamicDataMap.get(crowdtainerId.toHexString());
+      const start = Date.now();
+      const elapsed = start - lastFetchEpochTimeInMilliseconds;
+      if (crowdtainerDynamicData !== undefined && elapsed < cacheExpirationTimeInMilliseconds) {
+         return Ok(crowdtainerDynamicData);
+      }
+
+      console.log(`Fetching dynamic data for Crowdtainer ID ${crowdtainerId}..`);
       let crowdtainerAddress: string;
       let crowdtainerStaticData: CrowdtainerStaticModel | undefined = crowdtainerStaticDataMap.get(crowdtainerId.toHexString());
+      await provider.ready;
+
       const vouchers721Contract = Vouchers721__factory.connect(Vouchers721Address, provider);
 
       if (crowdtainerStaticData === undefined || crowdtainerStaticData.contractAddress === undefined) {
@@ -59,6 +65,10 @@ async function fetchData(crowdtainerId: BigNumber): Promise<Result<CrowdtainerDy
          raised: await crowdtainerContract.totalValueRaised(),
          fundsInContract: await erc20Contract.balanceOf(crowdtainerAddress)
       }
+
+      crowdtainerDynamicDataMap.set(crowdtainerId.toHexString(), crowdtainerData);
+      lastFetchEpochTimeInMilliseconds = Date.now();
+      console.log(`Done. Crowdtainer ID ${crowdtainerId} dynamic data fetch took ${(lastFetchEpochTimeInMilliseconds - start)/1000} seconds.`);
 
       return Ok(crowdtainerData);
    } catch (errorMessage) {

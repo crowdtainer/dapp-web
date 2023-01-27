@@ -2,14 +2,8 @@
 	import '../app.css';
 	import TopMenuNav from '$lib/TopMenuNav.svelte';
 	import FooterNav from '$lib/FooterNav.svelte';
-	import "@fontsource/open-sans";
+	import '@fontsource/open-sans';
 </script>
-
-<style>
-  :global(body) {
-    font-family: "Open Sans", sans-serif;
-  }
-</style>
 
 <div class="flex flex-col h-screen ">
 	<TopMenuNav />
@@ -18,3 +12,9 @@
 	</main>
 	<FooterNav />
 </div>
+
+<style>
+	:global(body) {
+		font-family: 'Open Sans', sans-serif;
+	}
+</style>

@@ -1,4 +1,4 @@
-import redis from "$lib/Database/redis";                // Database
+import { getDatabase } from "$lib/Database/redis";                // Database
 import { ethers } from 'ethers';                        // Ethers
 import { type Result, Ok, Err } from "@sniptt/monads";  // Monads
 
@@ -16,6 +16,11 @@ import type { RequestHandler } from './$types';
 //                  signatureHash: hex string   // statement signature
 //                }
 export const POST: RequestHandler = async ({ request }) => {
+
+    let redis = getDatabase();
+    if(redis === undefined){
+        throw error(500, `Db connection error.`);
+    }
 
     let authorizedEmailskey = `authorizedEmails`;
 
