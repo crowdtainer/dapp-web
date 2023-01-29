@@ -1,8 +1,8 @@
 <script lang="ts">
 	import { onMount } from "svelte";
-
-	let contactHtml = import.meta.env.VITE_CONTACT_HTML;
 	let isDarkMode: boolean;
+
+	import { contactHTML } from "./strings";
 
 	onMount(() => {
 		isDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches
@@ -121,10 +121,10 @@
 			>
 		</div>
 	</div>
-	{#if contactHtml !== undefined && contactHtml !== ''}
+	{#if contactHTML !== undefined && contactHTML !== ''}
 		<div>
 			<span class="footer-title">Contact</span>
-			{@html contactHtml}
+			{@html contactHTML}
 		</div>
 	{/if}
 </footer>

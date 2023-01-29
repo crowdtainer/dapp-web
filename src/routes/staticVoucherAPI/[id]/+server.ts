@@ -16,18 +16,19 @@ import { Coin__factory } from '../../typechain/';
 import { crowdtainerStaticDataMap } from '../../../hooks/cache';
 import { error } from '@sveltejs/kit';
 
-import { Network, Alchemy } from 'alchemy-sdk';
+import { SERVER_ETH_RPC } from '$env/static/private';
 
+// import { Network, Alchemy } from 'alchemy-sdk';
 // const settings = {
-//    apiKey: import.meta.env.VITE_RPC_API_KEY,
+//    apiKey: SERVER_ETH_RPC,
 //    network: Network.OPT_MAINNET
 // };
-// network: import.meta.env.VITE_RPC_BACKEND
-
 // const alchemy = new Alchemy(settings);
 // const provider =await alchemy.config.getProvider();
 
-const provider = new ethers.providers.JsonRpcProvider(import.meta.env.VITE_RPC_BACKEND);
+const provider = new ethers.providers.JsonRpcProvider(SERVER_ETH_RPC);
+const url = new URL(SERVER_ETH_RPC);
+console.log(`Backend ETH RPC @ ${url.protocol}//${url.hostname}:${url.port}`);
 
 async function fetchData(crowdtainerId: BigNumber): Promise<Result<CrowdtainerStaticModel, Error>> {
 

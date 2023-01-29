@@ -17,15 +17,16 @@ import { crowdtainerStaticDataMap } from '../../../hooks/cache';
 import { getERC20Contract } from '$lib/ethersCalls/rpcRequests';
 
 // import { Network, Alchemy } from 'alchemy-sdk';
-
 // const settings = {
-//    apiKey: import.meta.env.VITE_RPC_API_KEY,
+//    apiKey: SERVER_ETH_RPC,
 //    network: Network.OPT_MAINNET
 // };
 // const alchemy = new Alchemy(settings);
 // const provider =await alchemy.config.getProvider();
 
-const provider = new ethers.providers.JsonRpcProvider(import.meta.env.VITE_RPC_BACKEND);
+import { SERVER_ETH_RPC } from '$env/static/private';
+
+const provider = new ethers.providers.JsonRpcProvider(SERVER_ETH_RPC);
 
 async function fetchData(crowdtainerId: BigNumber): Promise<Result<CrowdtainerDynamicModel, Error>> {
    try {

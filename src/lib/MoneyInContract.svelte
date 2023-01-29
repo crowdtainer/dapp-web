@@ -30,7 +30,7 @@
 <div class="">
 	{#if state === ProjectStatusUI.Failed || state === ProjectStatusUI.ServiceProviderDeclined}
 		<p class="projectStatus">
-			{moneyFormatter.format($tweenedRaised)}
+			{moneyFormatter.format($tweenedFundsInContract)}
 			{campaignStaticUI ? campaignStaticUI.tokenSymbol : ''}
 		</p>
 		<p class="projectDataSubtitle">left for withdrawal</p>

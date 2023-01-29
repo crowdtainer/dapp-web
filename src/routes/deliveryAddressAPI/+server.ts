@@ -3,19 +3,19 @@ import redis from "$lib/Database/redis";                // Database
 import { ethers } from 'ethers';                        // Ethers
 import { type Result, Ok, Err } from "@sniptt/monads";  // Monads
 
-import { domain, makeDeliveryStatement, type DeliveryDetails } from '$lib/Model/SignTerms';
+import { isTimeValid, makeDeliveryRequestMessage, type DeliveryDetails } from '$lib/Model/SignTerms';
 import { Vouchers721Address } from '../Data/projects.json';
 
 import { error } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
 
-import { SiweMessage, type VerifyParams } from '@crowdtainer/siwe';
 import { Vouchers721__factory } from "../typechain/factories/Vouchers721__factory";
 import { deliveryVoucherKey } from "$lib/Database/schemes";
 
-const provider = new ethers.providers.JsonRpcProvider(import.meta.env.VITE_RPC_BACKEND);
+import { SERVER_ETH_RPC } from '$env/static/private';
+const provider = new ethers.providers.JsonRpcProvider(SERVER_ETH_RPC);
 
-export async function isOwnerOf(provider: ethers.Signer | undefined,
+async function isOwnerOf(provider: ethers.Signer | undefined,
     vouchers721Address: string, tokenId: number): Promise<Result<boolean, string>> {
 
     if (provider === undefined) {
@@ -40,8 +40,12 @@ export async function isOwnerOf(provider: ethers.Signer | undefined,
 }
 
 // POST Inputs: - {
+//                  signerAddress: string,      // user stated signer address
+//                         domain: string,      // user stated domain
+//                         origin: string,      // user stated origin
+//                          nonce: string,      // nonce with at least 8 digits
+//                 currentTimeISO: string,      // time when signature was created
 //                deliveryDetails: string,      // Participant's delivery request details
-//                        message: string,      // SIWE message
 //                  signatureHash: hex string   // statement signature
 //                }
 export const POST: RequestHandler = async ({ request }) => {
@@ -52,56 +56,44 @@ export const POST: RequestHandler = async ({ request }) => {
         throw error(400, result.unwrapErr());
     }
 
-    let [deliveryDetails, message, signatureHash] = result.unwrap();
-
-    let signerAddress: string;
+    let [signerAddress, domain, origin, nonce, currentTimeISO, deliveryDetails, signatureHash] = result.unwrap();
 
     try {
-        let siweMessage = new SiweMessage(message);
 
         // Check signature
-        let verifyParams: VerifyParams = { signature: signatureHash, domain };
-        let siweResponse = await siweMessage.verify(verifyParams);
+        let message = makeDeliveryRequestMessage(signerAddress, domain, origin, deliveryDetails, nonce, currentTimeISO);
 
-        if (!siweResponse.success) {
-            console.dir(siweResponse);
-            throw error(400, `Invalid message: ${siweResponse.error}`);
+        let recoveredSigner = ethers.utils.verifyMessage(message, signatureHash);
+
+        console.log(`Derived signer address: ${recoveredSigner}`);
+
+        if (!ethers.utils.isAddress(signerAddress)) {
+            throw error(400, "Invalid wallet address.");
         }
 
-        console.log("Signed message payload:");
-        console.dir(deliveryDetails);
-
-        if (deliveryDetails === undefined) {
-            throw error(400, `Invalid message: parsing failed.`);
+        // Check if signatures matches
+        if (recoveredSigner !== signerAddress) {
+            throw error(400, `Invalid statement or message signature.`);
         }
 
-        // Check signature
-        let expectedStatement = makeDeliveryStatement(deliveryDetails);
-
-        if (siweMessage.statement !== expectedStatement) {
-            throw error(400, `Invalid signed statement. Expected: '${expectedStatement}' Received:'${siweMessage.statement}'`);
-        }
-
-        signerAddress = siweMessage.address;
-        console.log(`Derived signer address: ${signerAddress}`);
-
+        // TODO: perform domain/origin validation
+        console.log(`client declared domain: ${domain}`);
+        console.log(`client declared origin: ${domain}`);
+        console.log(`siweMessage.issuedAt: ${currentTimeISO}`);
+        // TODO: validate nonce (i.e., is it in 8 digit range? has it been used (redis))
         // TODO: Filter out unsupported chainIds
+
+        if(!isTimeValid(currentTimeISO)) {
+            throw error(400, 'Signature timestamp too old or too far in the future.');
+        }
 
         if (Vouchers721Address !== deliveryDetails.vouchers721Address) {
             throw error(400, `Invalid Vouchers721 address. Expected: '${Vouchers721Address}' Received:'${deliveryDetails.vouchers721Address}'`);
         }
 
-        // TODO: deny signatures too old and with used nonces
-        console.log(`siweMessage.issuedAt: ${siweMessage.issuedAt}`);
-        console.log(`siweMessage.nonce: ${siweMessage.nonce}`);
-
     } catch (_error) {
         console.dir(_error);
         throw error(400, `Invalid message: ${_error}`);
-    }
-
-    if (!ethers.utils.isAddress(signerAddress)) {
-        throw error(400, "Invalid wallet address.");
     }
 
     try {
@@ -127,27 +119,63 @@ export const POST: RequestHandler = async ({ request }) => {
 
 type Error = string;
 
-function getPayload(item: any): Result<[deliveryDetails: DeliveryDetails, message: string, signatureHash: string], Error> {
+//                  signerAddress: string,      // user stated signer address
+//                         domain: string,      // user stated domain
+//                         origin: string,      // user stated origin
+//                          nonce: string,      // nonce with at least 8 digits
+//                 currentTimeISO: string,      // time when signature was created
+//                deliveryDetails: string,      // Participant's delivery request details
+//                  signatureHash: hex string   // statement signature
+function getPayload(item: any): Result<[
+    signerAddress: string,
+    domain: string,
+    origin: string,
+    nonce: string,
+    currentTimeISO: string,
+    deliveryDetails: DeliveryDetails,
+    signatureHash: string], Error> {
 
     if (item == undefined) {
         return Err("Missing payload");
+    }
+
+    if (item.signerAddress == undefined) {
+        return Err("Missing 'signerAddress' field");
+    }
+
+    if (item.domain == undefined) {
+        return Err("Missing 'domain' field");
+    }
+
+    if (item.origin == undefined) {
+        return Err("Missing 'origin' field");
+    }
+
+    if (item.nonce == undefined) {
+        return Err("Missing 'nonce' field");
+    }
+
+    if (item.currentTimeISO == undefined) {
+        return Err("Missing 'currentTimeISO' field");
     }
 
     if (item.deliveryDetails == undefined) {
         return Err("Missing 'deliveryDetails' field");
     }
 
-    if (item.message == undefined) {
-        return Err("Missing 'message' field");
-    }
-
     if (item.signatureHash == undefined) {
         return Err("Missing 'signatureHash' field");
     }
 
-    console.dir(item.deliveryDetails);
     try {
-        const result: [DeliveryDetails, string, string] = [item.deliveryDetails, item.message, item.signatureHash];
+        const result: [string, string, string, string, string, DeliveryDetails, string] = [
+            item.signerAddress,
+            item.domain,
+            item.origin,
+            item.nonce,
+            item.currentTimeISO,
+            item.deliveryDetails,
+            item.signatureHash];
         return Ok(result);
     } catch (error) {
         return Err("Error decoding input fields");

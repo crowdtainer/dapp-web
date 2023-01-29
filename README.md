@@ -25,7 +25,11 @@ cp example.projects.json src/routes/Data/projects.json
 src/routes/Legal/Imprint/+page.svelte
 src/routes/Legal/PrivacyPolicy/+page.svelte
 src/routes/Legal/Terms/+page.svelte
+
+# An optional footer block with contact details will be shown from contactHTML in:
+src/lib/strings.ts
 ```
+
 
 ### Install dependencies:
 

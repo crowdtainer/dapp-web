@@ -45,24 +45,24 @@ export async function requestEmailAuthorizationAPI(email: string, code: string):
 	return result.text();
 }
 
-export async function requestWalletAuthorizationAPI(email: string, message: string, sigHash: string): Promise<string> {
+export async function requestWalletAuthorizationAPI(email: string, signerAddress: string, domain: string, origin: string, nonce: string, currentTimeISO: string, sigHash: string): Promise<string> {
 	let result: Response;
 
 	result = await fetch('authorizeWalletAPI', {
 		method: 'POST',
-		body: JSON.stringify({ email: email, message: message, signatureHash: sigHash })
+		body: JSON.stringify({ email: email, signerAddress: signerAddress, domain: domain, origin: origin, nonce: nonce, currentTimeISO: currentTimeISO, signatureHash: sigHash })
 	});
 	return result.text();
 }
 
 // Order confirmation
 
-export async function requestDeliveryAPI(deliveryDetails: DeliveryDetails, message: string, sigHash: string): Promise<string> {
+export async function requestDeliveryAPI(signerAddress: string, domain: string, origin: string, nonce: string, currentTimeISO: string, deliveryDetails: DeliveryDetails, sigHash: string): Promise<string> {
 	let result: Response;
 
 	result = await fetch('deliveryAddressAPI', {
 		method: 'POST',
-		body: JSON.stringify({ deliveryDetails: deliveryDetails, message: message, signatureHash: sigHash })
+		body: JSON.stringify({ signerAddress: signerAddress, domain: domain, origin: origin, nonce: nonce, currentTimeISO: currentTimeISO , deliveryDetails: deliveryDetails, signatureHash: sigHash })
 	});
 	return result.text();
 }

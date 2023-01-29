@@ -14,7 +14,6 @@
 		disconnect,
 		setupWallet,
 		tearDownWallet,
-		web3Provider
 	} from '$lib/wallet';
 	import { WalletType } from '$lib/walletStorage';
 
@@ -194,7 +193,7 @@
 									tabindex="-1"
 									id="user-menu-item-0">Connect wallet</a
 								>
-								{#if import.meta.env.MODE === 'development'}
+								<!-- {#if import.meta.env.MODE === 'development'} -->
 									<!-- svelte-ignore a11y-invalid-attribute -->
 									<a
 										href="#"
@@ -207,7 +206,7 @@
 										tabindex="-1"
 										id="user-menu-item-0">Connect to browser extension wallet</a
 									>
-								{/if}
+								<!-- {/if} -->
 							{/if}
 						</div>
 					{/if}

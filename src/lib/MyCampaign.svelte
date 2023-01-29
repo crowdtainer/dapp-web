@@ -3,7 +3,7 @@
 	import type { Readable } from 'svelte/store';
 
 	import { initializeCampaignStores, campaignStores } from '$lib/campaignStore';
-	import { getTokenURI, walletFundsInCrowdtainer } from './ethersCalls/rpcRequests';
+	import { walletFundsInCrowdtainer } from './ethersCalls/rpcRequests';
 	import { BigNumber } from 'ethers';
 
 	import CampaignActions from './CampaignActions.svelte';
@@ -38,9 +38,7 @@
 	export let crowdtainerId: number;
 	export let title: string;
 	export let subtitle: string;
-	export let description: string;
 	export let projectURL: string;
-	export let projectImageURL: string;
 
 	export let campaignStaticData: CrowdtainerStaticModel | undefined;
 	export let campaignStaticUI: UIFields | undefined;
