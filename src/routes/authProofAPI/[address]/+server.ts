@@ -6,6 +6,9 @@ import { BigNumber, ethers } from 'ethers';             // Ethers
 import { AuthorizationGateway__factory } from '../../../routes/typechain/factories/Crowdtainer.sol/AuthorizationGateway__factory';
 import { error } from "@sveltejs/kit";
 
+import { AUTHORIZER_PRIVATE_KEY } from '$env/static/private';
+import { AUTHORIZER_SIGNATURE_EXPIRATION_TIME_IN_SECONDS } from '$env/static/private';
+
 // POST Inputs: - { 
 //                           calldata: bytes,
 //                }
@@ -14,14 +17,8 @@ export const POST: RequestHandler = async ({ request, params }) => {
     let userWalletAddress = params.address;
     let returnValue: string;
 
-    if (import.meta.env.VITE_BACKEND_SIGNER_SIG_EXPIRATION_TIME_IN_SECONDS === undefined) {
-        const message = 'Required environment variable missing: VITE_BACKEND_SIGNER_SIG_EXPIRATION_TIME_IN_SECONDS';
-        console.log(message);
-        throw error(500, message);
-    }
-
-    if (import.meta.env.VITE_BACKEND_SIGNER_PRIVATE_KEY === undefined) {
-        const message = 'Required environment variable missing: VITE_BACKEND_SIGNER_PRIVATE_KEY';
+    if (!ethers.utils.isAddress(ethers.utils.computeAddress(AUTHORIZER_PRIVATE_KEY))) {
+        const message = 'Invalid AUTHORIZER_PRIVATE_KEY.';
         console.log(message);
         throw error(500, message);
     }
@@ -68,13 +65,13 @@ export const POST: RequestHandler = async ({ request, params }) => {
     const [crowdtainerAddress, address, quantities, enableReferral, referralAddress] = args;
 
     // TODO: Apply any sanity checks to parameters (e.g.: quantity too high)
-    let epochExpiration = BigNumber.from(Math.floor(Date.now() / 1000) + import.meta.env.VITE_BACKEND_SIGNER_SIG_EXPIRATION_TIME_IN_SECONDS);
+    let epochExpiration = BigNumber.from(Math.floor(Date.now() / 1000) + AUTHORIZER_SIGNATURE_EXPIRATION_TIME_IN_SECONDS);
     let nonce = ethers.utils.randomBytes(32);
     let messageHash = ethers.utils.solidityKeccak256(["address", "address", "uint256[4]", "bool", "address", "uint64", "bytes32"],
         [crowdtainerAddress, userWalletAddress, quantities, enableReferral, referralAddress, epochExpiration, nonce]);
     let messageHashBinary = ethers.utils.arrayify(messageHash);
 
-    let signer = new ethers.Wallet(import.meta.env.VITE_BACKEND_SIGNER_PRIVATE_KEY);
+    let signer = new ethers.Wallet(AUTHORIZER_PRIVATE_KEY);
     let signature = await signer.signMessage(messageHashBinary);
 
     returnValue = ethers.utils.defaultAbiCoder.encode(["address", "uint64", "bytes32", "bytes"], [crowdtainerAddress, epochExpiration, nonce, signature]);

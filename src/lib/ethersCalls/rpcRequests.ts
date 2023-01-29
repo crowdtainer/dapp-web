@@ -4,7 +4,7 @@ import { BigNumber, ethers, type ContractTransaction } from 'ethers';
 import { IERC20__factory } from '../../routes/typechain/factories/IERC20__factory';
 
 import { type Result, Ok, Err } from "@sniptt/monads";
-import type { IERC20 } from 'src/routes/typechain/IERC20';
+import type { IERC20 } from '../../routes/typechain/IERC20';
 import type { UserStoreModel } from '$lib/Model/UserStoreModel';
 import { decodeEthersError } from '$lib/Converters/EthersErrorHandler';
 import { getSigner } from '$lib/wallet';

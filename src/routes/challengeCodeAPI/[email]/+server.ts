@@ -1,4 +1,3 @@
-// Random number
 import { randomInt } from "crypto";                         // Random number
 import redis from "$lib/Database/redis";                    // Database
 import type { RequestHandler, RouteParams, RouteId } from './$types';              // Internal

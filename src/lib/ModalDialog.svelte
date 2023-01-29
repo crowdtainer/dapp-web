@@ -45,7 +45,7 @@
 <div data-theme="cmyk" class="modal {modalDialogData.visible ? 'modal-open' : ''} modal-bottom sm:modal-middle">
 	<div class="modal-box">
 		<h3 class="font-bold text-lg">{modalDialogData.title}</h3>
-		<div class="h-20 flex justify-center mt-8">
+		<div class="h-auto flex justify-center mt-8">
 			<div class="flex flex-row">
 				{#if modalDialogData.visible}
 					{#if modalDialogData.animation !== ModalAnimation.None}

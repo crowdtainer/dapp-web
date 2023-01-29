@@ -1,4 +1,6 @@
 import WalletConnectProvider from '@walletconnect/web3-provider/dist/umd/index.min.js';
+// Can't use propert import, see: https://github.com/WalletConnect/walletconnect-monorepo/issues/864
+// import WalletConnectProvider from "@walletconnect/web3-provider";
 import { ethers, providers, Signer } from 'ethers';
 
 import { writable, derived } from 'svelte/store';

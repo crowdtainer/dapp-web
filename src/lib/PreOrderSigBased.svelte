@@ -55,8 +55,9 @@
 	} from './ethersCalls/rpcRequests';
 	import WalletBalances from './WalletBalances.svelte';
 	import refreshWalletData from './WalletBalances.svelte';
-	import type { IERC20 } from 'src/routes/typechain';
+	import type { IERC20 } from '../routes/typechain';
 	import ConnectWallet from './ConnectWallet.svelte';
+	import { pseudoRandomNonce } from './Utils/random';
 
 	// User product selection
 	$: productListLength = campaignStaticUI ? campaignStaticUI?.descriptions.length : 0;
@@ -385,7 +386,8 @@
 
 		modalDialogData.type = ModalType.ActionRequest;
 		modalDialogData.title = 'Terms and Conditions confirmation';
-		modalDialogData.body = 'Please read the message and confirm the signature request in your mobile wallet.';
+		modalDialogData.body =
+			'Please read the message and confirm the signature request in your mobile wallet.';
 		modalDialogData.animation = ModalAnimation.Circle2;
 		modalDialogData.visible = true;
 
@@ -401,16 +403,31 @@
 			return;
 		}
 
-		console.log(account);
+		console.log(`Account: ${account}`);
 
 		// make sure address is check-summed; Some wallets don't use checksummed addresses (e.g. Metamask mobile)
 		account = ethers.utils.getAddress(account);
 
-		let message = makeAgreeToTermsMessage(userEmail, account);
+		console.log(`Account check-summed: ${account}`);
+
+		const nonce = pseudoRandomNonce().toString();
+		const currentTime = new Date().toISOString();
+		const domain = window.location.host;
+		const origin = window.location.origin;
+
+		let message = makeAgreeToTermsMessage(domain, origin, userEmail, account, nonce, currentTime);
 		let signResult = await signMessage(signer, message);
 		if (signResult.isOk()) {
-			let [message, sigHash] = signResult.unwrap();
-			let requestResult = await requestWalletAuthorizationAPI(userEmail, message, sigHash);
+			let sigHash = signResult.unwrap();
+			let requestResult = await requestWalletAuthorizationAPI(
+				userEmail,
+				account,
+				domain,
+				origin,
+				nonce,
+				currentTime,
+				sigHash
+			);
 
 			let errorDescription: string = '';
 
@@ -419,13 +436,15 @@
 			} else {
 				try {
 					let json = JSON.parse(requestResult);
-					if(json.message) { errorDescription = json.message};
+					if (json.message) {
+						errorDescription = json.message;
+					}
 				} catch (error) {
 					console.log(`Error parsing server error message.`);
 				}
 				console.log(`Error: ${requestResult}`);
 				let message = 'An error ocurred while approving the signature';
-				message = `${message}${(errorDescription !== '' ? `: ${errorDescription}` : `.`)}`;
+				message = `${message}${errorDescription !== '' ? `: ${errorDescription}` : `.`}`;
 
 				modalDialogData = {
 					type: ModalType.ActionRequest,

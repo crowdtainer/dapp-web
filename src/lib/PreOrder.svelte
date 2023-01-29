@@ -44,7 +44,7 @@
 	import { joinProject, checkAllowance, getERC20Contract } from './ethersCalls/rpcRequests';
 	import WalletBalances from './WalletBalances.svelte';
 	import refreshWalletData from './WalletBalances.svelte';
-	import type { IERC20 } from 'src/routes/typechain';
+	import type { IERC20 } from '../routes/typechain';
 	import ConnectWallet from '$lib/ConnectWallet.svelte';
 
 	// User product selection
@@ -262,7 +262,12 @@
 		modalDialogData.body = `Waiting for transaction confirmation..`;
 		modalDialogData.icon = ModalIcon.None;
 		modalDialogData.animation = ModalAnimation.Diamonds;
-		await permitApproveTx.wait();
+
+		if(permitApproveTx !== undefined) {
+			await permitApproveTx.wait();
+		} else {
+			console.log(`permitApproveTx undefined`);
+		}
 
 		let checkAllowanceResult = await checkAllowance(
 			String(accountAddress),

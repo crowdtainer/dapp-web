@@ -9,6 +9,10 @@
 	import { getSigner } from './wallet';
 	import { requestDeliveryAPI } from './api';
 
+	// Random number
+	import { ethers } from 'ethers';
+	import { pseudoRandomNonce } from './Utils/random';
+
 	// Modal Dialog
 	let modalDialogData: ModalDialogData = {
 		visible: false,
@@ -64,14 +68,24 @@
 		modalDialogData.animation = ModalAnimation.Circle2;
 		modalDialogData.visible = true;
 
-		let message = makeDeliveryRequestMessage(walletAddress, deliveryDetails);
+		const nonce = pseudoRandomNonce().toString();
+		const currentTime = new Date().toISOString();
+		const domain = window.location.host;
+		const origin = window.location.origin;
+
+		console.log(`Account: ${walletAddress}`);
+		// make sure address is check-summed; Some wallets don't use checksummed addresses (e.g. Metamask mobile)
+		walletAddress = ethers.utils.getAddress(walletAddress);
+		console.log(`Account check-summed: ${walletAddress}`);
+
+		let message = makeDeliveryRequestMessage(walletAddress, domain, origin, deliveryDetails, nonce, currentTime);
 		let signResult = await signMessage(signer, message);
 
 		if (signResult.isOk()) {
-			let [message, sigHash] = signResult.unwrap();
+			let sigHash = signResult.unwrap();
 
 			// TODO: Apply asymmetric encryption client/browser side before sending.
-			let requestResult = await requestDeliveryAPI(deliveryDetails, message, sigHash);
+			let requestResult = await requestDeliveryAPI(walletAddress, domain, origin, nonce, currentTime, deliveryDetails, sigHash);
 
 			if (requestResult === 'OK') {
 				modalDialogData.visible = false;

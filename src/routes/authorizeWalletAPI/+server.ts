@@ -2,15 +2,17 @@ import redis from "$lib/Database/redis";                // Database
 import { ethers } from 'ethers';                        // Ethers
 import { type Result, Ok, Err } from "@sniptt/monads";  // Monads
 
-import { makeAgreeToTermsStatement, domain } from '$lib/Model/SignTerms';
+import { makeAgreeToTermsMessage, isTimeValid } from '$lib/Model/SignTerms';
 import { error } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
 
-import { SiweMessage, type VerifyParams } from '@crowdtainer/siwe';
-
 // POST Inputs: - {
-//                          email: string,      // Participant's email
-//                        message: string,      // SIWE message
+//                          email: string,      // user's email
+//                  signerAddress: string,      // user stated signer address
+//                         domain: string,      // user stated domain
+//                         origin: string,      // user stated origin
+//                          nonce: string,      // nonce with at least 8 digits
+//                 currentTimeISO: string,      // time when signature was created
 //                  signatureHash: hex string   // statement signature
 //                }
 export const POST: RequestHandler = async ({ request }) => {
@@ -23,43 +25,38 @@ export const POST: RequestHandler = async ({ request }) => {
         throw error(400, result.unwrapErr());
     }
 
-    let [email, message, signatureHash] = result.unwrap();
+    let [email, signerAddress, domain, origin, nonce, currentTimeISO, signatureHash] = result.unwrap();
 
-    // Get wallet public key from signature
-    let signerAddress: string;
     try {
-        let siweMessage = new SiweMessage(message);
+        // TODO: perform domain/origin validation
+        console.log(`client declared domain: ${domain}`);
+        console.log(`client declared origin: ${domain}`);
+        console.log(`siweMessage.issuedAt: ${currentTimeISO}`);
+        // TODO: validate nonce (i.e., is it in 8 digit range? has it been used (redis))
+        // TODO: Filter out unsupported chainIds
 
-        // Check signature
-        let verifyParams: VerifyParams = { signature: signatureHash, domain };
-        let siweResponse = await siweMessage.verify(verifyParams);
-
-        if (!siweResponse.success) {
-            console.dir(siweResponse);
-            throw error(400, `Invalid message: ${siweResponse.error}`);
+        if(!isTimeValid(currentTimeISO)) {
+            throw error(400, 'Signature timestamp too old or too far in the future.');
         }
 
-        // Check signature
-        let expectedStatement = makeAgreeToTermsStatement(email);
+        // Reconstruct the message locally
+        let message = makeAgreeToTermsMessage(domain, origin, email, signerAddress, nonce, currentTimeISO);
 
-        if (siweMessage.statement !== expectedStatement) {
-            throw error(400, `Invalid signed statement. Expected: '${expectedStatement}' Received:'${siweMessage.statement}'`);
+        let recoveredSigner = ethers.utils.verifyMessage(message, signatureHash);
+
+        if (!ethers.utils.isAddress(signerAddress)) {
+            throw error(400, `Invalid wallet address (${signerAddress}).`);
         }
 
-        signerAddress = siweMessage.address;
-        console.log(`Derived signer address: ${signerAddress}`);
-
-        console.log(`siweMessage.issuedAt: ${siweMessage.issuedAt}`);
+        // Check if signatures matches
+        if (recoveredSigner !== signerAddress) {
+            throw error(400, `Invalid statement or message signature.`);
+        }
 
     } catch (_error) {
         console.dir(_error);
-        throw error(500, `Invalid message: ${_error}`);
+        throw error(400, `Invalid message: ${_error}`);
     }
-
-    if (!ethers.utils.isAddress(signerAddress)) {
-        throw error(500, "Invalid wallet address.");
-    }
-
 
     // Check if email is authorized
     const emailAuthorized = await redis.sismember(authorizedEmailskey, email);
@@ -109,7 +106,8 @@ export const POST: RequestHandler = async ({ request }) => {
 
 type Error = string;
 
-function getPayload(item: any): Result<[email: string, message: string, signatureHash: string], Error> {
+function getPayload(item: any): Result<[email: string, signerAddress: string,
+    domain: string, origin: string, nonce: string, currentTimeISO: string, signatureHash: string], Error> {
 
     if (item == undefined) {
         return Err("Missing payload");
@@ -119,8 +117,24 @@ function getPayload(item: any): Result<[email: string, message: string, signatur
         return Err("Missing 'email' field");
     }
 
-    if (item.message == undefined) {
-        return Err("Missing 'message' field");
+    if (item.signerAddress == undefined) {
+        return Err("Missing 'signerAddress' field");
+    }
+
+    if (item.domain == undefined) {
+        return Err("Missing 'domain' field");
+    }
+
+    if (item.origin == undefined) {
+        return Err("Missing 'origin' field");
+    }
+
+    if (item.nonce == undefined) {
+        return Err("Missing 'nonce' field");
+    }
+
+    if (item.currentTimeISO == undefined) {
+        return Err("Missing 'currentTimeISO' field");
     }
 
     if (item.signatureHash == undefined) {
@@ -128,7 +142,9 @@ function getPayload(item: any): Result<[email: string, message: string, signatur
     }
 
     try {
-        const result: [string, string, string] = [item.email, item.message, item.signatureHash];
+        const result: [string, string, string, string, string, string, string] =
+            [item.email, item.signerAddress, item.domain, item.origin,
+            item.nonce, item.currentTimeISO, item.signatureHash];
         return Ok(result);
     } catch (error) {
         return Err("Error decoding input fields");
