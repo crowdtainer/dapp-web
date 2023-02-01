@@ -1,6 +1,6 @@
 import { randomInt } from "crypto";                         // Random number
-import redis from "$lib/Database/redis";                    // Database
-import type { RequestHandler, RouteParams, RouteId } from './$types';              // Internal
+import { getDatabase } from "$lib/Database/redis";          // Database
+import type { RequestHandler } from './$types';             // Internal
 import { error } from "@sveltejs/kit";
 
 const maxAPI_hits = 8;
@@ -8,6 +8,11 @@ const codeExpireTime = 1800 // 30 minutes
 const emailWorkerExpiration = 5 * 60 // 5 minutes
 
 export const GET: RequestHandler = async ({ params }) => {
+
+    let redis = getDatabase();
+    if (redis === undefined) {
+        throw error(500, `Db connection error.`);
+    }
 
     let userEmail = params.email;
 

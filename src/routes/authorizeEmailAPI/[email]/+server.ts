@@ -1,12 +1,17 @@
-import redis from "$lib/Database/redis";                // Database
-import { type Result, Ok, Err } from "@sniptt/monads";  // Monads
+import { getDatabase } from "$lib/Database/redis";              // Database
+import { type Result, Ok, Err } from "@sniptt/monads";          // Monads
+import type { RequestHandler } from './$types';                 // Internal
 import { error } from '@sveltejs/kit';
-import type { RequestHandler } from './$types'; // Internal
 
 // POST Inputs: - { 
-//                           code: number,
+//                     code: number,
 //                }
 export const POST: RequestHandler = async ({ request, params }) => {
+
+    let redis = getDatabase();
+    if (redis === undefined) {
+        throw error(500, `Db connection error.`);
+    }
 
     let userEmail = params.email;
 

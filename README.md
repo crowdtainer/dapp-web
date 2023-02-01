@@ -5,10 +5,20 @@
 
 Web-based (Svelte) application to interact with the [Crowdtainer solidity contracts](https://github.com/crowdtainer/dapp-contracts).
 
+Following these instructions allows you to host your own instance of Crowdtainer.
+
 ## Development
 
 To run everything locally, follow the instructions in [Crowdtainer solidity contracts](https://github.com/crowdtainer/dapp-contracts) to run and deploy the contracts (`npx hardhat node`).
 Once a blockchain or RPC can be connected to, proceed setting up this frontend per instructions below.
+
+### Frameworks
+
+- [SvelteKit](https://kit.svelte.dev) 
+- TailWindCSS
+- Typechain
+
+As this project uses typechain to generate typescript bindings for interacttion with deployed smart contracts, if changes are made to the smart contract interfaces, then the respective JSON files (in /abi folder) needs to be updated in this project, and bindings re-generated with: `npm run build-types`.
 
 ### Environment variables
 ```bash
@@ -17,9 +27,13 @@ cp .env.example .env
 ```
 
 ### Projects & Legal texts
+
+Edit the projects.json file (src/routes/Data/projects.json) accordingly to inform the frontend about which campaigns should be displayed.
+The Vouchers721Address is obtained during smart contract deployment. Then each new Crowdtainer project generates an 'id' which should be referenced in the file.
+
 ```bash
-# Copy the projects.json file and edit it accordingly to inform the app about which campaigns should be displayed.
-cp example.projects.json src/routes/Data/projects.json
+# Enter projects to be displayed in:
+src/routes/Data/projects.json
 
 # Edit the privacy policy and other custom pages accordingly:
 src/routes/Legal/Imprint/+page.svelte
@@ -30,20 +44,41 @@ src/routes/Legal/Terms/+page.svelte
 src/lib/strings.ts
 ```
 
+## Docker
+
+### Running with docker:
+
+```bash
+docker-compose build crowdtainer-node
+docker-compose up -d crowdtainer-node
+# or simply: docker compose up -d --build crowdtainer-node
+```
+
+### Specifying env files
+
+```bash
+docker compose --env-file .env.production up -d --build crowdtainer-node
+```
+
+### Debugging from VSCode:
+
+```bash
+# specify the debug-web service:
+docker compose up -d --build debug-web
+```
+Then use the "Attach" launch configuration in VSCode's debugger.
+
+## Installing/running without docker
 
 ### Install dependencies:
 
 ```bash
-# node dependencies:
+# Node dependencies:
 npm install
 
-# install local redis instance:
-brew install redis # MacOS
-
-# For other OS's see: https://redis.io/docs/getting-started/installation/
+# Redis:
+brew install redis # MacOS; For other OS's see: https://redis.io/docs/getting-started/installation/
 ```
-
-> Note: Redis and E-mail service are only required for service providers using CCIP-Read for off-chain verification rules (i.e., signer != address(0) in the deployed project). If the project doesn't require CCIP-Read, Redis is not required.
 
 ---
 ### To start a development server:
@@ -56,13 +91,11 @@ redis-server
 brew services start redis
  ```
 
- Run frontend:
+Run the frontend in development mode:
 
 ```bash
 npm run dev
-
-# or
-
+# or:
 npm run dev -- --open #open in browser
 ```
 
@@ -80,16 +113,11 @@ To preview:
 npm run preview
 ```
 
-### Frameworks
-
-- [SvelteKit](https://kit.svelte.dev) 
-- TailWindCSS
-
 ---
 
 ## Known issues
 
-- Typechain (our tool to generate bindings between EVM/Solidity ABI and typescript) has a bug where it generates a few imports wrongly (without typescript's "type" specifier). For this reason, these files are not git ignored (included in the '.gitignore' list), so that we can quickly revert changes done by the generator (bindings are generated post install, or with npm run build).
+- Typechain (our tool to generate bindings between EVM/Solidity ABI and typescript) has a bug where it generates a few imports wrongly (without typescript's "type" specifier). For this reason, these files are not git ignored (included in the '.gitignore' list), so that we can quickly revert changes done by the generator.
 
 ---
 
@@ -154,18 +182,18 @@ npm run preview
         - ✅ Sign data with wallet PK and send everything to backend endpoint.
     - ✅ Backend endpoint validates the input and persist data in redis (creates a checkout/delivery request).
 
-- ◻️ "Download Invoice" button / E-mail Invoice.
+- ✅ Impressum / legal pages.
+
+- ◻️ E-mail Invoice service.
     - ◻️ Background work to process checkout requests and create invoice dispatch job.
         - ◻️ Create order in shop system, set checkout request status as claimed for the respective wallet.
     - ◻️ Background work to check order status:
         - ◻️ Download invoice PDF when ready and send it by email; Set checkout request as complete.
 
-- ✅ Impressum / legal page.
-
-- ◻️ Browser-side encryption (asymmetric, using service provider's PubKey) before pushing sensitive data to redis.
-
 ##### Out of scope for MVP:
 
+- ◻️ "Download Invoice" button
+- ◻️ Browser-side encryption (asymmetric, using service provider's PubKey) before pushing sensitive data to redis.
 - ◻️ Support for multiple deployments, each on potentially different chainIDs.
 - ◻️ When joining, I'd like to additionally specify:
     - ◻️ whether I'd like to be eligible to share referral code so that I can get rewards for my friend's purchases (check-box).

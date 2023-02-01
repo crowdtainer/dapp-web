@@ -1,4 +1,4 @@
-import redis from "$lib/Database/redis";                // Database
+import { getDatabase } from "$lib/Database/redis";      // Database
 import { type Result, Ok, Err } from "@sniptt/monads";  // Monads
 import type { RequestHandler } from './$types';         // Internal
 
@@ -13,6 +13,11 @@ import { AUTHORIZER_SIGNATURE_EXPIRATION_TIME_IN_SECONDS } from '$env/static/pri
 //                           calldata: bytes,
 //                }
 export const POST: RequestHandler = async ({ request, params }) => {
+
+    let redis = getDatabase();
+    if (redis === undefined) {
+        throw error(500, `Db connection error.`);
+    }
 
     let userWalletAddress = params.address;
     let returnValue: string;
