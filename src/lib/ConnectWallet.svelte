@@ -1,7 +1,8 @@
 <script lang="ts">
 	import { connect } from '$lib/wallet';
 	import { WalletType } from '$lib/walletStorage';
-	import { Icon, InformationCircle } from 'svelte-hero-icons';
+	import { Icon } from '@steeze-ui/svelte-icon';
+	import { InformationCircle } from '@steeze-ui/heroicons';
 </script>
 
 <p class="text-center mx-2 my-4">Please connect your wallet to continue.</p>

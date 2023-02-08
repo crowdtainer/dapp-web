@@ -4,16 +4,16 @@
 
 @layer components{
   .active-btn {
-    @apply bg-sky-900 text-white px-3 py-2 rounded-md text-sm font-medium;
+    @apply bg-sky-900 font-display text-white px-3 py-2 rounded-md text-sm font-medium;
   }
   .inactive-btn {
-      @apply text-gray-300 hover:bg-sky-900 hover:text-white px-3 py-2 rounded-md text-sm font-medium;
+      @apply text-gray-300 font-display hover:bg-sky-900 hover:text-white px-3 py-2 rounded-md text-sm font-medium;
   }
   .mobile-active-btn {
-    @apply bg-gray-800 text-white block px-3 py-2 rounded-md text-base font-medium;
+    @apply bg-gray-800 text-white font-display block px-3 py-2 rounded-md text-base font-medium;
   }
   .mobile-inactive-btn {
-    @apply text-gray-300 hover:bg-gray-700 hover:text-white block px-3 py-2 rounded-md text-base font-medium;
+    @apply text-gray-300 font-display hover:bg-gray-700 hover:text-white block px-3 py-2 rounded-md text-base font-medium;
   }
 
   .red-action-btn {
@@ -35,7 +35,7 @@
 
   .campaignSection {
     @apply border-b-4 border-double dark:border-gray-400 border-gray-700;
-    @apply text-black dark:text-white;
+    @apply text-black dark:text-gray-200;
   }
 
   .tooltip {
@@ -47,22 +47,22 @@
   }
 
   .projectStatus {
-    @apply font-mono;
-    @apply text-lg font-medium dark:text-white;
+    @apply font-display;
+    @apply text-lg font-medium dark:text-gray-200;
   }
 
   .projectData {
-    @apply font-mono;
-    @apply text-black dark:text-white text-base font-medium;
+    @apply font-display;
+    @apply text-black dark:text-gray-200 text-base font-medium;
   }
 
   .projectDataSubtitle {
-    @apply font-mono;
+    @apply font-display;
     @apply dark:text-white text-sm font-light;
   }
 
   .productPrice {
-    @apply font-mono;
+    @apply font-display;
     @apply text-xl font-medium;
   }
 

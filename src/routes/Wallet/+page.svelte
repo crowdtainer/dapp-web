@@ -10,6 +10,8 @@
 	import EmptySection from '$lib/EmptySection.svelte';
 	import { connect } from '$lib/wallet';
 	import { WalletType } from '$lib/walletStorage';
+	import { Icon } from '@steeze-ui/svelte-icon';
+	import { Wallet } from '@steeze-ui/heroicons';
 
 	import ModalDialog, {
 		ModalAnimation,
@@ -108,7 +110,7 @@
 
 	onMount(async () => {
 		loadUserData();
-	 });
+	});
 
 	// Immediatelly update UI elements related to connected wallet on wallet or connection change
 	$: $connected, $accountAddress, loadUserData();
@@ -118,17 +120,16 @@
 	<ModalDialog modalDialogData={dialog} />
 {/if}
 
-<header class="ct-divider">
-	<div class="max-w-7xl mx-auto py-4 px-4 sm:px-6 lg:px-8">
-		<h1 class="font-mono text-xl text-white">Your Campaigns</h1>
+<div class="flex justify-center  my-6">
+	<div class="">
+		<Icon src={Wallet} theme="solid" class="text-gray-800 dark:text-gray-200" size="42" />
 	</div>
-</header>
-
-<!-- <header class="campaignSection">
-	<div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
-		<h1 class="font-mono text-xl font-bold">Your Campaigns</h1>
-	</div>
-</header> -->
+</div>
+<div class="flex justify-center">
+	<p class="font-sans text-center dark:text-gray-200 text-xl mb-2 md:mb-0 md:text-2xl">
+		Your Campaigns
+	</p>
+</div>
 
 {#if $connected && staticDataLoadStatus == LoadStatus.Loaded}
 	<div class="divide-y">
@@ -152,14 +153,14 @@
 
 {#if !$connected}
 	<EmptySection>
-		<p class="text-black dark:text-white text-center mx-2 my-4">
+		<p class="text-black dark:text-gray-200 text-center mx-2 my-10">
 			Please connect your wallet to see your campaigns.
 		</p>
 		<br />
 
-		<div class="flex justify-center ">
+		<div class="flex justify-center">
 			<button
-				class="btn btn-outline text-black dark:text-white"
+				class="btn btn-outline text-black dark:text-gray-200 mb-6"
 				on:click={() => {
 					connect(WalletType.WalletConnect);
 				}}

@@ -132,7 +132,7 @@
 			>
 				<!-- Profile dropdown -->
 				{#if !$connected}
-					<p class="pt-1 pr-4 text-right text-sm text-white">Disconnected.</p>
+					<p class="pt-1 text-right text-sm text-white invisible sm:visible">Disconnected</p>
 				{:else}
 					<p class="pr-4 text-right text-sm text-white">
 						{#await $shortOrENSNamedAccount}

@@ -1,11 +1,22 @@
+<div class="flex justify-center  my-6">
+	<div class="">
+		<img class="my-8 h-32 w-32 rounded-full" src="/images/site/CrowdtainerLogo.svg" alt=""/>
+	</div>
+</div>
+<div class="flex justify-center">
+	<p class="font-sans text-center dark:text-gray-200 text-xl mb-2 md:mb-0 md:text-2xl">
+		About
+	</p>
+</div>
+
 <div class="flex flex-center">
 	<div class="max-w-lg mx-auto white overflow-hidden md:max-w-7xl px-6 mb-12">
 		<div class="prose lg:prose-lg prose-headings:underline prose-a:text-blue-600">
-			<article>
+			<article class="prose-blockquote:font-text prose-ol:font-text prose-li:font-text prose-p:font-text prose-h2:font-display">
 				<div class="text-gray-900 dark:text-[#C8D1D0]">
 					<!-- Why -->
 					<h2 class="text-primary">Why?</h2>
-					<p>
+					<p class="">
 						<b>The boostrapping dillema:</b> Is it worth to invest "X" in project "Y"? Is there enough
 						demand to justify the invesment?
 					</p>
@@ -93,8 +104,9 @@
 						</li>
 					</ul>
 					<p>
-						Since I am based in Germany, from a legal perspective, there is a step of "preparation of payment", and a second step
-						of confirmation from the seller side, referencing preparation step as the payment.
+						Since I am based in Germany, from a legal perspective, there is a step of "preparation
+						of payment", and a second step of confirmation from the seller side, referencing
+						preparation step as the payment.
 					</p>
 					<p>Customers send a binding order, which I as a seller only confirm if:</p>
 					<ol>
@@ -108,7 +120,6 @@
 							</p>
 						</li>
 					</ol>
-
 				</div>
 			</article>
 		</div>

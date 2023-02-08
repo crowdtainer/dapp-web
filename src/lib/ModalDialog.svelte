@@ -29,7 +29,8 @@
 <script lang="ts">
 	import { blur } from 'svelte/transition';
 	import { Circle2, Diamonds } from 'svelte-loading-spinners';
-	import { BadgeCheck, Icon, Exclamation, DeviceMobile } from 'svelte-hero-icons';
+	import { Icon } from '@steeze-ui/svelte-icon';
+	import { CheckBadge, ExclamationCircle, DevicePhoneMobile } from '@steeze-ui/heroicons';
 
 	export let modalDialogData: ModalDialogData = {
 		visible: false,
@@ -59,11 +60,11 @@
 					{/if}
 					<div class="flex justify-center">
 						{#if modalDialogData.icon === ModalIcon.DeviceMobile}
-							<Icon src={DeviceMobile} class="text-black m-2" size="36" />
+							<Icon src={DevicePhoneMobile} class="text-black m-2" size="36" />
 						{:else if modalDialogData.icon === ModalIcon.BadgeCheck}
-							<Icon src={BadgeCheck} class="text-black m-2" size="36" />
+							<Icon src={CheckBadge} class="text-black m-2" size="36" />
 						{:else if modalDialogData.icon === ModalIcon.Exclamation}
-							<Icon src={Exclamation} class="text-black m-2" size="36" />
+							<Icon src={ExclamationCircle} class="text-black m-2" size="36" />
 						{/if}
 					</div>
 					<div in:blur={{ duration: 450 }} class="basis-3/4">
