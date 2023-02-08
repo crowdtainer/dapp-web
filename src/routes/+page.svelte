@@ -5,6 +5,10 @@
 	import Project from '$lib/Project.svelte';
 	import { fetchStaticData } from '$lib/api';
 
+	import { Icon } from '@steeze-ui/svelte-icon';
+	import { UserGroup } from '@steeze-ui/heroicons';
+	import "@fontsource/red-hat-display";
+
 	import {
 		LoadStatus,
 		loadingString,
@@ -87,10 +91,15 @@
 </header> -->
 
 <main class="">
+	<div class="grid h-full place-items-center justify-center sm:mb-3 mt-5">
+		<!-- <a href="/"> -->
+			<Icon src={UserGroup} theme="solid" class="text-gray-800 dark:text-gray-200" size="42" />
+			<p class="font-display dark:text-gray-200 text-xl my-4 md:mb-0 md:text-2xl">Group Buying Campaigns</p>
+	</div>
 	<div>
 		<div class="campaignSection sticky top-0 bg-[#EFF6FF] dark:bg-[#0D1116] z-40">
 			<div class="max-w-7xl mx-auto py-3 px-4 sm:px-6 lg:px-8">
-				<h1 class="font-mono text-xl">Active</h1>
+				<h1 class="font-display lg:text-xl md:text-sm">Active</h1>
 			</div>
 		</div>
 		<div>
@@ -124,7 +133,7 @@
 	<div>
 		<div class="campaignSection sticky top-0 bg-[#EFF6FF] dark:bg-[#0D1116] z-40">
 			<div class="max-w-7xl mx-auto py-3 px-4 sm:px-6 lg:px-8">
-				<h1 class="font-mono text-xl">Upcoming</h1>
+				<h1 class="font-display lg:text-xl md:text-sm">Upcoming</h1>
 			</div>
 		</div>
 
@@ -158,8 +167,8 @@
 
 	<div>
 		<div class="campaignSection sticky top-0 bg-[#EFF6FF] dark:bg-[#0D1116] z-40">
-			<div class="font-mono max-w-7xl mx-auto py-3 px-4 sm:px-6 lg:px-8">
-				<h1 class="text-xl">Previous</h1>
+			<div class="max-w-7xl mx-auto py-3 px-4 sm:px-6 lg:px-8">
+				<h1 class="font-display lg:text-xl md:text-sm">Previous</h1>
 			</div>
 		</div>
 

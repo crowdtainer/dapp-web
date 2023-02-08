@@ -186,7 +186,7 @@
 				/>
 			</div>
 			<div class="p-8 w-full">
-				<div class="text-primary drop-shadow-sm font-mono uppercase tracking-wide">
+				<div class="text-primary drop-shadow-sm font-display uppercase tracking-wide">
 					{title}
 				</div>
 				<a

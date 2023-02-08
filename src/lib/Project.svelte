@@ -262,16 +262,16 @@
 			<div class="md:shrink-0">
 				<img class="w-full object-cover md:h-full md:w-96" src={projectImageURL} alt="Coffee" />
 			</div>
-			<div class="pr-8 pl-8 pt-8 pb-4">
-				<div class="font-mono uppercase tracking-wide text-primary">
+			<div class="font-sans pr-8 pl-8 pt-8 pb-4">
+				<div class="font-display uppercase tracking-wide text-primary">
 					{title}
 				</div>
 				<a
 					href={projectURL}
-					class="text-black dark:text-white block mt-1 text-2xl leading-tight font-medium hover:underline"
+					class="font-sans text-black dark:text-gray-200 block mt-1 text-2xl leading-tight font-medium hover:underline"
 					>{subtitle}</a
 				>
-				<p class="my-8 text-slate-700 dark:text-white">
+				<p class="font-text my-8 text-slate-700 dark:text-gray-200">
 					{@html description}
 				</p>
 
@@ -330,7 +330,7 @@
 						</div>
 
 						<!-- Smart contract details -->
-						<div class="dark:text-white">
+						<div class="dark:text-gray-200">
 							<ProjectDetails
 								{vouchers721Address}
 								{crowdtainerId}
@@ -355,7 +355,7 @@
 								</div>
 							</div>
 
-							<fieldset class="mt-4 font-mono">
+							<fieldset class="mt-4">
 								<legend class="sr-only">Choose a product</legend>
 								{#if campaignStaticUI}
 									<div class="grid grid-cols-2 gap-4">

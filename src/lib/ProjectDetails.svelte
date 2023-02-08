@@ -2,7 +2,8 @@
 	import { slide } from 'svelte/transition';
 	import { shortenAddress } from './wallet';
 
-	import { Clipboard, Icon } from 'svelte-hero-icons';
+	import { Icon } from '@steeze-ui/svelte-icon';
+	import { Clipboard } from '@steeze-ui/heroicons';
 	import { addToast, type ToastData } from './Toast/ToastStore';
 	import { MessageType } from './Toast/MessageType';
 

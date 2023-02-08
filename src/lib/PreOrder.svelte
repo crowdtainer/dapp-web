@@ -9,7 +9,8 @@
 	import { onMount } from 'svelte';
 	import { slide } from 'svelte/transition';
 
-	import { Icon, Check, ShieldCheck } from 'svelte-hero-icons';
+	import { Icon } from '@steeze-ui/svelte-icon';
+	import { Check, ShieldCheck } from '@steeze-ui/heroicons';
 
 	import { createEventDispatcher } from 'svelte';
 	const dispatch = createEventDispatcher();

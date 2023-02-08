@@ -2,6 +2,12 @@ module.exports = {
   content: ['./src/**/*.{html,js,svelte,ts}'],
   theme: {
     extend: {},
+    fontFamily: {
+      'sans': ['"Red Hat Display"', 'sans-serif'],
+      'serif': ['"Red Hat Text"', 'sans-serif'],
+      'display': ['"Red Hat Display"', 'sans-serif'],
+      'text': ['"Red Hat Text"', 'sans-serif'],
+    },
   },
   plugins: [
     require('daisyui'),
