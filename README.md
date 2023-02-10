@@ -113,6 +113,14 @@ To preview:
 npm run preview
 ```
 
+To run:
+
+```
+node build # or node -r dotenv/config build
+```
+
+More details [here](https://kit.svelte.dev/docs/adapter-node)
+
 ---
 
 ## Known issues
