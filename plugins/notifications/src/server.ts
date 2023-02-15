@@ -22,9 +22,7 @@ import { createTransport } from 'nodemailer';
 type EmailsSent = { emails: string[] };
 type Error = { details: number };
 
-async function performMailWork() {
-
-    const db = getDatabase();
+async function performMailWork(db: Redis) {
 
     const emailCodes = await getMailWork(db);
     if (emailCodes.size == 0) {
@@ -125,13 +123,15 @@ async function foreverLoop() {
 
     console.log("Mailer worker started.");
 
+    const db = getDatabase();
+
     while (!terminateProcess) {
-        await performMailWork();
+        await performMailWork(db);
         await delay(INTERVAL_IN_MS);
     }
 
     console.log("Mailer worker stopped.");
-    process.exit();
+    db.quit();
 }
 
 function delay(time: number) {
