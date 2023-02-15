@@ -4,8 +4,8 @@ import type { RequestHandler } from './$types';             // Internal
 import { error } from "@sveltejs/kit";
 
 const maxAPI_hits = 8;
-const codeExpireTime = 1800 // 30 minutes
-const emailWorkerExpiration = 5 * 60 // 5 minutes
+const codeExpireTimeInSeconds = 1800 // 30 minutes
+const emailWorkerExpirationInSeconds = 10 * 60 // 10 minutes
 
 export const GET: RequestHandler = async ({ params }) => {
 
@@ -26,7 +26,7 @@ export const GET: RequestHandler = async ({ params }) => {
     try {
         let currentCount = await redis.incr(apiHits);
         console.log(`hits: ${currentCount}, max: ${maxAPI_hits}`);
-        await redis.expire(apiHits, codeExpireTime);
+        await redis.expire(apiHits, codeExpireTimeInSeconds);
 
         if (currentCount > maxAPI_hits) {
             throw error(429, "Please try again later.");
@@ -37,7 +37,13 @@ export const GET: RequestHandler = async ({ params }) => {
         if (randomNumber != undefined) {
             console.log(`Existing code present for email ${userEmail}`);
 
-            return new Response(randomNumber);
+            // Push new item to "email sender worker" list
+            await redis.multi()
+                .lpush(workerKey, userEmail)
+                .expire(workerKey, emailWorkerExpirationInSeconds)
+                .exec();
+            console.log(`Key -> ${emailCodekey} ; Value -> ${randomNumber} expires in ${emailWorkerExpirationInSeconds} seconds.`);
+            return new Response("OK");
         }
     } catch (_error) {
         console.dir(_error);
@@ -48,9 +54,9 @@ export const GET: RequestHandler = async ({ params }) => {
         randomNumber = randomInt(0, 100000).toString();
         // Save code in database and push item to "email sender worker" list
         await redis.multi()
-            .set(emailCodekey, Number(randomNumber), 'EX', codeExpireTime)
-            .lpush(workerKey, emailCodekey)
-            .expire(workerKey, emailWorkerExpiration)
+            .set(emailCodekey, Number(randomNumber), 'EX', codeExpireTimeInSeconds)
+            .lpush(workerKey, userEmail)
+            .expire(workerKey, emailWorkerExpirationInSeconds)
             .exec();
 
         console.log(`Key -> ${emailCodekey} ; Value -> ${randomNumber}`);

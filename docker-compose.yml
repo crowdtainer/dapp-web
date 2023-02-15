@@ -1,3 +1,5 @@
+version: '3.6'
+
 services:
   redis:
     hostname: redis
@@ -29,16 +31,43 @@ services:
       - REDIS_CONNECTION_STRING=${REDIS_CONNECTION_STRING-redis:6379}
       - SERVER_ETH_RPC=${SERVER_ETH_RPC}
       - VITE_DOMAIN=${VITE_DOMAIN} # signature generation and verification
-      - VITE_TERMS_OF_AGREEMENT_PATH=${VITE_TERMS_OF_AGREEMENT_PATH} # signature generation and verificatio
+      - VITE_TERMS_OF_AGREEMENT_PATH=${VITE_TERMS_OF_AGREEMENT_PATH}
       - AUTHORIZER_PRIVATE_KEY=${AUTHORIZER_PRIVATE_KEY}
       - AUTHORIZER_SIGNATURE_EXPIRATION_TIME_IN_SECONDS=${AUTHORIZER_SIGNATURE_EXPIRATION_TIME_IN_SECONDS}
       - VITE_WALLET_CONNECT_RPC=${VITE_WALLET_CONNECT_RPC}
       - VITE_WALLET_CONNECT_CHAIN_ID=${VITE_WALLET_CONNECT_CHAIN_ID}
 
+  mailer:
+    hostname: mailer
+    container_name: mailer
+    depends_on:
+      - redis
+    build:
+      context: plugins/notifications
+      dockerfile: Dockerfile
+      target: mailerPlugin
+    restart: on-failure
+    networks:
+      - app-network
+    environment:
+      - NODE_ENV=production
+      - INTERVAL_IN_MS=${INTERVAL_IN_MS-5000}
+      - REDIS_CONNECTION_STRING=${REDIS_CONNECTION_STRING-redis:6379}
+      - SMTP_SERVER=${SMTP_SERVER-test}
+      - SMTP_PORT=${SMTP_PORT-465}
+      - SMTP_SECURE=${SMTP_SECURE-true}
+      - SMTP_USER=${SMTP_USER}
+      - SMTP_PASSWORD=${SMTP_PASSWORD}
+      - EMAIL_FROM=${EMAIL_FROM}
+      - EMAIL_SUBJECT=${EMAIL_SUBJECT-'Validation Code'}
+      - EMAIL_TEXT=${EMAIL_TEXT-'Hello. Your validation code is %{otp_code}'}
+      - EMAIL_HTML=${EMAIL_HTML}
+
   # For debugging purposes:
   # e.g.: BUILDKIT_PROGRESS=plain docker compose --env-file .env.production up -d --build debug-web 
   debug-web:
     extends: crowdtainer-node
+    container_name: crowdtainerServerDebug
     build:
       target: debugger
     entrypoint: node --inspect=0.0.0.0:5858 build/index.js
