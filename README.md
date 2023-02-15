@@ -123,6 +123,37 @@ More details [here](https://kit.svelte.dev/docs/adapter-node)
 
 ---
 
+## Plugins
+
+The plugins folder contains services that can be run separately from the frontend (only a connection to the same redis db is required).
+
+### Mailer service (verification codes)
+- The e-mail worker sending verification codes (joining with signature) can be executed as follows:
+
+```sh
+# Copy the example .env and edit accordingly:
+cd plugins/notifications/
+cp .env.example .env
+
+# Install dependencies:
+npm install
+
+# Build & run:
+npm run build; node -r dotenv/config dist/server.js
+
+# The process will exit gracefully with e.g. SIGINT (CTRL+C).
+```
+
+Alternatively, it is also possible to run it with docker compose:
+
+```sh
+# From the root directory, run the service:
+docker compose --env-file plugins/notifications/.env  up --build -d mailer
+```
+Note: be careful to not expose the redis port to the internet (unless authenticated/encrypted). When docker compose is used, the redis port remains isolated and shared only between the required services.
+
+---
+
 ## Known issues
 
 - Typechain (our tool to generate bindings between EVM/Solidity ABI and typescript) has a bug where it generates a few imports wrongly (without typescript's "type" specifier). For this reason, these files are not git ignored (included in the '.gitignore' list), so that we can quickly revert changes done by the generator.
@@ -181,7 +212,7 @@ More details [here](https://kit.svelte.dev/docs/adapter-node)
 
 - ✅ Button to transfer NFT/participation proof ownership to another wallet.
 
-- ◻️ Worker service to dispatch email (pull job from redis):
+- ✅ Worker service to dispatch email (pull job from redis):
     - Verification/validation code
 
 - ✅ "Checkout" button (available once funded/suceeded) to conclude the order with service provider (providing delivery address details).

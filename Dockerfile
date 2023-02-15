@@ -15,6 +15,7 @@ COPY --from=builder --chown=node:node /app/build ./build
 COPY --from=builder --chown=node:node /app/node_modules ./node_modules
 COPY --chown=node:node package.json .
 CMD ["node","-r", "dotenv/config", "build"]
+# CMD ["npm","run", "start"]
 
 FROM node:19.5.0-alpine3.16 as debugger
 USER node:node
