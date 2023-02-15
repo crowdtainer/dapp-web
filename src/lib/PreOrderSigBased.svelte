@@ -82,7 +82,7 @@
 		ThankYouMessage
 	}
 
-	let preOrderStep = JoinStep.FinalConfirmation;
+	let preOrderStep = JoinStep.QuantitySelection;
 
 	let actionButtonEnabled = true;
 
