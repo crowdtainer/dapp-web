@@ -18,7 +18,7 @@ Once a blockchain or RPC can be connected to, proceed setting up this frontend p
 - TailWindCSS
 - Typechain
 
-As this project uses typechain to generate typescript bindings for interacttion with deployed smart contracts, if changes are made to the smart contract interfaces, then the respective JSON files (in /abi folder) needs to be updated in this project, and bindings re-generated with: `npm run build-types`.
+As this project uses typechain to generate typescript bindings for interaction with deployed smart contracts, if changes are made to the smart contract interfaces, then the respective JSON files (in /abi folder) needs to be updated in this project, and bindings re-generated with: `npm run build-types`.
 
 ### Environment variables
 ```bash
