@@ -1,5 +1,4 @@
-version: '3.6'
-
+version: '3.7'
 services:
   redis:
     hostname: redis
@@ -8,11 +7,11 @@ services:
     volumes:
       - /var/redis/data:/data
     networks:
-      - app-network
+      - redis-network
 
   crowdtainer-node:
     hostname: crowdtainerServer
-    container_name: crowdatinerServer
+    container_name: crowdtainerServer
     depends_on:
       - redis
     build:
@@ -23,7 +22,8 @@ services:
     ports:
       - 3002:3000
     networks:
-      - app-network
+      - crowdtainer-webapp-network
+      - redis-network
     environment:
       - ORIGIN=${ORIGIN-http://localhost} # https://my.site.example
       - HOST=${HOST-0.0.0.0}
@@ -67,7 +67,6 @@ services:
   # e.g.: BUILDKIT_PROGRESS=plain docker compose --env-file .env.production up -d --build debug-web 
   debug-web:
     extends: crowdtainer-node
-    container_name: crowdtainerServerDebug
     build:
       target: debugger
     entrypoint: node --inspect=0.0.0.0:5858 build/index.js
@@ -78,5 +77,9 @@ services:
       - "5858:5858"
 
 networks:
-  app-network:
+  redis-network:
+    name: redisNetwork
+    driver: bridge
+  crowdtainer-webapp-network:
+    name: crowdtainerNetwork
     driver: bridge
