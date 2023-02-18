@@ -48,7 +48,7 @@ services:
       target: mailerPlugin
     restart: on-failure
     networks:
-      - app-network
+      - redis-network
     environment:
       - NODE_ENV=production
       - INTERVAL_IN_MS=${INTERVAL_IN_MS-5000}
