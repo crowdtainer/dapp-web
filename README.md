@@ -123,11 +123,11 @@ More details [here](https://kit.svelte.dev/docs/adapter-node)
 
 ---
 
-## Plugins
+# Plugins
 
 The plugins folder contains services that can be run separately from the frontend (only a connection to the same redis db is required).
 
-### Mailer service (verification codes)
+## Mailer service (verification codes)
 - The e-mail worker sending verification codes (joining with signature) can be executed as follows:
 
 ```sh
@@ -152,6 +152,17 @@ docker compose --env-file plugins/notifications/.env  up --build -d mailer
 ```
 Note: be careful to not expose the redis port to the internet (unless authenticated/encrypted). When docker compose is used, the redis port remains isolated and shared only between the required services.
 
+## WooCommerce integration (order creation from successfull campaigns)
+
+This plugin helps with the "check out" workflow, with integration with Wordpress plugin WooCommerce. A reason to use WooCommerce is to take advantage of the existing ecosystem thus avoiding 'reinventing the wheel' when it comes to fulfillment, stock management, invoicing, tax, accounting, etc. Please see all files under:
+
+```sh
+cd plugins/woocommerce/
+
+# The procedure to build and run is exactly the same as specified for 'mailer' plugin above.
+
+# Make sure to read `plugins/woocommerce/README.md` as well.
+```
 ---
 
 ## Known issues
