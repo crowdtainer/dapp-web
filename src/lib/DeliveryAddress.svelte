@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { type DeliveryDetails, makeDeliveryRequestMessage, signMessage } from './Model/SignTerms';
+	import { type DeliveryDetails, makeDeliveryRequestMessage, signMessage, treatSpecialChars } from './Model/SignTerms';
 	import ModalDialog, {
 		ModalAnimation,
 		ModalIcon,
@@ -83,6 +83,15 @@
 
 		if (signResult.isOk()) {
 			let sigHash = signResult.unwrap();
+
+			deliveryDetails.lastName = treatSpecialChars(deliveryDetails.lastName);
+			deliveryDetails.firstName = treatSpecialChars(deliveryDetails.firstName);
+			deliveryDetails.country = treatSpecialChars(deliveryDetails.country);
+			deliveryDetails.address = treatSpecialChars(deliveryDetails.address);
+			deliveryDetails.complement = treatSpecialChars(deliveryDetails.complement);
+			deliveryDetails.postalCode = treatSpecialChars(deliveryDetails.postalCode);
+			deliveryDetails.city = treatSpecialChars(deliveryDetails.city);
+			deliveryDetails.email = treatSpecialChars(deliveryDetails.email);
 
 			// TODO: Apply asymmetric encryption client/browser side before sending.
 			let requestResult = await requestDeliveryAPI(walletAddress, domain, origin, nonce, currentTime, deliveryDetails, sigHash);

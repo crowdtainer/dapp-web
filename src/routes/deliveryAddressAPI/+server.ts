@@ -1,7 +1,7 @@
-import { getDatabase } from "$lib/Database/redis";                // Database
+import { getDatabase } from "$lib/Database/redis";              // Database
 
-import { ethers } from 'ethers';                        // Ethers
-import { type Result, Ok, Err } from "@sniptt/monads";  // Monads
+import { ethers } from 'ethers';                                // Ethers
+import { type Result, Ok, Err, } from "@sniptt/monads";        // Monads
 
 import { isTimeValid, makeDeliveryRequestMessage, type DeliveryDetails } from '$lib/Model/SignTerms';
 import { Vouchers721Address } from '../Data/projects.json';
@@ -12,6 +12,27 @@ import type { RequestHandler } from './$types';
 import { Vouchers721__factory } from "../typechain/factories/Vouchers721__factory";
 import { deliveryVoucherKey } from "$lib/Database/schemes";
 import { provider } from '$lib/ethersCalls/provider';
+import { loadTokenURIRepresentation, type TokenURIObject, type Description } from "$lib/Converters/tokenURI.js";
+import { Crowdtainer__factory } from "../typechain/index.js";
+
+async function getCampaignState(provider: ethers.Signer | undefined,
+    vouchers721Address: string, tokenId: number): Promise<Result<number, string>> {
+
+    if (provider === undefined) {
+        return Err("Provider not available.");
+    }
+
+    try {
+        const vouchers721Contract = Vouchers721__factory.connect(vouchers721Address, provider);
+
+        let crowdtainerId = await vouchers721Contract.tokenIdToCrowdtainerId(tokenId);
+        const crowdtainerContract = Crowdtainer__factory.connect(crowdtainerId.toString(), provider);
+        let campaignState = await crowdtainerContract.crowdtainerState();
+        return Ok(campaignState);
+    } catch (error) {
+        return Err(`${error}`);
+    }
+}
 
 async function isOwnerOf(provider: ethers.Signer | undefined,
     vouchers721Address: string, tokenId: number): Promise<Result<boolean, string>> {
@@ -24,13 +45,33 @@ async function isOwnerOf(provider: ethers.Signer | undefined,
         const vouchers721Contract = Vouchers721__factory.connect(vouchers721Address, provider);
 
         let wallet = await provider.getAddress();
-        let tokenOwner = (await vouchers721Contract.ownerOf(tokenId));
+        let tokenOwner = await vouchers721Contract.ownerOf(tokenId);
 
         if (wallet === tokenOwner) {
             return Ok(true);
         } else {
             return Ok(false);
         }
+
+    } catch (error) {
+        return Err(`${error}`);
+    }
+}
+
+async function getOrderDetails(provider: ethers.Signer | undefined,
+    vouchers721Address: string, tokenId: number): Promise<Result<TokenURIObject, string>> {
+
+    if (provider === undefined) {
+        return Err("Provider not available.");
+    }
+
+    try {
+        let tokenDetails = await loadTokenURIRepresentation(provider, vouchers721Address, tokenId);
+        if (tokenDetails === undefined) {
+            return Err("Unable to decode tokenURI.");
+        }
+
+        return Ok(tokenDetails);
 
     } catch (error) {
         return Err(`${error}`);
@@ -100,20 +141,53 @@ export const POST: RequestHandler = async ({ request }) => {
     }
 
     try {
+        let signer = provider.getSigner();
         // Check if token is owned by wallet
-        if (!(await isOwnerOf(provider.getSigner(), Vouchers721Address, deliveryDetails.voucherId))) {
+        if (!(await isOwnerOf(signer, Vouchers721Address, deliveryDetails.voucherId))) {
             throw error(401, "The signature provided does not belog to a wallet which owns the specified token id.");
         }
 
-        // TODO: Check if related parcel wasn't already shipped
+        // Check if the smart contract is in delivery state .
+        const campaignStateResult = await getCampaignState(signer, Vouchers721Address, deliveryDetails.voucherId);
+
+        if(campaignStateResult.isErr()){
+            console.log(`Error: ${campaignStateResult.unwrapErr()}`);
+            throw error(500, `Failure to read campaign status as in 'delivery state'.`);
+        }
+
+        if(campaignStateResult.unwrap() !== 2) {
+            throw error(500, `Failure not in 'delivery state'.`);
+        }
+
+        // TODO: Check if related tokenId wasn't already processed
 
         // Key for item
         let key = deliveryVoucherKey(deliveryDetails.chainId, deliveryDetails.vouchers721Address, deliveryDetails.voucherId);
 
-        // Save delivery address to redis
-        redis.hset(key, deliveryDetails);
+        let orderDetailsResult = await getOrderDetails(signer, Vouchers721Address, deliveryDetails.voucherId);
+
+        if (orderDetailsResult.isErr()) {
+            throw error(500, `Unable to get order details for token id: ${deliveryDetails.voucherId} in Vouchers721Address ${Vouchers721Address}.`);
+        }
+
+        let orderDetails = orderDetailsResult.unwrap();
+
+        let quantities = new Array<Number>();
+
+        orderDetails.description.forEach((element: Description) => {
+            quantities.push(Number(element.amount));
+        });
+
+        console.log(`Inserting: ${JSON.stringify(key)}`);
+
+        await redis.multi()
+            .hset(key, deliveryDetails)                                 // Save delivery address
+            .set(`${key}:quantities`, JSON.stringify(quantities))       // Save order quantities
+            .lpush("deliveryRequests:v1", key)                          // Add its id to the work queue
+            .exec();
 
     } catch (e) {
+        console.log(`Error: ${e}`);
         throw error(500, "Database error.");
     }
 

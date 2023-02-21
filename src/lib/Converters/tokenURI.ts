@@ -34,7 +34,6 @@ export async function loadTokenURIRepresentation(
         console.log('Unrecognized data');
         return undefined;
     }
-
     let [, imageDataInBase64] = payload.split(',');
     const imageDataJSON: TokenURIObject = JSON.parse(atob(imageDataInBase64));
 

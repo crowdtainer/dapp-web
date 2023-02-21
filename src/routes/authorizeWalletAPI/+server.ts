@@ -84,7 +84,7 @@ export const POST: RequestHandler = async ({ request }) => {
             signatureHash: signatureHash,
             signatureCount: Number(signatureCount) + 1
         };
-        redis.multi()
+        await redis.multi()
             .hset(`${userSigKey}:${signatureCount}`, currentData)
             .hset(userSigKey, newData)
             .del(authorizedEmailskey)
