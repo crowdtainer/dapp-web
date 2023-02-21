@@ -232,5 +232,13 @@
 		<p class="text-black dark:text-white text-center mx-2 my-32">
 			Waiting for service provider confirmation. Please try again in a few minutes.
 		</p>
+	{:else if projectStatusUI === ProjectStatusUI.Funding}
+		<p class="text-black dark:text-white text-center mx-2 my-32">
+			Funding still ongoing. Please come back later.
+		</p>
+	{:else}
+		<p class="text-black dark:text-white text-center mx-2 my-32">
+			No successfully funded campaigns available for this wallet.
+		</p>
 	{/if}
 </div>

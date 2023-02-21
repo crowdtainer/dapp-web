@@ -279,14 +279,14 @@ export async function fetchUserBalancesData(provider: ethers.providers.JsonRpcPr
 }
 
 export async function getTokenURI(
-    provider: ethers.Signer | undefined,
+    signerOrProvider: ethers.Signer | ethers.providers.Provider | undefined,
     vouchers721Address: string,
     tokenId: number): Promise<Result<string, string>> {
-    if (provider === undefined) {
-        return Err("Provider not available.");
+    if (signerOrProvider === undefined) {
+        return Err("Signer / Provider not available.");
     }
     try {
-        const vouchers721Contract = Vouchers721__factory.connect(vouchers721Address, provider);
+        const vouchers721Contract = Vouchers721__factory.connect(vouchers721Address, signerOrProvider);
         let result = await vouchers721Contract.tokenURI(tokenId);
         return Ok(result);
     } catch (error) {

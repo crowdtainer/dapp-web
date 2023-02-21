@@ -17,6 +17,7 @@ export interface DeliveryDetails {
     address: string,
     complement: string,
     postalCode: string,
+    state: string;
     city: string,
     email: string
 }
@@ -90,7 +91,7 @@ export async function signMessage(signer: Signer | undefined, message: string): 
 
 import { transliterate as tr } from 'transliteration';
 
-function removeSpecialChars(input: string): string {
+export function treatSpecialChars(input: string): string {
     let asciiRepresentation = tr(input);
     return asciiRepresentation.replace(/[^@:/\.a-zA-Z0-9 ]/g, "");
 }
@@ -98,14 +99,14 @@ function removeSpecialChars(input: string): string {
 function makeAgreeToTermsStatement(email: string, _termsURI: string): string {
     let statement = `I agree to the terms and conditions found in ${_termsURI}. ` +
         `My e-mail address is: ${email}`;
-    return removeSpecialChars(statement);
+    return treatSpecialChars(statement);
 }
 
 function makeDeliveryStatement(delivery: DeliveryDetails, _termsURI: string): string {
     let statement = `My delivery address is: ` +
         `${delivery.firstName} ${delivery.lastName} ${delivery.address} ` +
-        `${delivery.complement} ${delivery.postalCode} ${delivery.city} ${delivery.country}. Email for invoice: ${delivery.email}. ` +
+        `${delivery.complement} ${delivery.postalCode} ${delivery.state} ${delivery.city} ${delivery.country}. Email for invoice: ${delivery.email}. ` +
         `I confirm acceptance to the terms and conditions found in ${_termsURI}. ` +
         `Proof of payment: ${delivery.vouchers721Address}, token id: ${delivery.voucherId}.`;
-    return removeSpecialChars(statement);
+    return treatSpecialChars(statement);
 }
