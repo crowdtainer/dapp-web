@@ -9,3 +9,4 @@ node_modules
 /src/out
 vite.config.js.timestamp-*
 vite.config.ts.timestamp-*
+dump.rdb

@@ -9,6 +9,18 @@ import { error } from "@sveltejs/kit";
 import { AUTHORIZER_PRIVATE_KEY } from '$env/static/private';
 import { AUTHORIZER_SIGNATURE_EXPIRATION_TIME_IN_SECONDS } from '$env/static/private';
 
+const ERC20_MAXIMUM_PURCHASE_VALUE = 450;
+
+let availableCrowdtainerIds: number[] = [];
+import { projects } from '../../Data/projects.json';
+import type { CrowdtainerStaticModel } from "$lib/Model/CrowdtainerModel.js";
+import { fetchStaticData } from "$lib/ethersCalls/fetchStaticData.js";
+for (let result of projects) {
+    availableCrowdtainerIds.push(result.crowdtainerId);
+}
+
+let campaignStaticData = new Array<CrowdtainerStaticModel>();
+
 // POST Inputs: - { 
 //                           calldata: bytes,
 //                }
@@ -17,6 +29,24 @@ export const POST: RequestHandler = async ({ request, params }) => {
     let redis = getDatabase();
     if (redis === undefined) {
         throw error(500, `Db connection error.`);
+    }
+
+    try {
+        for (let i = 0; i < availableCrowdtainerIds.length; i++) {
+            let crowdtainer = BigNumber.from(Number(availableCrowdtainerIds[i]));
+            console.log(`Got here`);
+            let result = await fetchStaticData(crowdtainer);
+
+            if (result.isOk()) {
+                campaignStaticData.push(result.unwrap());
+            } else {
+                // Fail if any id request fails.
+                throw error(500, `${result.unwrapErr()}`);
+            }
+        }
+    } catch (_error) {
+        console.log(`Error: ${_error}`);
+        throw error(500, `${_error}`);
     }
 
     let userWalletAddress = params.address;
@@ -69,7 +99,34 @@ export const POST: RequestHandler = async ({ request, params }) => {
     const args = abiInterface.decodeFunctionData("getSignedJoinApproval", `${hexCalldata}`);
     const [crowdtainerAddress, address, quantities, enableReferral, referralAddress] = args;
 
-    // TODO: Apply any sanity checks to parameters (e.g.: quantity too high)
+    // Apply sanity checks and restrictions
+    let campaignData: CrowdtainerStaticModel | undefined;
+    campaignStaticData.forEach((value: CrowdtainerStaticModel, _key: number) => {
+        if (value.contractAddress === crowdtainerAddress) {
+            campaignData = value;
+        }
+    });
+
+    if (campaignData === undefined) {
+        throw error(400, `Unrecognized crowdtainer address.`);
+    }
+
+    let totalValue = BigNumber.from(0);
+
+    for (let i = 0; i < campaignData.prices.length; i++) {
+        console.log(`Quantities[${i}]: ${quantities[i]}`);
+        totalValue = totalValue.add(campaignData.prices[i].mul(BigNumber.from(quantities[i])));
+    }
+
+    let maxCost = ethers.utils.parseUnits(`${ERC20_MAXIMUM_PURCHASE_VALUE}`, campaignData.tokenDecimals);
+
+    console.log(`total order value: ${totalValue}`);
+    console.log(`max allowed: ${maxCost}`);
+
+    if (totalValue > maxCost) {
+        throw error(400, `Order amount too high. Maximum: ${ERC20_MAXIMUM_PURCHASE_VALUE} ${campaignData.tokenSymbol}.`);
+    }
+
     let epochExpiration = BigNumber.from(Math.floor(Date.now() / 1000) + AUTHORIZER_SIGNATURE_EXPIRATION_TIME_IN_SECONDS);
     let nonce = ethers.utils.randomBytes(32);
     let messageHash = ethers.utils.solidityKeccak256(["address", "address", "uint256[4]", "bool", "address", "uint64", "bytes32"],

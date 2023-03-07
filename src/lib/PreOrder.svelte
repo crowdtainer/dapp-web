@@ -38,6 +38,7 @@
 	let deliveryAcknowledged = false;
 	let shipmentConditions = false;
 	let termsAcknowledged = false;
+	let feesAcknowledged = false;
 
 	// Wallet management
 	import { getAccountAddress, getSigner } from '$lib/wallet';
@@ -352,16 +353,37 @@
 						<input
 							type="checkbox"
 							disabled={termsAccepted}
+							bind:checked={feesAcknowledged}
+							class="checkbox checkbox-primary"
+						/>
+						<span class="label-text dark:text-white"
+							>I am aware that Ethereum network fees will apply to prepare the payment and in case I
+							want to leave a campaign. Those fees are paid to 3rd parties and are not re-payable by
+							us in case of my withdrawal from the purchase.</span
+						>
+					</label>
+				</div>
+
+				<div class="flex justify-center">
+					<label class="label cursor-pointer gap-3 my-4 sm:w-full md:w-4/5 lg:w-4/6 xl:w-3/6">
+						<input
+							type="checkbox"
+							disabled={termsAccepted}
 							bind:checked={termsAcknowledged}
 							class="checkbox checkbox-primary"
 						/>
 						<span class="label-text dark:text-white"
 							>By clicking "Agree" and cryptographically signing the transaction, I agree to the
-							<b>General Terms and Conditions</b>, <b>Privacy Policy</b>, <b>Refund policy</b>, and
-							<b>Shipping policy</b>.</span
+							<b>General Terms and Conditions</b>.</span
 						>
 					</label>
 				</div>
+
+				<div class="flex justify-center">
+					<div>
+						<a target="_blank" href='/Legal/Terms' rel="noopener">General Terms and Conditions</a>
+					</div>
+			</div>
 
 				<div class="flex justify-center my-2">
 					<div class="grid grid-flow-col auto-cols-max">
