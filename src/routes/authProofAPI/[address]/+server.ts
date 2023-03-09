@@ -9,10 +9,8 @@ import { error } from "@sveltejs/kit";
 import { AUTHORIZER_PRIVATE_KEY } from '$env/static/private';
 import { AUTHORIZER_SIGNATURE_EXPIRATION_TIME_IN_SECONDS } from '$env/static/private';
 
-const ERC20_MAXIMUM_PURCHASE_VALUE = 450;
-
 let availableCrowdtainerIds: number[] = [];
-import { projects } from '../../Data/projects.json';
+import { projects, ERC20_MaximumPurchaseValuePerWallet } from '../../Data/projects.json';
 import type { CrowdtainerStaticModel } from "$lib/Model/CrowdtainerModel.js";
 import { fetchStaticData } from "$lib/ethersCalls/fetchStaticData.js";
 for (let result of projects) {
@@ -118,13 +116,13 @@ export const POST: RequestHandler = async ({ request, params }) => {
         totalValue = totalValue.add(campaignData.prices[i].mul(BigNumber.from(quantities[i])));
     }
 
-    let maxCost = ethers.utils.parseUnits(`${ERC20_MAXIMUM_PURCHASE_VALUE}`, campaignData.tokenDecimals);
+    let maxCost = ethers.utils.parseUnits(`${ERC20_MaximumPurchaseValuePerWallet}`, campaignData.tokenDecimals);
 
     console.log(`total order value: ${totalValue}`);
     console.log(`max allowed: ${maxCost}`);
 
     if (totalValue > maxCost) {
-        throw error(400, `Order amount too high. Maximum: ${ERC20_MAXIMUM_PURCHASE_VALUE} ${campaignData.tokenSymbol}.`);
+        throw error(400, `Order amount too high. Maximum: ${ERC20_MaximumPurchaseValuePerWallet} ${campaignData.tokenSymbol}.`);
     }
 
     let epochExpiration = BigNumber.from(Math.floor(Date.now() / 1000) + AUTHORIZER_SIGNATURE_EXPIRATION_TIME_IN_SECONDS);

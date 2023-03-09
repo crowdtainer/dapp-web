@@ -234,14 +234,14 @@ cd plugins/woocommerce/
 
 - ✅ Impressum / legal pages.
 
-- ◻️ E-mail Invoice service.
-    - ◻️ Background work to process checkout requests and create invoice dispatch job.
-        - ◻️ Create order in shop system, set checkout request status as claimed for the respective wallet.
-    - ◻️ Background work to check order status:
-        - ◻️ Download invoice PDF when ready and send it by email; Set checkout request as complete.
+- ✅ Invoice service (WooCommerce integration).
+    - ✅ Background work to process checkout requests and create invoice dispatch job.
+        - ✅ Create order in shop system.
+        - ✅ Track in redis which tokenIds had its order created.
 
 ##### Out of scope for MVP:
 
+- ◻️ Service to set ERC-721's status as 'claimed' for token ids which had its order created/confirmed.
 - ◻️ "Download Invoice" button
 - ◻️ Browser-side encryption (asymmetric, using service provider's PubKey) before pushing sensitive data to redis.
 - ◻️ Support for multiple deployments, each on potentially different chainIDs.

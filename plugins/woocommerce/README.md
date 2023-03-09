@@ -20,7 +20,7 @@ After a crowdtainer project has been successful, an "order/delivery" process can
 1. The service provider calls "getPaidAndDeliver" in the project's respective smart contract, receiving the customers funds / payments.
 2. The action above causes the web application to show a "Check out" button in the project's page, as well as the instruction "Please proceed to checkout to complete your order".
 3. The "Checkout" button drives the user to a form, to be filled with delivery details.
-4. After entering their delivery details, the user clicks the "Complete Order" button.
+4. After entering their delivery details, the user clicks the "Request Order" button.
 5. A signature request is presented on the user's connected wallet. The payload is signed by the user and sent to the service provider's database (redis).
 6. A thank you message is shown to the user, who is informed that the service provider's order acceptance will arrive soon by e-mail with the respective invoice.
 7. In the project's web page, the "Check out" button disappears, and the user is presented with the message: "Your order has been received and is being processed."

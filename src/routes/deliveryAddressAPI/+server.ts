@@ -23,13 +23,16 @@ async function getCampaignState(provider: ethers.Signer | undefined,
     }
 
     try {
+        console.log(`vouchers721Address: ${vouchers721Address}`);
         const vouchers721Contract = Vouchers721__factory.connect(vouchers721Address, provider);
 
         let crowdtainerId = await vouchers721Contract.tokenIdToCrowdtainerId(tokenId);
-        const crowdtainerContract = Crowdtainer__factory.connect(crowdtainerId.toString(), provider);
+        let crowdtainer = await vouchers721Contract.crowdtainerForId(crowdtainerId);
+        const crowdtainerContract = Crowdtainer__factory.connect(crowdtainer, provider);
         let campaignState = await crowdtainerContract.crowdtainerState();
         return Ok(campaignState);
     } catch (error) {
+        console.log(`Error: ${error}`);
         return Err(`${error}`);
     }
 }
@@ -147,7 +150,7 @@ export const POST: RequestHandler = async ({ request }) => {
             throw error(401, "The signature provided does not belog to a wallet which owns the specified token id.");
         }
 
-        // Check if the smart contract is in delivery state .
+        // Check if the smart contract is in delivery state.
         const campaignStateResult = await getCampaignState(signer, Vouchers721Address, deliveryDetails.voucherId);
 
         if(campaignStateResult.isErr()){
@@ -159,8 +162,6 @@ export const POST: RequestHandler = async ({ request }) => {
             throw error(500, `Failure not in 'delivery state'.`);
         }
 
-        // TODO: Check if related tokenId wasn't already processed
-
         // Key for item
         let key = deliveryVoucherKey(deliveryDetails.chainId, deliveryDetails.vouchers721Address, deliveryDetails.voucherId);
 
@@ -171,7 +172,6 @@ export const POST: RequestHandler = async ({ request }) => {
         }
 
         let orderDetails = orderDetailsResult.unwrap();
-
         let quantities = new Array<Number>();
 
         orderDetails.description.forEach((element: Description) => {
