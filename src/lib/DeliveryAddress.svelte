@@ -33,6 +33,7 @@
 	let address: string;
 	let complement: string;
 	let postalCode: string;
+	let state: string;
 	let city: string;
 	let email: string;
 
@@ -58,6 +59,7 @@
 			address,
 			complement,
 			postalCode,
+			state,
 			city,
 			email
 		};
@@ -128,7 +130,7 @@
 		<p class="text-secondary text-xl">Success!</p>
 		<br />
 		<p>
-			Thank you for your order. We have received your delivery address and in a few minutes you
+			Thank you. We have received your delivery address and in a few minutes you
 			should receive an invoice by Email as a final confirmation.
 		</p>
 	</div>
@@ -196,6 +198,10 @@
 						<input type="text" name="postalCode" class="text-input-form" bind:value={postalCode} />
 					</div>
 					<div class="form-group mb-2">
+						<span class="text-secondary text-sm">State</span>
+						<input type="text" name="city" class="text-input-form" bind:value={state} />
+					</div>
+					<div class="form-group mb-2">
 						<span class="text-secondary text-sm">City</span>
 						<input type="text" name="city" class="text-input-form" bind:value={city} />
 					</div>
@@ -208,7 +214,7 @@
 				</div>
 
 				<div class="flex justify-center">
-					<button type="submit" class="sky-btn w-68">Complete order</button>
+					<button type="submit" class="sky-btn w-68">Request order</button>
 				</div>
 			</form>
 		</div>

@@ -34,8 +34,8 @@
 				`${userFundsInCrowdtainer}`,
 				BigNumber.from(campaignStaticUI.tokenDecimals)
 			)}
-			{campaignStaticUI.tokenSymbol}
-		</b>.
+			{campaignStaticUI.tokenSymbol}.</b
+		>
 		<br />
 		{#if state === ProjectStatusUI.Failed || state === ProjectStatusUI.ServiceProviderDeclined}
 			• You can withdrawl {ethers.utils.formatUnits(

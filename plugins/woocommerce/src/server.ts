@@ -40,11 +40,9 @@ async function performWork(axiosInstance: AxiosInstance, db: Redis) {
         return;
     }
 
-    // TODO: insert metadata (voucherID) to order, and skip if the order is already present/found in WooCommerce.
-    // Between order creation and deletion of the job in redis, there's a small probability that a crash could happen,
-    // leading to a "consumed" to not be deleted from redis, thus potentailly leading to duplicate orders.
     const [ordersCreated, ordersWithError] = await createWordpressOrders(axiosInstance, deliveryOrders, async function onCreated(id: string) {
         await db.multi()
+            .hsetnx(`${id}:orderCreated`, 'epochTimeInMilliseconds', new Date().getTime()) // Flag order as created.
             .lrem('deliveryRequests:v1', 0, id)
             .del(`${id}:quantities`)
             .exec();
@@ -79,11 +77,19 @@ async function getDeliveryOrdersWork(db: Redis): Promise<Map<string, Order>> {
     for (let i = 0; i < deliveryRequestIds.length; i++) {
 
         let currentKey = deliveryRequestIds[i];
+        console.log(`Current key: ${currentKey}`);
+
+        let orderCreated = await db.hexists(`${currentKey}:orderCreated`, 'epochTimeInMilliseconds');
+        if(orderCreated) {
+            let createdTime = await db.hget(`${currentKey}:orderCreated`, 'epochTimeInMilliseconds');
+            console.log(`Warning: Order for ${currentKey} already exists (from epoch time ${createdTime} ms). Removing delivery request job.`)
+            db.lrem('deliveryRequests:v1', 0, currentKey);
+            continue;
+        }
 
         const deliveryDetailsResult = await db.hgetall(currentKey);
         const deliveryDetails: DeliveryDetails = JSON.parse(JSON.stringify(deliveryDetailsResult));
 
-        console.log(`Current key: ${currentKey}`);
         const quantitiesResult = await db.get(`${currentKey}:quantities`);
 
         if (quantitiesResult === null) {
