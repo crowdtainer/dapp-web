@@ -3,7 +3,7 @@
 	export let isError: boolean = false;
 </script>
 
-<div class="max-w-7xl mx-auto py-6 sm:px-0 lg:px-0">
+<div class="max-w-7xl mx-auto py-6 sm:px-0 lg:px-0" >
 	<div class="px-2 py-6 sm:px-0">
 		<div class="mx-6 font-text border-2 border-dashed border-gray-400 rounded-lg ">
 			<slot />
