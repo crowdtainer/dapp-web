@@ -7,7 +7,7 @@
 
 	import { Icon } from '@steeze-ui/svelte-icon';
 	import { UserGroup } from '@steeze-ui/heroicons';
-	import "@fontsource/red-hat-display";
+	import '@fontsource/red-hat-display';
 
 	import {
 		LoadStatus,
@@ -91,112 +91,118 @@
 </header> -->
 
 <main class="">
-	<div class="grid h-full place-items-center justify-center sm:mb-3 mt-5">
-		<!-- <a href="/"> -->
-			<Icon src={UserGroup} theme="solid" class="text-gray-800 dark:text-gray-200" size="42" />
-			<p class="font-display dark:text-gray-200 text-xl my-4 md:mb-0 md:text-2xl">Group Buying Campaigns</p>
-	</div>
-	<div>
-		<div class="campaignSection sticky top-0 bg-[#EFF6FF] dark:bg-[#0D1116] z-40">
-			<div class="max-w-7xl mx-auto py-3 px-4 sm:px-6 lg:px-8">
-				<h1 class="font-display lg:text-xl md:text-sm">Active</h1>
+	<div class="grid place-items-center">
+		<div class="w-full xl:w-5/6 2xl:w-4/6">
+			<div class="grid h-full place-items-center justify-center sm:mb-3 mt-5">
+				<!-- <a href="/"> -->
+				<Icon src={UserGroup} theme="solid" class="text-gray-800 dark:text-gray-200" size="42" />
+				<p class="font-display dark:text-gray-200 text-xl my-4 md:mb-0 md:text-2xl">
+					Group Buying Campaigns
+				</p>
 			</div>
-		</div>
-		<div>
-			{#each activeProjects as project, index}
-				{#if index !== 0}
-					<div class="dashedBorder" />
-				{/if}
-				<Project
-					vouchers721Address={Vouchers721Address}
-					{...projectFromCrowdtainerId(project)}
-					{staticDataLoadStatus}
-					campaignStaticData={campaignStaticData.get(project)}
-					campaignStaticUI={campaignStaticUI.get(project)}
-					basePrices={projects[index].basePriceDenominator}
-					basePriceUnit={projects[index].basePriceUnit}
-				/>
-			{/each}
-		</div>
+			<div>
+				<div class="campaignSection sticky top-0 z-40 backdrop-blur-[2px]">
+					<div class="max-w-7xl mx-auto py-3 px-4 sm:px-6 lg:px-8">
+						<h1 class="font-display lg:text-xl md:text-sm">Active</h1>
+					</div>
+				</div>
+				<div>
+					{#each activeProjects as project, index}
+						{#if index !== 0}
+							<div class="dashedBorder" />
+						{/if}
+						<Project
+							vouchers721Address={Vouchers721Address}
+							{...projectFromCrowdtainerId(project)}
+							{staticDataLoadStatus}
+							campaignStaticData={campaignStaticData.get(project)}
+							campaignStaticUI={campaignStaticUI.get(project)}
+							basePrices={projects[index].basePriceDenominator}
+							basePriceUnit={projects[index].basePriceUnit}
+						/>
+					{/each}
+				</div>
 
-		<div>
-			{#if staticDataLoadStatus === LoadStatus.Loading}
-				<EmptySection emptyMessage={loadingString} />
-			{:else if staticDataLoadStatus === LoadStatus.FetchFailed}
-				<EmptySection emptyMessage={networkFailedMessage} isError={true} />
-			{:else if activeProjects.length === 0}
-				<EmptySection emptyMessage="No active projects currently." />
-			{/if}
-		</div>
-	</div>
-
-	<div>
-		<div class="campaignSection sticky top-0 bg-[#EFF6FF] dark:bg-[#0D1116] z-40">
-			<div class="max-w-7xl mx-auto py-3 px-4 sm:px-6 lg:px-8">
-				<h1 class="font-display lg:text-xl md:text-sm">Upcoming</h1>
+				<div>
+					{#if staticDataLoadStatus === LoadStatus.Loading}
+						<EmptySection emptyMessage={loadingString} />
+					{:else if staticDataLoadStatus === LoadStatus.FetchFailed}
+						<EmptySection emptyMessage={networkFailedMessage} isError={true} />
+					{:else if activeProjects.length === 0}
+						<EmptySection emptyMessage="No active projects currently." />
+					{/if}
+				</div>
 			</div>
-		</div>
 
-		<div>
-			{#each upcomingProjects as project, index}
-				{#if index !== 0}
-					<div class="dashedBorder" />
-				{/if}
-				<Project
-					vouchers721Address={Vouchers721Address}
-					{...projectFromCrowdtainerId(project)}
-					{staticDataLoadStatus}
-					campaignStaticData={campaignStaticData.get(project)}
-					campaignStaticUI={campaignStaticUI.get(project)}
-					basePrices={projects[index].basePriceDenominator}
-					basePriceUnit={projects[index].basePriceUnit}
-				/>
-			{/each}
-		</div>
+			<div>
+				<div class="campaignSection sticky top-0 z-40 backdrop-blur-[2px]">
+					<div class="max-w-7xl mx-auto py-3 px-4 sm:px-6 lg:px-8">
+						<h1 class="font-display lg:text-xl md:text-sm">Upcoming</h1>
+					</div>
+				</div>
 
-		<div>
-			{#if staticDataLoadStatus === LoadStatus.Loading}
-				<EmptySection emptyMessage={loadingString} />
-			{:else if staticDataLoadStatus === LoadStatus.FetchFailed}
-				<EmptySection emptyMessage={networkFailedMessage} isError={true} />
-			{:else if upcomingProjects.length === 0}
-				<EmptySection emptyMessage="More projects coming soon." />
-			{/if}
-		</div>
-	</div>
+				<div>
+					{#each upcomingProjects as project, index}
+						{#if index !== 0}
+							<div class="dashedBorder" />
+						{/if}
+						<Project
+							vouchers721Address={Vouchers721Address}
+							{...projectFromCrowdtainerId(project)}
+							{staticDataLoadStatus}
+							campaignStaticData={campaignStaticData.get(project)}
+							campaignStaticUI={campaignStaticUI.get(project)}
+							basePrices={projects[index].basePriceDenominator}
+							basePriceUnit={projects[index].basePriceUnit}
+						/>
+					{/each}
+				</div>
 
-	<div>
-		<div class="campaignSection sticky top-0 bg-[#EFF6FF] dark:bg-[#0D1116] z-40">
-			<div class="max-w-7xl mx-auto py-3 px-4 sm:px-6 lg:px-8">
-				<h1 class="font-display lg:text-xl md:text-sm">Previous</h1>
+				<div>
+					{#if staticDataLoadStatus === LoadStatus.Loading}
+						<EmptySection emptyMessage={loadingString} />
+					{:else if staticDataLoadStatus === LoadStatus.FetchFailed}
+						<EmptySection emptyMessage={networkFailedMessage} isError={true} />
+					{:else if upcomingProjects.length === 0}
+						<EmptySection emptyMessage="More projects coming soon." />
+					{/if}
+				</div>
 			</div>
-		</div>
 
-		<div>
-			{#each pastProjects as project, index}
-				{#if index !== 0}
-					<div class="dashedBorder" />
-				{/if}
-				<Project
-					vouchers721Address={Vouchers721Address}
-					{...projectFromCrowdtainerId(project)}
-					{staticDataLoadStatus}
-					campaignStaticData={campaignStaticData.get(project)}
-					campaignStaticUI={campaignStaticUI.get(project)}
-					basePrices={projects[index].basePriceDenominator}
-					basePriceUnit={projects[index].basePriceUnit}
-				/>
-			{/each}
-		</div>
+			<div>
+				<div class="campaignSection sticky top-0 z-40 backdrop-blur-[2px]">
+					<div class="max-w-7xl mx-auto py-3 px-4 sm:px-6 lg:px-8">
+						<h1 class="font-display lg:text-xl md:text-sm">Previous</h1>
+					</div>
+				</div>
 
-		<div>
-			{#if staticDataLoadStatus === LoadStatus.Loading}
-				<EmptySection emptyMessage={loadingString} />
-			{:else if staticDataLoadStatus === LoadStatus.FetchFailed}
-				<EmptySection emptyMessage={networkFailedMessage} isError={true} />
-			{:else if pastProjects.length === 0}
-				<EmptySection emptyMessage="Nothing to see here yet." />
-			{/if}
+				<div>
+					{#each pastProjects as project, index}
+						{#if index !== 0}
+							<div class="dashedBorder" />
+						{/if}
+						<Project
+							vouchers721Address={Vouchers721Address}
+							{...projectFromCrowdtainerId(project)}
+							{staticDataLoadStatus}
+							campaignStaticData={campaignStaticData.get(project)}
+							campaignStaticUI={campaignStaticUI.get(project)}
+							basePrices={projects[index].basePriceDenominator}
+							basePriceUnit={projects[index].basePriceUnit}
+						/>
+					{/each}
+				</div>
+
+				<div>
+					{#if staticDataLoadStatus === LoadStatus.Loading}
+						<EmptySection emptyMessage={loadingString} />
+					{:else if staticDataLoadStatus === LoadStatus.FetchFailed}
+						<EmptySection emptyMessage={networkFailedMessage} isError={true} />
+					{:else if pastProjects.length === 0}
+						<EmptySection emptyMessage="Nothing to see here yet." />
+					{/if}
+				</div>
+			</div>
 		</div>
 	</div>
 </main>

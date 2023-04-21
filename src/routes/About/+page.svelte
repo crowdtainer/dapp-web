@@ -1,4 +1,4 @@
-<div class="flex justify-center  my-6">
+<div class="flex justify-center my-6">
 	<div class="">
 		<img class="my-8 h-32 w-32 rounded-full" src="/images/site/CrowdtainerLogo.svg" alt=""/>
 	</div>
