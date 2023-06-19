@@ -144,7 +144,7 @@ npm run build; node -r dotenv/config dist/server.js
 # The process will exit gracefully with e.g. SIGINT (CTRL+C).
 ```
 
-Alternatively, it is also possible to run it with docker compose:
+Alternatively, to run with docker compose:
 
 ```sh
 # From the root directory, run the service:
@@ -162,6 +162,30 @@ cd plugins/woocommerce/
 # The procedure to build and run is exactly the same as specified for 'mailer' plugin above.
 
 # Make sure to read `plugins/woocommerce/README.md` as well.
+```
+
+## WalletConnect (v1) integration
+
+The WalletConnnect protocol requires a backend in order to connect an external mobile wallet with the frontend. To run it:
+
+```sh
+# Copy the example .env and edit accordingly:
+cd plugins/walletconnect-bridge/
+
+# Install dependencies:
+npm install
+
+# Build & run:
+npm run build; npm run start
+
+# SIGINT (CTRL+C) to terminate the process.
+```
+
+Alternatively, to run with docker compose:
+
+```sh
+# From the root directory, run the service:
+docker compose -f docker-compose.walletconnect.yml up --build -d walletconnect-bridge-server
 ```
 ---
 

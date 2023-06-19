@@ -1,0 +1,46 @@
+version: '3.7'
+services:
+  walletconnect-redis:
+    hostname: wc-redis
+    image: 'redis:7.0.8-alpine'
+    restart: on-failure
+    volumes:
+      - /var/redis/data:/data
+    networks:
+      - wc-redis-network
+
+  walletconnect-bridge-server:
+    hostname: walletConnectServer
+    container_name: walletConnectServer
+    depends_on:
+      - walletconnect-redis
+    build:
+      context: ./plugins/walletconnect-bridge
+      dockerfile: Dockerfile
+      target: walletConnectServer
+    restart: on-failure
+    ports:
+      - 5002:5000
+    networks:
+      - wc-redis-network
+    environment:
+      - HOST=${HOST-0.0.0.0}
+      - PORT=${PORT-5000}
+
+  # For debugging purposes:
+  # e.g.: BUILDKIT_PROGRESS=plain docker compose -f docker-compose.walletconnect.yml --env-file .env.production up -d --build debug-web
+  debug-web:
+    extends: walletconnect-bridge-server
+    build:
+      target: debugger
+    entrypoint: node --inspect=0.0.0.0:5858 build/index.js
+    volumes:
+      - .:/app
+    ports:
+      - "5002:5000"
+      - "5858:5858"
+
+networks:
+  wc-redis-network:
+    name: wc-redis-network
+    driver: bridge
