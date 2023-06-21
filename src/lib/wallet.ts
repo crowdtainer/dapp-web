@@ -155,6 +155,7 @@ export let wcProvider: WalletConnectProvider;
 
 async function setupWalletConnect() {
     wcProvider = new WalletConnectProvider({
+        qrcodeModalOptions: { desktopLinks:[] },
         bridge: VITE_WALLET_CONNECT_BRIDGE_SERVER,
         rpc: {
             // Only one network at a time is supported.
