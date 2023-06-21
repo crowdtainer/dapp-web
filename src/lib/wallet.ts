@@ -8,6 +8,8 @@ import { writable, derived } from 'svelte/store';
 import { type WalletState, WalletType, ConnectionState, persistState, getLastState, resetStorageState } from '$lib/walletStorage';
 import { MessageType } from './Toast/MessageType';
 
+const VITE_WALLET_CONNECT_BRIDGE_SERVER: string = import.meta.env.VITE_WALLET_CONNECT_BRIDGE_SERVER;
+
 export const walletState = createWalletStore();
 export const connected = derived(walletState, $walletState => $walletState.connectionState === ConnectionState.Connected);
 export const accountAddress = derived(walletState, $walletState => {
@@ -153,7 +155,7 @@ export let wcProvider: WalletConnectProvider;
 
 async function setupWalletConnect() {
     wcProvider = new WalletConnectProvider({
-        bridge: "https://wc.barterfly.de",
+        bridge: VITE_WALLET_CONNECT_BRIDGE_SERVER,
         rpc: {
             // Only one network at a time is supported.
             // Add all supported networks here; Then configure .env accordingly.
