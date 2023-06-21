@@ -153,6 +153,7 @@ export let wcProvider: WalletConnectProvider;
 
 async function setupWalletConnect() {
     wcProvider = new WalletConnectProvider({
+        bridge: "https://wc.barterfly.de",
         rpc: {
             // Only one network at a time is supported.
             // Add all supported networks here; Then configure .env accordingly.
