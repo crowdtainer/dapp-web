@@ -101,7 +101,7 @@
 				</p>
 			</div>
 			<div>
-				<div class="campaignSection sticky top-0 z-40 backdrop-blur-[2px]">
+				<div class="campaignSection">
 					<div class="max-w-7xl mx-auto py-3 px-4 sm:px-6 lg:px-8">
 						<h1 class="font-display lg:text-xl md:text-sm">Active</h1>
 					</div>
@@ -135,7 +135,7 @@
 			</div>
 
 			<div>
-				<div class="campaignSection sticky top-0 z-40 backdrop-blur-[2px]">
+				<div class="campaignSection">
 					<div class="max-w-7xl mx-auto py-3 px-4 sm:px-6 lg:px-8">
 						<h1 class="font-display lg:text-xl md:text-sm">Upcoming</h1>
 					</div>
@@ -170,7 +170,7 @@
 			</div>
 
 			<div>
-				<div class="campaignSection sticky top-0 z-40 backdrop-blur-[2px]">
+				<div class="campaignSection">
 					<div class="max-w-7xl mx-auto py-3 px-4 sm:px-6 lg:px-8">
 						<h1 class="font-display lg:text-xl md:text-sm">Previous</h1>
 					</div>
