@@ -36,6 +36,7 @@
   .campaignSection {
     @apply border-b-4 border-double dark:border-gray-400 border-gray-700;
     @apply text-black dark:text-gray-200;
+    @apply rounded-b-lg sticky top-0 z-40 backdrop-blur-[6px] dark:bg-[#0d1116]/30 bg-gray-100/30
   }
 
   .tooltip {

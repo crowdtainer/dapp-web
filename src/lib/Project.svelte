@@ -260,7 +260,7 @@
 	>
 		<div class="md:flex">
 			<div class="md:shrink-0">
-				<img class="w-full object-cover md:h-full md:w-96" src={projectImageURL} alt="Coffee" />
+				<img class="w-full object-cover md:w-96" src={projectImageURL} alt="Coffee" />
 			</div>
 			<div class="font-sans pr-8 pl-8 pt-8 pb-4">
 				<div class="font-display uppercase tracking-wide text-primary">
