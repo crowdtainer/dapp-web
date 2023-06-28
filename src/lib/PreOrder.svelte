@@ -295,7 +295,7 @@
 {/if}
 
 {#if $totalSum > 0}
-	<div transition:slide={{ duration: 150 }}>
+	<div transition:slide|global={{ duration: 150 }}>
 		{#if preOrderStep === JoinStep.QuantitySelection}
 			{#if campaignStaticUI === undefined}
 				<Quantity totalSum={$totalSum} />

@@ -15,7 +15,7 @@
 				<p class="text-sm">7% tax (USt.) and shipping included</p>
 				<p class="text-sm"><b>(Currently shipping only to Germany)</b></p>
 				{#key totalSum}
-					<p in:blur={{ duration: 250 }} class="text-lg my-4">
+					<p in:blur|global={{ duration: 250 }} class="text-lg my-4">
 						<b>Total</b>: {totalSum}
 						{tokenSymbol}
 					</p>
