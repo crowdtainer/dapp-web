@@ -160,7 +160,7 @@
 					{#if profileMenuOpen}
 						<div
 							use:clickOutside={() => (profileMenuOpen = false)}
-							transition:fade={{ duration: 130 }}
+							transition:fade|global={{ duration: 130 }}
 							class="origin-top-right absolute right-0 mt-2 w-48 rounded-md shadow-lg py-1 bg-white ring-1 ring-black ring-opacity-5 focus:outline-none"
 							role="menu"
 							aria-orientation="vertical"
@@ -217,7 +217,7 @@
 
 	<!-- Mobile menu, show/hide based on menu state. -->
 	{#if mobileMenuOpen}
-		<div transition:fade={{ duration: 200 }} class="sm:hidden" id="mobile-menu">
+		<div transition:fade|global={{ duration: 200 }} class="sm:hidden" id="mobile-menu">
 			<div class="px-2 pt-2 pb-3 space-y-1">
 				<!-- Current: "bg-gray-900 text-white", Default: "text-gray-300 hover:bg-gray-700 hover:text-white" -->
 				<a

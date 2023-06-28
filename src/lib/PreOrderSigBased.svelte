@@ -493,7 +493,7 @@
 {/if}
 
 {#if $totalSum > 0}
-	<div in:slide={{ duration: 150 }}>
+	<div in:slide|global={{ duration: 150 }}>
 		<ul class="w-full steps my-5 mb-10">
 			<li class="step step-primary">Quantity</li>
 			<li class="step {stepTwoActive}">E-mail</li>
@@ -547,9 +547,9 @@
 								on:click={callSendChallengeCodeAPI}
 							>
 								{#if emailSent}
-									<p in:slide={{ duration: 300 }}>Sent!</p>
+									<p in:slide|global={{ duration: 300 }}>Sent!</p>
 								{:else}
-									<p in:slide={{ duration: 300 }}>Send</p>
+									<p in:slide|global={{ duration: 300 }}>Send</p>
 								{/if}
 							</button>
 						</div>

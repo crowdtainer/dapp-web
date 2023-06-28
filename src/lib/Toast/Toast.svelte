@@ -24,7 +24,7 @@
 	};
 </script>
 
-<div class={'toastBox ' + typeString(type)} role="alert" transition:fade>
+<div class={'toastBox ' + typeString(type)} role="alert" transition:fade|global>
 	<Icon iconType={type} width="1.1em" />
 
 	<div class="mx-2">

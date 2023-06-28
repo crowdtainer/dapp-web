@@ -50,7 +50,7 @@
 			<div class="flex flex-row">
 				{#if modalDialogData.visible}
 					{#if modalDialogData.animation !== ModalAnimation.None}
-						<div in:blur={{ duration: 450 }} class="basis-1/4">
+						<div in:blur|global={{ duration: 450 }} class="basis-1/4">
 							{#if modalDialogData.animation === ModalAnimation.Diamonds}
 								<Diamonds size="60" unit="px" />
 							{:else if modalDialogData.animation === ModalAnimation.Circle2}
@@ -67,7 +67,7 @@
 							<Icon src={ExclamationCircle} class="text-black m-2" size="36" />
 						{/if}
 					</div>
-					<div in:blur={{ duration: 450 }} class="basis-3/4">
+					<div in:blur|global={{ duration: 450 }} class="basis-3/4">
 						<p>{modalDialogData.body}</p>
 					</div>
 				{/if}
