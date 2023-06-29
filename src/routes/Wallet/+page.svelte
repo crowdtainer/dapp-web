@@ -120,13 +120,13 @@
 	<ModalDialog modalDialogData={dialog} />
 {/if}
 
-<div class="flex justify-center  my-6">
+<div class="flex justify-center  mt-24">
 	<div class="">
 		<Icon src={Wallet} theme="solid" class="text-gray-800 dark:text-gray-200" size="42" />
 	</div>
 </div>
 <div class="flex justify-center">
-	<p class="font-sans text-center dark:text-gray-200 text-xl mb-2 md:mb-0 md:text-2xl">
+	<p class="font-sans text-center dark:text-gray-200 text-xl my-5 md:mb-0 md:text-2xl">
 		Your Campaigns
 	</p>
 </div>

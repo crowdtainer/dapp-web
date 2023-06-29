@@ -18,7 +18,6 @@
 	import { WalletType } from '$lib/walletStorage';
 
 	// Toast
-	import Toasts from '$lib/Toast/Toasts.svelte';
 	import { addToast, type ToastData } from '$lib/Toast/ToastStore';
 	import type { MessageType } from './Toast/MessageType';
 
@@ -59,9 +58,6 @@
 	$: path = $page.url.pathname;
 </script>
 
-<Toasts />
-
-<nav class="bg-[#172939] dark:bg-transparent dark:backdrop-blur-none dark:backdrop-blur-sm z-50">
 	<div class="max-w-7xl mx-auto px-2 sm:px-6 lg:px-8">
 		<div class="relative flex items-center justify-between h-16">
 			<div class="absolute inset-y-0 left-0 flex items-center sm:hidden">
@@ -245,4 +241,3 @@
 			</div>
 		</div>
 	{/if}
-</nav>

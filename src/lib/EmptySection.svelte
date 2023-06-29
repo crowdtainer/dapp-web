@@ -3,14 +3,16 @@
 	export let isError: boolean = false;
 </script>
 
-<div class="max-w-7xl mx-auto py-6 sm:px-0 lg:px-0" >
-	<div class="px-2 py-6 sm:px-0">
-		<div class="mx-6 font-text border-2 border-dashed border-gray-400 rounded-lg ">
+<div class="max-w-7xl mx-auto py-6 sm:px-0 lg:px-0">
+	<div class="px-2  py-6 sm:px-0">
+		<div
+			class="backdrop-blur-[4px] dark:backdrop-brightness-50 mx-6 font-text border-2 border-dashed border-gray-400 rounded-lg "
+		>
 			<slot />
 			{#if isError}
 				<p class="text-red-700 text-center m-5">{emptyMessage}</p>
 			{:else}
-				<p class="text-gray-500 text-center m-5">{emptyMessage}</p>
+				<p class="dark:text-gray-300 text-gray-500 text-center m-5">{emptyMessage}</p>
 			{/if}
 		</div>
 	</div>
