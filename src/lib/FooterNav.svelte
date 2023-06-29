@@ -1,32 +1,23 @@
 <script lang="ts">
-	import { onMount } from "svelte";
-	let isDarkMode: boolean;
-
-	import { contactHTML } from "./strings";
-
-	onMount(() => {
-		isDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches
-	});
+	import { contactHTML } from './strings';
 </script>
 
 <footer
-	style="{!isDarkMode? "background-image: url('/images/site/footerWaves.jpeg');" :
-	"background-image: url('/images/site/footerWavesDark.jpeg');"} background-size: 100% 130%;"
-	class="footer p-10 bg-black text-base-content"
-	data-theme="black"
+	style="background-size: 100% 130%;"
+	class="bg-[#172939] dark:bg-[#07141d] footer p-10 text-base-content"
 >
-	<div>
+	<div class="text-white">
 		<span class="footer-title">Legal</span>
 		<a href="/Legal/Imprint" class="link link-hover">Impressum / Imprint</a>
 		<a href="/Legal/Terms" class="link link-hover">Geschäftsbedingungen / Terms & Conditions</a>
 		<a href="/Legal/PrivacyPolicy" class="link link-hover">Datenschutzerklärung / Privacy Policy</a>
 	</div>
-	<div>
+	<div class="text-white">
 		<span class="footer-title">Learn</span>
 		<a href="https://crowdtainer.io/post/" class="link link-hover">Blog</a>
 		<a href="https://" class="link link-hover">Documentation</a>
 	</div>
-	<div>
+	<div class="text-white">
 		<span class="footer-title">Community</span>
 		<div class="grid grid-flow-col gap-4">
 			<a href="http://instagram.com/" class="mr-3">
@@ -122,7 +113,7 @@
 		</div>
 	</div>
 	{#if contactHTML !== undefined && contactHTML !== ''}
-		<div>
+		<div class="text-white">
 			<span class="footer-title">Contact</span>
 			{@html contactHTML}
 		</div>

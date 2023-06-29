@@ -256,7 +256,7 @@
 
 <div class="max-w-10xl mx-auto py-1 sm:px-6 lg:px-8">
 	<div
-		class="border-2 border-black dark:border dark:border-white rounded-md max-w-lg mx-auto white overflow-hidden md:max-w-7xl my-8"
+		class="dark:bg-transparent backdrop-blur-[4px] backdrop-saturate-50 dark:backdrop-brightness-50 border-2 border-black dark:border dark:border-white rounded-md max-w-lg mx-auto white overflow-hidden md:max-w-7xl my-8"
 	>
 		<div class="md:flex">
 			<div class="md:shrink-0">
