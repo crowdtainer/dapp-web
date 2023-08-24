@@ -20,8 +20,10 @@
 	import { derived, type Readable } from 'svelte/store';
 	import ProductQuantity from './ProductQuantity.svelte';
 
-	import ModalDialog, { ModalAnimation, ModalIcon, ModalType } from './ModalDialog.svelte';
+	import ModalDialog from './ModalDialog.svelte';
+	import { ModalAnimation, ModalIcon, ModalType } from './ModalDialog.svelte';
 	import type { ModalDialogData } from './ModalDialog.svelte';
+	let modalDialog: ModalDialog;
 
 	// Toast
 	import { addToast, showWarningToast, type ToastData } from '$lib/Toast/ToastStore';
@@ -45,9 +47,9 @@
 	import { makeAgreeToTermsMessage, signMessage } from './Model/SignTerms';
 
 	// Wallet management
-	import { getAccountAddress, getSigner, web3Provider } from '$lib/wallet';
-	import { accountAddress, walletState, connected, connect } from '$lib/wallet';
-	import { WalletType } from '$lib/walletStorage';
+	import { getAccountAddress, getSigner, web3Provider } from '$lib/Utils/wallet';
+	import { accountAddress, walletState, connected, connect } from '$lib/Utils/wallet';
+	import { WalletType } from '$lib/Utils/walletStorage';
 	import { validEmail } from './Validation/utils';
 	import {
 		checkAllowance,
@@ -88,7 +90,7 @@
 
 	// Modal Dialog
 	let modalDialogData: ModalDialogData = {
-		visible: false,
+		id: '',
 		title: '',
 		body: '',
 		animation: ModalAnimation.Circle2,
@@ -144,7 +146,7 @@
 
 	// UserStore
 	$: totalCostInERCUnits =
-		campaignStaticUI !== undefined
+		(campaignStaticUI !== undefined && $totalSum !== undefined && !isNaN($totalSum))
 			? ethers.utils.parseUnits(`${$totalSum}`, campaignStaticUI.tokenDecimals)
 			: BigNumber.from(0);
 
@@ -173,13 +175,14 @@
 			}
 
 			modalDialogData = {
+				id: 'joinProject',
 				title: 'Join project',
 				type: ModalType.ActionRequest,
 				icon: ModalIcon.DeviceMobile,
 				body: 'Please sign the transaction from your wallet.',
-				animation: ModalAnimation.Circle2,
-				visible: true
+				animation: ModalAnimation.Circle2
 			};
+			modalDialog.showDialog();
 
 			actionButtonEnabled = false;
 
@@ -208,13 +211,14 @@
 			if (authorizationResult.isErr()) {
 				console.log(`Error: ${authorizationResult.unwrapErr()}`);
 				modalDialogData = {
+					id: 'txRejected',
 					type: ModalType.ActionRequest,
-					visible: true,
 					title: 'Transaction rejected',
 					body: `An error ocurred when joining the project: ${authorizationResult.unwrapErr()}`,
 					icon: ModalIcon.Exclamation,
 					animation: ModalAnimation.None
 				};
+				modalDialog.showDialog();
 				actionButtonEnabled = true;
 				return;
 			}
@@ -246,13 +250,14 @@
 						? ''
 						: `\n\n Details: ${errorString}`;
 				modalDialogData = {
+					id: 'txRejected',
 					type: ModalType.ActionRequest,
-					visible: true,
 					title: 'Transaction rejected',
 					body: `An error ocurred when joining the project. ${errorDescription}`,
 					icon: ModalIcon.Exclamation,
 					animation: ModalAnimation.None
 				};
+				modalDialog.showDialog();
 
 				console.log(`${joinTransaction.unwrapErr()}`);
 				actionButtonEnabled = true;
@@ -260,14 +265,14 @@
 			}
 
 			modalDialogData = {
+				id: 'joinProjectConfirmationWait',
 				type: ModalType.ActionRequest,
-				visible: true,
 				title: 'Join project',
 				body: 'Waiting for transaction confirmation..',
 				icon: ModalIcon.None,
 				animation: ModalAnimation.Diamonds
 			};
-
+			modalDialog.showDialog();
 			await joinTransaction.unwrap().wait();
 
 			// TODO: check side-effects
@@ -307,13 +312,14 @@
 		}
 
 		modalDialogData = {
+			id: 'walletApproval',
 			type: ModalType.ActionRequest,
-			visible: true,
 			title: 'Wallet approval',
 			body: `Please approve the spending of ${$totalSum} ${campaignStaticUI.tokenSymbol} to Crowdtainer from your wallet.`,
 			icon: ModalIcon.None,
 			animation: ModalAnimation.Circle2
 		};
+		modalDialog.showDialog();
 
 		actionButtonEnabled = false;
 
@@ -330,7 +336,7 @@
 			};
 			addToast(toast);
 			actionButtonEnabled = true;
-			modalDialogData.visible = true;
+			modalDialog.showDialog();
 			return;
 		}
 
@@ -357,7 +363,7 @@
 			modalDialogData.body = message;
 			modalDialogData.icon = ModalIcon.Exclamation;
 			modalDialogData.animation = ModalAnimation.None;
-			modalDialogData.visible = true;
+			modalDialog.showDialog();
 			return;
 		}
 
@@ -369,12 +375,14 @@
 		);
 
 		if (checkAllowanceResult.isErr()) {
+			modalDialogData.icon = ModalIcon.Exclamation;
+			modalDialogData.animation = ModalAnimation.None;
 			modalDialogData.body = `Unable to authorize ERC20 spending.`;
-			modalDialogData.visible = true;
+			modalDialog.showDialog();
 			console.log(`${checkAllowanceResult.unwrapErr()}`);
 		} else {
 			await refreshWalletData;
-			modalDialogData.visible = false;
+			modalDialog.close();
 		}
 
 		actionButtonEnabled = true;
@@ -386,12 +394,13 @@
 			return;
 		}
 
+		modalDialogData.id = 'toc_confirmation';
 		modalDialogData.type = ModalType.ActionRequest;
 		modalDialogData.title = 'Terms and Conditions confirmation';
 		modalDialogData.body =
 			'Please read the message and confirm the signature request in your mobile wallet.';
 		modalDialogData.animation = ModalAnimation.Circle2;
-		modalDialogData.visible = true;
+		modalDialog.showDialog();
 
 		let signer = getSigner();
 		if (signer === undefined) {
@@ -449,13 +458,14 @@
 				message = `${message}${errorDescription !== '' ? `: ${errorDescription}` : `.`}`;
 
 				modalDialogData = {
+					id: 'approveFailed',
 					type: ModalType.ActionRequest,
-					visible: true,
 					title: 'Operation failed',
 					body: message,
 					icon: ModalIcon.Exclamation,
 					animation: ModalAnimation.None
 				};
+				modalDialog.showDialog();
 				actionButtonEnabled = true;
 				console.log(`what went wrong? ${requestResult}`);
 				return;
@@ -464,7 +474,7 @@
 			console.log(`Failure!? ${signResult.unwrapErr()}`);
 		}
 
-		modalDialogData.visible = false;
+		modalDialog.close();
 	};
 
 	const callRequestEmailAuthorizationAPI = async () => {
@@ -488,9 +498,7 @@
 	};
 </script>
 
-{#if modalDialogData.visible}
-	<ModalDialog {modalDialogData} />
-{/if}
+<ModalDialog {modalDialogData} bind:this={modalDialog}/>
 
 {#if $totalSum > 0}
 	<div in:slide|global={{ duration: 150 }}>
@@ -693,9 +701,9 @@
 				</div>
 
 				<div class="flex justify-center">
-						<div>
-							<a target="_blank" href='/Legal/Terms' rel="noopener">General Terms and Conditions</a>
-						</div>
+					<div>
+						<a target="_blank" href="/Legal/Terms" rel="noopener">General Terms and Conditions</a>
+					</div>
 				</div>
 
 				<div class="flex justify-center my-2">
@@ -709,8 +717,11 @@
 
 				<div class="flex justify-center">
 					<button
-						disabled={!feesAcknowledged || !deliveryAcknowledged || !termsAcknowledged || !shipmentConditions}
-						class="{modalDialogData.visible ? 'hidden' : ''} btn btn-primary mx-2  my-2 w-28 "
+						disabled={!feesAcknowledged ||
+							!deliveryAcknowledged ||
+							!termsAcknowledged ||
+							!shipmentConditions}
+						class="{modalDialog.open ? 'hidden' : ''} btn btn-primary mx-2 my-2 w-28"
 						on:click={callSignTermsAndConditions}
 					>
 						{#if termsAccepted}
@@ -726,7 +737,7 @@
 				</p>
 				<br />
 
-				<div class="flex justify-center ">
+				<div class="flex justify-center">
 					<button
 						class="btn btn-outline"
 						on:click={() => {
@@ -739,7 +750,7 @@
 
 				<div class="flex justify-center">
 					<div class="text-md my-4 sm:w-full md:w-4/5 lg:w-4/6 xl:w-3/6">
-						<div class="text-md my-4  mx-4">
+						<div class="text-md my-4 mx-4">
 							<div class="grid grid-flow-col auto-cols-max my-4">
 								<div><Icon src={InformationCircle} class="text-green-700" size="24" /></div>
 								<p class="px-2 text-md">Tips</p>

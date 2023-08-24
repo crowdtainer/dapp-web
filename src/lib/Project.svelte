@@ -32,13 +32,15 @@
 		ProjectStatusUI
 	} from '$lib/Converters/CrowdtainerData';
 
-	import { connected, getSigner, accountAddress } from '$lib/wallet';
+	import { connected, getSigner, accountAddress } from '$lib/Utils/wallet';
 	import ModalDialog, {
 		ModalAnimation,
 		ModalIcon,
 		ModalType,
 		type ModalDialogData
 	} from './ModalDialog.svelte';
+	let modalDialog: ModalDialog;
+
 	import PreOrder from './PreOrder.svelte';
 	import { getOrderDetailsAPI, OrderStatus } from './api';
 	import ProjectDetails from './ProjectDetails.svelte';
@@ -76,7 +78,7 @@
 
 	// Modal Dialog
 	let dialog: ModalDialogData = {
-		visible: false,
+		id: '',
 		title: '',
 		body: '',
 		animation: ModalAnimation.Circle2,
@@ -111,7 +113,7 @@
 
 	initializeReadLoop(readDataForConnectedWallet, 13000);
 
-	onMount(async () => {
+	function loadData() {
 		$joinSelection = $joinSelection;
 		// Dynamic data
 		if (campaignDynamicData == undefined) {
@@ -120,6 +122,10 @@
 			campaignDynamicData = campaignStores.get(crowdtainerId);
 		}
 		if (campaignStaticUI) updateCurrentSelection(0, campaignStaticUI.prices[0]);
+	}
+
+	onMount(async () => {
+		loadData();
 	});
 
 	function setRaisedAmount() {
@@ -139,7 +145,13 @@
 			if (percentage) {
 				tweenedPercentageRaised.set(percentage);
 				tweenedPercentageWidth.set(calculatePercentageWidth(percentage));
+			} else {
+				tweenedPercentageRaised.set(0);
+				tweenedPercentageWidth.set(0);
 			}
+		} else {
+			tweenedPercentageRaised.set(0);
+			tweenedPercentageWidth.set(0);
 		}
 	}
 
@@ -186,7 +198,7 @@
 	function updateCurrentSelection(index: number, price: number) {
 		currentSelection = index;
 		currentPrice = price;
-		currentBasePrice = price/basePrices[index];
+		currentBasePrice = price / basePrices[index];
 	}
 
 	function addProduct() {
@@ -208,24 +220,39 @@
 
 	function handleCampaignJoinedEvent(event: CustomEvent) {
 		console.log(`Detected event of type: ${event.type} : detail: ${event.detail.text}`);
-		dialog.visible = true;
+		dialog.id = 'joinSuccess';
 		dialog.title = 'You have succesfully joined the project! 🎉';
 		dialog.animation = ModalAnimation.None;
 		dialog.icon = ModalIcon.BadgeCheck;
 		dialog.type = ModalType.Information;
 		dialog.body =
 			'If the minimum funding is reached, you will be able to enter your delivery address on this site. Otherwise, you can get your pre-payment back.';
+		modalDialog.showDialog();
 	}
 
 	function handleUserClaimedFundsEvent(event: CustomEvent) {
 		console.log(`Detected event of type: ${event.type} : detail: ${event.detail.text}`);
-		dialog.visible = true;
+		dialog.id = 'joinSuccess';
 		dialog.title = 'Success';
 		dialog.animation = ModalAnimation.None;
 		dialog.icon = ModalIcon.BadgeCheck;
 		dialog.type = ModalType.Information;
 		dialog.body =
 			'The value equivalent to your pre-payment amount has been returned to your wallet.';
+		modalDialog.showDialog();
+	}
+
+	function handleUserLeftCrowdtainerEvent(event: CustomEvent) {
+		console.log(`Detected event of type: ${event.type} : detail: ${event.detail.text}`);
+		if (campaignStaticUI === undefined) {
+			console.log(`Missing campaignStaticUI data`);
+			return;
+		}
+
+		let quantities: number[] = new Array<number>(campaignStaticUI.prices.length).fill(0);
+		$joinSelection.set(crowdtainerId, quantities);
+		$joinSelection = $joinSelection;
+		loadData();
 	}
 
 	// dynamic
@@ -250,13 +277,11 @@
 	$: $connected, $accountAddress, readDataForConnectedWallet();
 </script>
 
-{#if dialog.visible}
-	<ModalDialog modalDialogData={dialog} />
-{/if}
+<ModalDialog modalDialogData={dialog} bind:this={modalDialog} />
 
 <div class="max-w-10xl mx-auto py-1 sm:px-6 lg:px-8">
 	<div
-		class="dark:bg-transparent backdrop-blur-[4px] backdrop-saturate-50 dark:backdrop-brightness-50 border-2 border-black dark:border dark:border-white rounded-md max-w-lg mx-auto white overflow-hidden md:max-w-7xl my-8"
+		class="dark:bg-transparent backdrop-blur-[4px] backdrop-saturate-50 dark:backdrop-brightness-50 border-2 border-black dark:border dark:border-white rounded-md max-w-lg mx-auto white md:max-w-7xl my-8"
 	>
 		<div class="md:flex">
 			<div class="md:shrink-0">
@@ -290,7 +315,7 @@
 						</div> -->
 
 						<!-- Main Status -->
-						<div class="flex flex-wrap justify-between gap-6 ">
+						<div class="flex flex-wrap justify-between gap-6">
 							<div>
 								<p class="projectStatus">{stateString}</p>
 								<p class="projectDataSubtitle">Status</p>
@@ -345,7 +370,8 @@
 							<div class="pt-4">
 								{#if staticDataLoadStatus === LoadStatus.Loaded && currentPrice}
 									<p class="text-primary productPrice">
-										{currentPrice} {campaignStaticUI.tokenSymbol} ({`${currentBasePrice} ${campaignStaticUI.tokenSymbol}/${basePriceUnit}`})
+										{currentPrice}
+										{campaignStaticUI.tokenSymbol} ({`${currentBasePrice} ${campaignStaticUI.tokenSymbol}/${basePriceUnit}`})
 									</p>
 								{:else}
 									<p class="px-2 productPrice">{loadingString}</p>
@@ -434,7 +460,7 @@
 					{orderStatus}
 				/>
 
-				<div class="w-auto flex ">
+				<div class="w-auto flex">
 					{#if campaignStaticData !== undefined && campaignStaticUI !== undefined}
 						<CampaignActions
 							{tokenId}
@@ -445,6 +471,7 @@
 							{userFundsInCrowdtainer}
 							{orderStatus}
 							on:userClaimedFundsEvent={handleUserClaimedFundsEvent}
+							on:userLeftCrowdtainerEvent={handleUserLeftCrowdtainerEvent}
 						/>
 					{/if}
 				</div>

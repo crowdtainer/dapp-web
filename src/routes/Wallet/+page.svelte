@@ -6,10 +6,10 @@
 	import MyCampaign from '$lib/MyCampaign.svelte';
 
 	import { projects, Vouchers721Address } from '../Data/projects.json';
-	import { connected, getSigner, accountAddress } from '$lib/wallet';
+	import { connected, getSigner, accountAddress } from '$lib/Utils/wallet';
 	import EmptySection from '$lib/EmptySection.svelte';
-	import { connect } from '$lib/wallet';
-	import { WalletType } from '$lib/walletStorage';
+	import { connect } from '$lib/Utils/wallet';
+	import { WalletType } from '$lib/Utils/walletStorage';
 	import { Icon } from '@steeze-ui/svelte-icon';
 	import { Wallet } from '@steeze-ui/heroicons';
 
@@ -31,6 +31,7 @@
 
 	// Modal Dialog
 	let dialog: ModalDialogData = {
+		id: 'walletDialog',
 		type: ModalType.ActionRequest,
 		title: '',
 		body: '',
@@ -116,16 +117,14 @@
 	$: $connected, $accountAddress, loadUserData();
 </script>
 
-{#if dialog.visible}
-	<ModalDialog modalDialogData={dialog} />
-{/if}
+<ModalDialog modalDialogData={dialog} />
 
-<div class="flex justify-center  mt-24">
+<div class="flex justify-center mt-24">
 	<div class="">
 		<Icon src={Wallet} theme="solid" class="text-gray-800 dark:text-gray-200" size="42" />
 	</div>
 </div>
-<div class="flex justify-center">
+<div class="flex justify-center mb-4">
 	<p class="font-sans text-center dark:text-gray-200 text-xl my-5 md:mb-0 md:text-2xl">
 		Your Campaigns
 	</p>

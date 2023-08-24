@@ -93,7 +93,7 @@
 <main class="">
 	<div class="grid place-items-center">
 		<Icon src={UserGroup} theme="solid" class="text-gray-800 dark:text-gray-200 mt-20" size="42" />
-		<p class="font-display dark:text-gray-200 text-xl md:mb-0 md:text-2xl my-5">
+		<p class="font-display dark:text-gray-200 text-xl md:mb-2 md:text-2xl my-5">
 			Group Buying Campaigns
 		</p>
 

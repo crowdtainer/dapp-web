@@ -22,6 +22,7 @@
 
 	import ModalDialog, { ModalAnimation, ModalIcon, ModalType } from './ModalDialog.svelte';
 	import type { ModalDialogData } from './ModalDialog.svelte';
+	let modalDialog: ModalDialog;
 
 	// Toast
 	import { addToast, showWarningToast, type ToastData } from '$lib/Toast/ToastStore';
@@ -41,8 +42,8 @@
 	let feesAcknowledged = false;
 
 	// Wallet management
-	import { getAccountAddress, getSigner } from '$lib/wallet';
-	import { accountAddress, connected, connect } from '$lib/wallet';
+	import { getAccountAddress, getSigner } from '$lib/Utils/wallet';
+	import { accountAddress, connected, connect } from '$lib/Utils/wallet';
 	import { joinProject, checkAllowance, getERC20Contract } from './ethersCalls/rpcRequests';
 	import WalletBalances from './WalletBalances.svelte';
 	import refreshWalletData from './WalletBalances.svelte';
@@ -74,7 +75,7 @@
 
 	// Modal Dialog
 	let modalDialogData: ModalDialogData = {
-		visible: false,
+		id: '',
 		title: '',
 		body: '',
 		animation: ModalAnimation.Circle2,
@@ -140,13 +141,14 @@
 			}
 
 			modalDialogData = {
+				id: 'joinProject',
 				title: 'Join project',
 				type: ModalType.ActionRequest,
 				icon: ModalIcon.DeviceMobile,
 				body: 'Please sign the transaction from your wallet.',
-				animation: ModalAnimation.Circle2,
-				visible: true
+				animation: ModalAnimation.Circle2
 			};
+			modalDialog.showDialog();
 
 			actionButtonEnabled = false;
 
@@ -173,13 +175,14 @@
 						? ''
 						: `\n\n Details: ${errorString}`;
 				modalDialogData = {
+					id: 'txRejected',
 					type: ModalType.ActionRequest,
-					visible: true,
 					title: 'Transaction rejected',
 					body: `An error ocurred when joining the project. ${errorDescription}`,
 					icon: ModalIcon.Exclamation,
 					animation: ModalAnimation.None
 				};
+				modalDialog.showDialog();
 
 				console.log(`${errorString}`);
 				actionButtonEnabled = true;
@@ -187,13 +190,14 @@
 			}
 
 			modalDialogData = {
+				id: 'joinProjectConfirmationWait',
 				type: ModalType.ActionRequest,
-				visible: true,
 				title: 'Join project',
 				body: 'Waiting for transaction confirmation..',
 				icon: ModalIcon.None,
 				animation: ModalAnimation.Diamonds
 			};
+			modalDialog.showDialog();
 
 			await joinTransaction.unwrap().wait();
 
@@ -234,13 +238,14 @@
 		}
 
 		modalDialogData = {
+			id: 'walletApproval',
 			type: ModalType.ActionRequest,
-			visible: true,
 			title: 'Wallet approval',
 			body: `Please approve the spending of ${$totalSum} ${campaignStaticUI.tokenSymbol} to Crowdtainer from your wallet.`,
 			icon: ModalIcon.None,
 			animation: ModalAnimation.Circle2
 		};
+		modalDialog.showDialog();
 
 		actionButtonEnabled = false;
 
@@ -257,7 +262,7 @@
 			};
 			addToast(toast);
 			actionButtonEnabled = true;
-			modalDialogData.visible = false;
+			modalDialog.close();
 			return;
 		}
 
@@ -265,7 +270,7 @@
 		modalDialogData.icon = ModalIcon.None;
 		modalDialogData.animation = ModalAnimation.Diamonds;
 
-		if(permitApproveTx !== undefined) {
+		if (permitApproveTx !== undefined) {
 			await permitApproveTx.wait();
 		} else {
 			console.log(`permitApproveTx undefined`);
@@ -280,19 +285,18 @@
 
 		if (checkAllowanceResult.isErr()) {
 			modalDialogData.body = `Unable to authorize ERC20 spending.`;
+			modalDialogData.icon = ModalIcon.Exclamation;
 			console.log(`${checkAllowanceResult.unwrapErr()}`);
 		} else {
 			await refreshWalletData;
-			modalDialogData.visible = false;
+			modalDialog.close();
 		}
 
 		actionButtonEnabled = true;
 	};
 </script>
 
-{#if modalDialogData.visible}
-	<ModalDialog {modalDialogData} />
-{/if}
+<ModalDialog {modalDialogData} bind:this={modalDialog} />
 
 {#if $totalSum > 0}
 	<div transition:slide|global={{ duration: 150 }}>
@@ -381,9 +385,9 @@
 
 				<div class="flex justify-center">
 					<div>
-						<a target="_blank" href='/Legal/Terms' rel="noopener">General Terms and Conditions</a>
+						<a target="_blank" href="/Legal/Terms" rel="noopener">General Terms and Conditions</a>
 					</div>
-			</div>
+				</div>
 
 				<div class="flex justify-center my-2">
 					<div class="grid grid-flow-col auto-cols-max">

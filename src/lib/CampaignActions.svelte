@@ -18,10 +18,14 @@
 		ModalType,
 		type ModalDialogData
 	} from './ModalDialog.svelte';
+
+	let modalDialog: ModalDialog;
+	let transferWalletModalDialog: ModalDialog;
+
 	import { claimFunds, leaveProject, transferToken } from './ethersCalls/rpcRequests';
 
 	// Wallet management
-	import { getSigner } from '$lib/wallet';
+	import { getSigner } from '$lib/Utils/wallet';
 	import type { BigNumber } from 'ethers';
 	import { OrderStatus } from './api';
 
@@ -43,23 +47,23 @@
 		dispatch('userTransferredParticipationEvent', dialogData);
 	}
 
-	// Modal Dialog
+	// Modal dialog
 	let dialog: ModalDialogData = {
+		id: 'generic',
 		type: ModalType.ActionRequest,
 		title: '',
 		body: '',
 		animation: ModalAnimation.Circle2,
-		visible: false,
 		icon: ModalIcon.DeviceMobile
 	};
 
-	// Transfer to wallet dialog
+	// Transfer to wallet modal dialog
 	let transferWalletDialog: ModalDialogData = {
+		id: 'transferWallet',
 		type: ModalType.DataInput,
 		title: 'Transfer',
 		body: 'Please enter the wallet address you would like to send the participation proof to:',
 		animation: ModalAnimation.None,
-		visible: false,
 		icon: ModalIcon.None
 	};
 	let transferWalletUserInput = '';
@@ -69,21 +73,21 @@
 		dialog.title = 'Leave campaign';
 		dialog.body = 'Please confirm the transaction request in your mobile wallet.';
 		dialog.animation = ModalAnimation.Circle2;
-		dialog.visible = true;
+		modalDialog.showDialog();
 
 		let signResult = await leaveProject(getSigner(), vouchers721Address, crowdtainerAddress);
 
 		if (signResult.isErr()) {
-			dialog.visible = true;
 			dialog.title = 'Transaction rejected';
 			dialog.body = 'Your request to leave the project was not completed.';
 			dialog.animation = ModalAnimation.None;
 			dialog.icon = ModalIcon.Exclamation;
+			modalDialog.showDialog();
 			console.log(`Failure!? ${signResult.unwrapErr()}`);
 			return;
 		}
 
-		dialog.visible = false;
+		modalDialog.close();
 		userLeftCrowdtainer();
 	};
 
@@ -92,45 +96,47 @@
 		dialog.title = 'Claim funds';
 		dialog.body = 'Please confirm the transaction request in your mobile wallet.';
 		dialog.animation = ModalAnimation.Circle2;
-		dialog.visible = true;
+		modalDialog.showDialog();
 
 		let signResult = await claimFunds(getSigner(), crowdtainerAddress);
 
 		if (signResult.isErr()) {
-			dialog.visible = true;
 			dialog.title = 'Transaction rejected';
 			dialog.body = 'Your request to leave the project was not completed.';
 			dialog.animation = ModalAnimation.None;
 			dialog.icon = ModalIcon.Exclamation;
+			modalDialog.showDialog();
 			console.log(`Failure!? ${signResult.unwrapErr()}`);
 			return;
 		}
 
-		dialog.visible = false;
+		modalDialog.close();
 		userClaimedFunds();
 	};
 
 	let showTransferDialog = async () => {
 		transferWalletUserInput = '';
-		transferWalletDialog.visible = true;
+		transferWalletModalDialog.showDialog();
 	};
 
 	let callTransferParticipationProof = async (targetWallet: string, tokenId: number) => {
+		dialog.id = 'confirmTransferTx';
 		dialog.type = ModalType.ActionRequest;
 		dialog.title = 'Transfer participation proof to another wallet';
 		dialog.body = 'Please confirm the transaction request in your mobile wallet.';
 		dialog.animation = ModalAnimation.Circle2;
-		dialog.visible = true;
+		modalDialog.showDialog();
 
 		// TODO: Check if ENS rsoluition is working
 		let signResult = await transferToken(getSigner(), vouchers721Address, targetWallet, tokenId);
 
 		if (signResult.isErr()) {
-			dialog.visible = true;
+			dialog.id = 'transferRejected';
 			dialog.title = 'Transaction rejected';
-			dialog.body = 'Your request to leave the project was not completed.';
+			dialog.body = 'Your request to transfer the participation proof was not completed.';
 			dialog.animation = ModalAnimation.None;
 			dialog.icon = ModalIcon.Exclamation;
+			modalDialog.showDialog();
 			console.log(`Failure!? ${signResult.unwrapErr()}`);
 			return;
 		}
@@ -138,13 +144,14 @@
 		let confirmation = await signResult.unwrap().wait();
 
 		let resultDialog: ModalDialogData = {
+			id: 'resultDialog',
 			type: ModalType.Information,
-			visible: true,
 			title: '',
 			body: '',
 			icon: ModalIcon.BadgeCheck,
 			animation: ModalAnimation.None
 		};
+		modalDialog.showDialog();
 
 		if (confirmation.status === 1) {
 			resultDialog.title = 'Success';
@@ -160,52 +167,48 @@
 	};
 </script>
 
-{#if dialog.visible}
-	<ModalDialog modalDialogData={dialog} />
-{/if}
+<ModalDialog modalDialogData={dialog} bind:this={modalDialog} />
 
-{#if transferWalletDialog.visible}
-	<ModalDialog modalDialogData={transferWalletDialog}>
-		<label class="block my-2">
-			<span class="block text-sm font-medium text-slate-700">Wallet address or ENS name</span>
-			<input
-				type="text"
-				bind:value={transferWalletUserInput}
-				class="mt-1 block w-full px-3 py-2 bg-white border border-slate-300 rounded-md text-sm shadow-sm placeholder-slate-400
+<ModalDialog modalDialogData={transferWalletDialog} bind:this={transferWalletModalDialog}>
+
+	<label class="block my-2">
+		<span class="block text-sm font-medium text-slate-700">Wallet address or ENS name</span>
+		<input
+			type="text"
+			bind:value={transferWalletUserInput}
+			class="mt-1 block w-full px-3 py-2 bg-white border border-slate-300 rounded-md text-sm shadow-sm placeholder-slate-400
 			  focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500
 			  invalid:border-pink-500 invalid:text-pink-600
 			  focus:invalid:border-pink-500 focus:invalid:ring-pink-500
 			"
-			/>
-		</label>
-		<div class="flex justify-center gap-8">
-			<button
-				type="button"
-				class="red-action-btn"
-				on:click={async () => {
-					transferWalletDialog.visible = false;
-					transferWalletUserInput = '';
-				}}
-			>
-				Cancel
-			</button>
-			<button
-				type="button"
-				class="sky-btn"
-				on:click={async () => {
-					transferWalletDialog.visible = false;
-					if (tokenId !== undefined) {
-						callTransferParticipationProof(transferWalletUserInput, tokenId);
-					} else {
-						console.log('Error: tokenId not specified');
-					}
-				}}
-			>
-				Transfer
-			</button>
-		</div>
-	</ModalDialog>
-{/if}
+		/>
+	</label>
+	<div class="flex justify-center gap-8">
+		<button
+			type="button"
+			class="red-action-btn"
+			on:click={async () => {
+				transferWalletModalDialog.close();
+				transferWalletUserInput = '';
+			}}
+		>
+			Cancel
+		</button>
+		<button
+			type="button"
+			class="sky-btn"
+			on:click={async () => {
+				if (tokenId !== undefined) {
+					callTransferParticipationProof(transferWalletUserInput, tokenId);
+				} else {
+					console.log('Error: tokenId not specified');
+				}
+			}}
+		>
+			Transfer
+		</button>
+	</div>
+</ModalDialog>
 
 <div class="flex flex-wrap justify-center mt-2">
 	<!-- Checkout -->
@@ -217,8 +220,7 @@
 			<a href="/Checkout?vouchers721Address={vouchers721Address}&voucherId={tokenId}">
 				<button
 					type="button"
-					class="relative inline-flex items-center justify-center overflow-hidden text-sm font-medium text-gray-900 rounded-lg group bg-gradient-to-br from-teal-300 to-lime-300 group-hover:from-teal-300 group-hover:to-lime-300  focus:ring-4 focus:outline-none focus:ring-lime-200"
-
+					class="relative inline-flex items-center justify-center overflow-hidden text-sm font-medium text-gray-900 rounded-lg group bg-gradient-to-br from-teal-300 to-lime-300 group-hover:from-teal-300 group-hover:to-lime-300 focus:ring-4 focus:outline-none focus:ring-lime-200"
 				>
 					<span
 						class="h-auto w-36 relative px-5 py-6 transition-all ease-in duration-75 bg-white rounded-md group-hover:bg-opacity-0"
@@ -239,7 +241,7 @@
 				<!-- <span class="tooltip rounded shadow-lg p-1 bg-gray-100 mt-40"> Download invoice </span> -->
 				<button
 					type="button"
-					class="relative inline-flex items-center justify-center overflow-hidden text-sm font-medium text-gray-900 rounded-lg group bg-gradient-to-br from-teal-300 to-lime-300 group-hover:from-teal-300 group-hover:to-lime-300  focus:ring-4 focus:outline-none focus:ring-lime-200"
+					class="relative inline-flex items-center justify-center overflow-hidden text-sm font-medium text-gray-900 rounded-lg group bg-gradient-to-br from-teal-300 to-lime-300 group-hover:from-teal-300 group-hover:to-lime-300 focus:ring-4 focus:outline-none focus:ring-lime-200"
 				>
 					<span
 						class="h-auto w-36 relative px-5 py-6 transition-all ease-in duration-75 bg-white rounded-md group-hover:bg-opacity-0"

@@ -27,7 +27,7 @@ module.exports = {
     themes: [
       {
         garden: {
-          ...require("daisyui/src/colors/themes")["[data-theme=garden]"],
+          ...require("daisyui/src/theming/themes")["[data-theme=garden]"],
           primary: "#325ba9",
           secondary: "#000000",
          "neutral-content": "#f7f7f7"
@@ -35,7 +35,7 @@ module.exports = {
       },
     {
       forest: {
-        ...require("daisyui/src/colors/themes")["[data-theme=forest]"],
+        ...require("daisyui/src/theming/themes")["[data-theme=forest]"],
         primary: "#38accf",
         secondary: "#c2f7ffff",
         "primary-content":"#c2f7ffff",

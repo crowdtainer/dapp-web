@@ -1,6 +1,6 @@
 <script lang="ts">
-	import { connect } from '$lib/wallet';
-	import { WalletType } from '$lib/walletStorage';
+	import { connect } from '$lib/Utils/wallet';
+	import { WalletType } from '$lib/Utils/walletStorage';
 	import { Icon } from '@steeze-ui/svelte-icon';
 	import { InformationCircle } from '@steeze-ui/heroicons';
 </script>
