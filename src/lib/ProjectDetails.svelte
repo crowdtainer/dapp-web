@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { slide } from 'svelte/transition';
-	import { shortenAddress } from './wallet';
+	import { shortenAddress } from './Utils/wallet';
 
 	import { Icon } from '@steeze-ui/svelte-icon';
 	import { Clipboard } from '@steeze-ui/heroicons';

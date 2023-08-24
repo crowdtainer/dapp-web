@@ -22,13 +22,16 @@
 		loadingString
 	} from '$lib/Converters/CrowdtainerData';
 
-	import { connected, getSigner, accountAddress } from '$lib/wallet';
+	import { connected, getSigner, accountAddress } from '$lib/Utils/wallet';
+
 	import ModalDialog, {
 		ModalAnimation,
 		ModalIcon,
 		ModalType,
 		type ModalDialogData
 	} from './ModalDialog.svelte';
+	let modalDialog: ModalDialog;
+
 	import { loadTokenURIRepresentation } from './Converters/tokenURI';
 	import { getOrderDetailsAPI, type OrderStatus } from './api';
 	import ProjectDetails from './ProjectDetails.svelte';
@@ -55,7 +58,7 @@
 
 	// Modal Dialog
 	let dialog: ModalDialogData = {
-		visible: false,
+		id: '',
 		title: '',
 		body: '',
 		animation: ModalAnimation.Circle2,
@@ -144,13 +147,14 @@
 
 	function handleUserClaimedFundsEvent(event: CustomEvent) {
 		console.log(`Detected event of type: ${event.type} : detail: ${event.detail.text}`);
-		dialog.visible = true;
+		dialog.id = 'paymentReturnDialog';
 		dialog.title = 'Success';
 		dialog.animation = ModalAnimation.None;
 		dialog.icon = ModalIcon.BadgeCheck;
 		dialog.type = ModalType.Information;
 		dialog.body =
 			'The value equivalent to your pre-payment amount has been returned to your wallet.';
+		modalDialog.showDialog();
 	}
 
 	// dynamic
@@ -170,17 +174,15 @@
 	$: $connected, $accountAddress, readDataForConnectedWallet();
 </script>
 
-{#if dialog.visible}
-	<ModalDialog modalDialogData={dialog} />
-{/if}
+<ModalDialog modalDialogData={dialog} bind:this={modalDialog} />
 
 <div class="max-w-10xl mx-auto py-1 sm:px-6 lg:px-8">
-	<div class="rounded-md max-w-lg mx-auto white overflow-hidden md:max-w-7xl my-8 ">
+	<div class="rounded-md max-w-lg mx-auto white overflow-hidden md:max-w-7xl my-8">
 		<div class="md:flex">
 			<div class="md:shrink-0">
 				<!-- <img class="w-full object-cover md:h-full md:w-96" src={projectImageURL} alt="Coffee" /> -->
 				<img
-					class="drop-shadow-md hover:drop-shadow-xl w-full object-cover  md:w-96 p-2"
+					class="drop-shadow-md hover:drop-shadow-xl w-full object-cover md:w-96 p-2"
 					src={svg}
 					alt="Coffee"
 				/>
@@ -235,7 +237,7 @@
 					/>
 				</div>
 
-				<div class="w-auto flex ">
+				<div class="w-auto flex">
 					{#if campaignStaticData !== undefined && campaignStaticUI !== undefined}
 						<CampaignActions
 							{tokenId}

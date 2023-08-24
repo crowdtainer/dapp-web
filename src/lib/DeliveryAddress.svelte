@@ -1,12 +1,17 @@
 <script lang="ts">
-	import { type DeliveryDetails, makeDeliveryRequestMessage, signMessage, treatSpecialChars } from './Model/SignTerms';
+	import {
+		type DeliveryDetails,
+		makeDeliveryRequestMessage,
+		signMessage,
+		treatSpecialChars
+	} from './Model/SignTerms';
 	import ModalDialog, {
 		ModalAnimation,
 		ModalIcon,
 		ModalType,
 		type ModalDialogData
 	} from './ModalDialog.svelte';
-	import { getSigner } from './wallet';
+	import { getSigner } from './Utils/wallet';
 	import { requestDeliveryAPI } from './api';
 
 	// Random number
@@ -15,13 +20,14 @@
 
 	// Modal Dialog
 	let modalDialogData: ModalDialogData = {
-		visible: false,
+		id: 'deliveryDialog',
 		title: '',
 		body: '',
 		animation: ModalAnimation.Circle2,
 		icon: ModalIcon.DeviceMobile,
 		type: ModalType.ActionRequest
 	};
+	let modalDialog: ModalDialog;
 
 	export let walletAddress: string;
 	export let vouchers721Address: string;
@@ -64,11 +70,12 @@
 			email
 		};
 
+		modalDialogData.id = 'deliveryConfirmation';
 		modalDialogData.type = ModalType.ActionRequest;
 		modalDialogData.title = 'Delivery confirmation';
 		modalDialogData.body = 'Please confirm the signature request in your mobile wallet.';
 		modalDialogData.animation = ModalAnimation.Circle2;
-		modalDialogData.visible = true;
+		modalDialog.showDialog();
 
 		const nonce = pseudoRandomNonce().toString();
 		const currentTime = new Date().toISOString();
@@ -80,7 +87,14 @@
 		walletAddress = ethers.utils.getAddress(walletAddress);
 		console.log(`Account check-summed: ${walletAddress}`);
 
-		let message = makeDeliveryRequestMessage(walletAddress, domain, origin, deliveryDetails, nonce, currentTime);
+		let message = makeDeliveryRequestMessage(
+			walletAddress,
+			domain,
+			origin,
+			deliveryDetails,
+			nonce,
+			currentTime
+		);
 		let signResult = await signMessage(signer, message);
 
 		if (signResult.isOk()) {
@@ -96,22 +110,30 @@
 			deliveryDetails.email = treatSpecialChars(deliveryDetails.email);
 
 			// TODO: Apply asymmetric encryption client/browser side before sending.
-			let requestResult = await requestDeliveryAPI(walletAddress, domain, origin, nonce, currentTime, deliveryDetails, sigHash);
+			let requestResult = await requestDeliveryAPI(
+				walletAddress,
+				domain,
+				origin,
+				nonce,
+				currentTime,
+				deliveryDetails,
+				sigHash
+			);
 
 			if (requestResult === 'OK') {
-				modalDialogData.visible = false;
+				modalDialog.close();
 				displaySuccessMessage = true;
 			} else {
 				console.log(`Error: ${requestResult}`);
 				modalDialogData = {
+					id: 'transactionRejectedDialog',
 					type: ModalType.ActionRequest,
-					visible: true,
 					title: 'Transaction rejected',
 					body: `An error ocurred when requesting delivery. Please contact us with the following details: ${requestResult}.`,
 					icon: ModalIcon.Exclamation,
 					animation: ModalAnimation.None
 				};
-				modalDialogData.visible = true;
+				modalDialog.showDialog();
 				console.log(`what went wrong? ${requestResult}`);
 				return;
 			}
@@ -121,17 +143,15 @@
 	};
 </script>
 
-{#if modalDialogData.visible}
-	<ModalDialog {modalDialogData} />
-{/if}
+<ModalDialog {modalDialogData} bind:this={modalDialog} />
 
 {#if displaySuccessMessage}
 	<div class="text-black dark:text-white py-16 mx-16">
 		<p class="text-secondary text-xl">Success!</p>
 		<br />
 		<p>
-			Thank you. We have received your delivery address and in a few minutes you
-			should receive an invoice by Email as a final confirmation.
+			Thank you. We have received your delivery address and in a few minutes you should receive an
+			invoice by Email as a final confirmation.
 		</p>
 	</div>
 {:else}

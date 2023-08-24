@@ -3,7 +3,7 @@
 	import { fade } from 'svelte/transition';
 	import { onMount, onDestroy } from 'svelte';
 
-	import { clickOutside } from '$lib/clickOutside';
+	import { clickOutside } from '$lib/Utils/clickOutside';
 
 	// Wallet management
 	import {
@@ -14,8 +14,8 @@
 		disconnect,
 		setupWallet,
 		tearDownWallet,
-	} from '$lib/wallet';
-	import { WalletType } from '$lib/walletStorage';
+	} from '$lib/Utils/wallet';
+	import { WalletType } from '$lib/Utils/walletStorage';
 
 	// Toast
 	import { addToast, type ToastData } from '$lib/Toast/ToastStore';

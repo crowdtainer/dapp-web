@@ -34,15 +34,13 @@
 
 <Toasts />
 
-<div class={backgroundColor}>
+<div class="min-h-screen {backgroundColor}">
 	<div class={backgroundStyle}>
-		<div class="min-h-screen {backdropStyle}">
-			<div class="">
-				<nav class="{navBarStyle} z-50">
-					<TopMenuNav />
-				</nav>
-			</div>
-			<main class="">
+		<div class=" {backdropStyle}">
+			<nav class="{navBarStyle} z-50">
+				<TopMenuNav />
+			</nav>
+			<main>
 				<slot />
 			</main>
 		</div>

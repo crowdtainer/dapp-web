@@ -42,6 +42,7 @@ export const initializeCampaignStores = (campaignId: number): Readable<Crowdtain
 
 		return function stop() {
 			clearInterval(interval);
+			campaignStores.delete(campaignId);
 		};
 	});
 

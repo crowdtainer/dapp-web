@@ -7,17 +7,11 @@
 	import { LoadStatus, ProjectStatusUI, toState } from '$lib/Converters/CrowdtainerData';
 	import type { CrowdtainerDynamicModel } from '$lib/Model/CrowdtainerModel';
 
-	import { connected, getSigner, accountAddress } from '$lib/wallet';
+	import { connected, getSigner, accountAddress } from '$lib/Utils/wallet';
 	import EmptySection from '$lib/EmptySection.svelte';
-	import { connect } from '$lib/wallet';
-	import { WalletType } from '$lib/walletStorage';
+	import { connect } from '$lib/Utils/wallet';
+	import { WalletType } from '$lib/Utils/walletStorage';
 
-	import ModalDialog, {
-		ModalAnimation,
-		ModalIcon,
-		ModalType,
-		type ModalDialogData
-	} from '$lib/ModalDialog.svelte';
 	import { findTokenIdsForWallet } from '$lib/ethersCalls/rpcRequests';
 	import { BigNumber } from 'ethers';
 	import { loadTokenURIRepresentation, type TokenURIObject } from '$lib/Converters/tokenURI';
@@ -35,16 +29,6 @@
 	let vouchers721Address: string;
 
 	let tokenValidForWallet: boolean;
-
-	// Modal Dialog
-	let dialog: ModalDialogData = {
-		type: ModalType.ActionRequest,
-		title: '',
-		body: '',
-		animation: ModalAnimation.Circle2,
-		visible: false,
-		icon: ModalIcon.DeviceMobile
-	};
 
 	async function loadUserData() {
 		console.log(
@@ -168,10 +152,6 @@
 	});
 </script>
 
-{#if dialog.visible}
-	<ModalDialog modalDialogData={dialog} />
-{/if}
-
 <header class="ct-divider">
 	<div class="max-w-7xl mx-auto py-4 px-4 sm:px-6 lg:px-8">
 		<h1 class="font-display text-xl text-white">Checkout 🛒</h1>
@@ -185,7 +165,7 @@
 			<p>Please reconnect the following wallet: {loadedWallet} or restart Checkout.</p>
 		</div>
 	{:else if $connected && staticDataLoadStatus == LoadStatus.Loaded && projectStatusUI === ProjectStatusUI.Delivery}
-		<div class="md:flex ">
+		<div class="md:flex">
 			<div class="md:shrink-0">
 				<div class="flex justify-center">
 					<img
@@ -210,7 +190,7 @@
 			</p>
 			<br />
 
-			<div class="flex justify-center ">
+			<div class="flex justify-center">
 				<button
 					class="btn btn-outline text-black dark:text-white"
 					on:click={() => {

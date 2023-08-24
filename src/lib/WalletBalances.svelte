@@ -1,10 +1,10 @@
 <script lang="ts">
 	import type { BigNumber } from 'ethers';
-	import { onInterval } from './intervalTimer';
+	import { onInterval } from './Utils/intervalTimer';
 
 	import type { UserStoreModel } from '$lib/Model/UserStoreModel';
 	import { fetchUserBalancesData } from './ethersCalls/rpcRequests';
-	import { getSigner, web3Provider } from './wallet';
+	import { getSigner, web3Provider } from './Utils/wallet';
 
 	export let crowdtainerAddress: string;
 	export let tokenSymbol: string | undefined;

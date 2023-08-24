@@ -7,7 +7,7 @@ import { type Result, Ok, Err } from "@sniptt/monads";
 import type { IERC20 } from '../../routes/typechain/IERC20';
 import type { UserStoreModel } from '$lib/Model/UserStoreModel';
 import { decodeEthersError } from '$lib/Converters/EthersErrorHandler';
-import { getSigner } from '$lib/wallet';
+import { getSigner } from '$lib/Utils/wallet';
 
 function makeError(error: any): Result<ContractTransaction, string> {
     let errorDecoderResult = decodeEthersError(error);

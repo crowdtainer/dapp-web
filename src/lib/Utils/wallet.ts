@@ -5,8 +5,8 @@ import { ethers, providers, Signer } from 'ethers';
 
 import { writable, derived } from 'svelte/store';
 
-import { type WalletState, WalletType, ConnectionState, persistState, getLastState, resetStorageState } from '$lib/walletStorage';
-import { MessageType } from './Toast/MessageType';
+import { type WalletState, WalletType, ConnectionState, persistState, getLastState, resetStorageState } from '$lib/Utils/walletStorage';
+import { MessageType } from '../Toast/MessageType';
 
 const VITE_WALLET_CONNECT_BRIDGE_SERVER: string = import.meta.env.VITE_WALLET_CONNECT_BRIDGE_SERVER;
 
