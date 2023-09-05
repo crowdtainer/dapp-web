@@ -39,13 +39,13 @@
     @apply rounded-b-lg sticky top-0 z-40 backdrop-blur-[6px] dark:bg-[#0d1116]/30 bg-gray-100/30
   }
 
-  .tooltip {
+  /* .tooltip {
     @apply invisible absolute;
   }
   
   .has-tooltip:hover .tooltip {
     @apply visible z-50;
-  }
+  } */
 
   .projectStatus {
     @apply font-display;

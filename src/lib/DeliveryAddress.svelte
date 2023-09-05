@@ -70,12 +70,14 @@
 			email
 		};
 
-		modalDialogData.id = 'deliveryConfirmation';
-		modalDialogData.type = ModalType.ActionRequest;
-		modalDialogData.title = 'Delivery confirmation';
-		modalDialogData.body = 'Please confirm the signature request in your mobile wallet.';
-		modalDialogData.animation = ModalAnimation.Circle2;
-		modalDialog.showDialog();
+		modalDialog.show({
+			id: 'deliveryConfirmation',
+			title: 'Delivery confirmation',
+			body: 'Please confirm the signature request in your mobile wallet.',
+			type: ModalType.ActionRequest,
+			icon: ModalIcon.BadgeCheck,
+			animation: ModalAnimation.Circle2
+		});
 
 		const nonce = pseudoRandomNonce().toString();
 		const currentTime = new Date().toISOString();
@@ -125,15 +127,13 @@
 				displaySuccessMessage = true;
 			} else {
 				console.log(`Error: ${requestResult}`);
-				modalDialogData = {
+				modalDialog.show({
 					id: 'transactionRejectedDialog',
-					type: ModalType.ActionRequest,
 					title: 'Transaction rejected',
-					body: `An error ocurred when requesting delivery. Please contact us with the following details: ${requestResult}.`,
-					icon: ModalIcon.Exclamation,
-					animation: ModalAnimation.None
-				};
-				modalDialog.showDialog();
+					body: 'An error ocurred when requesting delivery. Please contact us with the following details: ${requestResult}.',
+					type: ModalType.ActionRequest,
+					icon: ModalIcon.Exclamation
+				});
 				console.log(`what went wrong? ${requestResult}`);
 				return;
 			}
@@ -143,7 +143,7 @@
 	};
 </script>
 
-<ModalDialog {modalDialogData} bind:this={modalDialog} />
+<ModalDialog bind:this={modalDialog} />
 
 {#if displaySuccessMessage}
 	<div class="text-black dark:text-white py-16 mx-16">

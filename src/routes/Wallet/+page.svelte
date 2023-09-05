@@ -13,13 +13,10 @@
 	import { Icon } from '@steeze-ui/svelte-icon';
 	import { Wallet } from '@steeze-ui/heroicons';
 
-	import ModalDialog, {
-		ModalAnimation,
-		ModalIcon,
-		ModalType,
-		type ModalDialogData
-	} from '$lib/ModalDialog.svelte';
+	import ModalDialog from '$lib/ModalDialog.svelte';
 	import { onMount } from 'svelte';
+
+	let modalDialog: ModalDialog;
 
 	let tokenIds: number[] = [];
 	let crowdtainerIds: number[] = [];
@@ -28,17 +25,6 @@
 	let campaignStaticUI: Map<number, UIFields> = new Map<number, UIFields>();
 	let staticDataLoadStatus: LoadStatus = LoadStatus.Loading;
 	let loadDataInFlight = false;
-
-	// Modal Dialog
-	let dialog: ModalDialogData = {
-		id: 'walletDialog',
-		type: ModalType.ActionRequest,
-		title: '',
-		body: '',
-		animation: ModalAnimation.Circle2,
-		visible: false,
-		icon: ModalIcon.DeviceMobile
-	};
 
 	function resetState() {
 		tokenIds = [];
@@ -59,7 +45,7 @@
 		console.log(`Detected event of type: ${event.type}`);
 		console.log(`Modal: typeof(detail): ${typeof event.detail}`);
 		console.dir(event.detail);
-		dialog = event.detail;
+		modalDialog = event.detail;
 		// Reload items
 		loadUserData();
 	}
@@ -117,7 +103,7 @@
 	$: $connected, $accountAddress, loadUserData();
 </script>
 
-<ModalDialog modalDialogData={dialog} />
+<ModalDialog bind:this={modalDialog} />
 
 <div class="flex justify-center mt-24">
 	<div class="">

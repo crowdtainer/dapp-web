@@ -21,4 +21,5 @@ export type CrowdtainerStaticModel = {
 	tokenDecimals: number;
 	tokenSymbol: string;
 	signer: string;
+	referralRate: BigNumber;
 }
