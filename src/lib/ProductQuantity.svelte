@@ -1,7 +1,8 @@
 <script lang="ts">
-	import { joinSelection } from '$lib/userStore';
+
 	import { derived, type Readable } from 'svelte/store';
 	import { fade, slide} from 'svelte/transition';
+	import { joinSelection } from './Stores/userStore.js';
 
 	export let prices: number[];
 	export let descriptions: string[];

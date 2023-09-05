@@ -97,6 +97,10 @@ export const POST: RequestHandler = async ({ request, params }) => {
     const args = abiInterface.decodeFunctionData("getSignedJoinApproval", `${hexCalldata}`);
     const [crowdtainerAddress, address, quantities, enableReferral, referralAddress] = args;
 
+    if (userWalletAddress !== address) {
+        throw error(400, `Unexpected wallet address.`);
+    }
+
     // Apply sanity checks and restrictions
     let campaignData: CrowdtainerStaticModel | undefined;
     campaignStaticData.forEach((value: CrowdtainerStaticModel, _key: number) => {
@@ -121,8 +125,19 @@ export const POST: RequestHandler = async ({ request, params }) => {
     console.log(`total order value: ${totalValue}`);
     console.log(`max allowed: ${maxCost}`);
 
+    if(referralAddress !== '0x0000000000000000000000000000000000000000') {
+        // apply discount
+        console.log(`Before discount: ${totalValue}`);
+        let rate = campaignData.referralRate.div(2);
+        let discount = BigNumber.from(totalValue).toNumber() * BigNumber.from(rate).toNumber() / 100;
+        totalValue = totalValue.sub(BigNumber.from(discount));
+        console.log(`rate: ${rate}`);
+        console.log(`discount: ${discount}`);
+        console.log(`After discount: ${totalValue}`);
+    }
+
     if (totalValue > maxCost) {
-        throw error(400, `Order amount too high. Maximum: ${ERC20_MaximumPurchaseValuePerWallet} ${campaignData.tokenSymbol}.`);
+        throw error(400, `Order amount too high (${totalValue}). Maximum: ${maxCost} ${campaignData.tokenSymbol}.`);
     }
 
     let epochExpiration = BigNumber.from(Math.floor(Date.now() / 1000) + AUTHORIZER_SIGNATURE_EXPIRATION_TIME_IN_SECONDS);

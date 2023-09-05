@@ -1,10 +1,8 @@
 <script lang="ts">
-	import { onDestroy, onMount } from 'svelte';
+	import { onMount } from 'svelte';
 	import type { Readable } from 'svelte/store';
 
-	import { initializeCampaignStores, campaignStores } from '$lib/campaignStore';
-	import { walletFundsInCrowdtainer } from './ethersCalls/rpcRequests';
-	import { BigNumber } from 'ethers';
+	import { initializeCampaignStores, campaignStores } from '$lib/Stores/campaignStore';
 
 	import CampaignActions from './CampaignActions.svelte';
 	import DetailedTokenIdState from './DetailedTokenIdState.svelte';
@@ -24,17 +22,13 @@
 
 	import { connected, getSigner, accountAddress } from '$lib/Utils/wallet';
 
-	import ModalDialog, {
-		ModalAnimation,
-		ModalIcon,
-		ModalType,
-		type ModalDialogData
-	} from './ModalDialog.svelte';
+	import ModalDialog, { ModalAnimation, ModalIcon, ModalType } from './ModalDialog.svelte';
 	let modalDialog: ModalDialog;
 
 	import { loadTokenURIRepresentation } from './Converters/tokenURI';
 	import { getOrderDetailsAPI, type OrderStatus } from './api';
 	import ProjectDetails from './ProjectDetails.svelte';
+	import { initializeDataForWallet, walletInCrowdtainer } from './Stores/dataForWalletStore.js';
 
 	export let tokenId: number;
 	export let vouchers721Address: string;
@@ -53,45 +47,19 @@
 
 	let fundsInContract: number | undefined;
 	let raisedAmount: number | undefined;
-	let userFundsInCrowdtainer: BigNumber = BigNumber.from(0);
 	let svg: string | undefined;
 
 	// Modal Dialog
-	let dialog: ModalDialogData = {
-		id: '',
-		title: '',
-		body: '',
-		animation: ModalAnimation.Circle2,
-		icon: ModalIcon.DeviceMobile,
-		type: ModalType.ActionRequest
-	};
+	// let dialog: ModalDialogData = {
+	// 	id: '',
+	// 	title: '',
+	// 	body: '',
+	// 	animation: ModalAnimation.Circle2,
+	// 	icon: ModalIcon.DeviceMobile,
+	// 	type: ModalType.ActionRequest
+	// };
 
-	function initializeReadLoop(callback: () => void, milliseconds: number | undefined) {
-		const interval = setInterval(callback, milliseconds);
-		onDestroy(() => {
-			clearInterval(interval);
-		});
-	}
-
-	const readDataForConnectedWallet = async () => {
-		if (!$connected || campaignStaticData === undefined) {
-			return;
-		}
-
-		let funds = await walletFundsInCrowdtainer(
-			getSigner(),
-			campaignStaticData?.contractAddress,
-			$accountAddress
-		);
-		if (funds.isErr()) {
-			console.log(`${funds.unwrapErr()}`);
-			return;
-		}
-
-		userFundsInCrowdtainer = funds.unwrap();
-	};
-
-	initializeReadLoop(readDataForConnectedWallet, 13000);
+	initializeDataForWallet(campaignStaticData?.contractAddress, $accountAddress);
 
 	onMount(async () => {
 		// Dynamic data
@@ -147,14 +115,14 @@
 
 	function handleUserClaimedFundsEvent(event: CustomEvent) {
 		console.log(`Detected event of type: ${event.type} : detail: ${event.detail.text}`);
-		dialog.id = 'paymentReturnDialog';
-		dialog.title = 'Success';
-		dialog.animation = ModalAnimation.None;
-		dialog.icon = ModalIcon.BadgeCheck;
-		dialog.type = ModalType.Information;
-		dialog.body =
-			'The value equivalent to your pre-payment amount has been returned to your wallet.';
-		modalDialog.showDialog();
+		modalDialog.show({
+			id: 'paymentReturnDialog',
+			type: ModalType.Information,
+			title: 'Success',
+			body: 'The value equivalent to your pre-payment amount has been returned to your wallet.',
+			animation: ModalAnimation.Circle2,
+			icon: ModalIcon.BadgeCheck
+		});
 	}
 
 	// dynamic
@@ -171,10 +139,12 @@
 	$: loadingAnimation = staticDataLoadStatus === LoadStatus.Loading;
 
 	// Immediatelly update UI elements related to connected wallet on wallet or connection change
-	$: $connected, $accountAddress, readDataForConnectedWallet();
+	$: $connected,
+		$accountAddress,
+		initializeDataForWallet(campaignStaticData?.contractAddress, $accountAddress);
 </script>
 
-<ModalDialog modalDialogData={dialog} bind:this={modalDialog} />
+<ModalDialog bind:this={modalDialog} />
 
 <div class="max-w-10xl mx-auto py-1 sm:px-6 lg:px-8">
 	<div class="rounded-md max-w-lg mx-auto white overflow-hidden md:max-w-7xl my-8">
@@ -217,7 +187,7 @@
 					<p class="my-6 text-red-800">Error fetching data.</p>
 				{/if}
 				<DetailedTokenIdState
-					{userFundsInCrowdtainer}
+					walletData={$walletInCrowdtainer}
 					{campaignStaticUI}
 					{fundsInContract}
 					{raisedAmount}
@@ -232,8 +202,10 @@
 						{crowdtainerId}
 						crowdtainerAddress={campaignStaticData?.contractAddress}
 						serviceProvider={campaignStaticData?.serviceProvider}
+						erc20TokenAddress={campaignStaticData?.token}
 						tokenDecimals={campaignStaticData?.tokenDecimals}
 						signerAddress={campaignStaticData?.signer}
+						referralRate={campaignStaticData?.referralRate}
 					/>
 				</div>
 
@@ -245,7 +217,7 @@
 							crowdtainerAddress={campaignStaticData?.contractAddress}
 							projectStatusUI={state}
 							tokenSymbol={campaignStaticUI.tokenSymbol}
-							{userFundsInCrowdtainer}
+							walletData={$walletInCrowdtainer}
 							{orderStatus}
 							on:userClaimedFundsEvent={handleUserClaimedFundsEvent}
 							on:userTransferredParticipationEvent

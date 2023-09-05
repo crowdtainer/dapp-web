@@ -82,6 +82,7 @@ export interface CrowdtainerInterface extends utils.Interface {
     "costForWallet(address)": FunctionFragment;
     "crowdtainerState()": FunctionFragment;
     "discountForUser(address)": FunctionFragment;
+    "enableReferral(address)": FunctionFragment;
     "expireTime()": FunctionFragment;
     "getPaidAndDeliver()": FunctionFragment;
     "getSigner()": FunctionFragment;
@@ -120,6 +121,7 @@ export interface CrowdtainerInterface extends utils.Interface {
       | "costForWallet"
       | "crowdtainerState"
       | "discountForUser"
+      | "enableReferral"
       | "expireTime"
       | "getPaidAndDeliver"
       | "getSigner"
@@ -178,6 +180,10 @@ export interface CrowdtainerInterface extends utils.Interface {
   ): string;
   encodeFunctionData(
     functionFragment: "discountForUser",
+    values: [PromiseOrValue<string>]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "enableReferral",
     values: [PromiseOrValue<string>]
   ): string;
   encodeFunctionData(
@@ -318,6 +324,10 @@ export interface CrowdtainerInterface extends utils.Interface {
   ): Result;
   decodeFunctionResult(
     functionFragment: "discountForUser",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "enableReferral",
     data: BytesLike
   ): Result;
   decodeFunctionResult(functionFragment: "expireTime", data: BytesLike): Result;
@@ -608,6 +618,11 @@ export interface Crowdtainer extends BaseContract {
       overrides?: CallOverrides
     ): Promise<[BigNumber]>;
 
+    enableReferral(
+      arg0: PromiseOrValue<string>,
+      overrides?: CallOverrides
+    ): Promise<[boolean]>;
+
     expireTime(overrides?: CallOverrides): Promise<[BigNumber]>;
 
     getPaidAndDeliver(
@@ -744,6 +759,11 @@ export interface Crowdtainer extends BaseContract {
     overrides?: CallOverrides
   ): Promise<BigNumber>;
 
+  enableReferral(
+    arg0: PromiseOrValue<string>,
+    overrides?: CallOverrides
+  ): Promise<boolean>;
+
   expireTime(overrides?: CallOverrides): Promise<BigNumber>;
 
   getPaidAndDeliver(
@@ -873,6 +893,11 @@ export interface Crowdtainer extends BaseContract {
       arg0: PromiseOrValue<string>,
       overrides?: CallOverrides
     ): Promise<BigNumber>;
+
+    enableReferral(
+      arg0: PromiseOrValue<string>,
+      overrides?: CallOverrides
+    ): Promise<boolean>;
 
     expireTime(overrides?: CallOverrides): Promise<BigNumber>;
 
@@ -1117,6 +1142,11 @@ export interface Crowdtainer extends BaseContract {
       overrides?: CallOverrides
     ): Promise<BigNumber>;
 
+    enableReferral(
+      arg0: PromiseOrValue<string>,
+      overrides?: CallOverrides
+    ): Promise<BigNumber>;
+
     expireTime(overrides?: CallOverrides): Promise<BigNumber>;
 
     getPaidAndDeliver(
@@ -1252,6 +1282,11 @@ export interface Crowdtainer extends BaseContract {
     crowdtainerState(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
     discountForUser(
+      arg0: PromiseOrValue<string>,
+      overrides?: CallOverrides
+    ): Promise<PopulatedTransaction>;
+
+    enableReferral(
       arg0: PromiseOrValue<string>,
       overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;

@@ -27,6 +27,7 @@ export function isTimeValid(timeISO: string): boolean {
     const timeDifference = +new Date() - +new Date(timeISO);
     console.log(`Signature time difference: ${timeDifference}`);
     if (timeDifference < -360000 || timeDifference > 360000) {
+        console.log(`Rejected signature.`);
         return false;
     } else return true;
 }

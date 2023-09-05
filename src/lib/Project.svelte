@@ -1,15 +1,14 @@
 <script lang="ts">
-	import { onDestroy, onMount } from 'svelte';
+	import { onMount } from 'svelte';
 	import { tweened } from 'svelte/motion';
 	import { cubicOut } from 'svelte/easing';
 	import type { Readable } from 'svelte/store';
 
-	import PreOrderSigBased from '$lib/PreOrderSigBased.svelte';
+	import JoinProject from '$lib/JoinProject.svelte';
 
-	import { initializeCampaignStores, campaignStores } from '$lib/campaignStore';
-	import { joinSelection } from '$lib/userStore';
-	import { findTokenIdsForWallet, walletFundsInCrowdtainer } from './ethersCalls/rpcRequests';
-	import { BigNumber } from 'ethers';
+	import { initializeCampaignStores, campaignStores } from '$lib/Stores/campaignStore';
+	import { joinSelection } from '$lib/Stores/userStore';
+	import { findTokenIdsForWallet } from './ethersCalls/rpcRequests';
 
 	import TimeLeft from './TimeLeft.svelte';
 	import MoneyInContract from './MoneyInContract.svelte';
@@ -33,17 +32,13 @@
 	} from '$lib/Converters/CrowdtainerData';
 
 	import { connected, getSigner, accountAddress } from '$lib/Utils/wallet';
-	import ModalDialog, {
-		ModalAnimation,
-		ModalIcon,
-		ModalType,
-		type ModalDialogData
-	} from './ModalDialog.svelte';
+	import { ModalIcon, ModalType } from './ModalDialog.svelte';
 	let modalDialog: ModalDialog;
 
-	import PreOrder from './PreOrder.svelte';
 	import { getOrderDetailsAPI, OrderStatus } from './api';
 	import ProjectDetails from './ProjectDetails.svelte';
+	import { initializeDataForWallet, walletInCrowdtainer } from './Stores/dataForWalletStore.js';
+	import ModalDialog from './ModalDialog.svelte';
 
 	export let vouchers721Address: string;
 	export let crowdtainerId: number;
@@ -69,49 +64,13 @@
 	let tweeningDuration = 650;
 	let tweenedPercentageWidth = tweened(0, { duration: tweeningDuration, easing: cubicOut });
 	let tweenedPercentageRaised = tweened(0, { duration: tweeningDuration, easing: cubicOut });
-	let userFundsInCrowdtainer: BigNumber = BigNumber.from(0);
 
 	let orderStatus: OrderStatus;
 
 	// tokenId is present only if the connected wallet has joined the project
 	let tokenId: number | undefined = undefined;
 
-	// Modal Dialog
-	let dialog: ModalDialogData = {
-		id: '',
-		title: '',
-		body: '',
-		animation: ModalAnimation.Circle2,
-		icon: ModalIcon.DeviceMobile,
-		type: ModalType.ActionRequest
-	};
-
-	function initializeReadLoop(callback: () => void, milliseconds: number | undefined) {
-		const interval = setInterval(callback, milliseconds);
-		onDestroy(() => {
-			clearInterval(interval);
-		});
-	}
-
-	const readDataForConnectedWallet = async () => {
-		if (!$connected || campaignStaticData === undefined) {
-			return;
-		}
-
-		let funds = await walletFundsInCrowdtainer(
-			getSigner(),
-			campaignStaticData?.contractAddress,
-			$accountAddress
-		);
-		if (funds.isErr()) {
-			console.log(`${funds.unwrapErr()}`);
-			return;
-		}
-
-		userFundsInCrowdtainer = funds.unwrap();
-	};
-
-	initializeReadLoop(readDataForConnectedWallet, 13000);
+	initializeDataForWallet(campaignStaticData?.contractAddress, $accountAddress);
 
 	function loadData() {
 		$joinSelection = $joinSelection;
@@ -220,26 +179,25 @@
 
 	function handleCampaignJoinedEvent(event: CustomEvent) {
 		console.log(`Detected event of type: ${event.type} : detail: ${event.detail.text}`);
-		dialog.id = 'joinSuccess';
-		dialog.title = 'You have succesfully joined the project! 🎉';
-		dialog.animation = ModalAnimation.None;
-		dialog.icon = ModalIcon.BadgeCheck;
-		dialog.type = ModalType.Information;
-		dialog.body =
-			'If the minimum funding is reached, you will be able to enter your delivery address on this site. Otherwise, you can get your pre-payment back.';
-		modalDialog.showDialog();
+		modalDialog.show({
+			id: 'joinSuccess',
+			title: 'You have succesfully joined the project! 🎉',
+			body: 'If the minimum funding is reached, you will be able to enter your delivery address on this site. Otherwise, you can get your pre-payment back.',
+			type: ModalType.Information,
+			icon: ModalIcon.BadgeCheck
+		});
+		loadData();
 	}
 
 	function handleUserClaimedFundsEvent(event: CustomEvent) {
 		console.log(`Detected event of type: ${event.type} : detail: ${event.detail.text}`);
-		dialog.id = 'joinSuccess';
-		dialog.title = 'Success';
-		dialog.animation = ModalAnimation.None;
-		dialog.icon = ModalIcon.BadgeCheck;
-		dialog.type = ModalType.Information;
-		dialog.body =
-			'The value equivalent to your pre-payment amount has been returned to your wallet.';
-		modalDialog.showDialog();
+		modalDialog.show({
+			id: 'joinSuccess',
+			title: 'Success',
+			body: 'The value equivalent to your pre-payment amount has been returned to your wallet.',
+			type: ModalType.Information,
+			icon: ModalIcon.BadgeCheck
+		});
 	}
 
 	function handleUserLeftCrowdtainerEvent(event: CustomEvent) {
@@ -252,12 +210,14 @@
 		let quantities: number[] = new Array<number>(campaignStaticUI.prices.length).fill(0);
 		$joinSelection.set(crowdtainerId, quantities);
 		$joinSelection = $joinSelection;
+
 		loadData();
 	}
 
 	// dynamic
 	$: state = toState($campaignDynamicData, campaignStaticData);
-	$: joinViewEnabled = state === ProjectStatusUI.Funding && userFundsInCrowdtainer.isZero();
+	$: joinViewEnabled =
+		state === ProjectStatusUI.Funding && $walletInCrowdtainer.fundsInCrowdtainer.isZero();
 
 	$: stateString =
 		staticDataLoadStatus !== LoadStatus.FetchFailed &&
@@ -274,10 +234,14 @@
 	$: loadingAnimation = staticDataLoadStatus === LoadStatus.Loading;
 
 	// Immediatelly update UI elements related to connected wallet on wallet or connection change
-	$: $connected, $accountAddress, readDataForConnectedWallet();
+	$: $connected,
+		$accountAddress,
+		initializeDataForWallet(campaignStaticData?.contractAddress, $accountAddress);
+
+	$: campaignStaticUI, console.log(`campaignStaticUI: ${campaignStaticUI}`);
 </script>
 
-<ModalDialog modalDialogData={dialog} bind:this={modalDialog} />
+<ModalDialog bind:this={modalDialog} />
 
 <div class="max-w-10xl mx-auto py-1 sm:px-6 lg:px-8">
 	<div
@@ -361,8 +325,10 @@
 								{crowdtainerId}
 								crowdtainerAddress={campaignStaticData?.contractAddress}
 								serviceProvider={campaignStaticData?.serviceProvider}
+								erc20TokenAddress={campaignStaticData?.token}
 								tokenDecimals={campaignStaticData?.tokenDecimals}
 								signerAddress={campaignStaticData?.signer}
+								referralRate={campaignStaticData?.referralRate}
 							/>
 						</div>
 
@@ -452,7 +418,7 @@
 				{/if}
 
 				<DetailedTokenIdState
-					{userFundsInCrowdtainer}
+					walletData={$walletInCrowdtainer}
 					{campaignStaticUI}
 					{fundsInContract}
 					{raisedAmount}
@@ -468,7 +434,7 @@
 							crowdtainerAddress={campaignStaticData?.contractAddress}
 							projectStatusUI={state}
 							tokenSymbol={campaignStaticUI.tokenSymbol}
-							{userFundsInCrowdtainer}
+							walletData={$walletInCrowdtainer}
 							{orderStatus}
 							on:userClaimedFundsEvent={handleUserClaimedFundsEvent}
 							on:userLeftCrowdtainerEvent={handleUserLeftCrowdtainerEvent}
@@ -478,29 +444,18 @@
 			</div>
 		</div>
 
-		{#if joinViewEnabled && campaignStaticData !== undefined}
+		{#if joinViewEnabled && campaignStaticData !== undefined && campaignStaticUI !== undefined}
 			<div class="dark:text-gray-100">
-				{#if campaignStaticData.signer === '0x0000000000000000000000000000000000000000'}
-					<PreOrder
-						{vouchers721Address}
-						crowdtainerAddress={campaignStaticData?.contractAddress}
-						{campaignStaticUI}
-						{crowdtainerId}
-						{basePrices}
-						{basePriceUnit}
-						on:userJoinedCrowdtainerEvent={handleCampaignJoinedEvent}
-					/>
-				{:else}
-					<PreOrderSigBased
-						{vouchers721Address}
-						crowdtainerAddress={campaignStaticData?.contractAddress}
-						{campaignStaticUI}
-						{crowdtainerId}
-						{basePrices}
-						{basePriceUnit}
-						on:userJoinedCrowdtainerEvent={handleCampaignJoinedEvent}
-					/>
-				{/if}
+				<JoinProject
+					{vouchers721Address}
+					crowdtainerAddress={campaignStaticData?.contractAddress}
+					{campaignStaticUI}
+					{crowdtainerId}
+					{basePrices}
+					{basePriceUnit}
+					referralRate={campaignStaticData?.referralRate}
+					on:userJoinedCrowdtainerEvent={handleCampaignJoinedEvent}
+				/>
 			</div>
 		{/if}
 	</div>

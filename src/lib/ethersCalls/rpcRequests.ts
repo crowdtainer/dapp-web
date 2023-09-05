@@ -8,6 +8,8 @@ import type { IERC20 } from '../../routes/typechain/IERC20';
 import type { UserStoreModel } from '$lib/Model/UserStoreModel';
 import { decodeEthersError } from '$lib/Converters/EthersErrorHandler';
 import { getSigner } from '$lib/Utils/wallet';
+import type { WalletCrowdtainerModel } from '$lib/Model/WalletCrowdtainerModel.js';
+import { toHuman } from '$lib/Converters/CrowdtainerData.js';
 
 function makeError(error: any): Result<ContractTransaction, string> {
     let errorDecoderResult = decodeEthersError(error);
@@ -20,21 +22,26 @@ function makeError(error: any): Result<ContractTransaction, string> {
 
 export async function walletFundsInCrowdtainer(provider: ethers.Signer | undefined,
     crowdtainerAddress: string,
-    wallet: string): Promise<Result<BigNumber, string>> {
+    wallet: string): Promise<Result<WalletCrowdtainerModel, string>> {
 
     if (!provider) {
         return Err("Provider not available.");
     }
 
-    let fundsInCrowdtainer: BigNumber;
+    let walletCrowdtainerData: WalletCrowdtainerModel = {
+        fundsInCrowdtainer: BigNumber.from(0),
+        accumulatedRewards: BigNumber.from(0)
+    };
+
     try {
         const crowdtainerContract = Crowdtainer__factory.connect(crowdtainerAddress, provider);
-        fundsInCrowdtainer = await crowdtainerContract.costForWallet(wallet);
+        walletCrowdtainerData.fundsInCrowdtainer = await crowdtainerContract.costForWallet(wallet);
+        walletCrowdtainerData.accumulatedRewards = await crowdtainerContract.accumulatedRewardsOf(wallet);
     } catch (error) {
         return Err(`${error}`);
     }
 
-    return Ok(fundsInCrowdtainer);
+    return Ok(walletCrowdtainerData);
 }
 
 export async function getERC20Contract(provider: ethers.Signer | ethers.providers.JsonRpcProvider | undefined, crowdtainerAddress: string): Promise<Result<IERC20, string>> {
@@ -105,6 +112,15 @@ export async function findTokenIdsForWallet(provider: ethers.Signer | undefined,
     }
 }
 
+export async function isReferralEnabledForAddress(provider: ethers.Signer, crowdtainerAddress: string, walletAddress: string): Promise<Result<boolean, string>> {
+    try {
+        const crowdtainerContract = Crowdtainer__factory.connect(crowdtainerAddress, provider);
+        let enabledReferral = await crowdtainerContract.enableReferral(walletAddress);
+        return Ok(enabledReferral);
+    } catch (error) {
+        return Err(`Failed to read smart contract data: couldn't check if referrals are enabled for ${walletAddress}. Details: ${error}`);
+    }
+}
 
 export async function leaveProject(provider: ethers.Signer | undefined,
     vouchers721Address: string,
@@ -159,6 +175,22 @@ export async function claimFunds(provider: ethers.Signer | undefined,
     }
 }
 
+export async function claimRewards(provider: ethers.Signer | undefined,
+    crowdtainerAddress: string): Promise<Result<ContractTransaction, string>> {
+
+    if (provider === undefined) {
+        return Err("Provider not available.");
+    }
+
+    try {
+        const crowdtainerContract = Crowdtainer__factory.connect(crowdtainerAddress, provider);
+        let claimFundsTransaction = await crowdtainerContract.claimRewards();
+        return Ok(claimFundsTransaction);
+    } catch (error) {
+        return makeError(error);
+    }
+}
+
 export async function transferToken(provider: ethers.Signer | undefined,
     vouchers721Address: string, targetWallet: string, tokenId: number): Promise<Result<ContractTransaction, string>> {
 
@@ -177,14 +209,16 @@ export async function transferToken(provider: ethers.Signer | undefined,
 
 export async function checkAllowance(signerAddress: string,
     erc20Contract: IERC20,
+    erc20Decimals: number,
     crowdtainerAddress: string,
     totalCost: BigNumber): Promise<Result<string, string>> {
 
     try {
+        console.log(`erc20Decimals: ${erc20Decimals}`);
         let currentAllowance = await erc20Contract.allowance(signerAddress, crowdtainerAddress);
 
         if (currentAllowance.lt(totalCost)) {
-            return Err(`Unable to request needed allowance. Required: ${totalCost}, current: ${currentAllowance}`);
+            return Err(`Unable to request needed allowance. Required: ${toHuman(totalCost, erc20Decimals)}, current: ${toHuman(currentAllowance, erc20Decimals)}`);
         }
         return Ok(`Allowance available for ${crowdtainerAddress}.`);
 
@@ -226,7 +260,9 @@ export async function joinProjectWithSignature(provider: ethers.Signer | undefin
 export async function joinProject(provider: ethers.Signer | undefined,
     vouchers721Address: string,
     crowdtainerAddress: string,
-    quantities: number[]): Promise<Result<ContractTransaction, string>> {
+    quantities: number[],
+    validUserCouponCode: string,
+    referralEnabled: boolean): Promise<Result<ContractTransaction, string>> {
 
     if (provider === undefined) {
         return Err("Provider not available.");
@@ -244,8 +280,7 @@ export async function joinProject(provider: ethers.Signer | undefined,
 
         console.log(`EIP-3668: join with signature disabled. Vouchers721 @ ${vouchers721Address}; Crowdtainer @ ${crowdtainerAddress}`);
 
-        let result: ContractTransaction;
-        result = await vouchers721Contract['join(address,uint256[4])'](crowdtainerAddress, arrayOfBigNumbers);
+        let result: ContractTransaction = await vouchers721Contract['join(address,uint256[4],bool,address)'](crowdtainerAddress, arrayOfBigNumbers, referralEnabled, validUserCouponCode);
         return Ok(result);
 
     } catch (error) {

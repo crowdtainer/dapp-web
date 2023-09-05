@@ -11,10 +11,10 @@ export type ToastData = {
   message: string
 };
 
-export const showWarningToast = (message: string) => {
+export const showToast = (message: string, type?: MessageType) => {
   let toast = {
     id: Math.floor(Math.random() * 10000),
-    type: MessageType.Warning,
+    type: (!type)? MessageType.Info : type,
     dismissible: true,
     timeout: 7000,
     message: message

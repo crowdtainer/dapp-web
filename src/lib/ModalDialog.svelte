@@ -20,8 +20,8 @@
 		id: string;
 		title: string;
 		body: string;
-		animation: ModalAnimation;
-		icon: ModalIcon;
+		animation?: ModalAnimation;
+		icon?: ModalIcon;
 		type: ModalType;
 	};
 </script>
@@ -33,17 +33,10 @@
 	import { CheckBadge, ExclamationCircle, DevicePhoneMobile } from '@steeze-ui/heroicons';
 
 	let dialog: HTMLDialogElement;
+	let data: ModalDialogData = { id: '', title: '', body: '', type: ModalType.Information };
 
-	export let modalDialogData: ModalDialogData = {
-		id: '',
-		title: '',
-		body: '',
-		animation: ModalAnimation.Circle2,
-		icon: ModalIcon.DeviceMobile,
-		type: ModalType.ActionRequest
-	};
-
-	export function showDialog() {
+	export function show(_data?: ModalDialogData) {
+		if (_data) data = _data;
 		dialog.showModal();
 	}
 
@@ -52,49 +45,47 @@
 	}
 </script>
 
-<dialog bind:this={dialog} id={modalDialogData.id} class="modal modal-bottom sm:modal-middle">
+<dialog bind:this={dialog} id={data.id} class="modal modal-bottom sm:modal-middle">
 	<form method="dialog" class="modal-box text-black">
-		<h3 class="font-bold text-lg">{modalDialogData.title}</h3>
+		<h3 class="font-bold text-lg">{data.title}</h3>
 		<div class="h-auto flex justify-center mt-8">
 			<div class="flex flex-row">
-				{#if modalDialogData.animation !== ModalAnimation.None}
+				{#if data.animation !== undefined && data.animation !== ModalAnimation.None}
 					<div in:blur|global={{ duration: 450 }} class="basis-1/4">
-						{#if modalDialogData.animation === ModalAnimation.Diamonds}
+						{#if data.animation === ModalAnimation.Diamonds}
 							<Diamonds size="60" unit="px" />
-						{:else if modalDialogData.animation === ModalAnimation.Circle2}
+						{:else if data.animation === ModalAnimation.Circle2}
 							<Circle2 size="60" unit="px" />
 						{/if}
 					</div>
 				{/if}
 				<div class="flex justify-center">
-					{#if modalDialogData.icon === ModalIcon.DeviceMobile}
+					{#if data.icon === ModalIcon.DeviceMobile}
 						<Icon src={DevicePhoneMobile} class="text-black m-2" size="36" />
-					{:else if modalDialogData.icon === ModalIcon.BadgeCheck}
+					{:else if data.icon === ModalIcon.BadgeCheck}
 						<Icon src={CheckBadge} class="text-black m-2" size="36" />
-					{:else if modalDialogData.icon === ModalIcon.Exclamation}
+					{:else if data.icon === ModalIcon.Exclamation}
 						<Icon src={ExclamationCircle} class="text-black m-2" size="36" />
 					{/if}
 				</div>
 				<div in:blur|global={{ duration: 450 }} class="basis-3/4">
-					<p>{modalDialogData.body}</p>
+					<p>{data.body}</p>
 				</div>
 			</div>
 		</div>
 
 		<slot />
 
-		{#if modalDialogData.type !== ModalType.DataInput}
+		{#if data.type !== ModalType.DataInput}
 			<div class="flex justify-center">
 				<div class="modal-action">
 					<button
-						class={modalDialogData.type === ModalType.ActionRequest
-							? 'red-action-btn'
-							: 'active-btn'}
+						class={data.type === ModalType.ActionRequest ? 'red-action-btn' : 'active-btn'}
 						on:click={async () => {
 							dialog.close();
 						}}
 					>
-						{#if modalDialogData.type === ModalType.ActionRequest}
+						{#if data.type === ModalType.ActionRequest}
 							Close
 						{:else}
 							Ok

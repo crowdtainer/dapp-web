@@ -50,8 +50,6 @@ export async function fetchStaticData(crowdtainerId: BigNumber): Promise<Result<
        let tokenContractAddress = await crowdtainerContract.token();
        const ERC20Contract = Coin__factory.connect(tokenContractAddress, provider);
  
-       let tokenDecimals = await ERC20Contract.decimals();
- 
        let numberOfProducts = (await crowdtainerContract.numberOfProducts()).toNumber();
        let prices: BigNumber[] = [];
        let descriptions: string[] = [];
@@ -76,9 +74,10 @@ export async function fetchStaticData(crowdtainerId: BigNumber): Promise<Result<
           productDescription: descriptions,
           prices: prices,
           token: await crowdtainerContract.token(),
-          tokenDecimals: tokenDecimals,
+          tokenDecimals: await ERC20Contract.decimals(),
           tokenSymbol: await ERC20Contract.symbol(),
-          signer: await crowdtainerContract.getSigner()
+          signer: await crowdtainerContract.getSigner(),
+          referralRate: await crowdtainerContract.referralRate()
        }
  
        crowdtainerStaticDataMap.set(crowdtainerId.toHexString(), crowdtainerData);

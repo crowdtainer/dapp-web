@@ -6,13 +6,16 @@
 	import { Clipboard } from '@steeze-ui/heroicons';
 	import { addToast, type ToastData } from './Toast/ToastStore';
 	import { MessageType } from './Toast/MessageType';
+	import { BigNumber } from 'ethers/lib/ethers.js';
 
 	export let vouchers721Address: string;
 	export let crowdtainerId: number;
 	export let crowdtainerAddress: string | undefined;
 	export let serviceProvider: string | undefined;
+	export let erc20TokenAddress: string | undefined;
 	export let tokenDecimals: number | undefined;
 	export let signerAddress: string | undefined;
+	export let referralRate: BigNumber | undefined;
 
 	let visible: boolean;
 
@@ -34,6 +37,8 @@
 		};
 		addToast(toast);
 	}
+
+	$: discount = BigNumber.from(referralRate).toNumber() / 2;
 </script>
 
 <div class="mb-4">
@@ -41,7 +46,7 @@
 		on:click={() => {
 			visibilityToggle();
 		}}
-		class=" w-auto  "
+		class=" w-auto"
 	>
 		{#if visible}
 			⬇ Details
@@ -110,7 +115,7 @@
 				</tr>
 
 				<tr>
-					<td>Service Provider: </td>
+					<td>Service provider: </td>
 					<td>
 						<button
 							on:click={() => {
@@ -132,15 +137,15 @@
 				</tr>
 
 				<tr>
-					<td>Signer:</td>
+					<td>Payment token: </td>
 					<td>
 						<button
 							on:click={() => {
-								copyToClipBoardAndNotify('Signer address', signerAddress);
+								copyToClipBoardAndNotify('ERC-20 token addess', erc20TokenAddress);
 							}}
 						>
 							<span class="inline-flex items-baseline">
-								<span>{shortenAddress(signerAddress)} </span>
+								<span>{shortenAddress(erc20TokenAddress)} </span>
 								<span
 									><Icon
 										src={Clipboard}
@@ -151,6 +156,47 @@
 							</span>
 						</button></td
 					>
+				</tr>
+
+				<tr>
+					<td>Referral system: </td>
+					<td>
+						<span class="inline-flex items-baseline">
+							{#if referralRate === undefined}
+								<span> -- </span>
+							{:else if discount > 0}
+								<span> {discount} % off for referee, {discount}% cashback for referrer.</span>
+							{:else}
+								<span> disabled </span>
+							{/if}
+						</span>
+					</td>
+				</tr>
+
+				<tr>
+					<td>Service provider signer:</td>
+					<td>
+						{#if signerAddress === '0x0000000000000000000000000000000000000000'}
+							<span> Offchain signature is not required to join this project.</span>
+						{:else}
+							<button
+								on:click={() => {
+									copyToClipBoardAndNotify('Signer address', signerAddress);
+								}}
+							>
+								<span class="inline-flex items-baseline">
+									<span>{shortenAddress(signerAddress)} </span>
+									<span
+										><Icon
+											src={Clipboard}
+											class="text-black dark:text-white self-center ml-2"
+											size="16"
+										/></span
+									>
+								</span>
+							</button>
+						{/if}
+					</td>
 				</tr>
 
 				<tr>
