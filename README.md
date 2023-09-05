@@ -238,20 +238,20 @@ cd plugins/woocommerce/
     - ✅ Background work to process checkout requests and create invoice dispatch job.
         - ✅ Create order in shop system.
         - ✅ Track in redis which tokenIds had its order created.
+- ✅ When joining, I'd like to additionally specify:
+    - ✅ whether I'd like to be eligible to share referral code so that I can get rewards for my friend's purchases (check-box).
+    - ✅ a friend's referral code, so that I can get a discount on my own purchase (address/ENS text input field).
+    - ◻️ Referral code shortener (using Either/Or ENS/redis).
 
+- ✅ I'd like an interface to view how much rewards I acquired due sharing of personal referral code, if the project succeeds.
+    - Use `Crowdtainer.accumulatedRewardsOf()` method.
+
+- ✅ I'd like an interface/button to claim rewards due sharing of referral code.
+    - Only possible if the project is in `Delivery` state.
+    - Use `Crowdtainer.claimRewards()` method.
 ##### Out of scope for MVP:
 
 - ◻️ Service to set ERC-721's status as 'claimed' for token ids which had its order created/confirmed.
 - ◻️ "Download Invoice" button
 - ◻️ Browser-side encryption (asymmetric, using service provider's PubKey) before pushing sensitive data to redis.
 - ◻️ Support for multiple deployments, each on potentially different chainIDs.
-- ◻️ When joining, I'd like to additionally specify:
-    - ◻️ whether I'd like to be eligible to share referral code so that I can get rewards for my friend's purchases (check-box).
-    - ◻️ a friend's referral code, so that I can get a discount on my own purchase (address/ENS text input field).
-
-- ◻️ I'd like an interface to view how much rewards I acquired due sharing of personal referral code, if the project succeeds.
-    - Use `Crowdtainer.accumulatedRewardsOf()` method.
-
-- ◻️ I'd like an interface/button to claim rewards due sharing of referral code.
-    - Only possible if the project is in `Delivery` state.
-    - Use `Crowdtainer.claimRewards()` method.
