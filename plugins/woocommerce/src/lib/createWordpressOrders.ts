@@ -1,5 +1,6 @@
 'use strict';
-import { AxiosInstance } from 'axios';
+import { AxiosError, AxiosInstance } from 'axios';
+import https from 'https'
 import {
     WORDPRESS_SERVER, WOOCOMMERCE_PAYMENT_METHOD, WOOCOMMERCE_PAYMENT_METHOD_TITLE,
     WOOCOMMERCE_SET_PAID
@@ -17,13 +18,25 @@ export async function createWordpressOrders(axios: AxiosInstance, deliveries: Ma
     let ordersCreated = new Array<string>();
     let ordersWithError = new Array<RequestError>();
 
+    /**
+    * Disable SSL check in development mode
+    */
+    if (process.env.NODE_ENV === 'development') {
+        console.log(`Warning: Development mode active. Allowing invalid SSL certs: RejectUnauthorized disabled.`);
+        const httpsAgent = new https.Agent({
+            rejectUnauthorized: false,
+        })
+        axios.defaults.httpsAgent = httpsAgent
+    }
+
     for (const [id, order] of deliveries) {
-        console.log(`Create order ${id} with : ${JSON.stringify(order)}\n`);
 
         const wooOrderObject = makeWooOrderObject(order, WOOCOMMERCE_PAYMENT_METHOD, WOOCOMMERCE_PAYMENT_METHOD_TITLE, Boolean(WOOCOMMERCE_SET_PAID));
-        assert(wooOrderObject.isOk());
 
+        assert(wooOrderObject.isOk());
         let requestError: any | undefined;
+
+        // console.log(`Woocommerce API payload: ${JSON.stringify(wooOrderObject.unwrap())}`);
 
         await Promise.all([await axios.post(`${WORDPRESS_SERVER}/wp-json/wc/v3/orders`, wooOrderObject.unwrap())
             .then(function (response) {
@@ -43,8 +56,6 @@ export async function createWordpressOrders(axios: AxiosInstance, deliveries: Ma
 
         if (requestError !== undefined) {
             ordersWithError.push(makeError(requestError));
-        } else {
-            ordersCreated.push(id);
         }
     }
 
@@ -54,7 +65,7 @@ export async function createWordpressOrders(axios: AxiosInstance, deliveries: Ma
 
 function makeError(error: any): RequestError {
     if (error.response) {
-        return { statusCode: error.response.statusCode, details: error.response.statusText };
+        return { statusCode: error.response.statusCode, details: `${error.response.statusText}. ${error.message}.` };
     } else if (error.request) {
         // The request was made but no response was received
         return { statusCode: 500, details: 'No server response' };

@@ -3,53 +3,39 @@
 		type DeliveryDetails,
 		makeDeliveryRequestMessage,
 		signMessage,
-		treatSpecialChars
+		normalizeDeliveryDetails,
+		makeAddress
 	} from './Model/SignTerms';
-	import ModalDialog, {
-		ModalAnimation,
-		ModalIcon,
-		ModalType,
-		type ModalDialogData
-	} from './ModalDialog.svelte';
+	import ModalDialog, { ModalAnimation, ModalIcon, ModalType } from './ModalDialog.svelte';
 	import { getSigner } from './Utils/wallet';
 	import { requestDeliveryAPI } from './api';
 
 	// Random number
 	import { ethers } from 'ethers';
 	import { pseudoRandomNonce } from './Utils/random';
+	import { slide } from 'svelte/transition';
 
-	// Modal Dialog
-	let modalDialogData: ModalDialogData = {
-		id: 'deliveryDialog',
-		title: '',
-		body: '',
-		animation: ModalAnimation.Circle2,
-		icon: ModalIcon.DeviceMobile,
-		type: ModalType.ActionRequest
-	};
 	let modalDialog: ModalDialog;
 
 	export let walletAddress: string;
 	export let vouchers721Address: string;
 	export let voucherId: number;
 
-	const country = 'Germany';
-	let firstName: string;
-	let lastName: string;
-	let address: string;
-	let complement: string;
-	let postalCode: string;
-	let state: string;
-	let city: string;
-	let email: string;
+	let deliveryAddress = makeAddress();
+	let billingAddress = makeAddress();
+
+	let deliverySameAsBilling = true;
 
 	let displaySuccessMessage: boolean = false;
+
+	interface ResponseObject {
+		message: string;
+	}
 
 	const callSubmitDelivery = async () => {
 		let signer = getSigner();
 		if (signer === undefined) {
 			console.log('Error: signer undefined');
-			// TODO: user feedback
 			return;
 		}
 
@@ -59,23 +45,22 @@
 			vouchers721Address,
 			voucherId,
 			chainId,
-			country,
-			firstName,
-			lastName,
-			address,
-			complement,
-			postalCode,
-			state,
-			city,
-			email
+			deliveryAddress,
+			billingAddress
 		};
+
+		if (deliverySameAsBilling) {
+			deliveryDetails.billingAddress = deliveryDetails.deliveryAddress;
+		} else {
+			deliveryDetails.billingAddress.email = deliveryAddress.email
+		}
 
 		modalDialog.show({
 			id: 'deliveryConfirmation',
 			title: 'Delivery confirmation',
 			body: 'Please confirm the signature request in your mobile wallet.',
 			type: ModalType.ActionRequest,
-			icon: ModalIcon.BadgeCheck,
+			icon: ModalIcon.DeviceMobile,
 			animation: ModalAnimation.Circle2
 		});
 
@@ -89,6 +74,8 @@
 		walletAddress = ethers.utils.getAddress(walletAddress);
 		console.log(`Account check-summed: ${walletAddress}`);
 
+		deliveryDetails = normalizeDeliveryDetails(deliveryDetails);
+
 		let message = makeDeliveryRequestMessage(
 			walletAddress,
 			domain,
@@ -101,15 +88,6 @@
 
 		if (signResult.isOk()) {
 			let sigHash = signResult.unwrap();
-
-			deliveryDetails.lastName = treatSpecialChars(deliveryDetails.lastName);
-			deliveryDetails.firstName = treatSpecialChars(deliveryDetails.firstName);
-			deliveryDetails.country = treatSpecialChars(deliveryDetails.country);
-			deliveryDetails.address = treatSpecialChars(deliveryDetails.address);
-			deliveryDetails.complement = treatSpecialChars(deliveryDetails.complement);
-			deliveryDetails.postalCode = treatSpecialChars(deliveryDetails.postalCode);
-			deliveryDetails.city = treatSpecialChars(deliveryDetails.city);
-			deliveryDetails.email = treatSpecialChars(deliveryDetails.email);
 
 			// TODO: Apply asymmetric encryption client/browser side before sending.
 			let requestResult = await requestDeliveryAPI(
@@ -127,18 +105,29 @@
 				displaySuccessMessage = true;
 			} else {
 				console.log(`Error: ${requestResult}`);
+
+				let response: ResponseObject = JSON.parse(requestResult);
 				modalDialog.show({
-					id: 'transactionRejectedDialog',
-					title: 'Transaction rejected',
-					body: 'An error ocurred when requesting delivery. Please contact us with the following details: ${requestResult}.',
+					id: 'requestDeliveryRejected',
+					title: 'Delivery Request rejected',
+					body: `An error ocurred when requesting delivery:  ${
+						response.message ? response.message : requestResult
+					}.`,
 					type: ModalType.ActionRequest,
 					icon: ModalIcon.Exclamation
 				});
-				console.log(`what went wrong? ${requestResult}`);
+				console.log(`Delivery Request API call failed: ${requestResult}`);
 				return;
 			}
 		} else {
-			console.log(`Failure!? ${signResult.unwrapErr()}`);
+			console.log(`Failure: ${signResult.unwrapErr()}`);
+			modalDialog.show({
+				id: 'requestDeliveryRejected',
+				title: 'Delivery Request transaction signing rejected',
+				body: `Signing request rejected from wallet.`,
+				type: ModalType.ActionRequest,
+				icon: ModalIcon.Exclamation
+			});
 		}
 	};
 </script>
@@ -160,6 +149,17 @@
 			class="block p-4 rounded-lg shadow-lg bg-white dark:bg-gray-900 drop-shadow-lg max-w-md mb-2"
 		>
 			<form on:submit|preventDefault={callSubmitDelivery}>
+				<p class="py-1 text-lg text-primary">Contact information</p>
+				<div class="form-group mb-2">
+					<span class="text-secondary text-sm">Email for Invoice</span>
+					<input
+						type="email"
+						name="email"
+						class="text-input-form"
+						bind:value={deliveryAddress.email}
+					/>
+				</div>
+
 				<p class="py-1 text-lg text-primary">Delivery address</p>
 
 				<!-- Country -->
@@ -169,10 +169,8 @@
 						<input
 							type="text"
 							name="country"
-							disabled
 							class="text-input-form"
-							placeholder="Country"
-							value="Germany"
+							bind:value={deliveryAddress.country}
 						/>
 					</label>
 				</div>
@@ -181,11 +179,21 @@
 				<div class="grid grid-cols-2 gap-4">
 					<div class="form-group mb-2">
 						<span class="text-secondary text-sm">First Name</span>
-						<input type="text" name="firstName" class="text-input-form" bind:value={firstName} />
+						<input
+							type="text"
+							name="firstName"
+							class="text-input-form"
+							bind:value={deliveryAddress.firstName}
+						/>
 					</div>
-					<div class="form-group mb-2">
+					<div class="form-group">
 						<span class="text-secondary text-sm">Last name</span>
-						<input type="text" name="lastName" class="text-input-form" bind:value={lastName} />
+						<input
+							type="text"
+							name="lastName"
+							class="text-input-form"
+							bind:value={deliveryAddress.lastName}
+						/>
 					</div>
 				</div>
 
@@ -193,7 +201,12 @@
 				<div class="form-group mb-2">
 					<label class="block">
 						<span class="text-secondary text-sm">Address</span>
-						<input type="text" name="address" class="text-input-form" bind:value={address} />
+						<input
+							type="text"
+							name="address"
+							class="text-input-form"
+							bind:value={deliveryAddress.address}
+						/>
 					</label>
 				</div>
 
@@ -206,32 +219,164 @@
 							type="text"
 							name="addressComplement"
 							class="text-input-form"
-							bind:value={complement}
+							bind:value={deliveryAddress.complement}
 						/>
 					</label>
 				</div>
-
 				<!-- Postal code / City -->
 				<div class="grid grid-cols-2 gap-4">
-					<div class="form-group mb-2">
+					<div class="form-group">
 						<span class="text-secondary text-sm">Postal code</span>
-						<input type="text" name="postalCode" class="text-input-form" bind:value={postalCode} />
+						<input
+							type="text"
+							name="postalCode"
+							class="text-input-form"
+							bind:value={deliveryAddress.postalCode}
+						/>
 					</div>
-					<div class="form-group mb-2">
+					<div class="form-group">
 						<span class="text-secondary text-sm">State</span>
-						<input type="text" name="city" class="text-input-form" bind:value={state} />
+						<input
+							type="text"
+							name="city"
+							class="text-input-form"
+							bind:value={deliveryAddress.state}
+						/>
 					</div>
-					<div class="form-group mb-2">
-						<span class="text-secondary text-sm">City</span>
-						<input type="text" name="city" class="text-input-form" bind:value={city} />
+				</div>
+				<div class="form-group my-2">
+					<span class="text-secondary text-sm">City</span>
+					<input
+						type="text"
+						name="city"
+						class="text-input-form"
+						bind:value={deliveryAddress.city}
+					/>
+				</div>
+
+				<p class="py-1 text-lg text-primary">Billing address</p>
+				<div class="flex">
+					<div class="form-control">
+						<label class="label cursor-pointer">
+							<input
+								type="radio"
+								name="radio-1"
+								class="radio"
+								value={true}
+								bind:group={deliverySameAsBilling}
+							/>
+							<span class="text-secondary label-text ml-2">Same as delivery address</span>
+						</label>
+					</div>
+					<div class="form-control">
+						<label class="label cursor-pointer">
+							<input
+								type="radio"
+								name="radio-1"
+								class="radio"
+								value={false}
+								bind:group={deliverySameAsBilling}
+							/>
+							<span class="text-secondary label-text ml-2">Use a different billing address</span>
+						</label>
 					</div>
 				</div>
 
-				<p class="py-1 text-lg text-primary">Contact information</p>
-				<div class="form-group mb-2">
-					<span class="text-secondary text-sm">Email for Invoice</span>
-					<input type="email" name="email" class="text-input-form" bind:value={email} />
-				</div>
+				{#if !deliverySameAsBilling}
+					<div in:slide={{ duration: 250 }} out:slide={{ duration: 250 }}>
+						<!-- Country -->
+						<div class="form-group mb-2">
+							<label class="block">
+								<span class="text-secondary text-sm">Country</span>
+								<input
+									type="text"
+									name="country"
+									class="text-input-form"
+									bind:value={billingAddress.country}
+								/>
+							</label>
+						</div>
+
+						<!-- Name -->
+						<div class="grid grid-cols-2 gap-4">
+							<div class="form-group mb-2">
+								<span class="text-secondary text-sm">First Name</span>
+								<input
+									type="text"
+									name="firstName"
+									class="text-input-form"
+									bind:value={billingAddress.firstName}
+								/>
+							</div>
+							<div class="form-group">
+								<span class="text-secondary text-sm">Last name</span>
+								<input
+									type="text"
+									name="lastName"
+									class="text-input-form"
+									bind:value={billingAddress.lastName}
+								/>
+							</div>
+						</div>
+
+						<!-- Address -->
+						<div class="form-group mb-2">
+							<label class="block">
+								<span class="text-secondary text-sm">Address</span>
+								<input
+									type="text"
+									name="address"
+									class="text-input-form"
+									bind:value={billingAddress.address}
+								/>
+							</label>
+						</div>
+
+						<div class="form-group mb-2">
+							<label class="block">
+								<span class="text-secondary text-sm"
+									>House number, apartment number or other (optional)</span
+								>
+								<input
+									type="text"
+									name="addressComplement"
+									class="text-input-form"
+									bind:value={billingAddress.complement}
+								/>
+							</label>
+						</div>
+						<!-- Postal code / City -->
+						<div class="grid grid-cols-2 gap-4">
+							<div class="form-group">
+								<span class="text-secondary text-sm">Postal code</span>
+								<input
+									type="text"
+									name="postalCode"
+									class="text-input-form"
+									bind:value={billingAddress.postalCode}
+								/>
+							</div>
+							<div class="form-group">
+								<span class="text-secondary text-sm">State</span>
+								<input
+									type="text"
+									name="city"
+									class="text-input-form"
+									bind:value={billingAddress.state}
+								/>
+							</div>
+						</div>
+						<div class="form-group my-2">
+							<span class="text-secondary text-sm">City</span>
+							<input
+								type="text"
+								name="city"
+								class="text-input-form"
+								bind:value={billingAddress.city}
+							/>
+						</div>
+					</div>
+				{/if}
 
 				<div class="flex justify-center">
 					<button type="submit" class="sky-btn w-68">Request order</button>

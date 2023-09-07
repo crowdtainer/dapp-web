@@ -34,6 +34,10 @@ export interface ShippingLine {
     total: string;
 }
 
+export interface CouponLine {
+    code: string;
+}
+
 export interface WooOrderObject {
     payment_method: string;
     payment_method_title: string;
@@ -42,4 +46,5 @@ export interface WooOrderObject {
     shipping: Shipping;
     line_items: LineItem[];
     shipping_lines: ShippingLine[];
+    coupon_lines: CouponLine[];
 }
