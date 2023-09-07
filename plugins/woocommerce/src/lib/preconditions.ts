@@ -12,9 +12,11 @@ export const WORDPRESS_API_CONSUMER_SECRET = process.env.WORDPRESS_API_CONSUMER_
 
 // Order options
 export const WOOCOMMERCE_PRODUCT_IDS = process.env.WOOCOMMERCE_PRODUCT_IDS || '';
+export const WOOCOMMERCE_VARIATION_IDS = process.env.WOOCOMMERCE_VARIATION_IDS || '';
 export const WOOCOMMERCE_PAYMENT_METHOD = process.env.WOOCOMMERCE_PAYMENT_METHOD || '';
 export const WOOCOMMERCE_PAYMENT_METHOD_TITLE = process.env.WOOCOMMERCE_PAYMENT_METHOD_TITLE || '';
 export const WOOCOMMERCE_SET_PAID = process.env.WOOCOMMERCE_SET_PAID || '';
+export const WOOCOMMERCE_COUPON_CODE = process.env.WOOCOMMERCE_COUPON_CODE || '';
 
 function printMissingVariable(name: string) {
     console.log(`Failure: missing ${name} environment variable.`);
@@ -44,6 +46,11 @@ export function checkPreconditions(): boolean {
 
     if (WOOCOMMERCE_PRODUCT_IDS == '') {
         printMissingVariable('WOOCOMMERCE_PRODUCT_IDS');
+        missingMandatoryEnvVar = true;
+    }
+
+    if (WOOCOMMERCE_VARIATION_IDS == '') {
+        printMissingVariable('WOOCOMMERCE_VARIATION_IDS');
         missingMandatoryEnvVar = true;
     }
 

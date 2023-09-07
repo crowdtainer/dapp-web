@@ -136,7 +136,7 @@ export const POST: RequestHandler = async ({ request, params }) => {
         console.log(`After discount: ${totalValue}`);
     }
 
-    if (totalValue > maxCost) {
+    if (totalValue.gt(maxCost)) {
         throw error(400, `Order amount too high (${totalValue}). Maximum: ${maxCost} ${campaignData.tokenSymbol}.`);
     }
 

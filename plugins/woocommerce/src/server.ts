@@ -6,7 +6,7 @@ import 'dotenv/config';
 import Redis from "ioredis";
 
 import { getDatabase } from './lib/database.js';
-import { LineItem } from './lib/WooOrderInterface.js';
+import { CouponLine, LineItem } from './lib/WooOrderInterface.js';
 
 var terminateProcess: boolean;
 let numberOfSuccessfulyCreatedOrders = 0;
@@ -14,20 +14,21 @@ let numberOfSuccessfulyCreatedOrders = 0;
 import {
     checkPreconditions, INTERVAL_IN_MS, WORDPRESS_SERVER,
     WORDPRESS_API_CONSUMER_KEY, WORDPRESS_API_CONSUMER_SECRET,
-    WOOCOMMERCE_PRODUCT_IDS
+    WOOCOMMERCE_PRODUCT_IDS, WOOCOMMERCE_VARIATION_IDS, WOOCOMMERCE_COUPON_CODE
 } from './lib/preconditions.js';
 
 const productIDs = WOOCOMMERCE_PRODUCT_IDS.split(',');
+const productVariationIDs = WOOCOMMERCE_VARIATION_IDS.split(',');
 
-import { DeliveryDetails, Order } from './lib/commonTypes.js';
+import { Address, DeliveryDetails, Order } from './lib/commonTypes.js';
 import { createWordpressOrders } from './lib/createWordpressOrders.js';
 import axios, { AxiosInstance } from 'axios';
 
 export const Woo_API_Config = {
     baseURL: WORDPRESS_SERVER,
     auth: {
-        username: WORDPRESS_API_CONSUMER_KEY,
-        password: WORDPRESS_API_CONSUMER_SECRET
+        username: `${WORDPRESS_API_CONSUMER_KEY}`,
+        password: `${WORDPRESS_API_CONSUMER_SECRET}`
     },
     headers: { 'Content-Type': 'application/json' }
 };
@@ -80,18 +81,39 @@ async function getDeliveryOrdersWork(db: Redis): Promise<Map<string, Order>> {
         console.log(`Current key: ${currentKey}`);
 
         let orderCreated = await db.hexists(`${currentKey}:orderCreated`, 'epochTimeInMilliseconds');
-        if(orderCreated) {
+        if (orderCreated) {
             let createdTime = await db.hget(`${currentKey}:orderCreated`, 'epochTimeInMilliseconds');
             console.log(`Warning: Order for ${currentKey} already exists (from epoch time ${createdTime} ms). Removing delivery request job.`)
             db.lrem('deliveryRequests:v1', 0, currentKey);
             continue;
         }
 
-        const deliveryDetailsResult = await db.hgetall(currentKey);
-        const deliveryDetails: DeliveryDetails = JSON.parse(JSON.stringify(deliveryDetailsResult));
+        // Extract currentKey data. E.g.: deliveryRequest:v1:31337:0x0165878A594ca255338adfa4d48449f69242Eb8F:1000002
+        let currentKeyComponents = currentKey.split(':');
+        if (currentKeyComponents.length != 5) {
+            console.log(`Fatal error: key ${currentKey} uses unexpected format.`);
+            continue;
+        }
+
+        let chainId = Number(currentKeyComponents[2]);
+        let vouchers721Address = currentKeyComponents[3];
+        let voucherId = Number(currentKeyComponents[4]);
+
+        const deliveryAddressResult = await db.hgetall(`${currentKey}:deliveryAddress`);
+        const deliveryAddress: Address = JSON.parse(JSON.stringify(deliveryAddressResult));
+
+        const billingAddressResult = await db.hgetall(`${currentKey}:billingAddress`);
+        let billingAddress = JSON.parse(JSON.stringify(billingAddressResult));
+
+        let deliveryDetails: DeliveryDetails = {
+            vouchers721Address,
+            voucherId,
+            chainId,
+            deliveryAddress,
+            billingAddress
+        };
 
         const quantitiesResult = await db.get(`${currentKey}:quantities`);
-
         if (quantitiesResult === null) {
             console.log(`Error: Skipping ${currentKey}; Quantities data not found.`);
             continue;
@@ -100,8 +122,20 @@ async function getDeliveryOrdersWork(db: Redis): Promise<Map<string, Order>> {
         const quantities = JSON.parse(quantitiesResult) as number[];
         console.log(`quantity: ${JSON.stringify(quantities)}`);
 
+        const discountValueResult = await db.get(`${currentKey}:discount`);
+        if (discountValueResult === null) {
+            console.log(`Error: Skipping ${currentKey}; Discount value data not found.`);
+            continue;
+        }
+        const discountValue = Number(discountValueResult);
+
         if (quantities.length !== productIDs?.length) {
             console.log(`Error: Skipping ${currentKey} due mismatch in array length. Expected: ${productIDs?.length}. Actual: ${quantities.length}.`);
+            continue;
+        }
+
+        if (quantities.length !== productVariationIDs?.length) {
+            console.log(`Error: Skipping ${currentKey} due mismatch in array length. Expected: ${productVariationIDs?.length}. Actual: ${quantities.length}.`);
             continue;
         }
 
@@ -111,7 +145,19 @@ async function getDeliveryOrdersWork(db: Redis): Promise<Map<string, Order>> {
             if (Number(productIDs[lineCount]) === undefined) {
                 break;
             }
-            lineItems.push({ product_id: Number(productIDs[lineCount]), quantity: Number(quantities[lineCount]) || 0 });
+            if (productVariationIDs) {
+                console.log(`productVariationID: ${productVariationIDs[lineCount]}`);
+                lineItems.push({
+                    product_id: Number(productIDs[lineCount]),
+                    quantity: Number(quantities[lineCount]) || 0,
+                    variation_id: Number(productVariationIDs[lineCount])
+                });
+            } else {
+                lineItems.push({
+                    product_id: Number(productIDs[lineCount]),
+                    quantity: Number(quantities[lineCount]) || 0
+                });
+            }
         }
 
         if (lineItems.length !== quantities.length) {
@@ -119,8 +165,12 @@ async function getDeliveryOrdersWork(db: Redis): Promise<Map<string, Order>> {
             continue;
         }
 
-        console.log(`Fetched: ${currentKey}`);
-        deliveryOrders.set(currentKey, { deliveryDetails, lineItems });
+        let couponLines = new Array<CouponLine>();
+        if (discountValue > 0 && WOOCOMMERCE_COUPON_CODE !== '') {
+            couponLines.push({ code: WOOCOMMERCE_COUPON_CODE });
+        }
+
+        deliveryOrders.set(currentKey, { deliveryDetails, lineItems, couponLines });
     }
 
     if (deliveryOrders.size === 0) {

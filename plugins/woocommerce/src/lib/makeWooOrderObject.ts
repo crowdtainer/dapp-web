@@ -1,7 +1,7 @@
 'use strict';
 import { Result, Ok } from '@sniptt/monads';
 import { Order } from './commonTypes.js';
-import { Billing, Shipping, ShippingLine, WooOrderObject } from './WooOrderInterface.js';
+import { Billing, CouponLine, Shipping, ShippingLine, WooOrderObject } from './WooOrderInterface.js';
 
 export type Error = { details: number };
 
@@ -10,29 +10,46 @@ export function makeWooOrderObject(inputOrderData: Order,
     paymentTitle: string,
     setPaid: boolean): Result<WooOrderObject, Error> {
 
-    // TODO: Add support for separate fields for billing
-    let billing: Billing = {
-        first_name: inputOrderData.deliveryDetails.firstName,
-        last_name: inputOrderData.deliveryDetails.lastName,
-        address_1: inputOrderData.deliveryDetails.address,
-        address_2: inputOrderData.deliveryDetails.complement,
-        city: inputOrderData.deliveryDetails.city,
-        state: inputOrderData.deliveryDetails.state,
-        postcode: inputOrderData.deliveryDetails.postalCode,
-        country: inputOrderData.deliveryDetails.country,
-        email: inputOrderData.deliveryDetails.email,
-        phone: ''
-    };
+    let billing: Billing;
+
+    if (inputOrderData.deliveryDetails.billingAddress) {
+        billing = {
+            first_name: inputOrderData.deliveryDetails.billingAddress.firstName,
+            last_name: inputOrderData.deliveryDetails.billingAddress.lastName,
+            address_1: inputOrderData.deliveryDetails.billingAddress.address,
+            address_2: inputOrderData.deliveryDetails.billingAddress.complement ? inputOrderData.deliveryDetails.billingAddress.complement : '',
+            city: inputOrderData.deliveryDetails.billingAddress.city,
+            state: inputOrderData.deliveryDetails.billingAddress.state,
+            postcode: inputOrderData.deliveryDetails.billingAddress.postalCode,
+            country: inputOrderData.deliveryDetails.billingAddress.country,
+            email: inputOrderData.deliveryDetails.billingAddress.email,
+            phone: ''
+        };
+    } else {
+        // If undefined, it means it is the same as delivery address.
+        billing = {
+            first_name: inputOrderData.deliveryDetails.deliveryAddress.firstName,
+            last_name: inputOrderData.deliveryDetails.deliveryAddress.lastName,
+            address_1: inputOrderData.deliveryDetails.deliveryAddress.address,
+            address_2: inputOrderData.deliveryDetails.deliveryAddress.complement ? inputOrderData.deliveryDetails.deliveryAddress.complement : '',
+            city: inputOrderData.deliveryDetails.deliveryAddress.city,
+            state: inputOrderData.deliveryDetails.deliveryAddress.state,
+            postcode: inputOrderData.deliveryDetails.deliveryAddress.postalCode,
+            country: inputOrderData.deliveryDetails.deliveryAddress.country,
+            email: inputOrderData.deliveryDetails.deliveryAddress.email,
+            phone: ''
+        };
+    }
 
     let shipping: Shipping = {
-        first_name: inputOrderData.deliveryDetails.firstName,
-        last_name: inputOrderData.deliveryDetails.lastName,
-        address_1: inputOrderData.deliveryDetails.address,
-        address_2: inputOrderData.deliveryDetails.complement,
-        city: inputOrderData.deliveryDetails.city,
-        state: inputOrderData.deliveryDetails.state,
-        postcode: inputOrderData.deliveryDetails.postalCode,
-        country: inputOrderData.deliveryDetails.country,
+        first_name: inputOrderData.deliveryDetails.deliveryAddress.firstName,
+        last_name: inputOrderData.deliveryDetails.deliveryAddress.lastName,
+        address_1: inputOrderData.deliveryDetails.deliveryAddress.address,
+        address_2: inputOrderData.deliveryDetails.deliveryAddress.complement ? inputOrderData.deliveryDetails.deliveryAddress.complement : '',
+        city: inputOrderData.deliveryDetails.deliveryAddress.city,
+        state: inputOrderData.deliveryDetails.deliveryAddress.state,
+        postcode: inputOrderData.deliveryDetails.deliveryAddress.postalCode,
+        country: inputOrderData.deliveryDetails.deliveryAddress.country,
     };
 
     let shippingLines = new Array<ShippingLine>();
@@ -44,7 +61,8 @@ export function makeWooOrderObject(inputOrderData: Order,
         billing,
         shipping,
         line_items: inputOrderData.lineItems,
-        shipping_lines: shippingLines
+        shipping_lines: shippingLines,
+        coupon_lines: inputOrderData.couponLines
     };
     return Ok(wooOrder);
 }

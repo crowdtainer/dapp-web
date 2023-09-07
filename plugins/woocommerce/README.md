@@ -58,5 +58,8 @@ npm run build
 # Run
 node -r dotenv/config dist/server.js
 
+# To allow invalid https certs (during development):
+NODE_ENV=development node -r dotenv/config dist/server.js
+
 ```
 
