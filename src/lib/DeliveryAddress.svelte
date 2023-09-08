@@ -14,6 +14,7 @@
 	import { ethers } from 'ethers';
 	import { pseudoRandomNonce } from './Utils/random';
 	import { slide } from 'svelte/transition';
+	import countries from 'iso-3166-1/dist/iso-3166.js';
 
 	let modalDialog: ModalDialog;
 
@@ -52,7 +53,7 @@
 		if (deliverySameAsBilling) {
 			deliveryDetails.billingAddress = deliveryDetails.deliveryAddress;
 		} else {
-			deliveryDetails.billingAddress.email = deliveryAddress.email
+			deliveryDetails.billingAddress.email = deliveryAddress.email;
 		}
 
 		modalDialog.show({
@@ -136,7 +137,7 @@
 
 {#if displaySuccessMessage}
 	<div class="text-black dark:text-white py-16 mx-16">
-		<p class="text-secondary text-xl">Success!</p>
+		<p class="text-secondary text-xl">Success !</p>
 		<br />
 		<p>
 			Thank you. We have received your delivery address and in a few minutes you should receive an
@@ -144,7 +145,7 @@
 		</p>
 	</div>
 {:else}
-	<div class="flex justify-center py-3">
+	<div class="flex justify-center">
 		<div
 			class="block p-4 rounded-lg shadow-lg bg-white dark:bg-gray-900 drop-shadow-lg max-w-md mb-2"
 		>
@@ -163,16 +164,14 @@
 				<p class="py-1 text-lg text-primary">Delivery address</p>
 
 				<!-- Country -->
-				<div class="form-group mb-2">
-					<label class="block">
-						<span class="text-secondary text-sm">Country</span>
-						<input
-							type="text"
-							name="country"
-							class="text-input-form"
-							bind:value={deliveryAddress.country}
-						/>
-					</label>
+				<div class="form-control w-full mb-2">
+					<span class=" text-secondary text-sm">Country</span>
+					<select class="select" bind:value={deliveryAddress.country}>
+						<option disabled selected>Select</option>
+						{#each countries as country}
+							<option value={country.alpha2}>{country.country}</option>
+						{/each}
+					</select>
 				</div>
 
 				<!-- Name -->
@@ -200,10 +199,11 @@
 				<!-- Address -->
 				<div class="form-group mb-2">
 					<label class="block">
-						<span class="text-secondary text-sm">Address</span>
+						<span class="text-secondary text-sm">Street Address</span>
 						<input
 							type="text"
 							name="address"
+							placeholder="House number and street name"
 							class="text-input-form"
 							bind:value={deliveryAddress.address}
 						/>
@@ -212,12 +212,11 @@
 
 				<div class="form-group mb-2">
 					<label class="block">
-						<span class="text-secondary text-sm"
-							>House number, apartment number or other (optional)</span
-						>
+						<span class="text-secondary text-sm">Complement (optional)</span>
 						<input
 							type="text"
 							name="addressComplement"
+							placeholder="Apartment number, suite, unit, etc"
 							class="text-input-form"
 							bind:value={deliveryAddress.complement}
 						/>
@@ -235,26 +234,17 @@
 						/>
 					</div>
 					<div class="form-group">
-						<span class="text-secondary text-sm">State</span>
+						<span class="text-secondary text-sm">City</span>
 						<input
 							type="text"
 							name="city"
 							class="text-input-form"
-							bind:value={deliveryAddress.state}
+							bind:value={deliveryAddress.city}
 						/>
 					</div>
 				</div>
-				<div class="form-group my-2">
-					<span class="text-secondary text-sm">City</span>
-					<input
-						type="text"
-						name="city"
-						class="text-input-form"
-						bind:value={deliveryAddress.city}
-					/>
-				</div>
 
-				<p class="py-1 text-lg text-primary">Billing address</p>
+				<p class="py-1 text-lg text-primary mt-2">Billing address</p>
 				<div class="flex">
 					<div class="form-control">
 						<label class="label cursor-pointer">
@@ -285,16 +275,14 @@
 				{#if !deliverySameAsBilling}
 					<div in:slide={{ duration: 250 }} out:slide={{ duration: 250 }}>
 						<!-- Country -->
-						<div class="form-group mb-2">
-							<label class="block">
-								<span class="text-secondary text-sm">Country</span>
-								<input
-									type="text"
-									name="country"
-									class="text-input-form"
-									bind:value={billingAddress.country}
-								/>
-							</label>
+						<div class="form-control w-full mb-2">
+							<span class=" text-secondary text-sm">Country</span>
+							<select class="select" bind:value={billingAddress.country}>
+								<option disabled selected>Select</option>
+								{#each countries as country}
+									<option value={country.alpha2}>{country.country}</option>
+								{/each}
+							</select>
 						</div>
 
 						<!-- Name -->
@@ -322,9 +310,10 @@
 						<!-- Address -->
 						<div class="form-group mb-2">
 							<label class="block">
-								<span class="text-secondary text-sm">Address</span>
+								<span class="text-secondary text-sm">Street Address</span>
 								<input
 									type="text"
+									placeholder="House number and street name"
 									name="address"
 									class="text-input-form"
 									bind:value={billingAddress.address}
@@ -334,12 +323,11 @@
 
 						<div class="form-group mb-2">
 							<label class="block">
-								<span class="text-secondary text-sm"
-									>House number, apartment number or other (optional)</span
-								>
+								<span class="text-secondary text-sm">Complement (optional)</span>
 								<input
 									type="text"
 									name="addressComplement"
+									placeholder="Apartment number, suite, unit, etc"
 									class="text-input-form"
 									bind:value={billingAddress.complement}
 								/>
@@ -357,23 +345,14 @@
 								/>
 							</div>
 							<div class="form-group">
-								<span class="text-secondary text-sm">State</span>
+								<span class="text-secondary text-sm">City</span>
 								<input
 									type="text"
 									name="city"
 									class="text-input-form"
-									bind:value={billingAddress.state}
+									bind:value={billingAddress.city}
 								/>
 							</div>
-						</div>
-						<div class="form-group my-2">
-							<span class="text-secondary text-sm">City</span>
-							<input
-								type="text"
-								name="city"
-								class="text-input-form"
-								bind:value={billingAddress.city}
-							/>
 						</div>
 					</div>
 				{/if}

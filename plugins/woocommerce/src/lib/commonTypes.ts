@@ -7,7 +7,7 @@ export interface Address {
     address: string;
     complement?: string;
     postalCode: string;
-    state: string;
+    state?: string;
     city: string;
     email: string;
 }

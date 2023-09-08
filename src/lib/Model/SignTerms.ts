@@ -14,7 +14,7 @@ export interface Address {
     address: string;
     complement?: string;
     postalCode: string;
-    state: string;
+    state?: string;
     city: string;
     email: string;
 }
@@ -34,30 +34,32 @@ export function makeAddress() : Address {
 		lastName: '',
 		address: '',
 		postalCode: '',
-		state: '',
+        complement: '',
 		city: '',
 		email: ''
 	};
 }
 
 export function normalizeDeliveryDetails(deliveryDetails: DeliveryDetails): DeliveryDetails {
-    deliveryDetails.deliveryAddress.lastName = treatSpecialChars(deliveryDetails.deliveryAddress.lastName);
-    deliveryDetails.deliveryAddress.firstName = treatSpecialChars(deliveryDetails.deliveryAddress.firstName);
     deliveryDetails.deliveryAddress.country = treatSpecialChars(deliveryDetails.deliveryAddress.country);
+    deliveryDetails.deliveryAddress.firstName = treatSpecialChars(deliveryDetails.deliveryAddress.firstName);
+    deliveryDetails.deliveryAddress.lastName = treatSpecialChars(deliveryDetails.deliveryAddress.lastName);
     deliveryDetails.deliveryAddress.address = treatSpecialChars(deliveryDetails.deliveryAddress.address);
     deliveryDetails.deliveryAddress.complement = treatSpecialChars(deliveryDetails.deliveryAddress.complement ? deliveryDetails.deliveryAddress.complement : '');
     deliveryDetails.deliveryAddress.postalCode = treatSpecialChars(deliveryDetails.deliveryAddress.postalCode);
     deliveryDetails.deliveryAddress.city = treatSpecialChars(deliveryDetails.deliveryAddress.city);
+    deliveryDetails.deliveryAddress.state = treatSpecialChars(deliveryDetails.deliveryAddress.state ? deliveryDetails.deliveryAddress.state : '');
     deliveryDetails.deliveryAddress.email = treatSpecialChars(deliveryDetails.deliveryAddress.email);
 
     if (deliveryDetails.billingAddress) {
-        deliveryDetails.billingAddress.lastName = treatSpecialChars(deliveryDetails.billingAddress.lastName);
-        deliveryDetails.billingAddress.firstName = treatSpecialChars(deliveryDetails.billingAddress.firstName);
         deliveryDetails.billingAddress.country = treatSpecialChars(deliveryDetails.billingAddress.country);
+        deliveryDetails.billingAddress.firstName = treatSpecialChars(deliveryDetails.billingAddress.firstName);
+        deliveryDetails.billingAddress.lastName = treatSpecialChars(deliveryDetails.billingAddress.lastName);
         deliveryDetails.billingAddress.address = treatSpecialChars(deliveryDetails.billingAddress.address);
         deliveryDetails.billingAddress.complement = treatSpecialChars(deliveryDetails.billingAddress.complement ? deliveryDetails.billingAddress.complement : '');
         deliveryDetails.billingAddress.postalCode = treatSpecialChars(deliveryDetails.billingAddress.postalCode);
         deliveryDetails.billingAddress.city = treatSpecialChars(deliveryDetails.billingAddress.city);
+        deliveryDetails.billingAddress.state = treatSpecialChars(deliveryDetails.billingAddress.state ? deliveryDetails.billingAddress.state : '');
         deliveryDetails.billingAddress.email = treatSpecialChars(deliveryDetails.billingAddress.email);
     }
     return deliveryDetails;
@@ -147,23 +149,23 @@ function makeAgreeToTermsStatement(email: string, _termsURI: string): string {
 
 function makeDeliveryStatement(delivery: DeliveryDetails, _termsURI: string): string {
     let billingStatement: string;
-    if (delivery.billingAddress) {
+    if (JSON.stringify(delivery.billingAddress) !== JSON.stringify(delivery.deliveryAddress)) {
         billingStatement = `My billing is: ` +
             `${delivery.billingAddress.firstName}, ${delivery.billingAddress.lastName}, ${delivery.billingAddress.address}, ` +
-            `${delivery.billingAddress.complement}, ${delivery.billingAddress.postalCode}, ` +
-            `${delivery.billingAddress.state}, ${delivery.billingAddress.city}, ${delivery.billingAddress.country}. `
+            `${(delivery.billingAddress.complement !== '')? `${delivery.billingAddress.complement},` : ''} ${delivery.billingAddress.postalCode}, ` +
+            `${(delivery.billingAddress.state)? `${delivery.billingAddress.state},` : ''}  ${delivery.billingAddress.city}, ${delivery.billingAddress.country}. `
     } else {
         billingStatement = 'Billing address is the same as delivery address.'
     }
 
     let statement =
         `I confirm acceptance to the terms and conditions found in ${_termsURI}. ` +
-        `Email for invoice: ${delivery.deliveryAddress.email}. ` +
-        `Proof of payment: ${delivery.vouchers721Address}, token id: ${delivery.voucherId}. ` +
-        `My delivery data is: ` +
-        `${delivery.deliveryAddress.firstName}, ${delivery.deliveryAddress.lastName}, ${delivery.deliveryAddress.address}, ` +
-        `${delivery.deliveryAddress.complement}, ${delivery.deliveryAddress.postalCode}, ` +
-        `${delivery.deliveryAddress.state}, ${delivery.deliveryAddress.city}, ${delivery.deliveryAddress.country}. ` +
+        `Email for invoice: ${treatSpecialChars(delivery.deliveryAddress.email)}. ` +
+        `Proof of payment: ${treatSpecialChars(delivery.vouchers721Address)}, token id: ${treatSpecialChars(`${delivery.voucherId}`)}. ` +
+        `My delivery address is: ` +
+        `${delivery.deliveryAddress.lastName}, ${delivery.deliveryAddress.firstName}, ${delivery.deliveryAddress.address}, ` +
+        `${(delivery.deliveryAddress.complement !== '')? `${delivery.deliveryAddress.complement},` : ''} ${delivery.deliveryAddress.postalCode}, ` +
+        `${(delivery.deliveryAddress.state !== '')? `${delivery.deliveryAddress.state},` : ''} ${delivery.deliveryAddress.city}, ${delivery.deliveryAddress.country}. ` +
         billingStatement;
-    return treatSpecialChars(statement);
+    return statement;
 }

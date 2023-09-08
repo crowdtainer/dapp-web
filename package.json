@@ -55,6 +55,7 @@
 		"dotenv": "^16.0.3",
 		"ethers": "^5.7.2",
 		"ioredis": "^5.2.3",
+		"iso-3166-1": "^2.1.1",
 		"prettier": "^2.6.2",
 		"prettier-plugin-svelte": "^2.10.1",
 		"transliteration": "^2.3.5",

@@ -34,9 +34,9 @@ export async function createWordpressOrders(axios: AxiosInstance, deliveries: Ma
         const wooOrderObject = makeWooOrderObject(order, WOOCOMMERCE_PAYMENT_METHOD, WOOCOMMERCE_PAYMENT_METHOD_TITLE, Boolean(WOOCOMMERCE_SET_PAID));
 
         assert(wooOrderObject.isOk());
-        let requestError: any | undefined;
+        let requestError: any | undefined = undefined;
 
-        // console.log(`Woocommerce API payload: ${JSON.stringify(wooOrderObject.unwrap())}`);
+        console.log(`Woocommerce API payload: ${JSON.stringify(wooOrderObject.unwrap())}`);
 
         await Promise.all([await axios.post(`${WORDPRESS_SERVER}/wp-json/wc/v3/orders`, wooOrderObject.unwrap())
             .then(function (response) {
@@ -51,6 +51,7 @@ export async function createWordpressOrders(axios: AxiosInstance, deliveries: Ma
                 ordersCreated.push(id);
             })
             .catch(function (error) {
+                console.log(`${JSON.stringify(error)}`);
                 requestError = error;
             })]);
 

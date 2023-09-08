@@ -1,7 +1,10 @@
 import { getDatabase } from "$lib/Database/redis";              // Database
 
-import { BigNumber, ethers } from 'ethers';                                // Ethers
+import { BigNumber, ethers } from 'ethers';                     // Ethers
 import { type Result, Ok, Err, } from "@sniptt/monads";         // Monads
+// const countryISO = require('iso-3166-1');
+import { whereAlpha2, whereCountry } from 'iso-3166-1';
+import Country from 'iso-3166-1';
 
 import { isTimeValid, makeDeliveryRequestMessage, type DeliveryDetails, type Address } from '$lib/Model/SignTerms';
 import { Vouchers721Address } from '../Data/projects.json';
@@ -168,6 +171,17 @@ export const POST: RequestHandler = async ({ request }) => {
 
     let [signerAddress, domain, origin, nonce, currentTimeISO, deliveryDetails, signatureHash] = result.unwrap();
 
+    // Check if country field is valid
+    let countryFound = whereAlpha2(deliveryDetails.deliveryAddress.country);
+    if (!countryFound) {
+        throw error(400, `Unrecognized delivery address country: '${deliveryDetails.deliveryAddress.country}'`);
+    }
+
+    countryFound = whereAlpha2(deliveryDetails.billingAddress.country);
+    if (!countryFound) {
+        throw error(400, `Unrecognized billing address country: '${deliveryDetails.billingAddress.country}'`);
+    }
+
     try {
 
         // Check signature
@@ -267,7 +281,7 @@ export const POST: RequestHandler = async ({ request }) => {
         }
 
         let decimals = await getTokenDecimals(signer, crowdtainerAddress);
-        if(decimals.isErr()) {
+        if (decimals.isErr()) {
             throw error(500, `Unable to read token decimals from crowdtainer ID: ${crowdtainerReference.unwrap().crowdtainerId}`);
         }
 
@@ -340,12 +354,18 @@ function getPayload(item: any): Result<[
 
     let addressKey: keyof Address;
     for (addressKey in deliveryDetails.deliveryAddress) {
+        if (addressKey === 'complement' || addressKey === 'state') { // optional fields 
+            continue;
+        }
         if (deliveryDetails.deliveryAddress[addressKey] === '') {
             return Err(`Delivery Address missing ${camelToSentenceCase(addressKey).toLowerCase()} field`);
         }
     }
 
     for (addressKey in deliveryDetails.billingAddress) {
+        if (addressKey === 'complement' || addressKey === 'state') { // optional fields
+            continue;
+        }
         if (deliveryDetails.billingAddress[addressKey] === '') {
             return Err(`Billing Address missing ${camelToSentenceCase(addressKey).toLowerCase()} field`);
         }

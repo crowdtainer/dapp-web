@@ -33,6 +33,10 @@
     @apply bg-[#172939] dark:bg-[#0D1116];
   }
 
+  .select {
+    @apply rounded-md;
+  }
+
   .campaignSection {
     @apply border-b-4 border-double dark:border-gray-400 border-gray-700;
     @apply text-black dark:text-gray-200;

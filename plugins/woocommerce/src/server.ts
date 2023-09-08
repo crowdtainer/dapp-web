@@ -53,9 +53,10 @@ async function performWork(axiosInstance: AxiosInstance, db: Redis) {
         console.log(`Orders created: ${JSON.stringify(ordersCreated)}`);
     }
 
-    if (ordersWithError.length > 0) {
-        console.log(`Order creation failures: ${JSON.stringify(ordersWithError)}`);
-    }
+    ordersWithError.forEach(element => {
+        console.log(`Order creation failures: status code: ${element.statusCode}. Details: ${element.details}`);
+    });
+
 
     numberOfSuccessfulyCreatedOrders += ordersCreated.orderIDs.length;
     console.log(`Total orders created since process start: ${numberOfSuccessfulyCreatedOrders}.`);
