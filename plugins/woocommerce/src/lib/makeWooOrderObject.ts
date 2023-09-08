@@ -1,7 +1,7 @@
 'use strict';
 import { Result, Ok } from '@sniptt/monads';
 import { Order } from './commonTypes.js';
-import { Billing, CouponLine, Shipping, ShippingLine, WooOrderObject } from './WooOrderInterface.js';
+import { Billing, Shipping, ShippingLine, WooOrderObject } from './WooOrderInterface.js';
 
 export type Error = { details: number };
 
@@ -17,9 +17,9 @@ export function makeWooOrderObject(inputOrderData: Order,
             first_name: inputOrderData.deliveryDetails.billingAddress.firstName,
             last_name: inputOrderData.deliveryDetails.billingAddress.lastName,
             address_1: inputOrderData.deliveryDetails.billingAddress.address,
-            address_2: inputOrderData.deliveryDetails.billingAddress.complement ? inputOrderData.deliveryDetails.billingAddress.complement : '',
+            address_2: inputOrderData.deliveryDetails.billingAddress.complement,
             city: inputOrderData.deliveryDetails.billingAddress.city,
-            state: inputOrderData.deliveryDetails.billingAddress.state ? inputOrderData.deliveryDetails.billingAddress.state : '',
+            state: inputOrderData.deliveryDetails.billingAddress.state,
             postcode: inputOrderData.deliveryDetails.billingAddress.postalCode,
             country: inputOrderData.deliveryDetails.billingAddress.country,
             email: inputOrderData.deliveryDetails.billingAddress.email,
@@ -31,9 +31,9 @@ export function makeWooOrderObject(inputOrderData: Order,
             first_name: inputOrderData.deliveryDetails.deliveryAddress.firstName,
             last_name: inputOrderData.deliveryDetails.deliveryAddress.lastName,
             address_1: inputOrderData.deliveryDetails.deliveryAddress.address,
-            address_2: inputOrderData.deliveryDetails.deliveryAddress.complement ? inputOrderData.deliveryDetails.deliveryAddress.complement : '',
+            address_2: inputOrderData.deliveryDetails.deliveryAddress.complement,
             city: inputOrderData.deliveryDetails.deliveryAddress.city,
-            state:inputOrderData.deliveryDetails.deliveryAddress.state ? inputOrderData.deliveryDetails.deliveryAddress.state : '',
+            state:inputOrderData.deliveryDetails.deliveryAddress.state,
             postcode: inputOrderData.deliveryDetails.deliveryAddress.postalCode,
             country: inputOrderData.deliveryDetails.deliveryAddress.country,
             email: inputOrderData.deliveryDetails.deliveryAddress.email,
@@ -45,9 +45,9 @@ export function makeWooOrderObject(inputOrderData: Order,
         first_name: inputOrderData.deliveryDetails.deliveryAddress.firstName,
         last_name: inputOrderData.deliveryDetails.deliveryAddress.lastName,
         address_1: inputOrderData.deliveryDetails.deliveryAddress.address,
-        address_2: inputOrderData.deliveryDetails.deliveryAddress.complement ? inputOrderData.deliveryDetails.deliveryAddress.complement : '',
+        address_2: inputOrderData.deliveryDetails.deliveryAddress.complement,
         city: inputOrderData.deliveryDetails.deliveryAddress.city,
-        state: inputOrderData.deliveryDetails.deliveryAddress.state ? inputOrderData.deliveryDetails.deliveryAddress.state : '',
+        state: inputOrderData.deliveryDetails.deliveryAddress.state,
         postcode: inputOrderData.deliveryDetails.deliveryAddress.postalCode,
         country: inputOrderData.deliveryDetails.deliveryAddress.country,
     };

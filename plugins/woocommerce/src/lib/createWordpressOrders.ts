@@ -34,7 +34,7 @@ export async function createWordpressOrders(axios: AxiosInstance, deliveries: Ma
         const wooOrderObject = makeWooOrderObject(order, WOOCOMMERCE_PAYMENT_METHOD, WOOCOMMERCE_PAYMENT_METHOD_TITLE, Boolean(WOOCOMMERCE_SET_PAID));
 
         assert(wooOrderObject.isOk());
-        let requestError: any | undefined = undefined;
+        let requestError: any | undefined;
 
         console.log(`Woocommerce API payload: ${JSON.stringify(wooOrderObject.unwrap())}`);
 

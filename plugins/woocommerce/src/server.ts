@@ -57,9 +57,17 @@ async function performWork(axiosInstance: AxiosInstance, db: Redis) {
         console.log(`Order creation failures: status code: ${element.statusCode}. Details: ${element.details}`);
     });
 
-
     numberOfSuccessfulyCreatedOrders += ordersCreated.orderIDs.length;
     console.log(`Total orders created since process start: ${numberOfSuccessfulyCreatedOrders}.`);
+
+    // There are cases where an order is created, yet wordpress returns an error.
+    // In order to avoid creating duplicate orders., we will stop processing in case 
+    // of failed orders until the problem is resolved.
+    if(ordersWithError.length > 0) {
+        console.log(`Shutting down since orders with errors were detected.`);
+        terminateProcess = true;
+        // TODO: Dispatch an e-mail to system admin
+    }
 }
 
 function signalHandler() {
