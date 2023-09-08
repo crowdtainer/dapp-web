@@ -36,7 +36,7 @@ export async function createWordpressOrders(axios: AxiosInstance, deliveries: Ma
         assert(wooOrderObject.isOk());
         let requestError: any | undefined;
 
-        // console.log(`Woocommerce API payload: ${JSON.stringify(wooOrderObject.unwrap())}`);
+        console.log(`Woocommerce API payload: ${JSON.stringify(wooOrderObject.unwrap())}`);
 
         await Promise.all([await axios.post(`${WORDPRESS_SERVER}/wp-json/wc/v3/orders`, wooOrderObject.unwrap())
             .then(function (response) {
@@ -51,6 +51,7 @@ export async function createWordpressOrders(axios: AxiosInstance, deliveries: Ma
                 ordersCreated.push(id);
             })
             .catch(function (error) {
+                console.log(`${JSON.stringify(error)}`);
                 requestError = error;
             })]);
 
