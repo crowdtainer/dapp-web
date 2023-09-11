@@ -98,11 +98,11 @@
 		</p>
 
 		<div class=" w-full grid place-items-center pb-10">
-			<div class="w-full xl:w-5/6 2xl:w-4/6">
+			<div class="w-full xl:w-5/6 max-w-screen-2xl">
 				<div>
 					<div class="campaignSection">
 						<div class="max-w-7xl mx-auto py-3 px-4 sm:px-6 lg:px-8">
-							<h1 class="font-display lg:text-xl md:text-sm">Active</h1>
+							<h1 class="font-display text-lg lg:text-xl">Active</h1>
 						</div>
 					</div>
 					<div>
@@ -136,7 +136,7 @@
 				<div>
 					<div class="campaignSection">
 						<div class="max-w-7xl mx-auto py-3 px-4 sm:px-6 lg:px-8">
-							<h1 class="font-display lg:text-xl md:text-sm">Upcoming</h1>
+							<h1 class="font-display text-lg lg:text-xl">Upcoming</h1>
 						</div>
 					</div>
 
@@ -171,7 +171,7 @@
 				<div>
 					<div class="campaignSection">
 						<div class="max-w-7xl mx-auto py-3 px-4 sm:px-6 lg:px-8">
-							<h1 class="font-display lg:text-xl md:text-sm">Previous</h1>
+							<h1 class="font-display text-lg lg:text-xl">Previous</h1>
 						</div>
 					</div>
 

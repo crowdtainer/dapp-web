@@ -309,7 +309,7 @@ export function getSigner(): Signer | undefined {
     return web3Provider.getSigner();
 }
 
-export async function getAccountAddress(): Promise<string | undefined> {
+async function getAccountAddress(): Promise<string | undefined> {
     if (connected) {
         return await web3Provider.getSigner().getAddress();
     }

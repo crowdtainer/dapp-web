@@ -65,6 +65,16 @@ export async function getERC20Contract(provider: ethers.Signer | ethers.provider
 
 export type NotEnoughFundsError = { current: BigNumber, required: BigNumber };
 
+export type TokenIDAssociations = {
+    foundTokenIds: number[],
+    crowdtainerIds: number[],
+    crowdtainerAddresses: string[]
+};
+
+export function makeNewTokenIDAssociations(): TokenIDAssociations {
+    return { foundTokenIds: new Array<number>(), crowdtainerIds: new Array<number>(), crowdtainerAddresses: new Array<string>() };
+}
+
 export async function hasEnoughFunds(erc20Contract: IERC20, signerAddress: string, totalCost: BigNumber): Promise<Result<BigNumber, NotEnoughFundsError>> {
     let balance = (await erc20Contract.balanceOf(signerAddress));
     console.log(`Current wallet balance: ${balance}`);
@@ -76,7 +86,7 @@ export async function hasEnoughFunds(erc20Contract: IERC20, signerAddress: strin
 }
 
 export async function findTokenIdsForWallet(provider: ethers.Signer | undefined,
-    vouchers721Address: string): Promise<Result<[number[], number[], string[]], string>> {
+    vouchers721Address: string): Promise<Result<TokenIDAssociations, string>> {
 
     if (provider === undefined) {
         return Err("Provider not available.");
@@ -89,9 +99,7 @@ export async function findTokenIdsForWallet(provider: ethers.Signer | undefined,
 
         let totalTokens = (await vouchers721Contract.balanceOf(wallet)).toNumber();
 
-        let foundTokenIds: number[] = new Array<number>();
-        let crowdtainerIds: number[] = new Array<number>();
-        let crowdtainerAddresses: string[] = new Array<string>();
+        let tokenAssociations = makeNewTokenIDAssociations();
 
         for (let index = 0; index < totalTokens; index++) {
             const tokenId = await vouchers721Contract.tokenOfOwnerByIndex(wallet, BigNumber.from(index));
@@ -99,13 +107,12 @@ export async function findTokenIdsForWallet(provider: ethers.Signer | undefined,
             let foundCrowdtainerAddress = await vouchers721Contract.crowdtainerIdToAddress(crowdtainerId);
             console.log(`Wallet ${wallet} is owner of tokenId: ${tokenId}, from crowdtainerId ${crowdtainerId} @ address ${foundCrowdtainerAddress}`);
 
-            foundTokenIds.push(tokenId.toNumber());
-            crowdtainerIds.push(crowdtainerId.toNumber());
-            crowdtainerAddresses.push(foundCrowdtainerAddress);
+            tokenAssociations.foundTokenIds.push(tokenId.toNumber());
+            tokenAssociations.crowdtainerIds.push(crowdtainerId.toNumber());
+            tokenAssociations.crowdtainerAddresses.push(foundCrowdtainerAddress);
         }
 
-        let result: [number[], number[], string[]] = [foundTokenIds, crowdtainerIds, crowdtainerAddresses];
-        return Ok(result);
+        return Ok(tokenAssociations);
 
     } catch (error) {
         return Err(`${error}`);
@@ -142,12 +149,12 @@ export async function leaveProject(provider: ethers.Signer | undefined,
         return Err(searchResult.unwrapErr());
     }
 
-    let [tokenIds, , crowdtainerAddresses] = searchResult.unwrap();
+    let tokenIdsAssociations = searchResult.unwrap();
 
     try {
-        for (let index = 0; index < tokenIds.length; index++) {
-            if (crowdtainerAddress === crowdtainerAddresses[index]) {
-                let leaveTransaction = await vouchers721Contract.leave(tokenIds[index]);
+        for (let index = 0; index < tokenIdsAssociations.foundTokenIds.length; index++) {
+            if (crowdtainerAddress === tokenIdsAssociations.crowdtainerAddresses[index]) {
+                let leaveTransaction = await vouchers721Contract.leave(tokenIdsAssociations.foundTokenIds[index]);
                 return Ok(leaveTransaction);
             }
         }
@@ -199,8 +206,19 @@ export async function transferToken(provider: ethers.Signer | undefined,
     }
 
     try {
+        let resolvedAddress: string;
+        if (ethers.utils.isAddress(targetWallet)) {
+            resolvedAddress = targetWallet;
+        }
+        else {
+            // Try for ENS address resolution
+            resolvedAddress = await provider.resolveName(targetWallet);
+            if (!ethers.utils.isAddress(resolvedAddress)) {
+                return Err('Invalid ethereum address and ENS resolution failed.');
+            }
+        }
         const vouchers721Contract = Vouchers721__factory.connect(vouchers721Address, provider);
-        let claimFundsTransaction = await vouchers721Contract.transferFrom(provider.getAddress(), targetWallet, BigNumber.from(tokenId));
+        let claimFundsTransaction = await vouchers721Contract.transferFrom(provider.getAddress(), resolvedAddress, BigNumber.from(tokenId));
         return Ok(claimFundsTransaction);
     } catch (error) {
         return makeError(error);

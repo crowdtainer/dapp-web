@@ -4,9 +4,8 @@
 
 	import { Icon } from '@steeze-ui/svelte-icon';
 	import { Clipboard } from '@steeze-ui/heroicons';
-	import { addToast, type ToastData } from './Toast/ToastStore';
-	import { MessageType } from './Toast/MessageType';
 	import { BigNumber } from 'ethers/lib/ethers.js';
+	import { copyToClipBoardAndNotify } from './Utils/clipboard.js';
 
 	export let vouchers721Address: string;
 	export let crowdtainerId: number;
@@ -21,21 +20,6 @@
 
 	function visibilityToggle() {
 		visible = !visible;
-	}
-
-	function copyToClipBoardAndNotify(description: string, text?: string) {
-		if (!text) return;
-
-		navigator.clipboard.writeText(text);
-
-		let toast: ToastData = {
-			id: Math.floor(Math.random() * 10000),
-			type: MessageType.Info,
-			dismissible: true,
-			timeout: 7000,
-			message: `${description} copied to clipboard.`
-		};
-		addToast(toast);
 	}
 
 	$: discount = BigNumber.from(referralRate).toNumber() / 2;

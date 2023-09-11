@@ -12,7 +12,7 @@
 	import { connect } from '$lib/Utils/wallet';
 	import { WalletType } from '$lib/Utils/walletStorage';
 
-	import { findTokenIdsForWallet } from '$lib/ethersCalls/rpcRequests';
+	import { findTokenIdsForWallet, type TokenIDAssociations } from '$lib/ethersCalls/rpcRequests';
 	import { BigNumber } from 'ethers';
 	import { loadTokenURIRepresentation, type TokenURIObject } from '$lib/Converters/tokenURI';
 	import DeliveryAddress from '$lib/DeliveryAddress.svelte';
@@ -24,6 +24,7 @@
 	let tokenJSON: TokenURIObject;
 	let loadedWallet: string;
 	let userWalletInvalid: boolean;
+	let tokenIdAssociations: TokenIDAssociations;
 
 	let voucherId: BigNumber;
 	let vouchers721Address: string;
@@ -68,16 +69,16 @@
 			return;
 		}
 
-		let [foundTokenIds, foundCrowdtainerIds, crowdtainerAddresses] = walletTokensSearch.unwrap();
+		tokenIdAssociations = walletTokensSearch.unwrap();
 		// console.log(`Found ${foundCrowdtainerIds.length} crowdtainer ids: ${foundCrowdtainerIds}`);
 
-		if (foundTokenIds.length == 0) {
+		if (tokenIdAssociations.foundTokenIds.length == 0) {
 			console.log('No tokens found.');
 			return;
 		}
 
 		// parameter needs to match token owner
-		let foundToken = foundTokenIds.filter((item) => item === voucherId.toNumber());
+		let foundToken = tokenIdAssociations.foundTokenIds.filter((item) => item === voucherId.toNumber());
 		if (foundToken.length === 0) {
 			console.log('The specified token does not belong to the connected wallet.');
 			return;

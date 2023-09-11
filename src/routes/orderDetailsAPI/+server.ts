@@ -18,7 +18,7 @@ async function fetchData(chainId: number, vouchers721Address: string, voucherId:
 
         let key = deliveryVoucherKey(chainId, vouchers721Address, voucherId);
 
-        if (await redis.exists(key)) {
+        if (await redis.lpos('deliveryRequests:v1', key) !== null) {
             return Ok(OrderStatus.DeliveryAddressReceived);
         } else {
             return Ok(OrderStatus.WaitingForDeliveryAddress);

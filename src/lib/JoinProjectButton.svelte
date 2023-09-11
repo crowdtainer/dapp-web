@@ -10,7 +10,7 @@
 		joinProject,
 		joinProjectWithSignature
 	} from './ethersCalls/rpcRequests';
-	import { getAccountAddress, getSigner, web3Provider } from './Utils/wallet';
+	import { getSigner, walletState, web3Provider } from './Utils/wallet';
 
 	import ModalDialog, { ModalAnimation, ModalIcon, ModalType } from '$lib/ModalDialog.svelte';
 	import { requestAuthorizationProof } from './api.js';
@@ -260,7 +260,7 @@
 			erc20Contract = erc20ContractResult.unwrap();
 		}
 
-		let accountAddress = await getAccountAddress();
+		let accountAddress = $walletState.account;
 		if (
 			erc20Contract === undefined ||
 			accountAddress === undefined ||
@@ -420,7 +420,7 @@
 		>
 			{#if actionButtonEnabled && enoughFunds && !enoughAllowance}
 				{#if tokenSymbol !== undefined}
-					Allow spending ({totalSum} {tokenSymbol})
+					Allow spending ({totalSum - discountValue} {tokenSymbol})
 				{:else}
 					Allow spending
 				{/if}

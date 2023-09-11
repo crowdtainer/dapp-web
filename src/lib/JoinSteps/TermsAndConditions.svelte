@@ -153,8 +153,8 @@
 				class="checkbox checkbox-primary"
 			/>
 			<p class="label-text dark:text-white w-full">
-				I understand that shipping is <b>only possible to Germany</b> at this time, and due the experimental
-				nature of this project, delivery can take more than 30 days.
+				I understand that due the experimental nature of this project, delivery can take more than
+				30 days.
 			</p>
 		</label>
 	</div>
