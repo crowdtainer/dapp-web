@@ -37,6 +37,15 @@
 	export let subtitle: string;
 	export let projectURL: string;
 
+	// svelte-ignore unused-export-let
+	export let description: string;
+	// svelte-ignore unused-export-let
+	export let projectImageURLs: string;
+	// svelte-ignore unused-export-let
+	export let basePriceDenominator: number[];
+	// svelte-ignore unused-export-let
+	export let basePriceUnit: string;
+
 	export let campaignStaticData: CrowdtainerStaticModel | undefined;
 	export let campaignStaticUI: UIFields | undefined;
 	export let staticDataLoadStatus: LoadStatus = LoadStatus.Loading;
@@ -48,16 +57,6 @@
 	let fundsInContract: number | undefined;
 	let raisedAmount: number | undefined;
 	let svg: string | undefined;
-
-	// Modal Dialog
-	// let dialog: ModalDialogData = {
-	// 	id: '',
-	// 	title: '',
-	// 	body: '',
-	// 	animation: ModalAnimation.Circle2,
-	// 	icon: ModalIcon.DeviceMobile,
-	// 	type: ModalType.ActionRequest
-	// };
 
 	initializeDataForWallet(campaignStaticData?.contractAddress, $accountAddress);
 
@@ -171,30 +170,21 @@
 					<div class:animate-pulse={loadingAnimation}>
 						<!-- Dates -->
 						<div class="flex py-6 gap-16">
+							<div>
+								<p class="projectStatus">{stateString}</p>
+								<p class="projectDataSubtitle">Status</p>
+							</div>
 							<div class="">
 								<p class="projectData">
 									{campaignStaticUI ? campaignStaticUI.endDateString : loadingString}
 								</p>
 								<p class="projectDataSubtitle">Funding end</p>
 							</div>
-							<div>
-								<p class="projectStatus">{stateString}</p>
-								<p class="projectDataSubtitle">Status</p>
-							</div>
 						</div>
 					</div>
 				{:else}
 					<p class="my-6 text-red-800">Error fetching data.</p>
 				{/if}
-				<DetailedTokenIdState
-					walletData={$walletInCrowdtainer}
-					{campaignStaticUI}
-					{fundsInContract}
-					{raisedAmount}
-					{state}
-					{orderStatus}
-				/>
-
 				<!-- Smart contract details -->
 				<div class="dark:text-white">
 					<ProjectDetails
@@ -208,6 +198,15 @@
 						referralRate={campaignStaticData?.referralRate}
 					/>
 				</div>
+
+				<DetailedTokenIdState
+					walletData={$walletInCrowdtainer}
+					{campaignStaticUI}
+					{fundsInContract}
+					{raisedAmount}
+					{state}
+					{orderStatus}
+				/>
 
 				<div class="w-auto flex">
 					{#if campaignStaticData !== undefined && campaignStaticUI !== undefined}

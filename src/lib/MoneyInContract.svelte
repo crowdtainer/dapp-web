@@ -33,7 +33,7 @@
 			{moneyFormatter.format($tweenedFundsInContract)}
 			{campaignStaticUI ? campaignStaticUI.tokenSymbol : ''}
 		</p>
-		<p class="projectDataSubtitle">left for withdrawal</p>
+		<p class="projectDataSubtitle">left in pool</p>
 	{:else if state === ProjectStatusUI.Delivery}
 	<p class="projectStatus">
 		{moneyFormatter.format($tweenedRaised)}

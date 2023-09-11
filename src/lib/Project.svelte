@@ -2,13 +2,15 @@
 	import { onMount } from 'svelte';
 	import { tweened } from 'svelte/motion';
 	import { cubicOut } from 'svelte/easing';
+	import { blur } from 'svelte/transition';
 	import type { Readable } from 'svelte/store';
+	import { goto } from '$app/navigation';
 
 	import JoinProject from '$lib/JoinProject.svelte';
 
 	import { initializeCampaignStores, campaignStores } from '$lib/Stores/campaignStore';
 	import { joinSelection } from '$lib/Stores/userStore';
-	import { findTokenIdsForWallet } from './ethersCalls/rpcRequests';
+	import { findTokenIdsForWallet, type TokenIDAssociations } from './ethersCalls/rpcRequests';
 
 	import TimeLeft from './TimeLeft.svelte';
 	import MoneyInContract from './MoneyInContract.svelte';
@@ -46,9 +48,11 @@
 	export let subtitle: string;
 	export let description: string;
 	export let projectURL: string;
-	export let projectImageURL: string;
+	export let projectImageURLs: string[];
 	export let basePrices: number[];
 	export let basePriceUnit: string;
+	// svelte-ignore unused-export-let
+	export let basePriceDenominator: number[];
 
 	export let campaignStaticData: CrowdtainerStaticModel | undefined;
 	export let campaignStaticUI: UIFields | undefined;
@@ -67,8 +71,7 @@
 
 	let orderStatus: OrderStatus;
 
-	// tokenId is present only if the connected wallet has joined the project
-	let tokenId: number | undefined = undefined;
+	let tokenIdAssociations: TokenIDAssociations | undefined;
 
 	initializeDataForWallet(campaignStaticData?.contractAddress, $accountAddress);
 
@@ -117,21 +120,33 @@
 	async function loadOrderDetails() {
 		let signer = getSigner();
 		if (!signer) {
-			console.log('Unable to load order details, missing signer.');
+			console.log('Error: Unable to load order details, missing signer.');
 			return;
 		}
 
-		if (!tokenId) {
+		if (tokenIdAssociations === undefined) {
+			console.log(`tokenIdAssociations === undefined`);
 			return;
 		}
 
-		let result = await getOrderDetailsAPI(await signer.getChainId(), vouchers721Address, tokenId);
+		if (tokenIdAssociations.foundTokenIds.length === 0) {
+			console.log(`No tokenIDs detected.`);
+			return;
+		} else if (tokenIdAssociations.foundTokenIds.length > 1) {
+			console.log(`Multiple tokens detected.`);
+			return;
+		}
+
+		let result = await getOrderDetailsAPI(
+			await signer.getChainId(),
+			vouchers721Address,
+			tokenIdAssociations.foundTokenIds[0]
+		);
 
 		if (result.isErr()) {
-			console.log(`${result.unwrapErr()}`);
+			console.log(`Error: getOrderDetailsAPI: ${result.unwrapErr()}`);
 			return;
 		}
-
 		orderStatus = result.unwrap();
 	}
 
@@ -139,18 +154,10 @@
 		if (staticDataLoadStatus === LoadStatus.Loaded) {
 			let searchResult = await findTokenIdsForWallet(getSigner(), vouchers721Address);
 			if (searchResult.isErr()) {
-				console.log(`loadTokenIdsForWallet: ${searchResult.unwrapErr()}`);
+				console.log(`Err: loadTokenIdsForWallet: ${searchResult.unwrapErr()}`);
 				return;
 			}
-
-			let [foundTokenIds, crowdtainerIds, crowdtainerAddresses] = searchResult.unwrap();
-			let index = crowdtainerIds.findIndex((element) => element === crowdtainerId);
-
-			if (index === -1) {
-				return;
-			}
-
-			tokenId = foundTokenIds[index];
+			tokenIdAssociations = searchResult.unwrap();
 		}
 	}
 
@@ -186,7 +193,7 @@
 			type: ModalType.Information,
 			icon: ModalIcon.BadgeCheck
 		});
-		loadData();
+		// loadData();
 	}
 
 	function handleUserClaimedFundsEvent(event: CustomEvent) {
@@ -243,14 +250,39 @@
 
 <ModalDialog bind:this={modalDialog} />
 
-<div class="max-w-10xl mx-auto py-1 sm:px-6 lg:px-8">
+<div class="mx-auto py-1 px-2 sm:px-6 lg:px-8">
 	<div
-		class="dark:bg-transparent backdrop-blur-[4px] backdrop-saturate-50 dark:backdrop-brightness-50 border-2 border-black dark:border dark:border-white rounded-md max-w-lg mx-auto white md:max-w-7xl my-8"
+		class="dark:bg-transparent backdrop-blur-[4px] backdrop-saturate-50 dark:backdrop-brightness-50 border-2 border-black dark:border dark:border-white rounded-md mx-auto white lg:max-w-7xl my-8"
 	>
 		<div class="md:flex">
-			<div class="md:shrink-0">
-				<img class="w-full object-cover md:w-96" src={projectImageURL} alt="Coffee" />
+			<!-- large size -->
+			<div class="hidden md:block w-4/6">
+				<div class="flex flex-col items-center align-center h-full">
+					<div class="my-4 grow carousel carousel-vertical p-4 rounded-box">
+						<div class="h-[32rem]">
+							{#each projectImageURLs as imageURL}
+								<div class="carousel-item justify-center w-full">
+									<img src={imageURL} class="rounded-box w-auto my-2" alt="" />
+								</div>
+							{/each}
+						</div>
+					</div>
+				</div>
 			</div>
+
+			<!-- small size -->
+			<div class="block md:hidden p-4">
+				<div class="flex flex-col items-center align-center">
+					<div class="carousel carousel-end rounded-box space-x-4">
+						{#each projectImageURLs as imageURL}
+							<div class="carousel-item">
+								<img src={imageURL} class="h-80" alt="test" />
+							</div>
+						{/each}
+					</div>
+				</div>
+			</div>
+
 			<div class="font-sans pr-8 pl-8 pt-8 pb-4">
 				<div class="font-display uppercase tracking-wide text-primary">
 					{title}
@@ -260,12 +292,15 @@
 					class="font-sans text-black dark:text-gray-200 block mt-1 text-2xl leading-tight font-medium hover:underline"
 					>{subtitle}</a
 				>
-				<p class="font-text my-8 text-slate-700 dark:text-gray-200">
+				<div class="font-text my-4 text-slate-700 dark:text-gray-200">
 					{@html description}
-				</p>
+				</div>
 
 				{#if staticDataLoadStatus === LoadStatus.Loaded || staticDataLoadStatus === LoadStatus.Loading}
-					<div class:animate-pulse={loadingAnimation}>
+					<div
+						class:animate-pulse={loadingAnimation}
+						class="dark:bg-gray-800 py-1 px-4 rounded-md dark:backdrop-brightness-[0.9]"
+					>
 						<div class="my-6 bg-gray-300 rounded-md w-full">
 							<div
 								class="progress progress-primary bg-sky-700 text-sm font-small text-white text-center p-1 leading-normal rounded-md"
@@ -331,75 +366,77 @@
 								referralRate={campaignStaticData?.referralRate}
 							/>
 						</div>
+					</div>
 
-						{#if joinViewEnabled && campaignStaticUI}
-							<div class="pt-4">
-								{#if staticDataLoadStatus === LoadStatus.Loaded && currentPrice}
-									<p class="text-primary productPrice">
+					{#if joinViewEnabled && campaignStaticUI}
+						<div class="pt-4">
+							{#if staticDataLoadStatus === LoadStatus.Loaded && currentPrice}
+								{#key currentPrice}
+									<p in:blur|global={{ duration: 200 }} class="text-primary productPrice">
 										{currentPrice}
 										{campaignStaticUI.tokenSymbol} ({`${currentBasePrice} ${campaignStaticUI.tokenSymbol}/${basePriceUnit}`})
 									</p>
-								{:else}
-									<p class="px-2 productPrice">{loadingString}</p>
-								{/if}
-								<div class="flex">
-									<h3 class="projectDataSubtitle">Price</h3>
-								</div>
+								{/key}
+							{:else}
+								<p class="px-2 productPrice">{loadingString}</p>
+							{/if}
+							<div class="flex">
+								<h3 class="projectDataSubtitle">Price</h3>
 							</div>
+						</div>
 
-							<fieldset class="mt-4">
-								<legend class="sr-only">Choose a product</legend>
-								{#if campaignStaticUI}
-									<div class="grid grid-cols-2 gap-4">
-										{#each campaignStaticUI.prices as price, index}
-											<label
-												class:ring-2={currentSelection === index}
-												class:ring-blue-500={currentSelection === index}
-												class="btn bg-white hover:bg-gray-200 dark:bg-black text-primary"
-											>
-												<input
-													type="radio"
-													name="size-choice"
-													on:click={() => updateCurrentSelection(index, price)}
-													value={campaignStaticUI.descriptions[index]}
-													class="sr-only"
-													aria-labelledby="size-choice-1-label"
-												/>
-												<span id="size-choice-1-label">
-													{campaignStaticUI.descriptions[index]}
-												</span>
-												<span
-													class="absolute -inset-px rounded-md pointer-events-none"
-													aria-hidden="true"
-												/>
-											</label>
-										{/each}
-									</div>
-								{:else}
-									<div class="grid grid-cols-1 gap-4">
-										{#each [loadingString, loadingString] as text}
-											<label
-												class="ring-gray-800 group relative border rounded-md py-3 px-5 flex items-center justify-center text-sm font-medium uppercase hover:bg-gray-50 focus:outline-none sm:flex-1 sm:py-4 bg-white shadow-sm text-gray-900 cursor-pointer"
-											>
-												<input
-													type="radio"
-													name="size-choice"
-													value={text}
-													class="sr-only"
-													aria-labelledby="size-choice-1-label"
-												/>
-												<span id="size-choice-1-label"> {text} </span>
-												<span
-													class="absolute -inset-px rounded-md pointer-events-none"
-													aria-hidden="true"
-												/>
-											</label>
-										{/each}
-									</div>
-								{/if}
-							</fieldset>
-						{/if}
-					</div>
+						<fieldset class="mt-4">
+							<legend class="sr-only">Choose a product</legend>
+							{#if campaignStaticUI}
+								<div class="grid grid-cols-2 gap-4">
+									{#each campaignStaticUI.prices as price, index}
+										<label
+											class:ring-2={currentSelection === index}
+											class:ring-blue-500={currentSelection === index}
+											class="btn bg-white hover:bg-gray-200 dark:bg-black text-primary"
+										>
+											<input
+												type="radio"
+												name="size-choice"
+												on:click={() => updateCurrentSelection(index, price)}
+												value={campaignStaticUI.descriptions[index]}
+												class="sr-only"
+												aria-labelledby="size-choice-1-label"
+											/>
+											<span id="size-choice-1-label">
+												{campaignStaticUI.descriptions[index]}
+											</span>
+											<span
+												class="absolute -inset-px rounded-md pointer-events-none"
+												aria-hidden="true"
+											/>
+										</label>
+									{/each}
+								</div>
+							{:else}
+								<div class="grid grid-cols-1 gap-4">
+									{#each [loadingString, loadingString] as text}
+										<label
+											class="ring-gray-800 group relative border rounded-md py-3 px-5 flex items-center justify-center text-sm font-medium uppercase hover:bg-gray-50 focus:outline-none sm:flex-1 sm:py-4 bg-white shadow-sm text-gray-900 cursor-pointer"
+										>
+											<input
+												type="radio"
+												name="size-choice"
+												value={text}
+												class="sr-only"
+												aria-labelledby="size-choice-1-label"
+											/>
+											<span id="size-choice-1-label"> {text} </span>
+											<span
+												class="absolute -inset-px rounded-md pointer-events-none"
+												aria-hidden="true"
+											/>
+										</label>
+									{/each}
+								</div>
+							{/if}
+						</fieldset>
+					{/if}
 
 					{#if joinViewEnabled}
 						<div class="flex">
@@ -417,30 +454,46 @@
 					<p class="my-6 text-red-800">Error fetching data.</p>
 				{/if}
 
-				<DetailedTokenIdState
-					walletData={$walletInCrowdtainer}
-					{campaignStaticUI}
-					{fundsInContract}
-					{raisedAmount}
-					{state}
-					{orderStatus}
-				/>
+				{#if loadingAnimation}
+					<div class:animate-pulse={tokenIdAssociations === undefined}>Loading...</div>
+				{:else if tokenIdAssociations !== undefined && tokenIdAssociations.foundTokenIds.length > 1}
+					<div class="mt-4 md:mt-6 inline-flex items-center text-black dark:text-gray-200">
+						<p>More than one participation proof detected:</p>
+						<button
+							class="btn btn-sm ml-2"
+							on:click={() => {
+								goto(`/Wallet`);
+							}}
+						>
+							View in wallet ⎘</button
+						>
+					</div>
+				{:else if tokenIdAssociations !== undefined}
+					<DetailedTokenIdState
+						walletData={$walletInCrowdtainer}
+						{campaignStaticUI}
+						{fundsInContract}
+						{raisedAmount}
+						{state}
+						{orderStatus}
+					/>
 
-				<div class="w-auto flex">
-					{#if campaignStaticData !== undefined && campaignStaticUI !== undefined}
-						<CampaignActions
-							{tokenId}
-							{vouchers721Address}
-							crowdtainerAddress={campaignStaticData?.contractAddress}
-							projectStatusUI={state}
-							tokenSymbol={campaignStaticUI.tokenSymbol}
-							walletData={$walletInCrowdtainer}
-							{orderStatus}
-							on:userClaimedFundsEvent={handleUserClaimedFundsEvent}
-							on:userLeftCrowdtainerEvent={handleUserLeftCrowdtainerEvent}
-						/>
-					{/if}
-				</div>
+					<div class="w-auto flex">
+						{#if campaignStaticData !== undefined && campaignStaticUI !== undefined}
+							<CampaignActions
+								tokenId={tokenIdAssociations.foundTokenIds[0]}
+								{vouchers721Address}
+								crowdtainerAddress={campaignStaticData?.contractAddress}
+								projectStatusUI={state}
+								tokenSymbol={campaignStaticUI.tokenSymbol}
+								walletData={$walletInCrowdtainer}
+								{orderStatus}
+								on:userClaimedFundsEvent={handleUserClaimedFundsEvent}
+								on:userLeftCrowdtainerEvent={handleUserLeftCrowdtainerEvent}
+							/>
+						{/if}
+					</div>
+				{/if}
 			</div>
 		</div>
 

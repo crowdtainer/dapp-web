@@ -5,10 +5,14 @@
         {
             "crowdtainerId": 1,
             "title": "Roasted Filter Coffee Beans",
-            "subtitle": "Santa Teresa & Santa Inacia Farm",
-            "description": "Years of experience come into play to make the best out of each coffee bean, and in that regard, coffee tradition is in the family as far as they can tell about their past - Alencar is a 3rd generation family-run coffee producer of small scale.",
+            "subtitle": "Santa Alina Farm",
+            "description": "Explore the amazing world of Single Origin coffee beans. Sitting at altitudes between 950 and 1,450 m.a.s.l., the farm covers almost 900 hectares of predominantly hilly terrain, of which 239 hectares are used for coffee cultivation.",
             "projectURL": "https://crowdtainer.io/farmers",
-            "projectImageURL": "images/projects/CoffeeBag.png",
+            "projectImageURLs": [
+                "images/projects/CoffeeBag.png",
+                "images/projects/CoffeeBag.png",
+                "images/projects/CoffeeBag.png"
+            ],
             "basePriceDenominator": [
                 0.25,
                 0.5,

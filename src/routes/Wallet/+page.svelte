@@ -1,7 +1,11 @@
 <script lang="ts">
 	import { fetchStaticData } from '$lib/api';
 	import { LoadStatus, prepareForUI, type UIFields } from '$lib/Converters/CrowdtainerData';
-	import { findTokenIdsForWallet } from '$lib/ethersCalls/rpcRequests';
+	import {
+		findTokenIdsForWallet,
+		makeNewTokenIDAssociations,
+		type TokenIDAssociations
+	} from '$lib/ethersCalls/rpcRequests';
 	import type { CrowdtainerStaticModel } from '$lib/Model/CrowdtainerModel';
 	import MyCampaign from '$lib/MyCampaign.svelte';
 
@@ -18,8 +22,7 @@
 
 	let modalDialog: ModalDialog;
 
-	let tokenIds: number[] = [];
-	let crowdtainerIds: number[] = [];
+	let tokenIdAssociations: TokenIDAssociations | undefined;
 
 	let campaignStaticData = new Map<number, CrowdtainerStaticModel>();
 	let campaignStaticUI: Map<number, UIFields> = new Map<number, UIFields>();
@@ -27,8 +30,7 @@
 	let loadDataInFlight = false;
 
 	function resetState() {
-		tokenIds = [];
-		crowdtainerIds = [];
+		tokenIdAssociations = undefined;
 		campaignStaticData = new Map<number, CrowdtainerStaticModel>();
 		campaignStaticUI = new Map<number, UIFields>();
 		staticDataLoadStatus = LoadStatus.Loading;
@@ -63,26 +65,24 @@
 			return;
 		}
 
-		let [foundTokenIds, foundCrowdtainerIds, crowdtainerAddresses] = walletTokensSearch.unwrap();
-		console.log(`Found ${foundCrowdtainerIds.length} crowdtainer ids: ${foundCrowdtainerIds}`);
+		tokenIdAssociations = walletTokensSearch.unwrap();
 
-		if (foundTokenIds.length == 0) {
+		if (tokenIdAssociations.foundTokenIds.length == 0) {
 			loadDataInFlight = false;
 			console.log('No tokens found.');
 			return;
 		}
 
-		foundTokenIds.forEach((item, index) => {
-			tokenIds.push(item);
-			crowdtainerIds.push(foundCrowdtainerIds[index]);
-		});
+		console.log(
+			`Found ${tokenIdAssociations.crowdtainerIds.length} crowdtainer ids: ${tokenIdAssociations.crowdtainerIds.length}`
+		);
 
-		let result = await fetchStaticData(crowdtainerIds);
+		let result = await fetchStaticData(tokenIdAssociations.crowdtainerIds);
 		if (result.isOk()) {
 			let data = result.unwrap();
 			for (let index = 0; index < data.length; index++) {
-				campaignStaticData.set(foundCrowdtainerIds[index], data[index]);
-				campaignStaticUI.set(foundCrowdtainerIds[index], prepareForUI(data[index]));
+				campaignStaticData.set(tokenIdAssociations.crowdtainerIds[index], data[index]);
+				campaignStaticUI.set(tokenIdAssociations.crowdtainerIds[index], prepareForUI(data[index]));
 			}
 			staticDataLoadStatus = LoadStatus.Loaded;
 		} else {
@@ -92,7 +92,6 @@
 		}
 
 		loadDataInFlight = false;
-		tokenIds = tokenIds;
 	}
 
 	onMount(async () => {
@@ -116,24 +115,28 @@
 	</p>
 </div>
 
-{#if $connected && staticDataLoadStatus == LoadStatus.Loaded}
+{#if tokenIdAssociations !== undefined && $connected && staticDataLoadStatus == LoadStatus.Loaded}
 	<div class="divide-y">
-		{#each tokenIds as tokenId, index}
+		{#each tokenIdAssociations.foundTokenIds as tokenId, index}
 			<MyCampaign
 				{tokenId}
 				vouchers721Address={Vouchers721Address}
-				{...projectFromCrowdtainerId(crowdtainerIds[index])}
+				{...projectFromCrowdtainerId(tokenIdAssociations.crowdtainerIds[index])}
 				{staticDataLoadStatus}
-				campaignStaticData={campaignStaticData.get(crowdtainerIds[index])}
-				campaignStaticUI={campaignStaticUI.get(crowdtainerIds[index])}
+				campaignStaticData={campaignStaticData.get(tokenIdAssociations.crowdtainerIds[index])}
+				campaignStaticUI={campaignStaticUI.get(tokenIdAssociations.crowdtainerIds[index])}
 				on:userTransferredParticipationEvent={handleUserTransferredParticipationEvent}
 			/>
 		{/each}
 	</div>
 {/if}
 
-{#if tokenIds.length == 0 && $connected}
-	<EmptySection emptyMessage="No campaigns associated with the connected wallet." />
+{#if tokenIdAssociations === undefined && $connected}
+	<EmptySection emptyMessage="Loading.." />
+{/if}
+
+{#if tokenIdAssociations !== undefined && tokenIdAssociations.foundTokenIds.length == 0 && $connected}
+	<EmptySection emptyMessage="No participation proofs associated with the connected wallet were found." />
 {/if}
 
 {#if !$connected}
