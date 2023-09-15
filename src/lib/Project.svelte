@@ -19,7 +19,8 @@
 
 	import type {
 		CrowdtainerDynamicModel,
-		CrowdtainerStaticModel
+		CrowdtainerStaticModel,
+		SplitSelection
 	} from '$lib/Model/CrowdtainerModel';
 	import {
 		toHuman,
@@ -49,10 +50,9 @@
 	export let description: string;
 	export let projectURL: string;
 	export let projectImageURLs: string[];
-	export let basePrices: number[];
 	export let basePriceUnit: string;
-	// svelte-ignore unused-export-let
 	export let basePriceDenominator: number[];
+	export let productConfiguration: SplitSelection;
 
 	export let campaignStaticData: CrowdtainerStaticModel | undefined;
 	export let campaignStaticUI: UIFields | undefined;
@@ -73,6 +73,60 @@
 
 	let tokenIdAssociations: TokenIDAssociations | undefined;
 
+	//  products display
+	let productTypes = new Set<string>();
+	let productTypesIndices = new Set<number>();
+	let descriptorForProduct = new Map<string, number>();
+
+	interface ProductOptions {
+		name: string;
+		productSubOptions: string[];
+	}
+
+	let productOptions: ProductOptions[];
+
+	let userProductSelection = new Map<string, string>(); // <descriptor, sub-option value>
+
+	function setUserSelection(descriptor: string, value: string) {
+		console.log(`Descriptor: ${descriptor}, Value: ${value}`);
+		userProductSelection.set(descriptor, value);
+
+		let categoryDescriptorIndex = productConfiguration.categoryDescriptors.indexOf(descriptor);
+		if (categoryDescriptorIndex == -1) {
+			console.log(`Error: categoryDescriptors not found`);
+			return;
+		}
+
+		if (productConfiguration.categoryDescriptors.length !== userProductSelection.size) {
+			console.log('Missing user input selection');
+			return;
+		}
+
+		// Find Crowdtainer's index from selection
+		let delimiter = productConfiguration.categoryDelimiter;
+		campaignStaticUI?.descriptions.forEach((value, index) => {
+			let finalString = '';
+			userProductSelection.forEach((element) => {
+				finalString += `${element}${delimiter}`;
+			});
+			// drop last delimiter
+			finalString = finalString.substring(0, finalString.lastIndexOf(`${delimiter}`));
+			if (value === finalString) {
+				console.log(`Found match: ${finalString} at index ${index}`);
+				currentSelection = index;
+			}
+		});
+
+		// Update current selection price
+		if (campaignStaticUI) {
+			currentPrice = campaignStaticUI.prices[currentSelection];
+			currentBasePrice = currentPrice / basePriceDenominator[currentSelection];
+		} else {
+			console.log(`Warning: prices not loaded yet.`);
+			return;
+		}
+	}
+
 	initializeDataForWallet(campaignStaticData?.contractAddress, $accountAddress);
 
 	function loadData() {
@@ -83,11 +137,67 @@
 		} else {
 			campaignDynamicData = campaignStores.get(crowdtainerId);
 		}
-		if (campaignStaticUI) updateCurrentSelection(0, campaignStaticUI.prices[0]);
+		if (campaignStaticUI === undefined) {
+			return;
+		}
+
+		updateCurrentSelection(0, campaignStaticUI.prices[0]);
+
+		console.log(`campaignStaticUI.descriptions: ${JSON.stringify(campaignStaticUI?.descriptions)}`);
+
+		//  products display
+
+		productTypes = new Set<string>();
+		productTypesIndices = new Set<number>();
+		descriptorForProduct = new Map<string, number>();
+		campaignStaticUI.descriptions.forEach((productLine) => {
+			let items = productLine.split(productConfiguration.categoryDelimiter);
+			if (items.length != productConfiguration.categoryDescriptors.length) {
+				let errorMessage = `
+					Error: Product configuration mismatch:
+					there must be a categoryDescriptor in productConfiguration for each delimiter, based on Crowdtainer's deployed product name.
+					`;
+				errorMessage += `Crowdtainer product name: ${productLine}`;
+				errorMessage += `productData.length: ${items.length}`;
+				errorMessage += `productConfiguration.categoryDescriptors.length: ${productConfiguration.categoryDescriptors.length}`;
+				console.log(errorMessage);
+				return;
+			}
+
+			items.forEach((item: string, index) => {
+				if (!productTypes.has(item)) {
+					descriptorForProduct.set(item, index);
+					productTypes.add(item);
+					productTypesIndices.add(index);
+				}
+			});
+		});
+
+		productOptions = new Array<ProductOptions>();
+
+		for (let index = 0; index < productTypesIndices.size; index++) {
+			let result = [...descriptorForProduct.entries()].filter(
+				(value: [string, number]) => value[1] === index
+			);
+			console.log(`Found ${result[0]} ${result[1]} @ index ${index}`);
+			let productSuboptions = new Array<string>();
+			result.forEach((item) => {
+				productSuboptions.push(item[0]);
+			});
+
+			productOptions.push({
+				name: productConfiguration.categoryDescriptors[index],
+				productSubOptions: productSuboptions
+			});
+
+			// set initial values
+			setUserSelection(productConfiguration.categoryDescriptors[index], productSuboptions[0]);
+		}
 	}
 
 	onMount(async () => {
 		loadData();
+		loadTokenIdsForWallet();
 	});
 
 	function setRaisedAmount() {
@@ -130,10 +240,10 @@
 		}
 
 		if (tokenIdAssociations.foundTokenIds.length === 0) {
-			console.log(`No tokenIDs detected.`);
+			// console.log(`No tokenIDs detected.`);
 			return;
 		} else if (tokenIdAssociations.foundTokenIds.length > 1) {
-			console.log(`Multiple tokens detected.`);
+			// console.log(`Multiple tokens detected.`);
 			return;
 		}
 
@@ -164,7 +274,7 @@
 	function updateCurrentSelection(index: number, price: number) {
 		currentSelection = index;
 		currentPrice = price;
-		currentBasePrice = price / basePrices[index];
+		currentBasePrice = price / basePriceDenominator[index];
 	}
 
 	function addProduct() {
@@ -218,6 +328,7 @@
 		$joinSelection.set(crowdtainerId, quantities);
 		$joinSelection = $joinSelection;
 
+		loadTokenIdsForWallet();
 		loadData();
 	}
 
@@ -369,73 +480,58 @@
 					</div>
 
 					{#if joinViewEnabled && campaignStaticUI}
-						<div class="pt-4">
-							{#if staticDataLoadStatus === LoadStatus.Loaded && currentPrice}
-								{#key currentPrice}
-									<p in:blur|global={{ duration: 200 }} class="text-primary productPrice">
-										{currentPrice}
-										{campaignStaticUI.tokenSymbol} ({`${currentBasePrice} ${campaignStaticUI.tokenSymbol}/${basePriceUnit}`})
-									</p>
-								{/key}
-							{:else}
-								<p class="px-2 productPrice">{loadingString}</p>
-							{/if}
-							<div class="flex">
-								<h3 class="projectDataSubtitle">Price</h3>
+						<div class="grid w-full gap-6 md:grid-cols-2 mt-2">
+							<fieldset class="mt-4">
+								<legend class="sr-only">Choose a product</legend>
+								{#if campaignStaticUI}
+									{#each productOptions as productOption}
+										<div class="text-black text-md font-medium dark:text-gray-200">
+											{productOption.name}
+										</div>
+										<ul class="flex flex-justify my-2 items-center">
+											{#each productOption.productSubOptions as subOption, index}
+												<li class="mx-2">
+													<input
+														checked={index == 0}
+														type="radio"
+														name={productOption.name}
+														value={subOption}
+														id={subOption}
+														class="hidden peer"
+														on:click={() => {
+															setUserSelection(productOption.name, subOption);
+														}}
+													/>
+													<label
+														for={subOption}
+														class="inline-flex items-center justify-between w-full px-4 py-3 text-gray-500 bg-white border border-gray-200 rounded-lg cursor-pointer dark:hover:text-gray-300 dark:border-gray-700 dark:peer-checked:text-[#63cddd] peer-checked:border-blue-600 peer-checked:text-blue-600 hover:text-gray-600 hover:bg-gray-100 dark:text-gray-400 dark:bg-gray-800 dark:hover:bg-gray-700"
+													>
+														<div class="">{subOption.replace(productOption.name, '')}</div>
+													</label>
+												</li>
+											{/each}
+										</ul>
+									{/each}
+								{/if}
+							</fieldset>
+							<div class="md:pt-4">
+								<div class="text-black text-md font-medium dark:text-gray-200">
+									Price
+								</div>
+								{#if staticDataLoadStatus === LoadStatus.Loaded && currentPrice}
+									{#key currentPrice}
+										<p in:blur|global={{ duration: 200 }} class="text-primary productPrice">
+											{currentPrice}
+											{campaignStaticUI.tokenSymbol} ({`${currentBasePrice.toFixed(2)} ${
+												campaignStaticUI.tokenSymbol
+											}/${basePriceUnit}`})
+										</p>
+									{/key}
+								{:else}
+									<p class="px-2 productPrice">{loadingString}</p>
+								{/if}
 							</div>
 						</div>
-
-						<fieldset class="mt-4">
-							<legend class="sr-only">Choose a product</legend>
-							{#if campaignStaticUI}
-								<div class="grid grid-cols-2 gap-4">
-									{#each campaignStaticUI.prices as price, index}
-										<label
-											class:ring-2={currentSelection === index}
-											class:ring-blue-500={currentSelection === index}
-											class="btn bg-white hover:bg-gray-200 dark:bg-black text-primary"
-										>
-											<input
-												type="radio"
-												name="size-choice"
-												on:click={() => updateCurrentSelection(index, price)}
-												value={campaignStaticUI.descriptions[index]}
-												class="sr-only"
-												aria-labelledby="size-choice-1-label"
-											/>
-											<span id="size-choice-1-label">
-												{campaignStaticUI.descriptions[index]}
-											</span>
-											<span
-												class="absolute -inset-px rounded-md pointer-events-none"
-												aria-hidden="true"
-											/>
-										</label>
-									{/each}
-								</div>
-							{:else}
-								<div class="grid grid-cols-1 gap-4">
-									{#each [loadingString, loadingString] as text}
-										<label
-											class="ring-gray-800 group relative border rounded-md py-3 px-5 flex items-center justify-center text-sm font-medium uppercase hover:bg-gray-50 focus:outline-none sm:flex-1 sm:py-4 bg-white shadow-sm text-gray-900 cursor-pointer"
-										>
-											<input
-												type="radio"
-												name="size-choice"
-												value={text}
-												class="sr-only"
-												aria-labelledby="size-choice-1-label"
-											/>
-											<span id="size-choice-1-label"> {text} </span>
-											<span
-												class="absolute -inset-px rounded-md pointer-events-none"
-												aria-hidden="true"
-											/>
-										</label>
-									{/each}
-								</div>
-							{/if}
-						</fieldset>
 					{/if}
 
 					{#if joinViewEnabled}
@@ -504,7 +600,7 @@
 					crowdtainerAddress={campaignStaticData?.contractAddress}
 					{campaignStaticUI}
 					{crowdtainerId}
-					{basePrices}
+					{basePriceDenominator}
 					{basePriceUnit}
 					referralRate={campaignStaticData?.referralRate}
 					on:userJoinedCrowdtainerEvent={handleCampaignJoinedEvent}

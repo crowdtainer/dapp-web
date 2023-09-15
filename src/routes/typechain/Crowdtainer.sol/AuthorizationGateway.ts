@@ -23,7 +23,7 @@ import type {
 
 export interface AuthorizationGatewayInterface extends utils.Interface {
   functions: {
-    "getSignedJoinApproval(address,address,uint256[4],bool,address)": FunctionFragment;
+    "getSignedJoinApproval(address,address,uint256[],bool,address)": FunctionFragment;
   };
 
   getFunction(
@@ -35,12 +35,7 @@ export interface AuthorizationGatewayInterface extends utils.Interface {
     values: [
       PromiseOrValue<string>,
       PromiseOrValue<string>,
-      [
-        PromiseOrValue<BigNumberish>,
-        PromiseOrValue<BigNumberish>,
-        PromiseOrValue<BigNumberish>,
-        PromiseOrValue<BigNumberish>
-      ],
+      PromiseOrValue<BigNumberish>[],
       PromiseOrValue<boolean>,
       PromiseOrValue<string>
     ]
@@ -84,12 +79,7 @@ export interface AuthorizationGateway extends BaseContract {
     getSignedJoinApproval(
       crowdtainerAddress: PromiseOrValue<string>,
       addr: PromiseOrValue<string>,
-      quantities: [
-        PromiseOrValue<BigNumberish>,
-        PromiseOrValue<BigNumberish>,
-        PromiseOrValue<BigNumberish>,
-        PromiseOrValue<BigNumberish>
-      ],
+      quantities: PromiseOrValue<BigNumberish>[],
       _enableReferral: PromiseOrValue<boolean>,
       _referrer: PromiseOrValue<string>,
       overrides?: CallOverrides
@@ -99,12 +89,7 @@ export interface AuthorizationGateway extends BaseContract {
   getSignedJoinApproval(
     crowdtainerAddress: PromiseOrValue<string>,
     addr: PromiseOrValue<string>,
-    quantities: [
-      PromiseOrValue<BigNumberish>,
-      PromiseOrValue<BigNumberish>,
-      PromiseOrValue<BigNumberish>,
-      PromiseOrValue<BigNumberish>
-    ],
+    quantities: PromiseOrValue<BigNumberish>[],
     _enableReferral: PromiseOrValue<boolean>,
     _referrer: PromiseOrValue<string>,
     overrides?: CallOverrides
@@ -114,12 +99,7 @@ export interface AuthorizationGateway extends BaseContract {
     getSignedJoinApproval(
       crowdtainerAddress: PromiseOrValue<string>,
       addr: PromiseOrValue<string>,
-      quantities: [
-        PromiseOrValue<BigNumberish>,
-        PromiseOrValue<BigNumberish>,
-        PromiseOrValue<BigNumberish>,
-        PromiseOrValue<BigNumberish>
-      ],
+      quantities: PromiseOrValue<BigNumberish>[],
       _enableReferral: PromiseOrValue<boolean>,
       _referrer: PromiseOrValue<string>,
       overrides?: CallOverrides
@@ -132,12 +112,7 @@ export interface AuthorizationGateway extends BaseContract {
     getSignedJoinApproval(
       crowdtainerAddress: PromiseOrValue<string>,
       addr: PromiseOrValue<string>,
-      quantities: [
-        PromiseOrValue<BigNumberish>,
-        PromiseOrValue<BigNumberish>,
-        PromiseOrValue<BigNumberish>,
-        PromiseOrValue<BigNumberish>
-      ],
+      quantities: PromiseOrValue<BigNumberish>[],
       _enableReferral: PromiseOrValue<boolean>,
       _referrer: PromiseOrValue<string>,
       overrides?: CallOverrides
@@ -148,12 +123,7 @@ export interface AuthorizationGateway extends BaseContract {
     getSignedJoinApproval(
       crowdtainerAddress: PromiseOrValue<string>,
       addr: PromiseOrValue<string>,
-      quantities: [
-        PromiseOrValue<BigNumberish>,
-        PromiseOrValue<BigNumberish>,
-        PromiseOrValue<BigNumberish>,
-        PromiseOrValue<BigNumberish>
-      ],
+      quantities: PromiseOrValue<BigNumberish>[],
       _enableReferral: PromiseOrValue<boolean>,
       _referrer: PromiseOrValue<string>,
       overrides?: CallOverrides

@@ -60,9 +60,9 @@ const _abi = [
             type: "uint256",
           },
           {
-            internalType: "uint256[4]",
+            internalType: "uint256[]",
             name: "unitPricePerType",
-            type: "uint256[4]",
+            type: "uint256[]",
           },
           {
             internalType: "uint256",
@@ -103,19 +103,9 @@ const _abi = [
         type: "address",
       },
       {
-        internalType: "uint256[4]",
+        internalType: "uint256[]",
         name: "_quantities",
-        type: "uint256[4]",
-      },
-      {
-        internalType: "bool",
-        name: "_enableReferral",
-        type: "bool",
-      },
-      {
-        internalType: "address",
-        name: "_referrer",
-        type: "address",
+        type: "uint256[]",
       },
     ],
     name: "join",
@@ -131,9 +121,19 @@ const _abi = [
         type: "address",
       },
       {
-        internalType: "uint256[4]",
+        internalType: "uint256[]",
         name: "_quantities",
-        type: "uint256[4]",
+        type: "uint256[]",
+      },
+      {
+        internalType: "bool",
+        name: "_enableReferral",
+        type: "bool",
+      },
+      {
+        internalType: "address",
+        name: "_referrer",
+        type: "address",
       },
     ],
     name: "join",
@@ -199,7 +199,7 @@ const _abi = [
     stateMutability: "view",
     type: "function",
   },
-];
+] as const;
 
 export class ICrowdtainer__factory {
   static readonly abi = _abi;

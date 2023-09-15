@@ -83,15 +83,15 @@ export const POST: RequestHandler = async ({ request, params }) => {
         throw error(400, "Invalid calldata parameter.");
     }
 
+    // console.log(`Selector: ${ethers.utils.id('joinWithSignature(bytes,bytes)')}`);
     let hexCalldata = ethers.utils.hexlify(calldata);
     const functionSelector = hexCalldata.slice(0, 10).toLowerCase();
-
-    if (functionSelector !== `0x08b70706`) { //joinWithSignature() => 0x08b70706
-        throw error(400, "Incorrect payload.");
+    if (functionSelector !== `0xed52b41c`) { //getSignedJoinApproval().selector
+        throw error(400, `Incorrect payload. Function selector: ${functionSelector}. Expected: 0x566a2cc2`);
     }
 
     const abiInterface = new ethers.utils.Interface(JSON.stringify(AuthorizationGateway__factory.abi));
-
+    
     console.log(`Authorization request received from wallet: ${userWalletAddress}`);
     // Decode function arguments
     const args = abiInterface.decodeFunctionData("getSignedJoinApproval", `${hexCalldata}`);
@@ -125,7 +125,7 @@ export const POST: RequestHandler = async ({ request, params }) => {
     console.log(`total order value: ${totalValue}`);
     console.log(`max allowed: ${maxCost}`);
 
-    if(referralAddress !== '0x0000000000000000000000000000000000000000') {
+    if (referralAddress !== '0x0000000000000000000000000000000000000000') {
         // apply discount
         console.log(`Before discount: ${totalValue}`);
         let rate = campaignData.referralRate.div(2);
@@ -142,7 +142,7 @@ export const POST: RequestHandler = async ({ request, params }) => {
 
     let epochExpiration = BigNumber.from(Math.floor(Date.now() / 1000) + AUTHORIZER_SIGNATURE_EXPIRATION_TIME_IN_SECONDS);
     let nonce = ethers.utils.randomBytes(32);
-    let messageHash = ethers.utils.solidityKeccak256(["address", "address", "uint256[4]", "bool", "address", "uint64", "bytes32"],
+    let messageHash = ethers.utils.solidityKeccak256(["address", "address", "uint256[]", "bool", "address", "uint64", "bytes32"],
         [crowdtainerAddress, userWalletAddress, quantities, enableReferral, referralAddress, epochExpiration, nonce]);
     let messageHashBinary = ethers.utils.arrayify(messageHash);
 

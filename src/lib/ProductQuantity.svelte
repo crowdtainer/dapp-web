@@ -8,7 +8,7 @@
 	export let descriptions: string[];
 	export let crowdtainerId: number;
 	export let tokenSymbol: string;
-	export let basePrices: number[];
+	export let basePriceDenominator: number[];
 	export let basePriceUnit: string;
 
 	var selection: Readable<number[]> = derived(joinSelection, ($joinSelection) => {
@@ -47,8 +47,8 @@
 <div class="text-black">
 	<!-- Header -->
 	<div id="header" class="text-center flex items-center bg-gray-100 dark:bg-gray-700 dark:text-white h-10 px-4">
-		<div class="w-5/12 font-semibold">Description</div>
-		<div class="w-4/12 font-semibold">Quantity</div>
+		<div class="w-6/12 font-semibold">Description</div>
+		<div class="w-3/12 font-semibold">Quantity</div>
 		<div class="w-3/12 font-semibold">Subtotal</div>
 	</div>
 	<!-- Header End -->
@@ -57,14 +57,14 @@
 		{#each descriptions as product, index}
 		{#if $selection[index] > 0}
 			<div transition:slide="{{ duration: 250 }}">
-				<div class="flex">
+				<div class="flex items-center">
 					<!-- Row start -->
-					<div class="w-5/12">
-						<p class="text-center text-base dark:text-white py-2 m-1">
-							<b>{`${product} (${prices[index]/basePrices[index]} ${tokenSymbol}/${basePriceUnit})`}</b>
+					<div class="w-6/12">
+						<p class="text-center text-sm md:text-base dark:text-white py-2 m-1">
+							<b>{`${product}`} {`- ${(prices[index]/basePriceDenominator[index]).toFixed(2)} ${tokenSymbol}/${basePriceUnit}`}</b>
 						</p>
 					</div>
-					<div class="w-4/12 flex justify-center">
+					<div class="w-3/12 flex justify-center">
 						<div class="">
 							<button
 								type="button"

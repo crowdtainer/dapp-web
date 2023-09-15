@@ -3,6 +3,9 @@
 @tailwind utilities;
 
 @layer components{
+  .btn {
+    @apply capitalize;
+  }
   .active-btn {
     @apply bg-sky-900 font-display text-white px-3 py-2 rounded-md text-sm font-medium;
   }

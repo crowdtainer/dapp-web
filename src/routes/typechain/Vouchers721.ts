@@ -34,12 +34,7 @@ export type CampaignDataStruct = {
   expireTime: PromiseOrValue<BigNumberish>;
   targetMinimum: PromiseOrValue<BigNumberish>;
   targetMaximum: PromiseOrValue<BigNumberish>;
-  unitPricePerType: [
-    PromiseOrValue<BigNumberish>,
-    PromiseOrValue<BigNumberish>,
-    PromiseOrValue<BigNumberish>,
-    PromiseOrValue<BigNumberish>
-  ];
+  unitPricePerType: PromiseOrValue<BigNumberish>[];
   referralRate: PromiseOrValue<BigNumberish>;
   referralEligibilityValue: PromiseOrValue<BigNumberish>;
   token: PromiseOrValue<string>;
@@ -53,7 +48,7 @@ export type CampaignDataStructOutput = [
   BigNumber,
   BigNumber,
   BigNumber,
-  [BigNumber, BigNumber, BigNumber, BigNumber],
+  BigNumber[],
   BigNumber,
   BigNumber,
   string,
@@ -65,7 +60,7 @@ export type CampaignDataStructOutput = [
   expireTime: BigNumber;
   targetMinimum: BigNumber;
   targetMaximum: BigNumber;
-  unitPricePerType: [BigNumber, BigNumber, BigNumber, BigNumber];
+  unitPricePerType: BigNumber[];
   referralRate: BigNumber;
   referralEligibilityValue: BigNumber;
   token: string;
@@ -77,7 +72,7 @@ export interface Vouchers721Interface extends utils.Interface {
     "ID_MULTIPLE()": FunctionFragment;
     "approve(address,uint256)": FunctionFragment;
     "balanceOf(address)": FunctionFragment;
-    "createCrowdtainer((address,address,uint256,uint256,uint256,uint256,uint256[4],uint256,uint256,address,string),string[4],address)": FunctionFragment;
+    "createCrowdtainer((address,address,uint256,uint256,uint256,uint256,uint256[],uint256,uint256,address,string),string[],address)": FunctionFragment;
     "crowdtainerCount()": FunctionFragment;
     "crowdtainerForId(uint256)": FunctionFragment;
     "crowdtainerIdToAddress(uint256)": FunctionFragment;
@@ -87,8 +82,8 @@ export interface Vouchers721Interface extends utils.Interface {
     "getSignature(bytes)": FunctionFragment;
     "idForCrowdtainer(address)": FunctionFragment;
     "isApprovedForAll(address,address)": FunctionFragment;
-    "join(address,uint256[4],bool,address)": FunctionFragment;
-    "join(address,uint256[4])": FunctionFragment;
+    "join(address,uint256[])": FunctionFragment;
+    "join(address,uint256[],bool,address)": FunctionFragment;
     "joinWithSignature(bytes,bytes)": FunctionFragment;
     "leave(uint256)": FunctionFragment;
     "metadataServiceForCrowdatinerId(uint256)": FunctionFragment;
@@ -125,8 +120,8 @@ export interface Vouchers721Interface extends utils.Interface {
       | "getSignature"
       | "idForCrowdtainer"
       | "isApprovedForAll"
-      | "join(address,uint256[4],bool,address)"
-      | "join(address,uint256[4])"
+      | "join(address,uint256[])"
+      | "join(address,uint256[],bool,address)"
       | "joinWithSignature"
       | "leave"
       | "metadataServiceForCrowdatinerId"
@@ -164,12 +159,7 @@ export interface Vouchers721Interface extends utils.Interface {
     functionFragment: "createCrowdtainer",
     values: [
       CampaignDataStruct,
-      [
-        PromiseOrValue<string>,
-        PromiseOrValue<string>,
-        PromiseOrValue<string>,
-        PromiseOrValue<string>
-      ],
+      PromiseOrValue<string>[],
       PromiseOrValue<string>
     ]
   ): string;
@@ -210,29 +200,16 @@ export interface Vouchers721Interface extends utils.Interface {
     values: [PromiseOrValue<string>, PromiseOrValue<string>]
   ): string;
   encodeFunctionData(
-    functionFragment: "join(address,uint256[4],bool,address)",
-    values: [
-      PromiseOrValue<string>,
-      [
-        PromiseOrValue<BigNumberish>,
-        PromiseOrValue<BigNumberish>,
-        PromiseOrValue<BigNumberish>,
-        PromiseOrValue<BigNumberish>
-      ],
-      PromiseOrValue<boolean>,
-      PromiseOrValue<string>
-    ]
+    functionFragment: "join(address,uint256[])",
+    values: [PromiseOrValue<string>, PromiseOrValue<BigNumberish>[]]
   ): string;
   encodeFunctionData(
-    functionFragment: "join(address,uint256[4])",
+    functionFragment: "join(address,uint256[],bool,address)",
     values: [
       PromiseOrValue<string>,
-      [
-        PromiseOrValue<BigNumberish>,
-        PromiseOrValue<BigNumberish>,
-        PromiseOrValue<BigNumberish>,
-        PromiseOrValue<BigNumberish>
-      ]
+      PromiseOrValue<BigNumberish>[],
+      PromiseOrValue<boolean>,
+      PromiseOrValue<string>
     ]
   ): string;
   encodeFunctionData(
@@ -366,11 +343,11 @@ export interface Vouchers721Interface extends utils.Interface {
     data: BytesLike
   ): Result;
   decodeFunctionResult(
-    functionFragment: "join(address,uint256[4],bool,address)",
+    functionFragment: "join(address,uint256[])",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
-    functionFragment: "join(address,uint256[4])",
+    functionFragment: "join(address,uint256[],bool,address)",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
@@ -551,12 +528,7 @@ export interface Vouchers721 extends BaseContract {
 
     createCrowdtainer(
       _campaignData: CampaignDataStruct,
-      _productDescription: [
-        PromiseOrValue<string>,
-        PromiseOrValue<string>,
-        PromiseOrValue<string>,
-        PromiseOrValue<string>
-      ],
+      _productDescription: PromiseOrValue<string>[],
       _metadataService: PromiseOrValue<string>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<ContractTransaction>;
@@ -604,27 +576,17 @@ export interface Vouchers721 extends BaseContract {
       overrides?: CallOverrides
     ): Promise<[boolean]>;
 
-    "join(address,uint256[4],bool,address)"(
+    "join(address,uint256[])"(
       _crowdtainer: PromiseOrValue<string>,
-      _quantities: [
-        PromiseOrValue<BigNumberish>,
-        PromiseOrValue<BigNumberish>,
-        PromiseOrValue<BigNumberish>,
-        PromiseOrValue<BigNumberish>
-      ],
-      _enableReferral: PromiseOrValue<boolean>,
-      _referrer: PromiseOrValue<string>,
+      _quantities: PromiseOrValue<BigNumberish>[],
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<ContractTransaction>;
 
-    "join(address,uint256[4])"(
+    "join(address,uint256[],bool,address)"(
       _crowdtainer: PromiseOrValue<string>,
-      _quantities: [
-        PromiseOrValue<BigNumberish>,
-        PromiseOrValue<BigNumberish>,
-        PromiseOrValue<BigNumberish>,
-        PromiseOrValue<BigNumberish>
-      ],
+      _quantities: PromiseOrValue<BigNumberish>[],
+      _enableReferral: PromiseOrValue<boolean>,
+      _referrer: PromiseOrValue<string>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<ContractTransaction>;
 
@@ -743,12 +705,7 @@ export interface Vouchers721 extends BaseContract {
 
   createCrowdtainer(
     _campaignData: CampaignDataStruct,
-    _productDescription: [
-      PromiseOrValue<string>,
-      PromiseOrValue<string>,
-      PromiseOrValue<string>,
-      PromiseOrValue<string>
-    ],
+    _productDescription: PromiseOrValue<string>[],
     _metadataService: PromiseOrValue<string>,
     overrides?: Overrides & { from?: PromiseOrValue<string> }
   ): Promise<ContractTransaction>;
@@ -796,27 +753,17 @@ export interface Vouchers721 extends BaseContract {
     overrides?: CallOverrides
   ): Promise<boolean>;
 
-  "join(address,uint256[4],bool,address)"(
+  "join(address,uint256[])"(
     _crowdtainer: PromiseOrValue<string>,
-    _quantities: [
-      PromiseOrValue<BigNumberish>,
-      PromiseOrValue<BigNumberish>,
-      PromiseOrValue<BigNumberish>,
-      PromiseOrValue<BigNumberish>
-    ],
-    _enableReferral: PromiseOrValue<boolean>,
-    _referrer: PromiseOrValue<string>,
+    _quantities: PromiseOrValue<BigNumberish>[],
     overrides?: Overrides & { from?: PromiseOrValue<string> }
   ): Promise<ContractTransaction>;
 
-  "join(address,uint256[4])"(
+  "join(address,uint256[],bool,address)"(
     _crowdtainer: PromiseOrValue<string>,
-    _quantities: [
-      PromiseOrValue<BigNumberish>,
-      PromiseOrValue<BigNumberish>,
-      PromiseOrValue<BigNumberish>,
-      PromiseOrValue<BigNumberish>
-    ],
+    _quantities: PromiseOrValue<BigNumberish>[],
+    _enableReferral: PromiseOrValue<boolean>,
+    _referrer: PromiseOrValue<string>,
     overrides?: Overrides & { from?: PromiseOrValue<string> }
   ): Promise<ContractTransaction>;
 
@@ -935,12 +882,7 @@ export interface Vouchers721 extends BaseContract {
 
     createCrowdtainer(
       _campaignData: CampaignDataStruct,
-      _productDescription: [
-        PromiseOrValue<string>,
-        PromiseOrValue<string>,
-        PromiseOrValue<string>,
-        PromiseOrValue<string>
-      ],
+      _productDescription: PromiseOrValue<string>[],
       _metadataService: PromiseOrValue<string>,
       overrides?: CallOverrides
     ): Promise<[string, BigNumber]>;
@@ -988,27 +930,17 @@ export interface Vouchers721 extends BaseContract {
       overrides?: CallOverrides
     ): Promise<boolean>;
 
-    "join(address,uint256[4],bool,address)"(
+    "join(address,uint256[])"(
       _crowdtainer: PromiseOrValue<string>,
-      _quantities: [
-        PromiseOrValue<BigNumberish>,
-        PromiseOrValue<BigNumberish>,
-        PromiseOrValue<BigNumberish>,
-        PromiseOrValue<BigNumberish>
-      ],
-      _enableReferral: PromiseOrValue<boolean>,
-      _referrer: PromiseOrValue<string>,
+      _quantities: PromiseOrValue<BigNumberish>[],
       overrides?: CallOverrides
     ): Promise<BigNumber>;
 
-    "join(address,uint256[4])"(
+    "join(address,uint256[],bool,address)"(
       _crowdtainer: PromiseOrValue<string>,
-      _quantities: [
-        PromiseOrValue<BigNumberish>,
-        PromiseOrValue<BigNumberish>,
-        PromiseOrValue<BigNumberish>,
-        PromiseOrValue<BigNumberish>
-      ],
+      _quantities: PromiseOrValue<BigNumberish>[],
+      _enableReferral: PromiseOrValue<boolean>,
+      _referrer: PromiseOrValue<string>,
       overrides?: CallOverrides
     ): Promise<BigNumber>;
 
@@ -1179,12 +1111,7 @@ export interface Vouchers721 extends BaseContract {
 
     createCrowdtainer(
       _campaignData: CampaignDataStruct,
-      _productDescription: [
-        PromiseOrValue<string>,
-        PromiseOrValue<string>,
-        PromiseOrValue<string>,
-        PromiseOrValue<string>
-      ],
+      _productDescription: PromiseOrValue<string>[],
       _metadataService: PromiseOrValue<string>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<BigNumber>;
@@ -1232,27 +1159,17 @@ export interface Vouchers721 extends BaseContract {
       overrides?: CallOverrides
     ): Promise<BigNumber>;
 
-    "join(address,uint256[4],bool,address)"(
+    "join(address,uint256[])"(
       _crowdtainer: PromiseOrValue<string>,
-      _quantities: [
-        PromiseOrValue<BigNumberish>,
-        PromiseOrValue<BigNumberish>,
-        PromiseOrValue<BigNumberish>,
-        PromiseOrValue<BigNumberish>
-      ],
-      _enableReferral: PromiseOrValue<boolean>,
-      _referrer: PromiseOrValue<string>,
+      _quantities: PromiseOrValue<BigNumberish>[],
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<BigNumber>;
 
-    "join(address,uint256[4])"(
+    "join(address,uint256[],bool,address)"(
       _crowdtainer: PromiseOrValue<string>,
-      _quantities: [
-        PromiseOrValue<BigNumberish>,
-        PromiseOrValue<BigNumberish>,
-        PromiseOrValue<BigNumberish>,
-        PromiseOrValue<BigNumberish>
-      ],
+      _quantities: PromiseOrValue<BigNumberish>[],
+      _enableReferral: PromiseOrValue<boolean>,
+      _referrer: PromiseOrValue<string>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<BigNumber>;
 
@@ -1372,12 +1289,7 @@ export interface Vouchers721 extends BaseContract {
 
     createCrowdtainer(
       _campaignData: CampaignDataStruct,
-      _productDescription: [
-        PromiseOrValue<string>,
-        PromiseOrValue<string>,
-        PromiseOrValue<string>,
-        PromiseOrValue<string>
-      ],
+      _productDescription: PromiseOrValue<string>[],
       _metadataService: PromiseOrValue<string>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<PopulatedTransaction>;
@@ -1425,27 +1337,17 @@ export interface Vouchers721 extends BaseContract {
       overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
 
-    "join(address,uint256[4],bool,address)"(
+    "join(address,uint256[])"(
       _crowdtainer: PromiseOrValue<string>,
-      _quantities: [
-        PromiseOrValue<BigNumberish>,
-        PromiseOrValue<BigNumberish>,
-        PromiseOrValue<BigNumberish>,
-        PromiseOrValue<BigNumberish>
-      ],
-      _enableReferral: PromiseOrValue<boolean>,
-      _referrer: PromiseOrValue<string>,
+      _quantities: PromiseOrValue<BigNumberish>[],
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<PopulatedTransaction>;
 
-    "join(address,uint256[4])"(
+    "join(address,uint256[],bool,address)"(
       _crowdtainer: PromiseOrValue<string>,
-      _quantities: [
-        PromiseOrValue<BigNumberish>,
-        PromiseOrValue<BigNumberish>,
-        PromiseOrValue<BigNumberish>,
-        PromiseOrValue<BigNumberish>
-      ],
+      _quantities: PromiseOrValue<BigNumberish>[],
+      _enableReferral: PromiseOrValue<boolean>,
+      _referrer: PromiseOrValue<string>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<PopulatedTransaction>;
 

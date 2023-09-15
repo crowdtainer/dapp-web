@@ -105,7 +105,7 @@
 		console.log(`Calldata: ${calldata}; \nsignedPayload: ${signedPayload}`);
 
 		let crowdtainerExtraData = ethers.utils.defaultAbiCoder.encode(
-			['address', 'uint256[4]', 'bool', 'address'],
+			['address', 'uint256[]', 'bool', 'address'],
 			[userWalletAddress, selection, referralEnabled, couponCodeAddress]
 		);
 		let extraData = ethers.utils.defaultAbiCoder.encode(
@@ -155,6 +155,7 @@
 		console.log(
 			`Join parameters: vouchers721Address: ${vouchers721Address}; crowdtainerAddress ${crowdtainerAddress};validUserCouponCode:${validUserCouponCode}, referralEnabled: ${referralCheckBoxActivated} `
 		);
+		console.log(`Selection: ${$selection}`);
 		if (withSignature) {
 			let result = await generateSignedData(
 				userWalletAddress,

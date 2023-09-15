@@ -34,12 +34,7 @@ export type CampaignDataStruct = {
   expireTime: PromiseOrValue<BigNumberish>;
   targetMinimum: PromiseOrValue<BigNumberish>;
   targetMaximum: PromiseOrValue<BigNumberish>;
-  unitPricePerType: [
-    PromiseOrValue<BigNumberish>,
-    PromiseOrValue<BigNumberish>,
-    PromiseOrValue<BigNumberish>,
-    PromiseOrValue<BigNumberish>
-  ];
+  unitPricePerType: PromiseOrValue<BigNumberish>[];
   referralRate: PromiseOrValue<BigNumberish>;
   referralEligibilityValue: PromiseOrValue<BigNumberish>;
   token: PromiseOrValue<string>;
@@ -53,7 +48,7 @@ export type CampaignDataStructOutput = [
   BigNumber,
   BigNumber,
   BigNumber,
-  [BigNumber, BigNumber, BigNumber, BigNumber],
+  BigNumber[],
   BigNumber,
   BigNumber,
   string,
@@ -65,7 +60,7 @@ export type CampaignDataStructOutput = [
   expireTime: BigNumber;
   targetMinimum: BigNumber;
   targetMaximum: BigNumber;
-  unitPricePerType: [BigNumber, BigNumber, BigNumber, BigNumber];
+  unitPricePerType: BigNumber[];
   referralRate: BigNumber;
   referralEligibilityValue: BigNumber;
   token: string;
@@ -86,10 +81,9 @@ export interface CrowdtainerInterface extends utils.Interface {
     "expireTime()": FunctionFragment;
     "getPaidAndDeliver()": FunctionFragment;
     "getSigner()": FunctionFragment;
-    "initialize(address,(address,address,uint256,uint256,uint256,uint256,uint256[4],uint256,uint256,address,string))": FunctionFragment;
-    "invariant()": FunctionFragment;
-    "join(address,uint256[4],bool,address)": FunctionFragment;
-    "join(address,uint256[4])": FunctionFragment;
+    "initialize(address,(address,address,uint256,uint256,uint256,uint256,uint256[],uint256,uint256,address,string))": FunctionFragment;
+    "join(address,uint256[])": FunctionFragment;
+    "join(address,uint256[],bool,address)": FunctionFragment;
     "joinWithSignature(bytes,bytes)": FunctionFragment;
     "leave(address)": FunctionFragment;
     "legalContractURI()": FunctionFragment;
@@ -126,9 +120,8 @@ export interface CrowdtainerInterface extends utils.Interface {
       | "getPaidAndDeliver"
       | "getSigner"
       | "initialize"
-      | "invariant"
-      | "join(address,uint256[4],bool,address)"
-      | "join(address,uint256[4])"
+      | "join(address,uint256[])"
+      | "join(address,uint256[],bool,address)"
       | "joinWithSignature"
       | "leave"
       | "legalContractURI"
@@ -199,31 +192,17 @@ export interface CrowdtainerInterface extends utils.Interface {
     functionFragment: "initialize",
     values: [PromiseOrValue<string>, CampaignDataStruct]
   ): string;
-  encodeFunctionData(functionFragment: "invariant", values?: undefined): string;
   encodeFunctionData(
-    functionFragment: "join(address,uint256[4],bool,address)",
-    values: [
-      PromiseOrValue<string>,
-      [
-        PromiseOrValue<BigNumberish>,
-        PromiseOrValue<BigNumberish>,
-        PromiseOrValue<BigNumberish>,
-        PromiseOrValue<BigNumberish>
-      ],
-      PromiseOrValue<boolean>,
-      PromiseOrValue<string>
-    ]
+    functionFragment: "join(address,uint256[])",
+    values: [PromiseOrValue<string>, PromiseOrValue<BigNumberish>[]]
   ): string;
   encodeFunctionData(
-    functionFragment: "join(address,uint256[4])",
+    functionFragment: "join(address,uint256[],bool,address)",
     values: [
       PromiseOrValue<string>,
-      [
-        PromiseOrValue<BigNumberish>,
-        PromiseOrValue<BigNumberish>,
-        PromiseOrValue<BigNumberish>,
-        PromiseOrValue<BigNumberish>
-      ]
+      PromiseOrValue<BigNumberish>[],
+      PromiseOrValue<boolean>,
+      PromiseOrValue<string>
     ]
   ): string;
   encodeFunctionData(
@@ -337,13 +316,12 @@ export interface CrowdtainerInterface extends utils.Interface {
   ): Result;
   decodeFunctionResult(functionFragment: "getSigner", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "initialize", data: BytesLike): Result;
-  decodeFunctionResult(functionFragment: "invariant", data: BytesLike): Result;
   decodeFunctionResult(
-    functionFragment: "join(address,uint256[4],bool,address)",
+    functionFragment: "join(address,uint256[])",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
-    functionFragment: "join(address,uint256[4])",
+    functionFragment: "join(address,uint256[],bool,address)",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
@@ -406,10 +384,10 @@ export interface CrowdtainerInterface extends utils.Interface {
     "CCIPURLChanged(string[])": EventFragment;
     "CrowdtainerCreated(address,address)": EventFragment;
     "CrowdtainerInDeliveryStage(address,uint256)": EventFragment;
-    "CrowdtainerInitialized(address,address,uint256,uint256,uint256,uint256,uint256[4],uint256,uint256,string,address)": EventFragment;
+    "CrowdtainerInitialized(address,address,uint256,uint256,uint256,uint256,uint256[],uint256,uint256,string,address)": EventFragment;
     "FundsClaimed(address,uint256)": EventFragment;
     "Initialized(uint8)": EventFragment;
-    "Joined(address,uint256[4],address,uint256,uint256,bool)": EventFragment;
+    "Joined(address,uint256[],address,uint256,uint256,bool)": EventFragment;
     "Left(address,uint256)": EventFragment;
     "RewardsClaimed(address,uint256)": EventFragment;
     "SignerChanged(address)": EventFragment;
@@ -468,7 +446,7 @@ export interface CrowdtainerInitializedEventObject {
   _expireTime: BigNumber;
   _targetMinimum: BigNumber;
   _targetMaximum: BigNumber;
-  _unitPricePerType: [BigNumber, BigNumber, BigNumber, BigNumber];
+  _unitPricePerType: BigNumber[];
   _referralRate: BigNumber;
   _referralEligibilityValue: BigNumber;
   _legalContractURI: string;
@@ -482,7 +460,7 @@ export type CrowdtainerInitializedEvent = TypedEvent<
     BigNumber,
     BigNumber,
     BigNumber,
-    [BigNumber, BigNumber, BigNumber, BigNumber],
+    BigNumber[],
     BigNumber,
     BigNumber,
     string,
@@ -514,21 +492,14 @@ export type InitializedEventFilter = TypedEventFilter<InitializedEvent>;
 
 export interface JoinedEventObject {
   wallet: string;
-  quantities: [BigNumber, BigNumber, BigNumber, BigNumber];
+  quantities: BigNumber[];
   referrer: string;
   finalCost: BigNumber;
   appliedDiscount: BigNumber;
   referralEnabled: boolean;
 }
 export type JoinedEvent = TypedEvent<
-  [
-    string,
-    [BigNumber, BigNumber, BigNumber, BigNumber],
-    string,
-    BigNumber,
-    BigNumber,
-    boolean
-  ],
+  [string, BigNumber[], string, BigNumber, BigNumber, boolean],
   JoinedEventObject
 >;
 
@@ -637,29 +608,17 @@ export interface Crowdtainer extends BaseContract {
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<ContractTransaction>;
 
-    invariant(overrides?: CallOverrides): Promise<[void]>;
-
-    "join(address,uint256[4],bool,address)"(
+    "join(address,uint256[])"(
       _wallet: PromiseOrValue<string>,
-      _quantities: [
-        PromiseOrValue<BigNumberish>,
-        PromiseOrValue<BigNumberish>,
-        PromiseOrValue<BigNumberish>,
-        PromiseOrValue<BigNumberish>
-      ],
-      _enableReferral: PromiseOrValue<boolean>,
-      _referrer: PromiseOrValue<string>,
+      _quantities: PromiseOrValue<BigNumberish>[],
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<ContractTransaction>;
 
-    "join(address,uint256[4])"(
+    "join(address,uint256[],bool,address)"(
       _wallet: PromiseOrValue<string>,
-      _quantities: [
-        PromiseOrValue<BigNumberish>,
-        PromiseOrValue<BigNumberish>,
-        PromiseOrValue<BigNumberish>,
-        PromiseOrValue<BigNumberish>
-      ],
+      _quantities: PromiseOrValue<BigNumberish>[],
+      _enableReferral: PromiseOrValue<boolean>,
+      _referrer: PromiseOrValue<string>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<ContractTransaction>;
 
@@ -778,29 +737,17 @@ export interface Crowdtainer extends BaseContract {
     overrides?: Overrides & { from?: PromiseOrValue<string> }
   ): Promise<ContractTransaction>;
 
-  invariant(overrides?: CallOverrides): Promise<void>;
-
-  "join(address,uint256[4],bool,address)"(
+  "join(address,uint256[])"(
     _wallet: PromiseOrValue<string>,
-    _quantities: [
-      PromiseOrValue<BigNumberish>,
-      PromiseOrValue<BigNumberish>,
-      PromiseOrValue<BigNumberish>,
-      PromiseOrValue<BigNumberish>
-    ],
-    _enableReferral: PromiseOrValue<boolean>,
-    _referrer: PromiseOrValue<string>,
+    _quantities: PromiseOrValue<BigNumberish>[],
     overrides?: Overrides & { from?: PromiseOrValue<string> }
   ): Promise<ContractTransaction>;
 
-  "join(address,uint256[4])"(
+  "join(address,uint256[],bool,address)"(
     _wallet: PromiseOrValue<string>,
-    _quantities: [
-      PromiseOrValue<BigNumberish>,
-      PromiseOrValue<BigNumberish>,
-      PromiseOrValue<BigNumberish>,
-      PromiseOrValue<BigNumberish>
-    ],
+    _quantities: PromiseOrValue<BigNumberish>[],
+    _enableReferral: PromiseOrValue<boolean>,
+    _referrer: PromiseOrValue<string>,
     overrides?: Overrides & { from?: PromiseOrValue<string> }
   ): Promise<ContractTransaction>;
 
@@ -911,29 +858,17 @@ export interface Crowdtainer extends BaseContract {
       overrides?: CallOverrides
     ): Promise<void>;
 
-    invariant(overrides?: CallOverrides): Promise<void>;
-
-    "join(address,uint256[4],bool,address)"(
+    "join(address,uint256[])"(
       _wallet: PromiseOrValue<string>,
-      _quantities: [
-        PromiseOrValue<BigNumberish>,
-        PromiseOrValue<BigNumberish>,
-        PromiseOrValue<BigNumberish>,
-        PromiseOrValue<BigNumberish>
-      ],
-      _enableReferral: PromiseOrValue<boolean>,
-      _referrer: PromiseOrValue<string>,
+      _quantities: PromiseOrValue<BigNumberish>[],
       overrides?: CallOverrides
     ): Promise<void>;
 
-    "join(address,uint256[4])"(
+    "join(address,uint256[],bool,address)"(
       _wallet: PromiseOrValue<string>,
-      _quantities: [
-        PromiseOrValue<BigNumberish>,
-        PromiseOrValue<BigNumberish>,
-        PromiseOrValue<BigNumberish>,
-        PromiseOrValue<BigNumberish>
-      ],
+      _quantities: PromiseOrValue<BigNumberish>[],
+      _enableReferral: PromiseOrValue<boolean>,
+      _referrer: PromiseOrValue<string>,
       overrides?: CallOverrides
     ): Promise<void>;
 
@@ -1028,7 +963,7 @@ export interface Crowdtainer extends BaseContract {
       totalValueRaised?: null
     ): CrowdtainerInDeliveryStageEventFilter;
 
-    "CrowdtainerInitialized(address,address,uint256,uint256,uint256,uint256,uint256[4],uint256,uint256,string,address)"(
+    "CrowdtainerInitialized(address,address,uint256,uint256,uint256,uint256,uint256[],uint256,uint256,string,address)"(
       _owner?: PromiseOrValue<string> | null,
       _token?: null,
       _openingTime?: null,
@@ -1067,7 +1002,7 @@ export interface Crowdtainer extends BaseContract {
     "Initialized(uint8)"(version?: null): InitializedEventFilter;
     Initialized(version?: null): InitializedEventFilter;
 
-    "Joined(address,uint256[4],address,uint256,uint256,bool)"(
+    "Joined(address,uint256[],address,uint256,uint256,bool)"(
       wallet?: PromiseOrValue<string> | null,
       quantities?: null,
       referrer?: PromiseOrValue<string> | null,
@@ -1161,29 +1096,17 @@ export interface Crowdtainer extends BaseContract {
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<BigNumber>;
 
-    invariant(overrides?: CallOverrides): Promise<BigNumber>;
-
-    "join(address,uint256[4],bool,address)"(
+    "join(address,uint256[])"(
       _wallet: PromiseOrValue<string>,
-      _quantities: [
-        PromiseOrValue<BigNumberish>,
-        PromiseOrValue<BigNumberish>,
-        PromiseOrValue<BigNumberish>,
-        PromiseOrValue<BigNumberish>
-      ],
-      _enableReferral: PromiseOrValue<boolean>,
-      _referrer: PromiseOrValue<string>,
+      _quantities: PromiseOrValue<BigNumberish>[],
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<BigNumber>;
 
-    "join(address,uint256[4])"(
+    "join(address,uint256[],bool,address)"(
       _wallet: PromiseOrValue<string>,
-      _quantities: [
-        PromiseOrValue<BigNumberish>,
-        PromiseOrValue<BigNumberish>,
-        PromiseOrValue<BigNumberish>,
-        PromiseOrValue<BigNumberish>
-      ],
+      _quantities: PromiseOrValue<BigNumberish>[],
+      _enableReferral: PromiseOrValue<boolean>,
+      _referrer: PromiseOrValue<string>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<BigNumber>;
 
@@ -1305,29 +1228,17 @@ export interface Crowdtainer extends BaseContract {
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<PopulatedTransaction>;
 
-    invariant(overrides?: CallOverrides): Promise<PopulatedTransaction>;
-
-    "join(address,uint256[4],bool,address)"(
+    "join(address,uint256[])"(
       _wallet: PromiseOrValue<string>,
-      _quantities: [
-        PromiseOrValue<BigNumberish>,
-        PromiseOrValue<BigNumberish>,
-        PromiseOrValue<BigNumberish>,
-        PromiseOrValue<BigNumberish>
-      ],
-      _enableReferral: PromiseOrValue<boolean>,
-      _referrer: PromiseOrValue<string>,
+      _quantities: PromiseOrValue<BigNumberish>[],
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<PopulatedTransaction>;
 
-    "join(address,uint256[4])"(
+    "join(address,uint256[],bool,address)"(
       _wallet: PromiseOrValue<string>,
-      _quantities: [
-        PromiseOrValue<BigNumberish>,
-        PromiseOrValue<BigNumberish>,
-        PromiseOrValue<BigNumberish>,
-        PromiseOrValue<BigNumberish>
-      ],
+      _quantities: PromiseOrValue<BigNumberish>[],
+      _enableReferral: PromiseOrValue<boolean>,
+      _referrer: PromiseOrValue<string>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<PopulatedTransaction>;
 

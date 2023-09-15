@@ -116,8 +116,6 @@
 								{staticDataLoadStatus}
 								campaignStaticData={campaignStaticData.get(project)}
 								campaignStaticUI={campaignStaticUI.get(project)}
-								basePrices={projects[index].basePriceDenominator}
-								basePriceUnit={projects[index].basePriceUnit}
 							/>
 						{/each}
 					</div>
@@ -151,8 +149,6 @@
 								{staticDataLoadStatus}
 								campaignStaticData={campaignStaticData.get(project)}
 								campaignStaticUI={campaignStaticUI.get(project)}
-								basePrices={projects[index].basePriceDenominator}
-								basePriceUnit={projects[index].basePriceUnit}
 							/>
 						{/each}
 					</div>
@@ -186,8 +182,6 @@
 								{staticDataLoadStatus}
 								campaignStaticData={campaignStaticData.get(project)}
 								campaignStaticUI={campaignStaticUI.get(project)}
-								basePrices={projects[index].basePriceDenominator}
-								basePriceUnit={projects[index].basePriceUnit}
 							/>
 						{/each}
 					</div>

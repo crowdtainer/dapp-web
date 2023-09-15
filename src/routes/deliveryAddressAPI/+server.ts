@@ -3,8 +3,7 @@ import { getDatabase } from "$lib/Database/redis";              // Database
 import { BigNumber, ethers } from 'ethers';                     // Ethers
 import { type Result, Ok, Err, } from "@sniptt/monads";         // Monads
 // const countryISO = require('iso-3166-1');
-import { whereAlpha2, whereCountry } from 'iso-3166-1';
-import Country from 'iso-3166-1';
+import { whereAlpha2 } from 'iso-3166-1';
 
 import { isTimeValid, makeDeliveryRequestMessage, type DeliveryDetails, type Address } from '$lib/Model/SignTerms';
 import { Vouchers721Address } from '../Data/projects.json';
