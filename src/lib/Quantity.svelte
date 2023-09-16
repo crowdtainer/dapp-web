@@ -84,7 +84,7 @@
 						on:click={()=>{userRemovedCoupon()}}
 						><p class="text-secondary">[ Remove ] &nbsp;</p></button>
 						<b
-							>{ratePercentage}% OFF referral discount ({shortenAddress(validUserCouponCode)}): -{discountValue}
+							>{ratePercentage}% OFF referral discount ({shortenAddress(validUserCouponCode)}): -{discountValue.toFixed(2)}
 							{tokenSymbol}</b
 						>
 					</p>
