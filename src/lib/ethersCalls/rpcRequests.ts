@@ -98,6 +98,7 @@ export async function findTokenIdsForWallet(provider: ethers.Signer | undefined,
         let wallet = await provider.getAddress();
 
         let totalTokens = (await vouchers721Contract.balanceOf(wallet)).toNumber();
+        // console.log(`totalTokens: ${totalTokens} for wallet ${wallet}`);
 
         let tokenAssociations = makeNewTokenIDAssociations();
 
@@ -289,16 +290,14 @@ export async function joinProject(provider: ethers.Signer | undefined,
     try {
         const vouchers721Contract = Vouchers721__factory.connect(vouchers721Address, provider);
 
-        let arrayOfBigNumbers: [BigNumber, BigNumber, BigNumber, BigNumber] = [
-            BigNumber.from(quantities[0]),
-            BigNumber.from(quantities[1]),
-            BigNumber.from(quantities[2]),
-            BigNumber.from(quantities[3])
-        ];
+        let quantitiesBigNum = new Array<BigNumber>();
+        quantities.forEach(element => {
+            quantitiesBigNum.push(BigNumber.from(element));
+        });
 
         console.log(`EIP-3668: join with signature disabled. Vouchers721 @ ${vouchers721Address}; Crowdtainer @ ${crowdtainerAddress}`);
 
-        let result: ContractTransaction = await vouchers721Contract['join(address,uint256[4],bool,address)'](crowdtainerAddress, arrayOfBigNumbers, referralEnabled, validUserCouponCode);
+        let result: ContractTransaction = await vouchers721Contract['join(address,uint256[],bool,address)'](crowdtainerAddress, quantitiesBigNum, referralEnabled, validUserCouponCode)
         return Ok(result);
 
     } catch (error) {

@@ -44,6 +44,42 @@ src/routes/Legal/Terms/+page.svelte
 src/lib/strings.ts
 ```
 
+The productConfiguration defined in projects.json is used to build the product selection UI automatically, by aligning the product name in the deployed campaign (smart contract side), with the description/delimiters defined in product configuration.
+
+For example, a project deployed with the following parameters: 
+
+```ts
+await vouchers721.createCrowdtainer(
+      campaignData, [
+      "Germany Delivery | 3 Month Subscription | 500g",
+      "Germany Delivery | 3 Month Subscription | 1kg",
+      "Germany Delivery | Single | 500g",
+      "Germany Delivery | Single | 1kg",
+      "Europe Delivery | 3 Month Subscription | 500g",
+      "Europe Delivery | 3 Month Subscription | 1kg",
+      "Europe Delivery | Single | 500g",
+      "Europe Delivery | Single | 1kg"
+    ],
+      metadataService.address
+    );
+```
+
+And with the following configuration in projects.json:
+
+```json
+"productConfiguration": {
+                "categoryDelimiter": " | ",
+                "categoryDescriptors" : [ "Delivery", "Type", "Size"]
+            }
+```
+
+Will generate an interface similar to the following:
+
+
+<img src="static/images/docs/productSelection.png" alt="Crowdtainer" height="328px"/><br />
+<br />
+
+
 ## Docker
 
 ### Running with docker:

@@ -10,19 +10,20 @@
   },
   "ast": {
     "absolutePath": "src/contracts/States.sol",
-    "id": 27893,
+    "id": 25920,
     "exportedSymbols": {
       "CrowdtainerState": [
-        27892
+        25919
       ]
     },
     "nodeType": "SourceUnit",
-    "src": "36:109:34",
+    "src": "36:109:32",
     "nodes": [
       {
-        "id": 27887,
+        "id": 25914,
         "nodeType": "PragmaDirective",
-        "src": "36:24:34",
+        "src": "36:24:32",
+        "nodes": [],
         "literals": [
           "solidity",
           "^",
@@ -31,45 +32,46 @@
         ]
       },
       {
-        "id": 27892,
+        "id": 25919,
         "nodeType": "EnumDefinition",
-        "src": "62:82:34",
+        "src": "62:82:32",
+        "nodes": [],
         "canonicalName": "CrowdtainerState",
         "members": [
           {
-            "id": 27888,
+            "id": 25915,
             "name": "Uninitialized",
-            "nameLocation": "90:13:34",
+            "nameLocation": "90:13:32",
             "nodeType": "EnumValue",
-            "src": "90:13:34"
+            "src": "90:13:32"
           },
           {
-            "id": 27889,
+            "id": 25916,
             "name": "Funding",
-            "nameLocation": "109:7:34",
+            "nameLocation": "109:7:32",
             "nodeType": "EnumValue",
-            "src": "109:7:34"
+            "src": "109:7:32"
           },
           {
-            "id": 27890,
+            "id": 25917,
             "name": "Delivery",
-            "nameLocation": "122:8:34",
+            "nameLocation": "122:8:32",
             "nodeType": "EnumValue",
-            "src": "122:8:34"
+            "src": "122:8:32"
           },
           {
-            "id": 27891,
+            "id": 25918,
             "name": "Failed",
-            "nameLocation": "136:6:34",
+            "nameLocation": "136:6:32",
             "nodeType": "EnumValue",
-            "src": "136:6:34"
+            "src": "136:6:32"
           }
         ],
         "name": "CrowdtainerState",
-        "nameLocation": "67:16:34"
+        "nameLocation": "67:16:32"
       }
     ],
     "license": "GPL-3.0"
   },
-  "id": 34
+  "id": 32
 }

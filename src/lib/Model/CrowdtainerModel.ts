@@ -23,3 +23,8 @@ export type CrowdtainerStaticModel = {
 	signer: string;
 	referralRate: BigNumber;
 }
+
+export interface SplitSelection { 
+	categoryDelimiter: string;
+	categoryDescriptors: string[];
+}

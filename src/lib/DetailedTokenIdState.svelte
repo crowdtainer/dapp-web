@@ -68,8 +68,7 @@
 		<div class="items-center text-black dark:text-gray-200 text-md text-md text-left mt-4">
 			{#if state === ProjectStatusUI.Failed || state === ProjectStatusUI.ServiceProviderDeclined}
 				<div class="inline-flex items-center justify-center">
-					<p>Next step:</p>
-					• You can withdrawl {ethers.utils.formatUnits(
+					<p>• Next step: &nbsp;You can withdrawl {ethers.utils.formatUnits(
 						`${walletData.fundsInCrowdtainer}`,
 						BigNumber.from(campaignStaticUI.tokenDecimals)
 					)}

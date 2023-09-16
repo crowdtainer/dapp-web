@@ -26,24 +26,9 @@ export type MetadataStruct = {
   tokenId: PromiseOrValue<BigNumberish>;
   currentOwner: PromiseOrValue<string>;
   claimed: PromiseOrValue<boolean>;
-  unitPricePerType: [
-    PromiseOrValue<BigNumberish>,
-    PromiseOrValue<BigNumberish>,
-    PromiseOrValue<BigNumberish>,
-    PromiseOrValue<BigNumberish>
-  ];
-  quantities: [
-    PromiseOrValue<BigNumberish>,
-    PromiseOrValue<BigNumberish>,
-    PromiseOrValue<BigNumberish>,
-    PromiseOrValue<BigNumberish>
-  ];
-  productDescription: [
-    PromiseOrValue<string>,
-    PromiseOrValue<string>,
-    PromiseOrValue<string>,
-    PromiseOrValue<string>
-  ];
+  unitPricePerType: PromiseOrValue<BigNumberish>[];
+  quantities: PromiseOrValue<BigNumberish>[];
+  productDescription: PromiseOrValue<string>[];
   numberOfProducts: PromiseOrValue<BigNumberish>;
 };
 
@@ -52,24 +37,24 @@ export type MetadataStructOutput = [
   BigNumber,
   string,
   boolean,
-  [BigNumber, BigNumber, BigNumber, BigNumber],
-  [BigNumber, BigNumber, BigNumber, BigNumber],
-  [string, string, string, string],
+  BigNumber[],
+  BigNumber[],
+  string[],
   BigNumber
 ] & {
   crowdtainerId: BigNumber;
   tokenId: BigNumber;
   currentOwner: string;
   claimed: boolean;
-  unitPricePerType: [BigNumber, BigNumber, BigNumber, BigNumber];
-  quantities: [BigNumber, BigNumber, BigNumber, BigNumber];
-  productDescription: [string, string, string, string];
+  unitPricePerType: BigNumber[];
+  quantities: BigNumber[];
+  productDescription: string[];
   numberOfProducts: BigNumber;
 };
 
 export interface IMetadataServiceInterface extends utils.Interface {
   functions: {
-    "uri((uint256,uint256,address,bool,uint256[4],uint256[4],string[4],uint256))": FunctionFragment;
+    "uri((uint256,uint256,address,bool,uint256[],uint256[],string[],uint256))": FunctionFragment;
   };
 
   getFunction(nameOrSignatureOrTopic: "uri"): FunctionFragment;

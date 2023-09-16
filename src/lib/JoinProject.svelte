@@ -3,9 +3,10 @@
 	export let crowdtainerId: number;
 	export let vouchers721Address: string | undefined;
 	export let crowdtainerAddress: string;
-	export let basePrices: number[];
+	export let basePriceDenominator: number[];
 	export let basePriceUnit: string;
 	export let referralRate: BigNumber | undefined;
+	// export let splitSelectionBy: SplitSelection[];
 
 	import { onMount } from 'svelte';
 	import { slide } from 'svelte/transition';
@@ -221,7 +222,7 @@
 						descriptions={campaignStaticUI.descriptions}
 						{crowdtainerId}
 						tokenSymbol={campaignStaticUI.tokenSymbol}
-						{basePrices}
+						{basePriceDenominator}
 						{basePriceUnit}
 					/>
 				</Quantity>
@@ -288,7 +289,7 @@
 						descriptions={campaignStaticUI.descriptions}
 						{crowdtainerId}
 						tokenSymbol={campaignStaticUI.tokenSymbol}
-						{basePrices}
+						{basePriceDenominator}
 						{basePriceUnit}
 					/>
 				</Quantity>
@@ -363,7 +364,7 @@
 				descriptions={campaignStaticUI.descriptions}
 				{crowdtainerId}
 				tokenSymbol={campaignStaticUI.tokenSymbol}
-				{basePrices}
+				{basePriceDenominator}
 				{basePriceUnit}
 			/>
 		</Quantity>

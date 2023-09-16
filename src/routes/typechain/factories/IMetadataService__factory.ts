@@ -35,19 +35,19 @@ const _abi = [
             type: "bool",
           },
           {
-            internalType: "uint256[4]",
+            internalType: "uint256[]",
             name: "unitPricePerType",
-            type: "uint256[4]",
+            type: "uint256[]",
           },
           {
-            internalType: "uint256[4]",
+            internalType: "uint256[]",
             name: "quantities",
-            type: "uint256[4]",
+            type: "uint256[]",
           },
           {
-            internalType: "string[4]",
+            internalType: "string[]",
             name: "productDescription",
-            type: "string[4]",
+            type: "string[]",
           },
           {
             internalType: "uint256",
@@ -71,7 +71,7 @@ const _abi = [
     stateMutability: "view",
     type: "function",
   },
-];
+] as const;
 
 export class IMetadataService__factory {
   static readonly abi = _abi;

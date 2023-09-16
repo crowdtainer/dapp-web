@@ -23,9 +23,9 @@ const _abi = [
         type: "address",
       },
       {
-        internalType: "uint256[4]",
+        internalType: "uint256[]",
         name: "quantities",
-        type: "uint256[4]",
+        type: "uint256[]",
       },
       {
         internalType: "bool",
@@ -49,7 +49,7 @@ const _abi = [
     stateMutability: "view",
     type: "function",
   },
-];
+] as const;
 
 export class AuthorizationGateway__factory {
   static readonly abi = _abi;

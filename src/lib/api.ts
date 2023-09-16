@@ -102,7 +102,7 @@ import { ethers } from "ethers";
 import type { DeliveryDetails } from "./Model/SignTerms";
 export async function requestAuthorizationProof(wallet: string,
 	crowdtainerAddress: string,
-	quantities: Number[],
+	quantities: number[],
 	enableReferral: boolean,
 	referralAddress: string
 ): Promise<Result<[string, string], string>> {

@@ -29,7 +29,7 @@ export const walletInCrowdtainer = readable(createWalletCrowdtainerData(), funct
             console.log(`${funds.unwrapErr()}`);
             return;
         }
-    
+
         let userWalletInCrowdtainer = funds.unwrap();
 
 		set(userWalletInCrowdtainer);
