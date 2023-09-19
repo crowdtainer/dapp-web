@@ -9,6 +9,7 @@ import { type WalletState, WalletType, ConnectionState, persistState, getLastSta
 import { MessageType } from '../Toast/MessageType';
 
 const VITE_WALLET_CONNECT_BRIDGE_SERVER: string = import.meta.env.VITE_WALLET_CONNECT_BRIDGE_SERVER;
+const NO_WALLET_DETECTED = '---';
 
 export const walletState = createWalletStore();
 export const connected = derived(walletState, $walletState => $walletState.connectionState === ConnectionState.Connected);
@@ -19,9 +20,19 @@ export const shortenedAccount = derived(walletState, $walletState => {
     return shortenAddress($walletState.account);
 });
 export const shortOrENSNamedAccount = derived(walletState, async $walletState => {
-    if ($walletState === undefined) return '---';
+    if ($walletState === undefined) {
+        dispatchMessage("Unable to load wallet store.", MessageType.Warning);
+        return NO_WALLET_DETECTED;
+    }
 
-    if ($walletState.account === undefined || web3Provider === undefined) return '---';
+    if ($walletState.account === undefined) {
+        dispatchMessage("Wallet account not found.", MessageType.Warning);
+        return NO_WALLET_DETECTED;
+    }
+    else if (web3Provider === undefined) {
+        dispatchMessage("web3Provider not found.", MessageType.Warning);
+        return NO_WALLET_DETECTED;
+    }
     let reversedResolve: string | null;
     try {
         reversedResolve = await web3Provider.lookupAddress($walletState.account);
@@ -35,7 +46,7 @@ export const shortOrENSNamedAccount = derived(walletState, async $walletState =>
 });
 
 export function shortenAddress(walletAddress: string | undefined): string {
-    return (walletAddress) ? walletAddress.slice(0, 6) + '...' + walletAddress.slice(-4) : '---';
+    return (walletAddress) ? walletAddress.slice(0, 6) + '...' + walletAddress.slice(-4) : NO_WALLET_DETECTED;
 }
 
 // 10: Optimism; 31337: hardhat local node; 5: Ethereum Goerli; 420: Optimism Goerli
@@ -155,7 +166,7 @@ export let wcProvider: WalletConnectProvider;
 
 async function setupWalletConnect() {
     wcProvider = new WalletConnectProvider({
-        qrcodeModalOptions: { desktopLinks:[] },
+        qrcodeModalOptions: { desktopLinks: [] },
         bridge: VITE_WALLET_CONNECT_BRIDGE_SERVER,
         rpc: {
             // Only one network at a time is supported.
