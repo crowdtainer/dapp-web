@@ -6,15 +6,15 @@
 	import { Clipboard } from '@steeze-ui/heroicons';
 	import { BigNumber } from 'ethers/lib/ethers.js';
 	import { copyToClipBoardAndNotify } from './Utils/clipboard.js';
+	import type { CrowdtainerStaticModel } from './Model/CrowdtainerModel.js';
+	import { moneyFormatter } from '$lib/Utils/moneyFormatter.js';
+	import { ethers } from 'ethers';
+	import type { UIFields } from './Converters/CrowdtainerData.js';
 
 	export let vouchers721Address: string;
 	export let crowdtainerId: number;
-	export let crowdtainerAddress: string | undefined;
-	export let serviceProvider: string | undefined;
-	export let erc20TokenAddress: string | undefined;
-	export let tokenDecimals: number | undefined;
-	export let signerAddress: string | undefined;
-	export let referralRate: BigNumber | undefined;
+	export let campaignStaticData: CrowdtainerStaticModel;
+	export let campaignStaticUI: UIFields;
 
 	let visible: boolean;
 
@@ -22,7 +22,9 @@
 		visible = !visible;
 	}
 
-	$: discount = BigNumber.from(referralRate).toNumber() / 2;
+	$: discount = campaignStaticData.referralRate
+		? BigNumber.from(campaignStaticData.referralRate).toNumber() / 2
+		: BigNumber.from(0);
 </script>
 
 <div class="mb-4">
@@ -77,13 +79,13 @@
 					<td>
 						<button
 							on:click={() => {
-								copyToClipBoardAndNotify('Crowdtainer address', crowdtainerAddress);
+								copyToClipBoardAndNotify('Crowdtainer address', campaignStaticData.contractAddress);
 							}}
 						>
 							<span class="inline-flex items-baseline">
-								{#if crowdtainerAddress !== undefined}
+								{#if campaignStaticData.contractAddress !== undefined}
 									<span>
-										{shortenAddress(crowdtainerAddress)}
+										{shortenAddress(campaignStaticData.contractAddress)}
 									</span>
 									<span>
 										<Icon
@@ -103,11 +105,14 @@
 					<td>
 						<button
 							on:click={() => {
-								copyToClipBoardAndNotify('Service Provider address', serviceProvider);
+								copyToClipBoardAndNotify(
+									'Service Provider address',
+									campaignStaticData.serviceProvider
+								);
 							}}
 						>
 							<span class="inline-flex items-baseline">
-								<span>{shortenAddress(serviceProvider)} </span>
+								<span>{shortenAddress(campaignStaticData.serviceProvider)} </span>
 								<span
 									><Icon
 										src={Clipboard}
@@ -118,6 +123,26 @@
 							</span>
 						</button></td
 					>
+				</tr>
+
+				<tr>
+					<td>Minimum goal: </td>
+					<td>
+						<span class="inline-flex items-baseline">
+							{moneyFormatter.format(Number(campaignStaticUI.minimum))}
+							{campaignStaticData.tokenSymbol}
+						</span>
+					</td>
+				</tr>
+
+				<tr>
+					<td>Maximum goal (cap): </td>
+					<td>
+						<span class="inline-flex items-baseline">
+							{moneyFormatter.format(Number(campaignStaticUI.maximum))}
+							{campaignStaticData.tokenSymbol}
+						</span>
+					</td>
 				</tr>
 
 				<tr>
@@ -125,11 +150,11 @@
 					<td>
 						<button
 							on:click={() => {
-								copyToClipBoardAndNotify('ERC-20 token addess', erc20TokenAddress);
+								copyToClipBoardAndNotify('ERC-20 token addess', campaignStaticData.token);
 							}}
 						>
 							<span class="inline-flex items-baseline">
-								<span>{shortenAddress(erc20TokenAddress)} </span>
+								<span>{shortenAddress(campaignStaticData.token)} </span>
 								<span
 									><Icon
 										src={Clipboard}
@@ -143,12 +168,19 @@
 				</tr>
 
 				<tr>
+					<td>ERC20 decimals: </td>
+					<td>
+						<span>{campaignStaticData.tokenDecimals}</span>
+					</td>
+				</tr>
+
+				<tr>
 					<td>Referral system: </td>
 					<td>
 						<span class="inline-flex items-baseline">
-							{#if referralRate === undefined}
+							{#if campaignStaticData.referralRate === undefined}
 								<span> -- </span>
-							{:else if discount > 0}
+							{:else if discount > BigNumber.from(0)}
 								<span> {discount} % off for referee, {discount}% cashback for referrer.</span>
 							{:else}
 								<span> disabled </span>
@@ -160,16 +192,16 @@
 				<tr>
 					<td>Service provider signer:</td>
 					<td>
-						{#if signerAddress === '0x0000000000000000000000000000000000000000'}
+						{#if campaignStaticData.signer === '0x0000000000000000000000000000000000000000'}
 							<span> Offchain signature is not required to join this project.</span>
 						{:else}
 							<button
 								on:click={() => {
-									copyToClipBoardAndNotify('Signer address', signerAddress);
+									copyToClipBoardAndNotify('Signer address', campaignStaticData.signer);
 								}}
 							>
 								<span class="inline-flex items-baseline">
-									<span>{shortenAddress(signerAddress)} </span>
+									<span>{shortenAddress(campaignStaticData.signer)} </span>
 									<span
 										><Icon
 											src={Clipboard}
@@ -180,13 +212,6 @@
 								</span>
 							</button>
 						{/if}
-					</td>
-				</tr>
-
-				<tr>
-					<td>ERC20 decimals: </td>
-					<td>
-						<span>{tokenDecimals}</span>
 					</td>
 				</tr>
 			</table>

@@ -13,6 +13,8 @@ let availableCrowdtainerIds: number[] = [];
 import { projects, ERC20_MaximumPurchaseValuePerWallet } from '../../Data/projects.json';
 import type { CrowdtainerStaticModel } from "$lib/Model/CrowdtainerModel.js";
 import { fetchStaticData } from "$lib/ethersCalls/fetchStaticData.js";
+import { moneyFormatter } from "$lib/Utils/moneyFormatter.js";
+import { toHuman } from "$lib/Converters/CrowdtainerData.js";
 for (let result of projects) {
     availableCrowdtainerIds.push(result.crowdtainerId);
 }
@@ -91,7 +93,7 @@ export const POST: RequestHandler = async ({ request, params }) => {
     }
 
     const abiInterface = new ethers.utils.Interface(JSON.stringify(AuthorizationGateway__factory.abi));
-    
+
     console.log(`Authorization request received from wallet: ${userWalletAddress}`);
     // Decode function arguments
     const args = abiInterface.decodeFunctionData("getSignedJoinApproval", `${hexCalldata}`);
@@ -137,7 +139,7 @@ export const POST: RequestHandler = async ({ request, params }) => {
     }
 
     if (totalValue.gt(maxCost)) {
-        throw error(400, `Order amount too high (${totalValue}). Maximum: ${maxCost} ${campaignData.tokenSymbol}.`);
+        throw error(400, `Order amount too high: ${moneyFormatter.format(Number(toHuman(totalValue, campaignData.tokenDecimals)))} ${campaignData.tokenSymbol}. Maximum: ${moneyFormatter.format(Number(toHuman(maxCost, campaignData.tokenDecimals)))} ${campaignData.tokenSymbol}.`);
     }
 
     let epochExpiration = BigNumber.from(Math.floor(Date.now() / 1000) + AUTHORIZER_SIGNATURE_EXPIRATION_TIME_IN_SECONDS);

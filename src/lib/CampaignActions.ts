@@ -112,13 +112,13 @@ export async function callClaimRewards(crowdtainerAddress: string, modalDialog: 
             body: 'Rewards transfer complete.',
             icon: ModalIcon.Exclamation
         });
-        console.log(`Transfer transaction hash: ${confirmation.transactionHash}`);
+        console.log(`Claim rewards transaction hash: ${confirmation.transactionHash}`);
     } else {
         modalDialog.show({
             id: 'rewardsClaimResultDialog',
             type: ModalType.Information,
             title: 'Failure',
-            body: 'Participation proof transfer Failed.',
+            body: 'Claim rewards transaction failed.',
             icon: ModalIcon.Exclamation
         });
     }
@@ -139,7 +139,7 @@ export async function callTransferParticipationProof(targetWallet: string,
         animation: ModalAnimation.Circle2
     });
 
-    // TODO: Check if ENS rsoluition is working
+    // TODO: Check if ENS resolution is working
     let signResult = await transferToken(getSigner(), vouchers721Address, targetWallet, tokenId);
 
     if (signResult.isErr()) {
@@ -156,6 +156,8 @@ export async function callTransferParticipationProof(targetWallet: string,
     }
 
     let confirmation = await signResult.unwrap().wait();
+
+    modalDialog.close();
 
     let resultDialogData: ModalDialogData;
     if (confirmation.status === 1) {
@@ -179,3 +181,25 @@ export async function callTransferParticipationProof(targetWallet: string,
 
     onUserTransferredParticipation(resultDialogData);
 };
+
+export function handleCampaignJoinedEvent(event: CustomEvent, modalDialog: ModalDialog) {
+    console.log(`Detected event of type: ${event.type} : detail: ${event.detail.text}`);
+    modalDialog.show({
+        id: 'joinSuccess',
+        title: 'You have succesfully joined the project! 🎉',
+        body: 'If the minimum funding is reached, you will be able to enter your delivery address on this site. Otherwise, you can get your pre-payment back.',
+        type: ModalType.Information,
+        icon: ModalIcon.BadgeCheck
+    });
+}
+
+export function handleUserClaimedFundsEvent(event: CustomEvent, modalDialog: ModalDialog) {
+    console.log(`Detected event of type: ${event.type} : detail: ${event.detail.text}`);
+    modalDialog.show({
+        id: 'joinSuccess',
+        title: 'Success',
+        body: 'The value equivalent to your pre-payment amount has been returned to your wallet.',
+        type: ModalType.Information,
+        icon: ModalIcon.BadgeCheck
+    });
+}

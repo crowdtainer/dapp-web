@@ -1,5 +1,7 @@
 import { browser } from '$app/environment';
 
+export const ssr = false;
+
 export enum WalletType { Injected, WalletConnect }
 export enum ConnectionState { Disconnected, Connected, ConnectedToUnsupportedNetwork }
 

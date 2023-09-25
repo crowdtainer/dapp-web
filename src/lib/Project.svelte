@@ -1,21 +1,22 @@
 <script lang="ts">
+	import ProjectGlobalView from './ProjectGlobalView.svelte';
+	import AddToCartView from './AddToCartView.svelte';
+
 	import { onMount } from 'svelte';
-	import { tweened } from 'svelte/motion';
-	import { cubicOut } from 'svelte/easing';
-	import { blur } from 'svelte/transition';
 	import type { Readable } from 'svelte/store';
 	import { goto } from '$app/navigation';
 
 	import JoinProject from '$lib/JoinProject.svelte';
 
-	import { initializeCampaignStores, campaignStores } from '$lib/Stores/campaignStore';
+	import {
+		initializeCampaignDynamicStores
+	} from '$lib/Stores/campaignStore';
 	import { joinSelection } from '$lib/Stores/userStore';
-	import { findTokenIdsForWallet, type TokenIDAssociations } from './ethersCalls/rpcRequests';
 
-	import TimeLeft from './TimeLeft.svelte';
-	import MoneyInContract from './MoneyInContract.svelte';
 	import DetailedTokenIdState from './DetailedTokenIdState.svelte';
 	import CampaignActions from './CampaignActions.svelte';
+
+	import { campaignStaticStores } from './Stores/campaignStaticDataStore.js';
 
 	import type {
 		CrowdtainerDynamicModel,
@@ -23,25 +24,22 @@
 		SplitSelection
 	} from '$lib/Model/CrowdtainerModel';
 	import {
-		toHuman,
-		toStateString,
 		toState,
-		calculatePercentageRaised,
-		calculatePercentageWidth,
 		type UIFields,
 		LoadStatus,
-		loadingString,
 		ProjectStatusUI
 	} from '$lib/Converters/CrowdtainerData';
 
 	import { connected, getSigner, accountAddress } from '$lib/Utils/wallet';
-	import { ModalIcon, ModalType } from './ModalDialog.svelte';
 	let modalDialog: ModalDialog;
 
-	import { getOrderDetailsAPI, OrderStatus } from './api';
-	import ProjectDetails from './ProjectDetails.svelte';
+	import { OrderStatus } from './api';
 	import { initializeDataForWallet, walletInCrowdtainer } from './Stores/dataForWalletStore.js';
 	import ModalDialog from './ModalDialog.svelte';
+	import { showToast } from './Toast/ToastStore.js';
+	import { handleCampaignJoinedEvent, handleUserClaimedFundsEvent } from './CampaignActions.js';
+	import { loadOrderDetails, loadTokenIdsForWallet } from './TokenUtils/tokenSearch.js';
+	import type { TokenIDAssociations } from './ethersCalls/rpcRequests.js';
 
 	export let vouchers721Address: string;
 	export let crowdtainerId: number;
@@ -52,272 +50,49 @@
 	export let projectImageURLs: string[];
 	export let basePriceUnit: string;
 	export let basePriceDenominator: number[];
-	export let productConfiguration: SplitSelection;
 
-	export let campaignStaticData: CrowdtainerStaticModel | undefined;
-	export let campaignStaticUI: UIFields | undefined;
+	export let productConfiguration: SplitSelection;
+	export let projectId: number;
 	export let staticDataLoadStatus: LoadStatus = LoadStatus.Loading;
 
-	let campaignDynamicData: Readable<CrowdtainerDynamicModel> | undefined;
+	let campaignStaticUI: UIFields | undefined;
+	let campaignStaticData: CrowdtainerStaticModel | undefined;
 
-	let currentSelection = 0;
-	let currentPrice: number;
-	let currentBasePrice: number;
-	let fundsInContract: number | undefined;
-	let raisedAmount: number | undefined;
-	let tweeningDuration = 650;
-	let tweenedPercentageWidth = tweened(0, { duration: tweeningDuration, easing: cubicOut });
-	let tweenedPercentageRaised = tweened(0, { duration: tweeningDuration, easing: cubicOut });
+	let campaignDynamicData: Readable<CrowdtainerDynamicModel> | undefined;
 
 	let orderStatus: OrderStatus;
 
 	let tokenIdAssociations: TokenIDAssociations | undefined;
 
-	//  products display
-	let productTypes = new Set<string>();
-	let productTypesIndices = new Set<number>();
-	let descriptorForProduct = new Map<string, number>();
-
-	interface ProductOptions {
-		name: string;
-		productSubOptions: string[];
-	}
-
-	let productOptions: ProductOptions[];
-
-	let userProductSelection = new Map<string, string>(); // <descriptor, sub-option value>
-
-	function setUserSelection(descriptor: string, value: string) {
-		console.log(`Descriptor: ${descriptor}, Value: ${value}`);
-		userProductSelection.set(descriptor, value);
-
-		let categoryDescriptorIndex = productConfiguration.categoryDescriptors.indexOf(descriptor);
-		if (categoryDescriptorIndex == -1) {
-			console.log(`Error: categoryDescriptors not found`);
-			return;
-		}
-
-		if (productConfiguration.categoryDescriptors.length !== userProductSelection.size) {
-			console.log('Missing user input selection');
-			return;
-		}
-
-		// Find Crowdtainer's index from selection
-		let delimiter = productConfiguration.categoryDelimiter;
-		campaignStaticUI?.descriptions.forEach((value, index) => {
-			let finalString = '';
-			userProductSelection.forEach((element) => {
-				finalString += `${element}${delimiter}`;
-			});
-			// drop last delimiter
-			finalString = finalString.substring(0, finalString.lastIndexOf(`${delimiter}`));
-			if (value === finalString) {
-				console.log(`Found match: ${finalString} at index ${index}`);
-				currentSelection = index;
-			}
-		});
-
-		// Update current selection price
-		if (campaignStaticUI) {
-			currentPrice = campaignStaticUI.prices[currentSelection];
-			currentBasePrice = currentPrice / basePriceDenominator[currentSelection];
-		} else {
-			console.log(`Warning: prices not loaded yet.`);
-			return;
-		}
-	}
-
 	initializeDataForWallet(campaignStaticData?.contractAddress, $accountAddress);
 
-	function loadData() {
+	async function refreshData() {
 		$joinSelection = $joinSelection;
-		// Dynamic data
-		if (campaignDynamicData == undefined) {
-			campaignDynamicData = initializeCampaignStores(crowdtainerId);
+		campaignDynamicData = initializeCampaignDynamicStores(crowdtainerId);
+		tokenIdAssociations = await loadTokenIdsForWallet(vouchers721Address);
+		let order = await loadOrderDetails(vouchers721Address, tokenIdAssociations?.foundTokenIds);
+		if (order) {
+			console.log(`Updated order status: ${order}`);
+			orderStatus = order;
 		} else {
-			campaignDynamicData = campaignStores.get(crowdtainerId);
-		}
-		if (campaignStaticUI === undefined) {
-			return;
-		}
-
-		updateCurrentSelection(0, campaignStaticUI.prices[0]);
-
-		console.log(`campaignStaticUI.descriptions: ${JSON.stringify(campaignStaticUI?.descriptions)}`);
-
-		//  products display
-
-		productTypes = new Set<string>();
-		productTypesIndices = new Set<number>();
-		descriptorForProduct = new Map<string, number>();
-		campaignStaticUI.descriptions.forEach((productLine) => {
-			let items = productLine.split(productConfiguration.categoryDelimiter);
-			if (items.length != productConfiguration.categoryDescriptors.length) {
-				let errorMessage = `
-					Error: Product configuration mismatch:
-					there must be a categoryDescriptor in productConfiguration for each delimiter, based on Crowdtainer's deployed product name.
-					`;
-				errorMessage += `Crowdtainer product name: ${productLine}`;
-				errorMessage += `productData.length: ${items.length}`;
-				errorMessage += `productConfiguration.categoryDescriptors.length: ${productConfiguration.categoryDescriptors.length}`;
-				console.log(errorMessage);
-				return;
-			}
-
-			items.forEach((item: string, index) => {
-				if (!productTypes.has(item)) {
-					descriptorForProduct.set(item, index);
-					productTypes.add(item);
-					productTypesIndices.add(index);
-				}
-			});
-		});
-
-		productOptions = new Array<ProductOptions>();
-
-		for (let index = 0; index < productTypesIndices.size; index++) {
-			let result = [...descriptorForProduct.entries()].filter(
-				(value: [string, number]) => value[1] === index
-			);
-			console.log(`Found ${result[0]} ${result[1]} @ index ${index}`);
-			let productSuboptions = new Array<string>();
-			result.forEach((item) => {
-				productSuboptions.push(item[0]);
-			});
-
-			productOptions.push({
-				name: productConfiguration.categoryDescriptors[index],
-				productSubOptions: productSuboptions
-			});
-
-			// set initial values
-			setUserSelection(productConfiguration.categoryDescriptors[index], productSuboptions[0]);
+			orderStatus = OrderStatus.Unknown;
 		}
 	}
 
 	onMount(async () => {
-		loadData();
-		loadTokenIdsForWallet();
+		let fetchError = await campaignStaticStores.fetchData([projectId]);
+		if (fetchError) {
+			showToast(`Error fetching data: ${fetchError.details}`);
+			return;
+		}
+
+		campaignStaticData = $campaignStaticStores.staticData[projectId];
+		campaignStaticUI = $campaignStaticStores.UIData[projectId];
+
+		refreshData();
 	});
 
-	function setRaisedAmount() {
-		if (staticDataLoadStatus !== LoadStatus.FetchFailed) {
-			let decimals = campaignStaticUI ? campaignStaticUI.tokenDecimals : undefined;
-			fundsInContract = toHuman($campaignDynamicData?.fundsInContract, decimals);
-			raisedAmount = toHuman($campaignDynamicData?.raised, decimals);
-		}
-	}
-
-	function setPercentages() {
-		if (staticDataLoadStatus !== LoadStatus.FetchFailed && raisedAmount !== undefined) {
-			let percentage = campaignStaticUI
-				? Number(calculatePercentageRaised(raisedAmount.toString(), campaignStaticUI.minimum))
-				: undefined;
-
-			if (percentage) {
-				tweenedPercentageRaised.set(percentage);
-				tweenedPercentageWidth.set(calculatePercentageWidth(percentage));
-			} else {
-				tweenedPercentageRaised.set(0);
-				tweenedPercentageWidth.set(0);
-			}
-		} else {
-			tweenedPercentageRaised.set(0);
-			tweenedPercentageWidth.set(0);
-		}
-	}
-
-	async function loadOrderDetails() {
-		let signer = getSigner();
-		if (!signer) {
-			console.log('Error: Unable to load order details, missing signer.');
-			return;
-		}
-
-		if (tokenIdAssociations === undefined) {
-			console.log(`tokenIdAssociations === undefined`);
-			return;
-		}
-
-		if (tokenIdAssociations.foundTokenIds.length === 0) {
-			// console.log(`No tokenIDs detected.`);
-			return;
-		} else if (tokenIdAssociations.foundTokenIds.length > 1) {
-			// console.log(`Multiple tokens detected.`);
-			return;
-		}
-
-		let result = await getOrderDetailsAPI(
-			await signer.getChainId(),
-			vouchers721Address,
-			tokenIdAssociations.foundTokenIds[0]
-		);
-
-		if (result.isErr()) {
-			console.log(`Error: getOrderDetailsAPI: ${result.unwrapErr()}`);
-			return;
-		}
-		orderStatus = result.unwrap();
-	}
-
-	async function loadTokenIdsForWallet() {
-		if (staticDataLoadStatus === LoadStatus.Loaded) {
-			let searchResult = await findTokenIdsForWallet(getSigner(), vouchers721Address);
-			if (searchResult.isErr()) {
-				console.log(`Err: loadTokenIdsForWallet: ${searchResult.unwrapErr()}`);
-				return;
-			}
-			tokenIdAssociations = searchResult.unwrap();
-		}
-	}
-
-	function updateCurrentSelection(index: number, price: number) {
-		currentSelection = index;
-		currentPrice = price;
-		currentBasePrice = price / basePriceDenominator[index];
-	}
-
-	function addProduct() {
-		if (staticDataLoadStatus === LoadStatus.FetchFailed || campaignStaticUI === undefined) {
-			return;
-		}
-		let updatedQuantity = $joinSelection.get(crowdtainerId);
-		if (updatedQuantity) {
-			updatedQuantity[currentSelection]++;
-			$joinSelection.set(crowdtainerId, updatedQuantity);
-			$joinSelection = $joinSelection;
-		} else {
-			let quantities: number[] = new Array<number>(campaignStaticUI.prices.length).fill(0);
-			quantities[currentSelection]++;
-			$joinSelection.set(crowdtainerId, quantities);
-			$joinSelection = $joinSelection;
-		}
-	}
-
-	function handleCampaignJoinedEvent(event: CustomEvent) {
-		console.log(`Detected event of type: ${event.type} : detail: ${event.detail.text}`);
-		modalDialog.show({
-			id: 'joinSuccess',
-			title: 'You have succesfully joined the project! 🎉',
-			body: 'If the minimum funding is reached, you will be able to enter your delivery address on this site. Otherwise, you can get your pre-payment back.',
-			type: ModalType.Information,
-			icon: ModalIcon.BadgeCheck
-		});
-		// loadData();
-	}
-
-	function handleUserClaimedFundsEvent(event: CustomEvent) {
-		console.log(`Detected event of type: ${event.type} : detail: ${event.detail.text}`);
-		modalDialog.show({
-			id: 'joinSuccess',
-			title: 'Success',
-			body: 'The value equivalent to your pre-payment amount has been returned to your wallet.',
-			type: ModalType.Information,
-			icon: ModalIcon.BadgeCheck
-		});
-	}
-
-	function handleUserLeftCrowdtainerEvent(event: CustomEvent) {
+	async function handleUserLeftCrowdtainerEvent(event: CustomEvent) {
 		console.log(`Detected event of type: ${event.type} : detail: ${event.detail.text}`);
 		if (campaignStaticUI === undefined) {
 			console.log(`Missing campaignStaticUI data`);
@@ -328,8 +103,16 @@
 		$joinSelection.set(crowdtainerId, quantities);
 		$joinSelection = $joinSelection;
 
-		loadTokenIdsForWallet();
-		loadData();
+		tokenIdAssociations = await loadTokenIdsForWallet(vouchers721Address);
+	}
+
+	function handleUserTransferredParticipationEvent(event: CustomEvent) {
+		console.log(`Detected event of type: ${event.type}`);
+		console.log(`Modal: typeof(detail): ${typeof event.detail}`);
+		console.dir(event.detail);
+		modalDialog.show(event.detail);
+		// Reload items
+		refreshData();
 	}
 
 	// dynamic
@@ -337,24 +120,14 @@
 	$: joinViewEnabled =
 		state === ProjectStatusUI.Funding && $walletInCrowdtainer.fundsInCrowdtainer.isZero();
 
-	$: stateString =
-		staticDataLoadStatus !== LoadStatus.FetchFailed &&
-		$campaignDynamicData !== undefined &&
-		campaignStaticData !== undefined
-			? toStateString($campaignDynamicData, campaignStaticData)
-			: loadingString;
-
-	$: $campaignDynamicData,
-		setRaisedAmount(),
-		setPercentages(),
-		loadTokenIdsForWallet(),
-		loadOrderDetails();
+	// $: $campaignDynamicData;
 	$: loadingAnimation = staticDataLoadStatus === LoadStatus.Loading;
 
 	// Immediatelly update UI elements related to connected wallet on wallet or connection change
 	$: $connected,
 		$accountAddress,
-		initializeDataForWallet(campaignStaticData?.contractAddress, $accountAddress);
+		initializeDataForWallet(campaignStaticData?.contractAddress, $accountAddress),
+		refreshData();
 
 	$: campaignStaticUI, console.log(`campaignStaticUI: ${campaignStaticUI}`);
 </script>
@@ -408,146 +181,25 @@
 				</div>
 
 				{#if staticDataLoadStatus === LoadStatus.Loaded || staticDataLoadStatus === LoadStatus.Loading}
-					<div
-						class:animate-pulse={loadingAnimation}
-						class="dark:bg-gray-800 py-1 px-4 rounded-md dark:backdrop-brightness-[0.9]"
-					>
-						<div class="my-6 bg-gray-300 rounded-md w-full">
-							<div
-								class="progress progress-primary bg-sky-700 text-sm font-small text-white text-center p-1 leading-normal rounded-md"
-								style="width: {$tweenedPercentageWidth}%"
-							>
-								{$tweenedPercentageRaised.toFixed(0)}%
-							</div>
-						</div>
-						<!-- <div class="my-6">
-							<progress class="progress-primary w-full" value={$tweenedPercentageWidth} max="100" />
-						</div> -->
-
-						<!-- Main Status -->
-						<div class="flex flex-wrap justify-between gap-6">
-							<div>
-								<p class="projectStatus">{stateString}</p>
-								<p class="projectDataSubtitle">Status</p>
-							</div>
-
-							<MoneyInContract {fundsInContract} {raisedAmount} {campaignStaticUI} {state} />
-
-							<div class="min-w-max">
-								{#if campaignStaticUI}
-									<p class="projectStatus">
-										<TimeLeft endTime={campaignStaticUI.endDate} />
-									</p>
-									<p class="projectDataSubtitle">to go</p>
-								{:else}
-									<p class="projectData">
-										{loadingString}
-									</p>
-									<p class="projectDataSubtitle">-</p>
-								{/if}
-							</div>
-						</div>
-
-						<!-- Dates -->
-						<div class="flex py-4 justify-between gap-12">
-							<div class="">
-								<p class="projectData">
-									{campaignStaticUI ? campaignStaticUI.startDateString : loadingString}
-								</p>
-								<p class="projectDataSubtitle">Start</p>
-							</div>
-							<div class="">
-								<p class="projectData">
-									{campaignStaticUI ? campaignStaticUI.endDateString : loadingString}
-								</p>
-								<p class="projectDataSubtitle">End</p>
-							</div>
-						</div>
-
-						<!-- Smart contract details -->
-						<div class="dark:text-gray-200">
-							<ProjectDetails
-								{vouchers721Address}
-								{crowdtainerId}
-								crowdtainerAddress={campaignStaticData?.contractAddress}
-								serviceProvider={campaignStaticData?.serviceProvider}
-								erc20TokenAddress={campaignStaticData?.token}
-								tokenDecimals={campaignStaticData?.tokenDecimals}
-								signerAddress={campaignStaticData?.signer}
-								referralRate={campaignStaticData?.referralRate}
-							/>
-						</div>
-					</div>
-
-					{#if joinViewEnabled && campaignStaticUI}
-						<div class="grid w-full gap-6 md:grid-cols-2 mt-2">
-							<fieldset class="mt-4">
-								<legend class="sr-only">Choose a product</legend>
-								{#if campaignStaticUI}
-									{#each productOptions as productOption}
-										<div class="text-black text-md font-medium dark:text-gray-200">
-											{productOption.name}
-										</div>
-										<ul class="flex flex-justify my-2 items-center">
-											{#each productOption.productSubOptions as subOption, index}
-												<li class="mx-2">
-													<input
-														checked={index == 0}
-														type="radio"
-														name={productOption.name}
-														value={subOption}
-														id={subOption}
-														class="hidden peer"
-														on:click={() => {
-															setUserSelection(productOption.name, subOption);
-														}}
-													/>
-													<label
-														for={subOption}
-														class="inline-flex items-center justify-between w-full px-4 py-3 text-gray-500 bg-white border border-gray-200 rounded-lg cursor-pointer dark:hover:text-gray-300 dark:border-gray-700 dark:peer-checked:text-[#63cddd] peer-checked:border-blue-600 peer-checked:text-blue-600 hover:text-gray-600 hover:bg-gray-100 dark:text-gray-400 dark:bg-gray-800 dark:hover:bg-gray-700"
-													>
-														<div class="">{subOption.replace(productOption.name, '')}</div>
-													</label>
-												</li>
-											{/each}
-										</ul>
-									{/each}
-								{/if}
-							</fieldset>
-							<div class="md:pt-4">
-								<div class="text-black text-md font-medium dark:text-gray-200">
-									Price
-								</div>
-								{#if staticDataLoadStatus === LoadStatus.Loaded && currentPrice}
-									{#key currentPrice}
-										<p in:blur|global={{ duration: 200 }} class="text-primary productPrice">
-											{currentPrice}
-											{campaignStaticUI.tokenSymbol} ({`${currentBasePrice.toFixed(2)} ${
-												campaignStaticUI.tokenSymbol
-											}/${basePriceUnit}`})
-										</p>
-									{/key}
-								{:else}
-									<p class="px-2 productPrice">{loadingString}</p>
-								{/if}
-							</div>
-						</div>
-					{/if}
-
-					{#if joinViewEnabled}
-						<div class="flex">
-							<button
-								on:click={() => {
-									addProduct();
-								}}
-								class="px-2 mt-10 w-full md:w-4/6 lg:w-2/6 btn btn-primary"
-							>
-								Add to pre-order
-							</button>
-						</div>
-					{/if}
+					<ProjectGlobalView
+						{vouchers721Address}
+						{crowdtainerId}
+						{projectId}
+						{staticDataLoadStatus}
+					/>
 				{:else}
 					<p class="my-6 text-red-800">Error fetching data.</p>
+				{/if}
+
+				{#if staticDataLoadStatus === LoadStatus.Loaded && joinViewEnabled && campaignStaticUI}
+					<AddToCartView
+						{crowdtainerId}
+						{basePriceUnit}
+						{basePriceDenominator}
+						{productConfiguration}
+						{projectId}
+						{staticDataLoadStatus}
+					/>
 				{/if}
 
 				{#if loadingAnimation}
@@ -568,8 +220,6 @@
 					<DetailedTokenIdState
 						walletData={$walletInCrowdtainer}
 						{campaignStaticUI}
-						{fundsInContract}
-						{raisedAmount}
 						{state}
 						{orderStatus}
 					/>
@@ -584,8 +234,10 @@
 								tokenSymbol={campaignStaticUI.tokenSymbol}
 								walletData={$walletInCrowdtainer}
 								{orderStatus}
-								on:userClaimedFundsEvent={handleUserClaimedFundsEvent}
+								on:userClaimedFundsEvent={(event) =>
+									handleUserClaimedFundsEvent(event, modalDialog)}
 								on:userLeftCrowdtainerEvent={handleUserLeftCrowdtainerEvent}
+								on:userTransferredParticipationEvent={handleUserTransferredParticipationEvent}
 							/>
 						{/if}
 					</div>
@@ -603,7 +255,7 @@
 					{basePriceDenominator}
 					{basePriceUnit}
 					referralRate={campaignStaticData?.referralRate}
-					on:userJoinedCrowdtainerEvent={handleCampaignJoinedEvent}
+					on:userJoinedCrowdtainerEvent={(event) => handleCampaignJoinedEvent(event, modalDialog)}
 				/>
 			</div>
 		{/if}

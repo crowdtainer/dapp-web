@@ -3,7 +3,6 @@
 	import { LoadStatus, prepareForUI, type UIFields } from '$lib/Converters/CrowdtainerData';
 	import {
 		findTokenIdsForWallet,
-		makeNewTokenIDAssociations,
 		type TokenIDAssociations
 	} from '$lib/ethersCalls/rpcRequests';
 	import type { CrowdtainerStaticModel } from '$lib/Model/CrowdtainerModel';

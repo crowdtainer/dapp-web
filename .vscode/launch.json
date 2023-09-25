@@ -5,14 +5,49 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "Attach",
+            "name": "Launch Chrome",
+            "request": "launch",
+            "type": "chrome",
+            "url": "http://localhost:5173",
+            "port": 5173,
+            "smartStep": true,
+            "skipFiles": [
+                "<node_internals>/**",
+                "node_modules/**",
+                "/**/*.js",
+                "/**/*.css",
+                "/*\\.js"
+            ],
+            "userDataDir": "${workspaceFolder}/.vscode/chrome"
+        },
+        {
+            "name": "Launch server",
+            "request": "launch",
+            "runtimeArgs": [
+                "run", "dev"
+            ],
+            "runtimeExecutable": "npm",
+            "skipFiles": [
+                "<node_internals>/**"
+            ],
             "type": "node",
-            "request": "attach",
-            "port": 5858,
-            "restart": false,
-            "sourceMaps": false,
-            "localRoot": "${workspaceRoot}/",
-            "remoteRoot": "/app"
-          }
+            "console": "integratedTerminal"
+        },
+        {
+            "type": "chrome",
+            "request": "launch",
+            "name": "Launch browser",
+            "url": "http://127.0.0.1:5173",
+            "webRoot": "${workspaceFolder}"
+        }
+    ],
+    "compounds": [
+        {
+            "name": "Both",
+            "configurations": [
+                "Launch server",
+                "Launch browser"
+            ]
+        }
     ]
 }
