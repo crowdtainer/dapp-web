@@ -36,7 +36,7 @@ export const walletInCrowdtainer = readable(createWalletCrowdtainerData(), funct
 	}, 5000);
 
 	return function stop() {
-        console.log(`kill called`);
+        console.log(`walletFundsInCrowdtainer loop terminated.`);
 		clearInterval(interval);
 	};
 });

@@ -8,9 +8,7 @@
 
 	import JoinProject from '$lib/JoinProject.svelte';
 
-	import {
-		initializeCampaignDynamicStores
-	} from '$lib/Stores/campaignStore';
+	import { initializeCampaignDynamicStores } from '$lib/Stores/campaignStore';
 	import { joinSelection } from '$lib/Stores/userStore';
 
 	import DetailedTokenIdState from './DetailedTokenIdState.svelte';
@@ -38,8 +36,8 @@
 	import ModalDialog from './ModalDialog.svelte';
 	import { showToast } from './Toast/ToastStore.js';
 	import { handleCampaignJoinedEvent, handleUserClaimedFundsEvent } from './CampaignActions.js';
-	import { loadOrderDetails, loadTokenIdsForWallet } from './TokenUtils/tokenSearch.js';
-	import type { TokenIDAssociations } from './ethersCalls/rpcRequests.js';
+	import { loadOrderDetails } from './TokenUtils/search.js';
+	import { findTokenIdsForWallet, type TokenIDAssociations } from './ethersCalls/rpcRequests.js';
 
 	export let vouchers721Address: string;
 	export let crowdtainerId: number;
@@ -69,7 +67,12 @@
 	async function refreshData() {
 		$joinSelection = $joinSelection;
 		campaignDynamicData = initializeCampaignDynamicStores(crowdtainerId);
-		tokenIdAssociations = await loadTokenIdsForWallet(vouchers721Address);
+		let tokenIdSearchResult = await findTokenIdsForWallet(getSigner(), vouchers721Address);
+		if (tokenIdSearchResult.isErr()) {
+			showToast(`Error loading tokens for connected wallet: ${tokenIdSearchResult.unwrapErr()}`);
+			return;
+		}
+		tokenIdAssociations = tokenIdSearchResult.unwrap();
 		let order = await loadOrderDetails(vouchers721Address, tokenIdAssociations?.foundTokenIds);
 		if (order) {
 			console.log(`Updated order status: ${order}`);
@@ -103,7 +106,12 @@
 		$joinSelection.set(crowdtainerId, quantities);
 		$joinSelection = $joinSelection;
 
-		tokenIdAssociations = await loadTokenIdsForWallet(vouchers721Address);
+		let searchResult = await findTokenIdsForWallet(getSigner(), vouchers721Address);
+		if (searchResult.isErr()) {
+			showToast(`Unable to find tokens for connected wallet.`);
+			return;
+		}
+		tokenIdAssociations = searchResult.unwrap();
 	}
 
 	function handleUserTransferredParticipationEvent(event: CustomEvent) {
@@ -118,7 +126,9 @@
 	// dynamic
 	$: state = toState($campaignDynamicData, campaignStaticData);
 	$: joinViewEnabled =
-		state === ProjectStatusUI.Funding && $walletInCrowdtainer.fundsInCrowdtainer.isZero();
+		state === ProjectStatusUI.Funding &&
+		$walletInCrowdtainer.fundsInCrowdtainer.isZero() &&
+		tokenIdAssociations?.foundTokenIds.length == 0;
 
 	// $: $campaignDynamicData;
 	$: loadingAnimation = staticDataLoadStatus === LoadStatus.Loading;
@@ -227,6 +237,8 @@
 					<div class="w-auto flex">
 						{#if campaignStaticData !== undefined && campaignStaticUI !== undefined}
 							<CampaignActions
+								title={`${subtitle} - ${title}`}
+								{projectURL}
 								tokenId={tokenIdAssociations.foundTokenIds[0]}
 								{vouchers721Address}
 								crowdtainerAddress={campaignStaticData?.contractAddress}

@@ -12,7 +12,8 @@
 
 	import type {
 		CrowdtainerDynamicModel,
-		CrowdtainerStaticModel
+		CrowdtainerStaticModel,
+		SplitSelection
 	} from '$lib/Model/CrowdtainerModel';
 	import {
 		toHuman,
@@ -43,6 +44,8 @@
 
 	// svelte-ignore unused-export-let
 	export let description: string;
+	// svelte-ignore unused-export-let
+	export let productConfiguration: SplitSelection;
 	// svelte-ignore unused-export-let
 	export let projectImageURLs: string[];
 	// svelte-ignore unused-export-let
@@ -180,10 +183,12 @@
 				<!-- Smart contract details -->
 				{#if campaignStaticData && campaignStaticUI}
 					<div class="dark:text-white">
-						<ProjectDetails {vouchers721Address}
-						{crowdtainerId}
-						{campaignStaticData}
-						{campaignStaticUI} />
+						<ProjectDetails
+							{vouchers721Address}
+							{crowdtainerId}
+							{campaignStaticData}
+							{campaignStaticUI}
+						/>
 					</div>
 				{/if}
 
@@ -197,6 +202,8 @@
 				<div class="w-auto flex">
 					{#if campaignStaticData !== undefined && campaignStaticUI !== undefined}
 						<CampaignActions
+							title={`${subtitle} - ${title}`}
+							{projectURL}
 							{tokenId}
 							{vouchers721Address}
 							crowdtainerAddress={campaignStaticData?.contractAddress}
@@ -204,8 +211,7 @@
 							tokenSymbol={campaignStaticUI.tokenSymbol}
 							walletData={$walletInCrowdtainer}
 							{orderStatus}
-							on:userClaimedFundsEvent={(event) =>
-								handleUserClaimedFundsEvent(event, modalDialog)}
+							on:userClaimedFundsEvent={(event) => handleUserClaimedFundsEvent(event, modalDialog)}
 							on:userTransferredParticipationEvent
 						/>
 					{/if}
