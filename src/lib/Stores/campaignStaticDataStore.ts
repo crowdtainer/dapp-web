@@ -58,39 +58,3 @@ export function createStaticCampaignDataStore() {
         }
     };
 }
-
-// export async function loadDataForProjectIds(projectIds: number[], cached: StaticCampaignData): Promise<Result<StaticCampaignData, Error>> {
-
-//     let missingItems = new Array<number>();
-//     projectIds.forEach(element => {
-//         if (!cached.availableProjectIds.includes(element)) {
-//             missingItems.push(element);
-//         }
-//     });
-
-//     let resultData: StaticCampaignData = makeNewStaticCampaignData();
-
-//     if (missingItems.length > 0) {
-//         try {
-//             let result = await fetchStaticData(missingItems);
-//             if (result.isOk()) {
-//                 let data = result.unwrap();
-//                 for (let index = 0; index < data.length; index++) {
-//                     let crowdtainerId = projects[index].crowdtainerId;
-//                     resultData.staticData[crowdtainerId] = data[index];
-//                     resultData.UIData[crowdtainerId] = prepareForUI(data[index]);
-//                     resultData.availableProjectIds.push(crowdtainerId);
-//                 }
-//             } else {
-//                 // TODO: Show user UI/pop-up with error.
-//                 console.log('Error: %o', result.unwrapErr());
-//                 return Err({ details: `Failed fetching static data for crowdtainerIds ${missingItems}` });
-//             }
-//         } catch (error) {
-//             console.log(`Error: ${error}`);
-//             return Err({ details: `Failed fetching static data for crowdtainerIds ${missingItems}` });
-//         }
-//     }
-
-//     return Ok(resultData);
-// }
