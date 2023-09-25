@@ -26,6 +26,8 @@
 	let userWalletInvalid: boolean;
 	let tokenIdAssociations: TokenIDAssociations;
 
+	let projectTitle: string | null;
+	let projectURL: string | null;
 	let voucherId: BigNumber;
 	let vouchers721Address: string;
 
@@ -42,6 +44,8 @@
 		);
 
 		try {
+			projectTitle = $page.url.searchParams.get('projectTitle');
+			projectURL = $page.url.searchParams.get('projectURL');
 			voucherId = BigNumber.from(Number($page.url.searchParams.get('voucherId')));
 			vouchers721Address = String($page.url.searchParams.get('vouchers721Address'));
 		} catch (error) {
@@ -155,7 +159,13 @@
 
 <header class="ct-divider">
 	<div class="max-w-7xl mx-auto py-4 px-4 sm:px-6 lg:px-8">
-		<h1 class="font-display text-xl text-white">🛒 &nbsp; Checkout </h1>
+		<!-- <h1 class="font-display text-xl text-white">{(projectTitle)? `${projectTitle} > `: ''} Checkout &nbsp; 🛍️ </h1> -->
+		<div class="text-md breadcrumbs text-white">
+			<ul>
+			  <li><a href={projectURL}>{(projectTitle)? `${projectTitle}`: ''}</a></li> 
+			  <li>Checkout &nbsp; 🛍️</li>
+			</ul>
+		  </div>
 	</div>
 </header>
 

@@ -1,6 +1,8 @@
 <script lang="ts">
 	import { ProjectStatusUI } from '$lib/Converters/CrowdtainerData';
 
+	export let projectURL: string | undefined;
+	export let title: string | undefined;
 	export let tokenId: number | undefined;
 	export let vouchers721Address: string;
 	export let crowdtainerAddress: string;
@@ -99,7 +101,7 @@
 				<button
 					class="relative inline-flex items-center justify-center overflow-hidden text-sm font-medium text-gray-900 rounded-lg group bg-gradient-to-br from-teal-300 to-lime-300 group-hover:from-teal-300 group-hover:to-lime-300 focus:ring-4 focus:outline-none focus:ring-lime-200"
 					on:click={() => {
-						goto(`/Checkout?vouchers721Address=${vouchers721Address}&voucherId=${tokenId}`);
+						goto(`/Checkout?vouchers721Address=${vouchers721Address}&voucherId=${tokenId}&projectURL=${projectURL}&projectTitle=${title}`);
 					}}
 				>
 					<span

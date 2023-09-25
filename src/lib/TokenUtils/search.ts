@@ -1,6 +1,7 @@
 import { getSigner } from "$lib/Utils/wallet.js";
 import { getOrderDetailsAPI } from "$lib/api.js";
-import { findTokenIdsForWallet, type TokenIDAssociations } from "$lib/ethersCalls/rpcRequests.js";
+
+import { projects } from '../../routes/Data/projects.json';
 
 export async function loadOrderDetails(vouchers721Address: string, tokenId: number[] | undefined): Promise<OrderStatus | undefined> {
     if (tokenId === undefined) {
@@ -35,11 +36,9 @@ export async function loadOrderDetails(vouchers721Address: string, tokenId: numb
     return result.unwrap();
 }
 
-export async function loadTokenIdsForWallet(vouchers721Address: string): Promise<TokenIDAssociations | undefined> {
-    let searchResult = await findTokenIdsForWallet(getSigner(), vouchers721Address);
-    if (searchResult.isErr()) {
-        console.log(`Err: loadTokenIdsForWallet: ${searchResult.unwrapErr()}`);
-        return;
-    }
-    return searchResult.unwrap();
+export function projectFromCrowdtainerId(id: number) {
+    let filtered = projects.filter((element) => {
+        return element.crowdtainerId === id;
+    });
+    return filtered[0];
 }

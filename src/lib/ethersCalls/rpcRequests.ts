@@ -98,12 +98,12 @@ export async function findTokenIdsForWallet(provider: ethers.Signer | undefined,
         let wallet = await provider.getAddress();
 
         let totalTokens = (await vouchers721Contract.balanceOf(wallet)).toNumber();
-        // console.log(`totalTokens: ${totalTokens} for wallet ${wallet}`);
+        console.log(`totalTokens: ${totalTokens} for wallet ${wallet}`);
 
         let tokenAssociations = makeNewTokenIDAssociations();
 
         for (let index = 0; index < totalTokens; index++) {
-            const tokenId = await vouchers721Contract.tokenOfOwnerByIndex(wallet, BigNumber.from(index));
+            const tokenId = await vouchers721Contract.tokenOfOwnerByIndex( provider.getAddress(), BigNumber.from(index));
             let crowdtainerId = await vouchers721Contract.tokenIdToCrowdtainerId(tokenId);
             let foundCrowdtainerAddress = await vouchers721Contract.crowdtainerIdToAddress(crowdtainerId);
             console.log(`Wallet ${wallet} is owner of tokenId: ${tokenId}, from crowdtainerId ${crowdtainerId} @ address ${foundCrowdtainerAddress}`);

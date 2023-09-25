@@ -1,14 +1,9 @@
 <script lang="ts">
-	import { fetchStaticData } from '$lib/api';
-	import { LoadStatus, prepareForUI, type UIFields } from '$lib/Converters/CrowdtainerData';
-	import {
-		findTokenIdsForWallet,
-		type TokenIDAssociations
-	} from '$lib/ethersCalls/rpcRequests';
-	import type { CrowdtainerStaticModel } from '$lib/Model/CrowdtainerModel';
+	import { LoadStatus } from '$lib/Converters/CrowdtainerData';
+	import { findTokenIdsForWallet, type TokenIDAssociations } from '$lib/ethersCalls/rpcRequests';
 	import MyCampaign from '$lib/MyCampaign.svelte';
 
-	import { projects, Vouchers721Address } from '../Data/projects.json';
+	import { Vouchers721Address } from '../Data/projects.json';
 	import { connected, getSigner, accountAddress } from '$lib/Utils/wallet';
 	import EmptySection from '$lib/EmptySection.svelte';
 	import { connect } from '$lib/Utils/wallet';
@@ -17,29 +12,19 @@
 	import { Wallet } from '@steeze-ui/heroicons';
 
 	import ModalDialog from '$lib/ModalDialog.svelte';
-	import { onMount } from 'svelte';
+	import { projectFromCrowdtainerId } from '$lib/TokenUtils/search.js';
+	import { showToast } from '$lib/Toast/ToastStore.js';
+	import { campaignStaticStores } from '$lib/Stores/campaignStaticDataStore.js';
 
 	let modalDialog: ModalDialog;
 
 	let tokenIdAssociations: TokenIDAssociations | undefined;
 
-	let campaignStaticData = new Map<number, CrowdtainerStaticModel>();
-	let campaignStaticUI: Map<number, UIFields> = new Map<number, UIFields>();
 	let staticDataLoadStatus: LoadStatus = LoadStatus.Loading;
-	let loadDataInFlight = false;
 
 	function resetState() {
 		tokenIdAssociations = undefined;
-		campaignStaticData = new Map<number, CrowdtainerStaticModel>();
-		campaignStaticUI = new Map<number, UIFields>();
 		staticDataLoadStatus = LoadStatus.Loading;
-	}
-
-	function projectFromCrowdtainerId(id: number) {
-		let filtered = projects.filter((element) => {
-			return element.crowdtainerId === id;
-		});
-		return filtered[0];
 	}
 
 	function handleUserTransferredParticipationEvent(event: CustomEvent) {
@@ -48,57 +33,33 @@
 		console.dir(event.detail);
 		modalDialog = event.detail;
 		// Reload items
-		loadUserData();
+		reloadUserData();
 	}
 
-	async function loadUserData() {
-		if (loadDataInFlight) return;
-
-		loadDataInFlight = true;
+	async function reloadUserData() {
+		if($connected == false) {
+			return;
+		}
 		resetState();
-		let signer = getSigner();
-		let walletTokensSearch = await findTokenIdsForWallet(signer, Vouchers721Address);
-		if (walletTokensSearch.isErr()) {
-			console.log(`Unable to search wallet tokens: ${walletTokensSearch.unwrapErr()}`);
-			loadDataInFlight = false;
-			return;
-		}
-
-		tokenIdAssociations = walletTokensSearch.unwrap();
-
-		if (tokenIdAssociations.foundTokenIds.length == 0) {
-			loadDataInFlight = false;
-			console.log('No tokens found.');
-			return;
-		}
-
-		console.log(
-			`Found ${tokenIdAssociations.crowdtainerIds.length} crowdtainer ids: ${tokenIdAssociations.crowdtainerIds.length}`
-		);
-
-		let result = await fetchStaticData(tokenIdAssociations.crowdtainerIds);
-		if (result.isOk()) {
-			let data = result.unwrap();
-			for (let index = 0; index < data.length; index++) {
-				campaignStaticData.set(tokenIdAssociations.crowdtainerIds[index], data[index]);
-				campaignStaticUI.set(tokenIdAssociations.crowdtainerIds[index], prepareForUI(data[index]));
-			}
-			staticDataLoadStatus = LoadStatus.Loaded;
-		} else {
-			// TODO: Show user UI/pop-up with error.
-			console.log('Error: %o', result.unwrapErr());
+		let tokenIdSearchResult = await findTokenIdsForWallet(getSigner(), Vouchers721Address);
+		if (tokenIdSearchResult.isErr()) {
+			showToast(`Error loading tokens for connected wallet: ${tokenIdSearchResult.unwrapErr()}`);
 			staticDataLoadStatus = LoadStatus.FetchFailed;
+			return;
 		}
+		tokenIdAssociations = tokenIdSearchResult.unwrap();
 
-		loadDataInFlight = false;
+		let fetchError = await campaignStaticStores.fetchData(tokenIdAssociations.crowdtainerIds);
+		if (fetchError) {
+			showToast(`Error fetching data: ${fetchError.details}`);
+			staticDataLoadStatus = LoadStatus.FetchFailed;
+			return;
+		}
+		staticDataLoadStatus = LoadStatus.Loaded;
 	}
-
-	onMount(async () => {
-		loadUserData();
-	});
 
 	// Immediatelly update UI elements related to connected wallet on wallet or connection change
-	$: $connected, $accountAddress, loadUserData();
+	$: $connected, $accountAddress, reloadUserData();
 </script>
 
 <ModalDialog bind:this={modalDialog} />
@@ -114,7 +75,7 @@
 	</p>
 </div>
 
-{#if tokenIdAssociations !== undefined && $connected && staticDataLoadStatus == LoadStatus.Loaded}
+{#if tokenIdAssociations !== undefined && $connected}
 	<div class="divide-y">
 		{#each tokenIdAssociations.foundTokenIds as tokenId, index}
 			<MyCampaign
@@ -122,20 +83,24 @@
 				vouchers721Address={Vouchers721Address}
 				{...projectFromCrowdtainerId(tokenIdAssociations.crowdtainerIds[index])}
 				{staticDataLoadStatus}
-				campaignStaticData={campaignStaticData.get(tokenIdAssociations.crowdtainerIds[index])}
-				campaignStaticUI={campaignStaticUI.get(tokenIdAssociations.crowdtainerIds[index])}
+				campaignStaticData={$campaignStaticStores.staticData[
+					tokenIdAssociations.crowdtainerIds[index]
+				]}
+				campaignStaticUI={$campaignStaticStores.UIData[tokenIdAssociations.crowdtainerIds[index]]}
 				on:userTransferredParticipationEvent={handleUserTransferredParticipationEvent}
 			/>
 		{/each}
 	</div>
 {/if}
 
-{#if tokenIdAssociations === undefined && $connected}
+{#if tokenIdAssociations === undefined && $connected && staticDataLoadStatus === LoadStatus.Loading}
 	<EmptySection emptyMessage="Loading.." />
 {/if}
 
 {#if tokenIdAssociations !== undefined && tokenIdAssociations.foundTokenIds.length == 0 && $connected}
-	<EmptySection emptyMessage="No participation proofs associated with the connected wallet were found." />
+	<EmptySection
+		emptyMessage="No participation proofs associated with the connected wallet were found."
+	/>
 {/if}
 
 {#if !$connected}

@@ -12,6 +12,7 @@
 
 	import { campaignStaticStores } from '$lib/Stores/campaignStaticDataStore.js';
 	import type { CrowdtainerStaticModel } from '$lib/Model/CrowdtainerModel.js';
+	import { projectFromCrowdtainerId } from '$lib/TokenUtils/search.js';
 
 	let staticDataLoadStatus: LoadStatus = LoadStatus.Loading;
 	let networkFailedMessage = 'Error loading data.';
@@ -42,13 +43,6 @@
 				pastProjects = [...pastProjects, Number(crowdtainerId)];
 			}
 		}
-	}
-
-	function projectFromCrowdtainerId(id: number) {
-		let filtered = projects.filter((element) => {
-			return element.crowdtainerId === id;
-		});
-		return filtered[0];
 	}
 
 	onMount(async () => {

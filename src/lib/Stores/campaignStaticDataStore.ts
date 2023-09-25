@@ -47,10 +47,10 @@ export function createStaticCampaignDataStore() {
                             campaignData.availableProjectIds.push(crowdtainerId);
                         }
                     } else {
-                        return { details: `Failed fetching static data for crowdtainerIds ${missingItems}. ${result.unwrapErr()}` };
+                        return { details: `Failed fetching static data for crowdtainerIds ${missingItems}. ${result.unwrapErr().message}` };
                     }
                 } catch (error) {
-                    return { details: `Failed fetching static data for crowdtainerIds ${missingItems}. ${result.unwrapErr()}` };
+                    return { details: `Failed fetching static data for crowdtainerIds ${missingItems}: ${error}` };
                 }
             }
             set(campaignData);

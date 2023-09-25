@@ -14,7 +14,6 @@ import { Coin__factory } from '../../routes/typechain/';
 import { crowdtainerStaticDataMap } from '../../hooks/cache';
 import { provider } from '$lib/ethersCalls/provider';
 
-
 export async function fetchStaticData(crowdtainerId: BigNumber): Promise<Result<CrowdtainerStaticModel, Error>> {
 
     try {
