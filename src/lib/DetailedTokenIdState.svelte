@@ -1,6 +1,4 @@
 <script lang="ts">
-	import { tweened } from 'svelte/motion';
-	import { cubicOut } from 'svelte/easing';
 	import type { UIFields } from './Converters/CrowdtainerData';
 	import { ProjectStatusUI } from './Converters/CrowdtainerData';
 	import { BigNumber, ethers } from 'ethers';
@@ -10,27 +8,13 @@
 	export let walletData: WalletCrowdtainerModel | undefined;
 
 	export let campaignStaticUI: UIFields | undefined;
-	export let fundsInContract: number | undefined;
-	export let raisedAmount: number | undefined;
 	export let state: ProjectStatusUI | undefined;
 	export let orderStatus: OrderStatus | undefined;
 
-	let tweeningDuration = 650;
-	let tweenedRaised = tweened(0, { duration: tweeningDuration, easing: cubicOut });
-	let tweenedFundsInContract = tweened(0, { duration: tweeningDuration, easing: cubicOut });
-
-	function setRaisedAmount(raised: number | undefined, fundsInContract: number | undefined) {
-		raised === undefined ? tweenedRaised.set(0) : tweenedRaised.set(raised);
-		fundsInContract === undefined
-			? tweenedFundsInContract.set(0)
-			: tweenedFundsInContract.set(fundsInContract);
-	}
-
-	$: setRaisedAmount(raisedAmount, fundsInContract);
 </script>
 
-{#if campaignStaticUI !== undefined}
-	{#if walletData !== undefined && !walletData.fundsInCrowdtainer.isZero()}
+{#if walletData !== undefined && campaignStaticUI !== undefined}
+	{#if !walletData.fundsInCrowdtainer.isZero()}
 		<div class="text-black dark:text-gray-200 text-md text-md text-left">
 			<p class="mt-4">You have joined this project.</p>
 			<div class="flex flex-justify mt-2 items-center">
@@ -63,26 +47,26 @@
 				<p>.</p>
 			{/if}
 		</div>
-
-		<!-- // General project status -->
-		<div class="items-center text-black dark:text-gray-200 text-md text-md text-left mt-4">
-			{#if state === ProjectStatusUI.Failed || state === ProjectStatusUI.ServiceProviderDeclined}
-				<div class="inline-flex items-center justify-center">
-					<p>• Next step: &nbsp;You can withdrawl {ethers.utils.formatUnits(
-						`${walletData.fundsInCrowdtainer}`,
-						BigNumber.from(campaignStaticUI.tokenDecimals)
-					)}
-					{campaignStaticUI.tokenSymbol} from this campaign.
-				</div>
-			{:else if state === ProjectStatusUI.SuccessfulyFunded}
-				<p>• Next step: &nbsp;Waiting for service provider confirmation.</p>
-			{:else if state === ProjectStatusUI.Delivery}
-				{#if orderStatus !== undefined && orderStatus === OrderStatus.WaitingForDeliveryAddress}
-					<p>• Next step: &nbsp;Please proceed to <b>Checkout</b> to complete your order.</p>
-				{:else if orderStatus !== undefined && orderStatus === OrderStatus.DeliveryAddressReceived}
-					<p>• Next step: &nbsp;Your order has been received and is being processed.</p>
-				{/if}
-			{/if}
-		</div>
 	{/if}
+	
+	<!-- // General project status -->
+	<div class="items-center text-black dark:text-gray-200 text-md text-md text-left mt-4">
+		{#if state === ProjectStatusUI.Failed || state === ProjectStatusUI.ServiceProviderDeclined}
+			<div class="inline-flex items-center justify-center">
+				<p>• Next step: &nbsp;You can withdrawl {ethers.utils.formatUnits(
+					`${walletData.fundsInCrowdtainer}`,
+					BigNumber.from(campaignStaticUI.tokenDecimals)
+				)}
+				{campaignStaticUI.tokenSymbol} from this campaign.
+			</div>
+		{:else if state === ProjectStatusUI.SuccessfulyFunded}
+			<p>• Next step: &nbsp;Waiting for service provider confirmation.</p>
+		{:else if state === ProjectStatusUI.Delivery}
+			{#if orderStatus !== undefined && orderStatus === OrderStatus.WaitingForDeliveryAddress}
+				<p>• Next step: &nbsp;Please proceed to <b>Checkout</b> to complete your order.</p>
+			{:else if orderStatus !== undefined && orderStatus === OrderStatus.DeliveryAddressReceived}
+				<p>• Next step: &nbsp;Your order has been received and is being processed.</p>
+			{/if}
+		{/if}
+	</div>
 {/if}

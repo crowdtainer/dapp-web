@@ -1,5 +1,5 @@
 import WalletConnectProvider from '@walletconnect/web3-provider/dist/umd/index.min.js';
-// Can't use propert import, see: https://github.com/WalletConnect/walletconnect-monorepo/issues/864
+// Can't use proper import, see: https://github.com/WalletConnect/walletconnect-monorepo/issues/864
 // import WalletConnectProvider from "@walletconnect/web3-provider";
 import { ethers, providers, Signer } from 'ethers';
 
@@ -10,6 +10,8 @@ import { MessageType } from '../Toast/MessageType';
 
 const VITE_WALLET_CONNECT_BRIDGE_SERVER: string = import.meta.env.VITE_WALLET_CONNECT_BRIDGE_SERVER;
 const NO_WALLET_DETECTED = '---';
+
+export const ssr = false;
 
 export const walletState = createWalletStore();
 export const connected = derived(walletState, $walletState => $walletState.connectionState === ConnectionState.Connected);
@@ -26,7 +28,7 @@ export const shortOrENSNamedAccount = derived(walletState, async $walletState =>
     }
 
     if ($walletState.account === undefined) {
-        dispatchMessage("Wallet account not found.", MessageType.Warning);
+        // dispatchMessage("Wallet account not found.", MessageType.Warning);
         return NO_WALLET_DETECTED;
     }
     else if (web3Provider === undefined) {

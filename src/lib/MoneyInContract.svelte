@@ -3,17 +3,12 @@
 	import { cubicOut } from 'svelte/easing';
 	import type { UIFields } from './Converters/CrowdtainerData';
 	import { ProjectStatusUI } from './Converters/CrowdtainerData';
+	import { moneyFormatter } from './Utils/moneyFormatter.js';
 
 	export let campaignStaticUI: UIFields | undefined;
 	export let fundsInContract: number | undefined;
 	export let raisedAmount: number | undefined;
 	export let state: ProjectStatusUI | undefined;
-
-	let moneyFormatter = new Intl.NumberFormat('en-GB', {
-		style: 'decimal',
-		minimumFractionDigits: 1,
-		maximumFractionDigits: 1
-	});
 
 	let tweeningDuration = 650;
 	let tweenedRaised = tweened(0, { duration: tweeningDuration, easing: cubicOut });

@@ -3,24 +3,16 @@
 
 	import { projects, Vouchers721Address } from './Data/projects.json';
 	import Project from '$lib/Project.svelte';
-	import { fetchStaticData } from '$lib/api';
 
 	import { Icon } from '@steeze-ui/svelte-icon';
 	import { UserGroup } from '@steeze-ui/heroicons';
-	import '@fontsource/red-hat-display';
 
-	import {
-		LoadStatus,
-		loadingString,
-		prepareForUI,
-		toDate,
-		type UIFields
-	} from '$lib/Converters/CrowdtainerData';
-	import type { CrowdtainerStaticModel } from '$lib/Model/CrowdtainerModel';
+	import { LoadStatus, loadingString, toDate } from '$lib/Converters/CrowdtainerData';
 	import EmptySection from '$lib/EmptySection.svelte';
 
-	let campaignStaticData = new Map<number, CrowdtainerStaticModel>();
-	let campaignStaticUI: Map<number, UIFields> = new Map<number, UIFields>();
+	import { campaignStaticStores } from '$lib/Stores/campaignStaticDataStore.js';
+	import type { CrowdtainerStaticModel } from '$lib/Model/CrowdtainerModel.js';
+
 	let staticDataLoadStatus: LoadStatus = LoadStatus.Loading;
 	let networkFailedMessage = 'Error loading data.';
 
@@ -36,17 +28,18 @@
 		return projectIds;
 	}
 
-	function sortProjects() {
+	function sortProjects(input: { [projectId: number]: CrowdtainerStaticModel }) {
 		let nowInMs = new Date().getTime();
-		for (let [crowdtainerId, data] of campaignStaticData.entries()) {
+		for (let [crowdtainerId, data] of Object.entries(input)) {
+			console.log(crowdtainerId, data);
 			let startInMs = toDate(data.startDate).getTime();
 			let endInMs = toDate(data.endDate).getTime();
 			if (nowInMs < startInMs) {
-				upcomingProjects = [...upcomingProjects, crowdtainerId];
+				upcomingProjects = [...upcomingProjects, Number(crowdtainerId)];
 			} else if (nowInMs < endInMs) {
-				activeProjects = [...activeProjects, crowdtainerId];
+				activeProjects = [...activeProjects, Number(crowdtainerId)];
 			} else {
-				pastProjects = [...pastProjects, crowdtainerId];
+				pastProjects = [...pastProjects, Number(crowdtainerId)];
 			}
 		}
 	}
@@ -59,23 +52,13 @@
 	}
 
 	onMount(async () => {
-		try {
-			let result = await fetchStaticData(projectIds());
-			if (result.isOk()) {
-				let data = result.unwrap();
-				for (let index = 0; index < data.length; index++) {
-					campaignStaticData.set(projects[index].crowdtainerId, data[index]);
-					campaignStaticUI.set(projects[index].crowdtainerId, prepareForUI(data[index]));
-				}
-				staticDataLoadStatus = LoadStatus.Loaded;
-			} else {
-				// TODO: Show user UI/pop-up with error.
-				console.log('Error: %o', result.unwrapErr());
-				staticDataLoadStatus = LoadStatus.FetchFailed;
-			}
-			sortProjects();
-		} catch (error) {
-			console.log(`Error: ${error}`);
+		staticDataLoadStatus = LoadStatus.Loading;
+		let resultError = await campaignStaticStores.fetchData(projectIds());
+		if (resultError) {
+			staticDataLoadStatus = LoadStatus.FetchFailed;
+		} else {
+			sortProjects($campaignStaticStores.staticData);
+			staticDataLoadStatus = LoadStatus.Loaded;
 		}
 	});
 </script>
@@ -83,12 +66,6 @@
 <svelte:head>
 	<title>Crowdtainer</title>
 </svelte:head>
-
-<!-- <header class="ct-divider">
-	<div class="max-w-7xl mx-auto py-4 px-4 sm:px-6 lg:px-8">
-		<h1 class="text-xl font-bold text-white">Campaigns</h1>
-	</div>
-</header> -->
 
 <main class="">
 	<div class="grid place-items-center">
@@ -107,15 +84,14 @@
 					</div>
 					<div>
 						{#each activeProjects as project, index}
-							{#if index !== 0}
+							{#if index > 1}
 								<div class="dashedBorder" />
 							{/if}
 							<Project
 								vouchers721Address={Vouchers721Address}
 								{...projectFromCrowdtainerId(project)}
 								{staticDataLoadStatus}
-								campaignStaticData={campaignStaticData.get(project)}
-								campaignStaticUI={campaignStaticUI.get(project)}
+								projectId={project}
 							/>
 						{/each}
 					</div>
@@ -140,15 +116,14 @@
 
 					<div>
 						{#each upcomingProjects as project, index}
-							{#if index !== 0}
+							{#if index > 1}
 								<div class="dashedBorder" />
 							{/if}
 							<Project
 								vouchers721Address={Vouchers721Address}
 								{...projectFromCrowdtainerId(project)}
 								{staticDataLoadStatus}
-								campaignStaticData={campaignStaticData.get(project)}
-								campaignStaticUI={campaignStaticUI.get(project)}
+								projectId={project}
 							/>
 						{/each}
 					</div>
@@ -173,15 +148,14 @@
 
 					<div>
 						{#each pastProjects as project, index}
-							{#if index !== 0}
+							{#if index > 1}
 								<div class="dashedBorder" />
 							{/if}
 							<Project
 								vouchers721Address={Vouchers721Address}
 								{...projectFromCrowdtainerId(project)}
 								{staticDataLoadStatus}
-								campaignStaticData={campaignStaticData.get(project)}
-								campaignStaticUI={campaignStaticUI.get(project)}
+								projectId={project}
 							/>
 						{/each}
 					</div>

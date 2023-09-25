@@ -1,11 +1,13 @@
-import { readable, type Readable } from 'svelte/store';
+import { readable, writable, type Readable, type Writable, derived } from 'svelte/store';
 
-import type { CrowdtainerDynamicModel } from '$lib/Model/CrowdtainerModel';
+import type { CrowdtainerDynamicModel, CrowdtainerStaticModel } from '$lib/Model/CrowdtainerModel';
 import { fetchDynamicData, type Error } from '$lib/api';
 
 const fetchInterval: number = (import.meta.env.DEV ? 10000 : 18000);
 
-export let campaignStores = new Map<number, Readable<CrowdtainerDynamicModel>>;
+export let campaignDynamicStores = new Map<number, Readable<CrowdtainerDynamicModel>>;
+
+export const joinSelection = writable(new Map<number, number[]>());
 
 let defaultData: CrowdtainerDynamicModel = {
 	status: undefined,
@@ -13,10 +15,10 @@ let defaultData: CrowdtainerDynamicModel = {
 	fundsInContract: undefined
 }
 
-export const initializeCampaignStores = (campaignId: number): Readable<CrowdtainerDynamicModel> | undefined => {
+export const initializeCampaignDynamicStores = (campaignId: number): Readable<CrowdtainerDynamicModel> | undefined => {
 
-	if (campaignStores.has(campaignId)) {
-		return campaignStores.get(campaignId);
+	if (campaignDynamicStores.has(campaignId)) {
+		return campaignDynamicStores.get(campaignId);
 	}
 
 	const timerBasedStore = readable(defaultData, function start(set) {
@@ -42,10 +44,10 @@ export const initializeCampaignStores = (campaignId: number): Readable<Crowdtain
 
 		return function stop() {
 			clearInterval(interval);
-			campaignStores.delete(campaignId);
+			campaignDynamicStores.delete(campaignId);
 		};
 	});
 
-	campaignStores.set(campaignId, timerBasedStore);
+	campaignDynamicStores.set(campaignId, timerBasedStore);
 	return timerBasedStore;
 }

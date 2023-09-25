@@ -2,7 +2,10 @@
 	import { onMount } from 'svelte';
 	import type { Readable } from 'svelte/store';
 
-	import { initializeCampaignStores, campaignStores } from '$lib/Stores/campaignStore';
+	import {
+		initializeCampaignDynamicStores,
+		campaignDynamicStores
+	} from '$lib/Stores/campaignStore';
 
 	import CampaignActions from './CampaignActions.svelte';
 	import DetailedTokenIdState from './DetailedTokenIdState.svelte';
@@ -22,13 +25,14 @@
 
 	import { connected, getSigner, accountAddress } from '$lib/Utils/wallet';
 
-	import ModalDialog, { ModalAnimation, ModalIcon, ModalType } from './ModalDialog.svelte';
+	import ModalDialog from './ModalDialog.svelte';
 	let modalDialog: ModalDialog;
 
 	import { loadTokenURIRepresentation } from './Converters/tokenURI';
 	import { getOrderDetailsAPI, type OrderStatus } from './api';
 	import ProjectDetails from './ProjectDetails.svelte';
 	import { initializeDataForWallet, walletInCrowdtainer } from './Stores/dataForWalletStore.js';
+	import { handleUserClaimedFundsEvent } from './CampaignActions.js';
 
 	export let tokenId: number;
 	export let vouchers721Address: string;
@@ -40,7 +44,7 @@
 	// svelte-ignore unused-export-let
 	export let description: string;
 	// svelte-ignore unused-export-let
-	export let projectImageURLs: string;
+	export let projectImageURLs: string[];
 	// svelte-ignore unused-export-let
 	export let basePriceDenominator: number[];
 	// svelte-ignore unused-export-let
@@ -63,9 +67,9 @@
 	onMount(async () => {
 		// Dynamic data
 		if (campaignDynamicData == undefined) {
-			campaignDynamicData = initializeCampaignStores(crowdtainerId);
+			campaignDynamicData = initializeCampaignDynamicStores(crowdtainerId);
 		} else {
-			campaignDynamicData = campaignStores.get(crowdtainerId);
+			campaignDynamicData = campaignDynamicStores.get(crowdtainerId);
 		}
 		let signer = getSigner();
 		if (signer === undefined) {
@@ -110,18 +114,6 @@
 			fundsInContract = toHuman($campaignDynamicData?.fundsInContract, decimals);
 			raisedAmount = toHuman($campaignDynamicData?.raised, decimals);
 		}
-	}
-
-	function handleUserClaimedFundsEvent(event: CustomEvent) {
-		console.log(`Detected event of type: ${event.type} : detail: ${event.detail.text}`);
-		modalDialog.show({
-			id: 'paymentReturnDialog',
-			type: ModalType.Information,
-			title: 'Success',
-			body: 'The value equivalent to your pre-payment amount has been returned to your wallet.',
-			animation: ModalAnimation.Circle2,
-			icon: ModalIcon.BadgeCheck
-		});
 	}
 
 	// dynamic
@@ -186,24 +178,18 @@
 					<p class="my-6 text-red-800">Error fetching data.</p>
 				{/if}
 				<!-- Smart contract details -->
-				<div class="dark:text-white">
-					<ProjectDetails
-						{vouchers721Address}
+				{#if campaignStaticData && campaignStaticUI}
+					<div class="dark:text-white">
+						<ProjectDetails {vouchers721Address}
 						{crowdtainerId}
-						crowdtainerAddress={campaignStaticData?.contractAddress}
-						serviceProvider={campaignStaticData?.serviceProvider}
-						erc20TokenAddress={campaignStaticData?.token}
-						tokenDecimals={campaignStaticData?.tokenDecimals}
-						signerAddress={campaignStaticData?.signer}
-						referralRate={campaignStaticData?.referralRate}
-					/>
-				</div>
+						{campaignStaticData}
+						{campaignStaticUI} />
+					</div>
+				{/if}
 
 				<DetailedTokenIdState
 					walletData={$walletInCrowdtainer}
 					{campaignStaticUI}
-					{fundsInContract}
-					{raisedAmount}
 					{state}
 					{orderStatus}
 				/>
@@ -218,7 +204,8 @@
 							tokenSymbol={campaignStaticUI.tokenSymbol}
 							walletData={$walletInCrowdtainer}
 							{orderStatus}
-							on:userClaimedFundsEvent={handleUserClaimedFundsEvent}
+							on:userClaimedFundsEvent={(event) =>
+								handleUserClaimedFundsEvent(event, modalDialog)}
 							on:userTransferredParticipationEvent
 						/>
 					{/if}
