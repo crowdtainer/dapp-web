@@ -114,6 +114,6 @@
 		{$tweenedPercentageRaised.toFixed(0)}%
 	</div>
 </div> -->
-<div class="my-6">
+<div class="mb-6">
 	<progress class="h-2 progress-primary w-full" value={$tweenedPercentageWidth} max="100" />
 </div>

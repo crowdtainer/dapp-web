@@ -41,7 +41,7 @@
 <ModalDialog bind:this={modalDialog} />
 
 <ModalDialog bind:this={transferWalletModalDialog}>
-	<label class="block my-2">
+	<label class="block mt-2">
 		<span class="block text-sm font-medium text-slate-700">Wallet address or ENS name</span>
 		<input
 			type="text"
@@ -101,7 +101,11 @@
 				<button
 					class="relative inline-flex items-center justify-center overflow-hidden text-sm font-medium text-gray-900 rounded-lg group bg-gradient-to-br from-teal-300 to-lime-300 group-hover:from-teal-300 group-hover:to-lime-300 focus:ring-4 focus:outline-none focus:ring-lime-200"
 					on:click={() => {
-						goto(`/Checkout?vouchers721Address=${vouchers721Address}&voucherId=${tokenId}&projectURL=${projectURL}&projectTitle=${title}`);
+						goto(
+							`/Checkout?vouchers721Address=${vouchers721Address}&voucherId=${tokenId}&projectURL=${projectURL}&projectTitle=${
+								title ? encodeURIComponent(title) : ''
+							}`
+						);
 					}}
 				>
 					<span

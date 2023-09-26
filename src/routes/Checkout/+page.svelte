@@ -159,7 +159,6 @@
 
 <header class="ct-divider">
 	<div class="max-w-7xl mx-auto py-4 px-4 sm:px-6 lg:px-8">
-		<!-- <h1 class="font-display text-xl text-white">{(projectTitle)? `${projectTitle} > `: ''} Checkout &nbsp; 🛍️ </h1> -->
 		<div class="text-md breadcrumbs text-white">
 			<ul>
 			  <li><a href={projectURL}>{(projectTitle)? `${projectTitle}`: ''}</a></li> 
@@ -169,7 +168,7 @@
 	</div>
 </header>
 
-<div class="max-w-lg mx-auto white overflow-hidden md:max-w-7xl my-2">
+<div class="max-w-lg mx-auto white overflow-hidden md:max-w-7xl my-2 lg:my-10">
 	{#if userWalletInvalid}
 		<div class="text-black dark:text-white text-center mx-2 my-4">
 			<p>The wallet was either disconected or changed.</p>

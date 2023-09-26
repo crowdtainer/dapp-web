@@ -104,9 +104,10 @@
 	$: campaignStaticUI, console.log(`campaignStaticUI: ${campaignStaticUI}`);
 </script>
 
+<!-- dark:backdrop-brightness-[0.8] -->
 <div
 	class:animate-pulse={loadingAnimation}
-	class="dark:bg-gray-800 py-1 px-4 rounded-md dark:backdrop-brightness-[0.9]"
+	class="py-0 rounded-md w-full lg:w-auto"
 >
 	<ProjectRaisedAmount {crowdtainerId} {projectId} {staticDataLoadStatus} />
 

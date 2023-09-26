@@ -207,40 +207,7 @@
 	$: campaignStaticUI, console.log(`campaignStaticUI: ${campaignStaticUI}`);
 </script>
 
-<div class="grid w-full gap-6 md:grid-cols-2 mt-2">
-	<fieldset class="mt-4">
-		<legend class="sr-only">Choose a product</legend>
-		{#if campaignStaticUI}
-			{#each productOptions as productOption}
-				<div class="text-black text-md font-medium dark:text-gray-200">
-					{productOption.name}
-				</div>
-				<ul class="flex flex-justify my-2 items-center">
-					{#each productOption.productSubOptions as subOption, index}
-						<li class="mx-2">
-							<input
-								checked={index == 0}
-								type="radio"
-								name={productOption.name}
-								value={subOption}
-								id={subOption}
-								class="hidden peer"
-								on:click={() => {
-									setUserSelection(productOption.name, subOption);
-								}}
-							/>
-							<label
-								for={subOption}
-								class="inline-flex items-center justify-between w-full px-4 py-3 text-gray-500 bg-white border border-gray-200 rounded-lg cursor-pointer dark:hover:text-gray-300 dark:border-gray-700 dark:peer-checked:text-[#63cddd] peer-checked:border-blue-600 peer-checked:text-blue-600 hover:text-gray-600 hover:bg-gray-100 dark:text-gray-400 dark:bg-gray-800 dark:hover:bg-gray-700"
-							>
-								<div class="">{subOption.replace(productOption.name, '')}</div>
-							</label>
-						</li>
-					{/each}
-				</ul>
-			{/each}
-		{/if}
-	</fieldset>
+<div class="grid w-full gap-2 md:grid-cols-1">
 	<div class="md:pt-4">
 		<div class="text-black text-md font-medium dark:text-gray-200">Price</div>
 		{#if campaignStaticUI !== undefined && staticDataLoadStatus === LoadStatus.Loaded && currentPrice}
@@ -256,14 +223,51 @@
 			<p class="px-2 productPrice">{loadingString}</p>
 		{/if}
 	</div>
+	<fieldset class="mt-4">
+		<legend class="sr-only">Choose a product</legend>
+		{#if campaignStaticUI}
+			<div class="flex flex-wrap">
+				{#each productOptions as productOption}
+					<div class='mx-0 max-w-md md:my-2'>
+						<div class="text-black text-md font-medium dark:text-gray-200">
+							{productOption.name}
+						</div>
+						<ul class="grid grid-flow-col auto-cols-max my-2 items-center mx-4">
+							{#each productOption.productSubOptions as subOption, index}
+								<li class="mx-2">
+									<input
+										checked={index == 0}
+										type="radio"
+										name={productOption.name}
+										value={subOption}
+										id={subOption}
+										class="hidden peer"
+										on:click={() => {
+											setUserSelection(productOption.name, subOption);
+										}}
+									/>
+									<label
+										for={subOption}
+										class="inline-flex items-center justify-between w-full px-4 py-3 text-gray-500 bg-white border border-gray-200 rounded-lg cursor-pointer dark:hover:text-gray-300 dark:border-gray-700 dark:peer-checked:text-[#63cddd] peer-checked:border-blue-600 peer-checked:text-blue-600 hover:text-gray-600 hover:bg-gray-100 dark:text-gray-400 dark:bg-gray-800 dark:hover:bg-gray-700"
+									>
+										<div class="">{subOption.replace(productOption.name, '')}</div>
+									</label>
+								</li>
+							{/each}
+						</ul>
+					</div>
+				{/each}
+			</div>
+		{/if}
+	</fieldset>
 </div>
-<div class="flex">
+<div class="dark:text-white container mx-auto">
 	<button
 		on:click={() => {
 			addProduct();
 		}}
-		class="px-2 mt-10 w-full md:w-4/6 lg:w-2/6 btn btn-primary"
+		class="px-2 mt-5 w-full md:w-4/6 lg:w-2/6 btn btn-primary"
 	>
-		Add to pre-order
+		↓ Add to pre-order
 	</button>
 </div>

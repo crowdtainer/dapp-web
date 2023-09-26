@@ -68,7 +68,7 @@
 						<Icon src={ExclamationCircle} class="text-black m-2" size="36" />
 					{/if}
 				</div>
-				<div in:blur|global={{ duration: 450 }} class="basis-3/4">
+				<div in:blur|global={{ duration: 450 }} class="w-full text-left">
 					<p>{data.body}</p>
 				</div>
 			</div>
