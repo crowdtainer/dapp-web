@@ -46,9 +46,6 @@
 			transition:slide|global={{ duration: 150 }}
 			class="border border-black dark:border-white p-2 mt-2 text-sm"
 		>
-			<p>Click any address to copy to clip-board.</p>
-			<br />
-
 			<table class="table-auto">
 				<tr>
 					<td class="pr-20"> Vouchers721: </td>

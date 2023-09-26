@@ -106,12 +106,7 @@
 		$joinSelection.set(crowdtainerId, quantities);
 		$joinSelection = $joinSelection;
 
-		let searchResult = await findTokenIdsForWallet(getSigner(), vouchers721Address);
-		if (searchResult.isErr()) {
-			showToast(`Unable to find tokens for connected wallet.`);
-			return;
-		}
-		tokenIdAssociations = searchResult.unwrap();
+		refreshData();
 	}
 
 	function handleUserTransferredParticipationEvent(event: CustomEvent) {

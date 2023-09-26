@@ -199,7 +199,7 @@
 {#if campaignStaticUI}
 	{#if $totalSum > 0 && projectHasSigner}
 		<div in:slide|global={{ duration: 150 }}>
-			<ul class="w-full steps my-5 mb-10">
+			<ul class="w-full steps my-8 mb-10">
 				<li class="step step-primary">Quantity</li>
 				<li class="step {stepTwoActive}">E-mail</li>
 				<li class="step {stepThreeActive}">Terms and Conditions</li>

@@ -2,7 +2,6 @@
 	import { blur } from 'svelte/transition';
 	import { InformationCircle } from '@steeze-ui/heroicons';
 	import { Icon } from '@steeze-ui/svelte-icon';
-	import { BigNumber } from 'ethers/lib/ethers.js';
 	import { createEventDispatcher } from 'svelte';
 	import { shortenAddress } from './Utils/wallet.js';
 
@@ -89,9 +88,9 @@
 						>
 					</p>
 				{/if}
-				<p class="text-sm mt-4">VAT tax (USt.) and shipping included</p>
+				<p class="text-sm mt-4">Incl. 7% USt. zzgl. Shipping | 7% VAT and shipping included)</p>
 				{#key totalSum}
-					<p in:blur|global={{ duration: 250 }} class="text-lg my-4 mt-4">
+					<p in:blur|global={{ duration: 250 }} class="text-lg mt-4">
 						<b>Total</b>: {totalSum - discountValue}
 						{tokenSymbol}
 					</p>

@@ -38,10 +38,10 @@
 	$: emailValid = validEmail(userEmail);
 </script>
 
-<div class="flex justify-center">
+<div class="">
 	<div class="m-6">
 		{#if emailVerificationRequired && !emailValidated}
-			<p class="flex justify-center text-lg bold">Please verify your E-mail:</p>
+			<p class="text-lg bold text-center">Please verify your E-mail:</p>
 			<br />
 			<div class="flex justify-center">
 				<input
@@ -87,7 +87,7 @@
 				</button>
 			</div>
 		{:else}
-			<div class="flex justify-center">
+			<div class="flex justify-center my-12">
 				<p class="text-lg bold">E-mail validated!</p>
 				<div><Icon src={Check} class="text-green-600" size="24" /></div>
 			</div>
@@ -95,22 +95,22 @@
 				<button class="btn btn-primary m-4 px-12" on:click={() => { nextClicked(userEmail)}}>Next</button>
 			</div>
 		{/if}
-		<div class="flex justify-center">
-			<div class="text-md my-8 sm:w-full md:w-4/5 lg:w-4/6 xl:w-3/6">
-				<div class="grid grid-flow-col auto-cols-max my-4">
+		<div class="flex justify-center mt-4">
+			<div class="text-md mt-8 max-w-screen-md text-left">
+				<div class="grid grid-flow-col auto-cols-max">
 					<div><Icon src={InformationCircle} class="text-green-700" size="24" /></div>
 					<p class="px-2 text-md">Why?</p>
 				</div>
 				<ul class="list-disc mx-5">
-					<li class="my-2">
+					<li class="mt-2">
 						If the project is succesfully funded, we will send you an e-mail asking you to provide
 						us your delivery address.
 					</li>
-					<li class="my-2">
+					<li class="mt-2">
 						To avoid collecting personal data before knowing for sure we will need it, you do not
 						need to provide us your delivery address at this stage (funding).
 					</li>
-					<li class="my-2">
+					<li class="mt-2">
 						We will <b>never</b> use your e-mail or all personal data for purposes other than fulfilling
 						our legal obligations.
 					</li>

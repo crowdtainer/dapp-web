@@ -122,77 +122,79 @@
 </script>
 
 {#if $connected}
-	<div class="flex justify-center gap-2 my-2">
-		<div class="grid grid-flow-col auto-cols-max my-2">
-			<div><Icon src={ShieldCheck} class="text-green-600" size="24" /></div>
-			<p class="text-xs px-1 py-1">Connected to: <b>{$accountAddress}</b></p>
+	<div class="text-left">
+		<div class="flex justify-center gap-2 my-2">
+			<div class="grid grid-flow-col auto-cols-max my-2">
+				<div><Icon src={ShieldCheck} class="text-green-600" size="24" /></div>
+				<p class="text-xs px-1 py-1">Connected to: <b>{$accountAddress}</b></p>
+			</div>
 		</div>
-	</div>
 
-	<div class="flex justify-center">
-		<label class="label cursor-pointer gap-3 my-4 sm:w-full md:w-4/5 lg:w-4/6 xl:w-3/6">
-			<input
-				type="checkbox"
-				disabled={termsAccepted}
-				bind:checked={deliveryAcknowledged}
-				class="checkbox checkbox-primary"
-			/>
-			<span class="label-text dark:text-white"
-				>I acknowledge that if the project is succesful, I need to return to this website to provide
-				my delivery details.</span
-			>
-		</label>
-	</div>
+		<div class="flex justify-center">
+			<label class="label cursor-pointer gap-3 my-4 sm:w-full md:w-4/5 lg:w-4/6 xl:w-3/6">
+				<input
+					type="checkbox"
+					disabled={termsAccepted}
+					bind:checked={deliveryAcknowledged}
+					class="checkbox checkbox-primary"
+				/>
+				<span class="label-text dark:text-white"
+					>I acknowledge that if the project is succesful, I need to return to this website to
+					provide my delivery details.</span
+				>
+			</label>
+		</div>
 
-	<div class="flex justify-center">
-		<label class="label cursor-pointer gap-3 my-4 sm:w-full md:w-4/5 lg:w-4/6 xl:w-3/6">
-			<input
-				type="checkbox"
-				disabled={termsAccepted}
-				bind:checked={shipmentConditions}
-				class="checkbox checkbox-primary"
-			/>
-			<p class="label-text dark:text-white w-full">
-				I understand that due the experimental nature of this project, delivery can take more than
-				30 days.
-			</p>
-		</label>
-	</div>
+		<div class="flex justify-center">
+			<label class="label cursor-pointer gap-3 my-4 sm:w-full md:w-4/5 lg:w-4/6 xl:w-3/6">
+				<input
+					type="checkbox"
+					disabled={termsAccepted}
+					bind:checked={shipmentConditions}
+					class="checkbox checkbox-primary"
+				/>
+				<p class="label-text dark:text-white w-full">
+					I understand that due the experimental nature of this project, delivery can take more than
+					30 days.
+				</p>
+			</label>
+		</div>
 
-	<div class="flex justify-center">
-		<label class="label cursor-pointer gap-3 my-4 sm:w-full md:w-4/5 lg:w-4/6 xl:w-3/6">
-			<input
-				type="checkbox"
-				disabled={termsAccepted}
-				bind:checked={feesAcknowledged}
-				class="checkbox checkbox-primary"
-			/>
-			<span class="label-text dark:text-white"
-				>I am aware that Ethereum network fees will apply to prepare the payment and in case I want
-				to leave a campaign. Those fees are paid to 3rd parties and are not re-payable by us in case
-				of my withdrawal from the purchase.</span
-			>
-		</label>
-	</div>
+		<div class="flex justify-center">
+			<label class="label cursor-pointer gap-3 my-4 sm:w-full md:w-4/5 lg:w-4/6 xl:w-3/6">
+				<input
+					type="checkbox"
+					disabled={termsAccepted}
+					bind:checked={feesAcknowledged}
+					class="checkbox checkbox-primary"
+				/>
+				<span class="label-text dark:text-white"
+					>I am aware that Ethereum network fees will apply to prepare the payment and in case I
+					want to leave a campaign. Those fees are paid to 3rd parties and are not re-payable by us
+					in case of my withdrawal from the purchase.</span
+				>
+			</label>
+		</div>
 
-	<div class="flex justify-center">
-		<label class="label cursor-pointer gap-3 my-4 sm:w-full md:w-4/5 lg:w-4/6 xl:w-3/6">
-			<input
-				type="checkbox"
-				disabled={termsAccepted}
-				bind:checked={termsAcknowledged}
-				class="checkbox checkbox-primary"
-			/>
-			<span class="label-text dark:text-white"
-				>I agree to the <b>General Terms and Conditions</b> and that I am solely responsible in safeguarding
-				my cryptographic private keys used to interact with this website.</span
-			>
-		</label>
-	</div>
+		<div class="flex justify-center">
+			<label class="label cursor-pointer gap-3 my-4 sm:w-full md:w-4/5 lg:w-4/6 xl:w-3/6">
+				<input
+					type="checkbox"
+					disabled={termsAccepted}
+					bind:checked={termsAcknowledged}
+					class="checkbox checkbox-primary"
+				/>
+				<span class="label-text dark:text-white"
+					>I agree to the <b>General Terms and Conditions</b> and that I am solely responsible in safeguarding
+					my cryptographic private keys used to interact with this website.</span
+				>
+			</label>
+		</div>
 
-	<div class="flex justify-center">
-		<div>
-			<a target="_blank" href="/Legal/Terms" rel="noopener">General Terms and Conditions</a>
+		<div class="flex justify-center">
+			<div>
+				<a class="link" target="_blank" href="/Legal/Terms" rel="noopener">General Terms and Conditions ⏍ </a>
+			</div>
 		</div>
 	</div>
 
