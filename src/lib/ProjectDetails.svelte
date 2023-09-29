@@ -178,7 +178,7 @@
 							{#if campaignStaticData.referralRate === undefined}
 								<span> -- </span>
 							{:else if discount > BigNumber.from(0)}
-								<span> {discount} % off for referee, {discount}% cashback for referrer.</span>
+								<span> {discount} % off for referee.<br /> {discount}% cashback for referrer.</span>
 							{:else}
 								<span> disabled </span>
 							{/if}

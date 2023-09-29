@@ -14,7 +14,7 @@
 		connect,
 		disconnect,
 		setupWallet,
-		tearDownWallet,
+		tearDownWallet
 	} from '$lib/Utils/wallet';
 	import { WalletType } from '$lib/Utils/walletStorage';
 
@@ -99,11 +99,11 @@
 				</svg>
 			</button>
 		</div>
-		<div class="flex-1 flex items-center justify-center sm:items-stretch sm:justify-start">
+		<div class="flex-1 flex items-center sm:items-stretch justify-start">
 			<div class="flex-shrink-0 flex items-center">
 				<a href="/">
 					<img
-						class="block lg:hidden h-8 w-auto"
+						class="block lg:hidden h-8 w-auto mx-16 sm:mx-0"
 						src="/images/site/CrowdtainerLogo.svg"
 						alt="Workflow"
 					/>
@@ -143,15 +143,9 @@
 									copyToClipBoardAndNotify('Connected wallet address', $walletState.account);
 								}}
 							>
-								<span class="inline-flex items-center ">
+								<span class="inline-flex items-center">
 									<span>{address} </span>
-									<span
-										><Icon
-											src={Clipboard}
-											class="self-center ml-2"
-											size="16"
-										/></span
-									>
+									<span><Icon src={Clipboard} class="self-center ml-2" size="16" /></span>
 								</span>
 							</button>
 						</div>

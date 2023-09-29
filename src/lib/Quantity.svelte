@@ -30,45 +30,42 @@
 			text: `${discountCode}`
 		});
 	};
-
 </script>
 
 <!-- Order container -->
 <div class="center container mx-auto max-w-6xl mb-4">
 	<div class="">
 		<!-- Products container -->
-		<div class="m-3">
+		<div class="sm:m-3">
 			<slot />
 			<!-- Discount code | start -->
 			{#if (validUserCouponCode === undefined || validUserCouponCode === '') && referralEnabled}
 				<!-- content here -->
 				<div class="flex justify-center my-4">
-					<div class="grid grid-flow-col auto-cols-max my-2 items-center">
-						<div
-							class="tooltip tooltip-info tooltip-right sm:tooltip-bottom lg:tooltip-left p-1 mt-2"
-							data-tip="Enter your friends code to apply discount."
-						>
-							<Icon src={InformationCircle} class="text-green-700 sm:mr-2 mr-0" size="28" />
-						</div>
-
-						<input
-							type="text"
-							bind:value={discountCode}
-							on:change={() => {
-								redField = false;
-							}}
-							placeholder="Coupon / referral code"
-							class="{redField && validUserCouponCode === ''
-								? 'border-red-600 border-2'
-								: ''} input input-primary w-full max-w-xs dark:text-black"
-						/>
-						<button
-							class="btn btn-outline mx-2 w-28 dark:text-white dark:disabled:text-gray-200"
-							on:click={userAppliedCoupon}
-						>
-							<p>Apply</p>
-						</button>
+					<div
+						class="tooltip tooltip-info tooltip-right sm:tooltip-bottom lg:tooltip-left p-1 mt-2"
+						data-tip="Enter your friends code to apply discount."
+					>
+						<Icon src={InformationCircle} class="text-green-700 sm:mr-2 mr-0" size="28" />
 					</div>
+
+					<input
+						type="text"
+						bind:value={discountCode}
+						on:change={() => {
+							redField = false;
+						}}
+						placeholder="Coupon / referral code"
+						class="{redField && validUserCouponCode === ''
+							? 'border-red-600 border-2'
+							: ''} input input-primary w-full max-w-xs dark:text-black"
+					/>
+					<button
+						class="btn btn-outline mx-2 w-28 dark:text-white dark:disabled:text-gray-200"
+						on:click={userAppliedCoupon}
+					>
+						<p>Apply</p>
+					</button>
 				</div>
 			{/if}
 			<!-- Discount code | end -->
@@ -80,10 +77,14 @@
 				{#if validUserCouponCode !== undefined && validUserCouponCode !== '' && referralEnabled}
 					<p class="text-sm sm:text-md text-primary my-2">
 						<button
-						on:click={()=>{userRemovedCoupon()}}
-						><p class="text-secondary">[ Remove ] &nbsp;</p></button>
+							on:click={() => {
+								userRemovedCoupon();
+							}}><p class="text-secondary">[ Remove ] &nbsp;</p></button
+						>
 						<b
-							>{ratePercentage}% OFF referral discount ({shortenAddress(validUserCouponCode)}): -{discountValue.toFixed(2)}
+							>{ratePercentage}% OFF referral discount ({shortenAddress(validUserCouponCode)}): -{discountValue.toFixed(
+								2
+							)}
 							{tokenSymbol}</b
 						>
 					</p>
