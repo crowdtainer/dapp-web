@@ -172,7 +172,7 @@
 				</div>
 			</div>
 
-			<div class="font-sans pr-8 pl-8 pt-8 pb-4">
+			<div class="font-sans pr-2 pl-2 sm:pr-8 sm:pl-8 pt-8 pb-4">
 				<div class="font-display uppercase tracking-wide text-primary">
 					{title}
 				</div>

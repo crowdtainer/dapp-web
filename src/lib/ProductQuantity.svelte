@@ -46,14 +46,14 @@
 
 <div class="text-black">
 	<!-- Header -->
-	<div id="header" class="text-center flex items-center bg-gray-100 dark:bg-gray-700 dark:text-white h-10 px-4">
+	<div id="header" class="text-center flex items-center bg-gray-100 dark:bg-gray-700 dark:text-white h-10 px-0 md:px-4">
 		<div class="w-6/12 font-semibold">Description</div>
 		<div class="w-3/12 font-semibold">Quantity</div>
 		<div class="w-3/12 font-semibold">Subtotal</div>
 	</div>
 	<!-- Header End -->
 
-	<div id="body" class="px-4 spacey-y-4">
+	<div id="body" class="px-0 md:px-4 spacey-y-4">
 		{#each descriptions as product, index}
 		{#if $selection[index] > 0}
 			<div transition:slide="{{ duration: 250 }}">
@@ -68,7 +68,7 @@
 						<div class="">
 							<button
 								type="button"
-								class="m-3 py-2 px-3 border-2 border-gray-600 dark:border-gray-200 text-gray-800 dark:text-white font-medium rounded-3xl text-xs leading-tight uppercase hover:bg-black hover:bg-opacity-5 focus:outline-none focus:ring-0"
+								class="m-3 py-2 px-2 sm:px-4 border-2 border-gray-600 dark:border-gray-200 text-gray-800 dark:text-white font-medium rounded-3xl text-xs leading-tight uppercase hover:bg-black hover:bg-opacity-5 focus:outline-none focus:ring-0"
 								on:click={() => {
 									decrementProduct(index);
 								}}
@@ -82,7 +82,7 @@
 						<div class="">
 							<button
 								type="button"
-								class="m-3 py-2 px-3 border-2 border-gray-600 dark:border-gray-200 text-gray-800 dark:text-white font-medium rounded-3xl text-xs leading-tight uppercase hover:bg-black hover:bg-opacity-5 focus:outline-none focus:ring-0"
+								class="m-3 py-2 px-2 sm:px-4 border-2 border-gray-600 dark:border-gray-200 text-gray-800 dark:text-white font-medium rounded-3xl text-xs leading-tight uppercase hover:bg-black hover:bg-opacity-5 focus:outline-none focus:ring-0"
 								on:click={() => {
 									incrementProduct(index);
 								}}
