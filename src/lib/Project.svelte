@@ -62,23 +62,25 @@
 
 	let tokenIdAssociations: TokenIDAssociations | undefined;
 
-	initializeDataForWallet(campaignStaticData?.contractAddress, $accountAddress);
-
 	async function refreshData() {
 		$joinSelection = $joinSelection;
 		campaignDynamicData = initializeCampaignDynamicStores(crowdtainerId);
-		let tokenIdSearchResult = await findTokenIdsForWallet(getSigner(), vouchers721Address);
-		if (tokenIdSearchResult.isErr()) {
-			showToast(`Error loading tokens for connected wallet: ${tokenIdSearchResult.unwrapErr()}`);
-			return;
-		}
-		tokenIdAssociations = tokenIdSearchResult.unwrap();
-		let order = await loadOrderDetails(vouchers721Address, tokenIdAssociations?.foundTokenIds);
-		if (order) {
-			console.log(`Updated order status: ${order}`);
-			orderStatus = order;
-		} else {
-			orderStatus = OrderStatus.Unknown;
+		if ($connected) {
+			initializeDataForWallet(campaignStaticData?.contractAddress, $accountAddress);
+
+			let tokenIdSearchResult = await findTokenIdsForWallet(getSigner(), vouchers721Address);
+			if (tokenIdSearchResult.isErr()) {
+				showToast(`Error loading tokens for connected wallet: ${tokenIdSearchResult.unwrapErr()}`);
+				return;
+			}
+			tokenIdAssociations = tokenIdSearchResult.unwrap();
+			let order = await loadOrderDetails(vouchers721Address, tokenIdAssociations?.foundTokenIds);
+			if (order) {
+				console.log(`Updated order status: ${order}`);
+				orderStatus = order;
+			} else {
+				orderStatus = OrderStatus.Unknown;
+			}
 		}
 	}
 
@@ -101,7 +103,7 @@
 			console.log(`Missing campaignStaticUI data`);
 			return;
 		}
-
+		tokenIdAssociations = undefined;
 		let quantities: number[] = new Array<number>(campaignStaticUI.prices.length).fill(0);
 		$joinSelection.set(crowdtainerId, quantities);
 		$joinSelection = $joinSelection;

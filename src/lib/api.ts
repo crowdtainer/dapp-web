@@ -30,39 +30,38 @@ export async function fetchStaticData(projectIds: number[]): Promise<Result<Crow
 
 // Pre-order steps
 
-export async function sendChallengeCodeAPI(email: string): Promise<boolean> {
-	const result = await fetch(`challengeCodeAPI/${email}`);
-	return result.ok;
+export async function sendChallengeCodeAPI(email: string): Promise<Response> {
+	return await fetch(`backendJoinSteps/01_getChallengeCodeAPI/${email}`);
 }
 
 export async function requestEmailAuthorizationAPI(email: string, code: string): Promise<string> {
 	let result: Response;
 
-	result = await fetch(`authorizeEmailAPI/${email}`, {
+	result = await fetch(`backendJoinSteps/02_validateEmailAPI/${email}`, {
 		method: 'POST',
 		body: JSON.stringify({ code: code })
 	});
 	return result.text();
 }
 
-export async function requestWalletAuthorizationAPI(email: string, signerAddress: string, domain: string, origin: string, nonce: string, currentTimeISO: string, sigHash: string): Promise<string> {
+export async function requestWalletAuthorizationAPI(email: string, signerAddress: string, chainId: string, voucherAddress: string, crowdtainerAddress: string, domain: string, nonce: string, currentTimeISO: string, sigHash: string): Promise<string> {
 	let result: Response;
 
-	result = await fetch('authorizeWalletAPI', {
+	result = await fetch('backendJoinSteps/03_authorizeWalletAPI', {
 		method: 'POST',
-		body: JSON.stringify({ email: email, signerAddress: signerAddress, domain: domain, origin: origin, nonce: nonce, currentTimeISO: currentTimeISO, signatureHash: sigHash })
+		body: JSON.stringify({ email: email, signerAddress: signerAddress, chainId, voucherAddress, crowdtainerAddress, domain: domain, nonce: nonce, currentTimeISO: currentTimeISO, signatureHash: sigHash })
 	});
 	return result.text();
 }
 
 // Order confirmation
 
-export async function requestDeliveryAPI(signerAddress: string, domain: string, origin: string, nonce: string, currentTimeISO: string, deliveryDetails: DeliveryDetails, sigHash: string): Promise<string> {
+export async function requestDeliveryAPI(signerAddress: string, domain: string, nonce: string, currentTimeISO: string, deliveryDetails: DeliveryDetails, sigHash: string): Promise<string> {
 	let result: Response;
 
 	result = await fetch('deliveryAddressAPI', {
 		method: 'POST',
-		body: JSON.stringify({ signerAddress: signerAddress, domain: domain, origin: origin, nonce: nonce, currentTimeISO: currentTimeISO , deliveryDetails: deliveryDetails, signatureHash: sigHash })
+		body: JSON.stringify({ signerAddress: signerAddress, domain: domain, nonce: nonce, currentTimeISO: currentTimeISO, deliveryDetails: deliveryDetails, signatureHash: sigHash })
 	});
 	return result.text();
 }
@@ -114,7 +113,7 @@ export async function requestAuthorizationProof(wallet: string,
 
 	// make sure address is check-summed
 	let walletWithChecksum = ethers.utils.getAddress(wallet);
-	let result: Response = await fetch(`authProofAPI/${walletWithChecksum}`, {
+	let result: Response = await fetch(`backendJoinSteps/04_authProofAPI/${walletWithChecksum}`, {
 		method: 'POST',
 		body: JSON.stringify({ calldata: calldataValue })
 	});

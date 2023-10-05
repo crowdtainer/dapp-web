@@ -15,12 +15,12 @@ export const POST: RequestHandler = async ({ request, params }) => {
 
     let userEmail = params.email;
 
-    let codeForUserKey = `userCode:${userEmail}`;
-    let authorizedEmailsKey = `authorizedEmails`;
-
     if (userEmail == undefined || userEmail === "") {
         throw error(400, "Missing email field.");
     }
+
+    let emailCodeKey = `userCode:${userEmail}`;
+    let validatedEmailsKey = `validatedEmails:${userEmail}`;
 
     let result = getPayload(await request.json());
 
@@ -31,7 +31,7 @@ export const POST: RequestHandler = async ({ request, params }) => {
     let providedCode = result.unwrap();
     let actualCode: null | undefined | string;
 
-    await redis.get(codeForUserKey, (err, result) => {
+    await redis.get(emailCodeKey, (err, result) => {
         if (err) {
             console.error(err);
         } else {
@@ -39,12 +39,12 @@ export const POST: RequestHandler = async ({ request, params }) => {
         }
     });
 
-    if (actualCode == undefined || actualCode !== String(providedCode)) {
+    if (!actualCode || actualCode !== String(providedCode)) {
         throw error(400, "Invalid code.");
     }
 
     try {
-        await redis.sadd(authorizedEmailsKey, userEmail); // add to "authorized set"
+        await redis.sadd(validatedEmailsKey, actualCode); // add to "validated set"
     } catch (e) {
         throw error(500, "Database error.");
     }

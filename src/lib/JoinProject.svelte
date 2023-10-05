@@ -63,6 +63,9 @@
 	let userVerifiedEmail = '';
 	let termsAccepted = false;
 
+	// User nonce (mail verification code)
+	let userEMailCode = '';
+
 	$: stepTwoActive = preOrderStep >= JoinStep.EMailCheck ? 'step-primary' : '';
 	$: stepThreeActive = preOrderStep >= JoinStep.TermsAcceptance ? 'step-primary' : '';
 	$: stepFourActive = preOrderStep >= JoinStep.FinalConfirmation ? 'step-primary' : '';
@@ -239,9 +242,10 @@
 			{:else if preOrderStep === JoinStep.EMailCheck}
 				<EmailCheck
 					{emailVerificationRequired}
-					nextClicked={(verifiedEmail) => {
+					nextClicked={(verifiedEmail, providedCode) => {
 						if (verifiedEmail) {
 							userVerifiedEmail = verifiedEmail;
+							userEMailCode = providedCode;
 						}
 						emailVerificationRequired = false;
 						preOrderStep++;
@@ -255,8 +259,11 @@
 						}}>Back</button
 					>
 				</div>
-			{:else if preOrderStep === JoinStep.TermsAcceptance}
+			{:else if preOrderStep === JoinStep.TermsAcceptance && vouchers721Address !== undefined && userEMailCode != ''}
 				<TermsAndConditions
+					{vouchers721Address}
+					{crowdtainerAddress}
+					{userEMailCode}
 					acceptanceRequired={!termsAccepted}
 					termsAcceptanceSuccess={() => {
 						preOrderStep++;
