@@ -21,7 +21,7 @@ for (let result of projects) {
     availableCrowdtainerIds.push(result.crowdtainerId);
 }
 
-const campaignStaticData = await loadCampaignData();
+let campaignStaticData: CrowdtainerStaticModel[] | undefined;
 
 async function loadCampaignData(): Promise<CrowdtainerStaticModel[]> {
     let campaignStaticData = new Array<CrowdtainerStaticModel>();
@@ -48,6 +48,10 @@ async function loadCampaignData(): Promise<CrowdtainerStaticModel[]> {
 //                   calldata: bytes,
 //                }
 export const POST: RequestHandler = async ({ request, params }) => {
+
+    if(!campaignStaticData) { // first execution
+       campaignStaticData =  await loadCampaignData();
+    }
 
     let redis = getDatabase();
     if (redis === undefined) {
