@@ -16,52 +16,38 @@ export const GET: RequestHandler = async ({ params }) => {
 
     let userEmail = params.email;
 
-    // TODO: encrypt user email
-    let emailCodekey = `userCode:${userEmail}`;
+    // TODO: encrypt user email client side
+    let emailCodeKey = `userCode:${userEmail}`;
     let workerKey = `mailWork`;
 
     let apiHits = `apiHits:${userEmail}`;
     let randomNumber: string | null | undefined;
 
+    let currentCount: number;
     try {
-        let currentCount = await redis.incr(apiHits);
+        currentCount = await redis.incr(apiHits);
         console.log(`hits: ${currentCount}, max: ${maxAPI_hits}`);
         await redis.expire(apiHits, codeExpireTimeInSeconds);
-
-        if (currentCount > maxAPI_hits) {
-            throw error(429, "Please try again later.");
-        }
-
-        let randomNumber = await redis.get(emailCodekey);
-
-        if (randomNumber != undefined) {
-            console.log(`Existing code present for email ${userEmail}`);
-
-            // Push new item to "email sender worker" list
-            await redis.multi()
-                .lpush(workerKey, userEmail)
-                .expire(workerKey, emailWorkerExpirationInSeconds)
-                .exec();
-            console.log(`Key -> ${emailCodekey} ; Value -> ${randomNumber} expires in ${emailWorkerExpirationInSeconds} seconds.`);
-            return new Response("OK");
-        }
     } catch (_error) {
         console.dir(_error);
         throw error(500, "Database failure.");
+    }
+
+    if (currentCount > maxAPI_hits) {
+        throw error(429, "Maximum requests limit reached. Please try again later.");
     }
 
     try {
         randomNumber = randomInt(0, 100000).toString();
         // Save code in database and push item to "email sender worker" list
         await redis.multi()
-            .set(emailCodekey, Number(randomNumber), 'EX', codeExpireTimeInSeconds)
+            .set(emailCodeKey, Number(randomNumber), 'EX', codeExpireTimeInSeconds)
             .lpush(workerKey, userEmail)
             .expire(workerKey, emailWorkerExpirationInSeconds)
             .exec();
-
-        console.log(`Key -> ${emailCodekey} ; Value -> ${randomNumber}`);
+        console.log(`Key -> ${emailCodeKey} ; Value -> ${randomNumber} ; Expires in ${emailWorkerExpirationInSeconds} seconds.`);
     } catch (_error) {
-        console.log(`Unable to set user code: ${emailCodekey}:${randomNumber}`);
+        console.log(`Unable to set user code: ${emailCodeKey}:${randomNumber}`);
         console.dir(_error);
         throw error(500, "Database failure.");
     }

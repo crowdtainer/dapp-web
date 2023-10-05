@@ -154,7 +154,6 @@ async function getOrderDetails(provider: ethers.Signer | undefined,
 // POST Inputs: - {
 //                  signerAddress: string,      // user stated signer address
 //                         domain: string,      // user stated domain
-//                         origin: string,      // user stated origin
 //                          nonce: string,      // nonce with at least 8 digits
 //                 currentTimeISO: string,      // time when signature was created
 //                deliveryDetails: string,      // Participant's delivery request details
@@ -168,7 +167,7 @@ export const POST: RequestHandler = async ({ request }) => {
         throw error(400, result.unwrapErr());
     }
 
-    let [signerAddress, domain, origin, nonce, currentTimeISO, deliveryDetails, signatureHash] = result.unwrap();
+    let [signerAddress, domain, nonce, currentTimeISO, deliveryDetails, signatureHash] = result.unwrap();
 
     // Check if country field is valid
     let countryFound = whereAlpha2(deliveryDetails.deliveryAddress.country);
@@ -182,9 +181,8 @@ export const POST: RequestHandler = async ({ request }) => {
     }
 
     try {
-
         // Check signature
-        let message = makeDeliveryRequestMessage(signerAddress, domain, origin, deliveryDetails, nonce, currentTimeISO);
+        let message = makeDeliveryRequestMessage(signerAddress, domain, deliveryDetails, nonce, currentTimeISO);
 
         let recoveredSigner = ethers.utils.verifyMessage(message, signatureHash);
 
@@ -199,10 +197,14 @@ export const POST: RequestHandler = async ({ request }) => {
             throw error(400, `Invalid statement or message signature.`);
         }
 
-        // TODO: perform domain/origin validation
-        console.log(`client declared domain: ${domain}`);
-        console.log(`client declared origin: ${domain}`);
         console.log(`siweMessage.issuedAt: ${currentTimeISO}`);
+
+        // Perform domain validation
+        console.log(`client declared domain: ${domain}`);
+        if(domain!== import.meta.env.VITE_DOMAIN) {
+            throw error(400, `Invalid domain address: ${domain}. Expected: ${import.meta.env.VITE_DOMAIN}`);
+        }
+
         // TODO: validate nonce (i.e., is it in 8 digit range? has it been used (redis))
         // TODO: Filter out unsupported chainIds
 
@@ -304,7 +306,6 @@ type Error = string;
 
 //                  signerAddress: string,      // user stated signer address
 //                         domain: string,      // user stated domain
-//                         origin: string,      // user stated origin
 //                          nonce: string,      // nonce with at least 8 digits
 //                 currentTimeISO: string,      // time when signature was created
 //                deliveryDetails: string,      // Participant's delivery request details
@@ -312,7 +313,6 @@ type Error = string;
 function getPayload(item: any): Result<[
     signerAddress: string,
     domain: string,
-    origin: string,
     nonce: string,
     currentTimeISO: string,
     deliveryDetails: DeliveryDetails,
@@ -328,10 +328,6 @@ function getPayload(item: any): Result<[
 
     if (item.domain == undefined) {
         return Err("Missing 'domain' field");
-    }
-
-    if (item.origin == undefined) {
-        return Err("Missing 'origin' field");
     }
 
     if (item.nonce == undefined) {
@@ -375,10 +371,9 @@ function getPayload(item: any): Result<[
     }
 
     try {
-        const result: [string, string, string, string, string, DeliveryDetails, string] = [
+        const result: [string, string, string, string, DeliveryDetails, string] = [
             item.signerAddress,
             item.domain,
-            item.origin,
             item.nonce,
             item.currentTimeISO,
             item.deliveryDetails,

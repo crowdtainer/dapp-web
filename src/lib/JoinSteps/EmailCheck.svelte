@@ -1,11 +1,13 @@
 <script lang="ts">
+	import { MessageType } from '$lib/Toast/MessageType.js';
+	import { showToast } from '$lib/Toast/ToastStore.js';
 	import { validEmail } from '$lib/Validation/utils.js';
 	import { requestEmailAuthorizationAPI, sendChallengeCodeAPI } from '$lib/api.js';
 	import { Check, InformationCircle } from '@steeze-ui/heroicons';
 	import { Icon } from '@steeze-ui/svelte-icon';
 	import { slide } from 'svelte/transition';
 
-	export let nextClicked: (verifiedEmail: string) => void;
+	export let nextClicked: (verifiedEmail: string, providedCode: string) => void;
 	export let emailVerificationRequired: boolean;
 
     let emailValidated = false;
@@ -29,7 +31,18 @@
 	};
 
 	const callSendChallengeCodeAPI = async () => {
-		emailSent = await sendChallengeCodeAPI(userEmail);
+		let emailSentResult = await sendChallengeCodeAPI(userEmail);
+		if(!emailSentResult.ok){
+			console.log(`result: ${emailSentResult.status}`)
+			if(emailSentResult.status == 429) {
+				showToast(`${emailSentResult.statusText}. Please try again later.`, MessageType.Warning);
+			} else {
+				showToast('Unable to send challenge code.', MessageType.Warning);
+			}
+			return;
+		}
+
+		emailSent = true;
 		setTimeout(function () {
 			emailSent = false;
 		}, 15000);
@@ -92,7 +105,7 @@
 				<div><Icon src={Check} class="text-green-600" size="24" /></div>
 			</div>
 			<div class="flex justify-center">
-				<button class="btn btn-primary m-4 px-12" on:click={() => { nextClicked(userEmail)}}>Next</button>
+				<button class="btn btn-primary m-4 px-12" on:click={() => { nextClicked(userEmail, userEmailCode)}}>Next</button>
 			</div>
 		{/if}
 		<div class="flex justify-center mt-4">

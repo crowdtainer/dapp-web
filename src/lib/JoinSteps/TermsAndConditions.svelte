@@ -8,13 +8,19 @@
 
 	import { ethers } from 'ethers';
 	import { WalletType } from '$lib/Utils/walletStorage.js';
+	const ChainID = import.meta.env.VITE_WALLET_CONNECT_CHAIN_ID;
 
 	import ModalDialog, { ModalAnimation, ModalIcon, ModalType } from '$lib/ModalDialog.svelte';
 	import { onMount } from 'svelte';
+	import { showToast } from '$lib/Toast/ToastStore.js';
+	import { MessageType } from '$lib/Toast/MessageType.js';
 
 	export let userEmail: string;
 	export let termsAcceptanceSuccess: () => void;
 	export let acceptanceRequired = true;
+	export let vouchers721Address: string | undefined;
+	export let crowdtainerAddress: string;
+	export let userEMailCode: string;
 
 	export let modalDialog: ModalDialog;
 
@@ -57,6 +63,11 @@
 			return;
 		}
 
+		if(vouchers721Address === undefined) {
+			showToast('Error: Missing Vouchers721Address.', MessageType.Warning);
+			return;
+		}
+
 		console.log(`Account: ${account}`);
 
 		// make sure address is check-summed; Some wallets don't use checksummed addresses (e.g. Metamask mobile)
@@ -64,20 +75,33 @@
 
 		console.log(`Account check-summed: ${account}`);
 
-		const nonce = pseudoRandomNonce().toString();
+		const nonce = userEMailCode;
 		const currentTime = new Date().toISOString();
 		const domain = window.location.host;
-		const origin = window.location.origin;
 
-		let message = makeAgreeToTermsMessage(domain, origin, userEmail, account, nonce, currentTime);
+		// Obtain a valid nonce, which gives access to the current email/wallet combination to a campaign ID.
+
+		let message = makeAgreeToTermsMessage(
+			domain,
+			userEmail,
+			account,
+			ChainID,
+			vouchers721Address,
+			crowdtainerAddress,
+			nonce,
+			currentTime
+		);
+
 		let signResult = await signMessage(signer, message);
 		if (signResult.isOk()) {
 			let sigHash = signResult.unwrap();
 			let requestResult = await requestWalletAuthorizationAPI(
 				userEmail,
 				account,
+				ChainID,
+				vouchers721Address,
+				crowdtainerAddress,
 				domain,
-				origin,
 				nonce,
 				currentTime,
 				sigHash
@@ -193,7 +217,9 @@
 
 		<div class="flex justify-center">
 			<div>
-				<a class="link" target="_blank" href="/Legal/Terms" rel="noopener">General Terms and Conditions ⏍ </a>
+				<a class="link" target="_blank" href="/Legal/Terms" rel="noopener"
+					>General Terms and Conditions ⏍
+				</a>
 			</div>
 		</div>
 	</div>

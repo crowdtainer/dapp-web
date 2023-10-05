@@ -137,13 +137,12 @@
 		actionButtonEnabled = false;
 
 		if (userWallet === undefined) {
-			console.log('Error: Missing signer.');
-			//TODO: UI error handling
+			showToast('Error: Missing signer.', MessageType.Warning);
 			return;
 		}
 
 		let userWalletAddress = await userWallet.getAddress();
-		if (userWalletAddress === undefined) {
+		if (!userWalletAddress || userWalletAddress === '') {
 			console.log(`Unable to get wallet signer address.`);
 			return;
 		}

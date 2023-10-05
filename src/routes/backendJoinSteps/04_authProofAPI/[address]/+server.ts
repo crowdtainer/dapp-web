@@ -1,16 +1,18 @@
 import { getDatabase } from "$lib/Database/redis";      // Database
 import { type Result, Ok, Err } from "@sniptt/monads";  // Monads
-import type { RequestHandler } from './$types';         // Internal
 
 import { BigNumber, ethers } from 'ethers';             // Ethers
-import { AuthorizationGateway__factory } from '../../../routes/typechain/factories/Crowdtainer.sol/AuthorizationGateway__factory';
-import { error } from "@sveltejs/kit";
+import { AuthorizationGateway__factory } from '../../../typechain/factories/Crowdtainer.sol/AuthorizationGateway__factory';
+import { error, type RequestHandler } from "@sveltejs/kit";
 
 import { AUTHORIZER_PRIVATE_KEY } from '$env/static/private';
 import { AUTHORIZER_SIGNATURE_EXPIRATION_TIME_IN_SECONDS } from '$env/static/private';
 
+const ChainID = import.meta.env.VITE_WALLET_CONNECT_CHAIN_ID;
+import { Vouchers721Address } from '../../../Data/projects.json';
+
 let availableCrowdtainerIds: number[] = [];
-import { projects, ERC20_MaximumPurchaseValuePerWallet } from '../../Data/projects.json';
+import { projects, ERC20_MaximumPurchaseValuePerWallet } from '../../../Data/projects.json';
 import type { CrowdtainerStaticModel } from "$lib/Model/CrowdtainerModel.js";
 import { fetchStaticData } from "$lib/ethersCalls/fetchStaticData.js";
 import { moneyFormatter } from "$lib/Utils/moneyFormatter.js";
@@ -19,22 +21,13 @@ for (let result of projects) {
     availableCrowdtainerIds.push(result.crowdtainerId);
 }
 
-let campaignStaticData = new Array<CrowdtainerStaticModel>();
+let campaignStaticData: CrowdtainerStaticModel[] | undefined;
 
-// POST Inputs: - { 
-//                           calldata: bytes,
-//                }
-export const POST: RequestHandler = async ({ request, params }) => {
-
-    let redis = getDatabase();
-    if (redis === undefined) {
-        throw error(500, `Db connection error.`);
-    }
-
+async function loadCampaignData(): Promise<CrowdtainerStaticModel[]> {
+    let campaignStaticData = new Array<CrowdtainerStaticModel>();
     try {
         for (let i = 0; i < availableCrowdtainerIds.length; i++) {
             let crowdtainer = BigNumber.from(Number(availableCrowdtainerIds[i]));
-            console.log(`Got here`);
             let result = await fetchStaticData(crowdtainer);
 
             if (result.isOk()) {
@@ -48,6 +41,22 @@ export const POST: RequestHandler = async ({ request, params }) => {
         console.log(`Error: ${_error}`);
         throw error(500, `${_error}`);
     }
+    return campaignStaticData;
+}
+
+// POST Inputs: - { 
+//                   calldata: bytes,
+//                }
+export const POST: RequestHandler = async ({ request, params }) => {
+
+    if(!campaignStaticData) { // first execution
+       campaignStaticData =  await loadCampaignData();
+    }
+
+    let redis = getDatabase();
+    if (redis === undefined) {
+        throw error(500, `Db connection error.`);
+    }
 
     let userWalletAddress = params.address;
     let returnValue: string;
@@ -58,15 +67,8 @@ export const POST: RequestHandler = async ({ request, params }) => {
         throw error(500, message);
     }
 
-    // Check if wallet is authorized (only possible when user signed the terms and conditions & validated their Email)
-    let userSigKey = `userSignature:${userWalletAddress}`;
-    const signatureCount = await redis.hget(userSigKey, "signatureCount");
-    console.log(`signatureCount ${signatureCount}`);
-
-    if (signatureCount === null) {
-        const message = `Wallet ${userWalletAddress} has not completed all pre-order steps.`;
-        console.log(message);
-        throw error(400, message);
+    if (!userWalletAddress) {
+        throw error(500, 'Missing wallet address parameter.');
     }
 
     if (!ethers.utils.isAddress(userWalletAddress)) {
@@ -97,13 +99,46 @@ export const POST: RequestHandler = async ({ request, params }) => {
     console.log(`Authorization request received from wallet: ${userWalletAddress}`);
     // Decode function arguments
     const args = abiInterface.decodeFunctionData("getSignedJoinApproval", `${hexCalldata}`);
-    const [crowdtainerAddress, address, quantities, enableReferral, referralAddress] = args;
+    const [crowdtainerAddress, decodedWalletAddress, quantities, enableReferral, referralAddress] = args;
 
-    if (userWalletAddress !== address) {
+    if (userWalletAddress !== decodedWalletAddress) {
         throw error(400, `Unexpected wallet address.`);
     }
 
-    // Apply sanity checks and restrictions
+    // Check if wallet is authorized (only possible when user went through all previous steps).
+    // Check presence of user signature.
+    let userSigKey = `userSignature:${ChainID}:${Vouchers721Address}:${crowdtainerAddress}:${userWalletAddress}`;
+    const signatureCount = await redis.hget(userSigKey, "signatureCount");
+    const userEmail = await redis.hget(userSigKey, "email");
+
+    if (!signatureCount || !userEmail) {
+        const message = `Wallet ${userWalletAddress} has not completed all pre-order steps.`;
+        console.log(message);
+        throw error(400, message);
+    }
+
+    console.log(`signatureCount ${signatureCount}`);
+
+    // Check if wallet has been 'authorized' by users's email.
+    let authorizedWalletsKey = `authorizedWallet:${ChainID}:${Vouchers721Address}:${crowdtainerAddress}:${userEmail}`;
+    const walletResult = await redis.hget(authorizedWalletsKey, "wallet");
+
+    if (!walletResult) {
+        throw error(400, `The wallet has not completed all join steps and is not authorized (${userWalletAddress}).`);
+    } else if (walletResult && walletResult != userWalletAddress) {
+        throw error(400, `Only one wallet per Email is allowed, however the given Email was already used by another wallet. `);
+    }
+
+    const walletNonceResult = Number(await redis.hget(authorizedWalletsKey, "nonce"));
+    if (!walletNonceResult || walletNonceResult == 0) {
+        throw error(500, `Inconsistent data. Please contact the service provider.`);
+    }
+
+    console.log(`raw nonce: ${walletNonceResult}`);
+    const nonce = ethers.utils.hexZeroPad(ethers.utils.hexlify(walletNonceResult), 32);
+    console.log(`actual: ${nonce}`);
+
+    // Apply other sanity checks and restrictions
     let campaignData: CrowdtainerStaticModel | undefined;
     campaignStaticData.forEach((value: CrowdtainerStaticModel, _key: number) => {
         if (value.contractAddress === crowdtainerAddress) {
@@ -143,7 +178,6 @@ export const POST: RequestHandler = async ({ request, params }) => {
     }
 
     let epochExpiration = BigNumber.from(Math.floor(Date.now() / 1000) + AUTHORIZER_SIGNATURE_EXPIRATION_TIME_IN_SECONDS);
-    let nonce = ethers.utils.randomBytes(32);
     let messageHash = ethers.utils.solidityKeccak256(["address", "address", "uint256[]", "bool", "address", "uint64", "bytes32"],
         [crowdtainerAddress, userWalletAddress, quantities, enableReferral, referralAddress, epochExpiration, nonce]);
     let messageHashBinary = ethers.utils.arrayify(messageHash);

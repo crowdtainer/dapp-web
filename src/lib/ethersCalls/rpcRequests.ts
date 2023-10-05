@@ -103,7 +103,7 @@ export async function findTokenIdsForWallet(provider: ethers.Signer | undefined,
         let tokenAssociations = makeNewTokenIDAssociations();
 
         for (let index = 0; index < totalTokens; index++) {
-            const tokenId = await vouchers721Contract.tokenOfOwnerByIndex( provider.getAddress(), BigNumber.from(index));
+            const tokenId = await vouchers721Contract.tokenOfOwnerByIndex(wallet, BigNumber.from(index));
             let crowdtainerId = await vouchers721Contract.tokenIdToCrowdtainerId(tokenId);
             let foundCrowdtainerAddress = await vouchers721Contract.crowdtainerIdToAddress(crowdtainerId);
             console.log(`Wallet ${wallet} is owner of tokenId: ${tokenId}, from crowdtainerId ${crowdtainerId} @ address ${foundCrowdtainerAddress}`);
@@ -156,10 +156,14 @@ export async function leaveProject(provider: ethers.Signer | undefined,
         for (let index = 0; index < tokenIdsAssociations.foundTokenIds.length; index++) {
             if (crowdtainerAddress === tokenIdsAssociations.crowdtainerAddresses[index]) {
                 let leaveTransaction = await vouchers721Contract.leave(tokenIdsAssociations.foundTokenIds[index]);
+                let receipt = await leaveTransaction.wait();
+                if ( receipt === undefined || receipt.status === 0) {
+                    // tx failed
+                    return Err('Leave transaction failed.');
+                }
                 return Ok(leaveTransaction);
             }
         }
-
     } catch (error) {
         return makeError(error);
     }

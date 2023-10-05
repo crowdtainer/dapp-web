@@ -4,8 +4,7 @@ import type { Signer } from 'ethers';
 import { type Result, Ok, Err } from "@sniptt/monads";
 
 export let domain = import.meta.env.VITE_DOMAIN;
-export let termsPath = import.meta.env.VITE_TERMS_OF_AGREEMENT_PATH;
-export let termsURI = `${domain}/${termsPath}`;
+export let termsURI = `${domain}/${import.meta.env.VITE_TERMS_OF_AGREEMENT_PATH}`;
 
 export interface Address {
     country: string;
@@ -27,17 +26,17 @@ export interface DeliveryDetails {
     billingAddress: Address
 }
 
-export function makeAddress() : Address { 
+export function makeAddress(): Address {
     return {
-		country: '',
-		firstName: '',
-		lastName: '',
-		address: '',
-		postalCode: '',
+        country: '',
+        firstName: '',
+        lastName: '',
+        address: '',
+        postalCode: '',
         complement: '',
-		city: '',
-		email: ''
-	};
+        city: '',
+        email: ''
+    };
 }
 
 export function normalizeDeliveryDetails(deliveryDetails: DeliveryDetails): DeliveryDetails {
@@ -75,20 +74,19 @@ export function isTimeValid(timeISO: string): boolean {
     } else return true;
 }
 
-export function makeAgreeToTermsMessage(domain: string, origin: string, email: string, walletAddress: string, nonce: string, ISO8601_issuedAt: string): string {
+export function makeAgreeToTermsMessage(domain: string, email: string, walletAddress: string, chainId: string,
+    voucherAddress: string, crowdtainerAddress: string, nonce: string, ISO8601_issuedAt: string): string {
     const message: string = `
 ${domain} wants you to sign in with your Ethereum account:
 ${walletAddress}
 
-${makeAgreeToTermsStatement(email, termsURI)}
+${makeAgreeToTermsStatement(email, termsURI, chainId, voucherAddress, crowdtainerAddress)}
 
-URI: ${origin}
+URI: ${termsURI}
 Version: 1
 Chain ID: ${import.meta.env.VITE_WALLET_CONNECT_CHAIN_ID}
 Nonce: ${nonce}
-Issued At: ${ISO8601_issuedAt}
-Resources:
-- ${termsURI}`;
+Issued At: ${ISO8601_issuedAt}`;
 
     return message;
 }
@@ -96,7 +94,6 @@ Resources:
 export function makeDeliveryRequestMessage(
     walletAddress: string,
     domain: string,
-    origin: string,
     deliveryAddress: DeliveryDetails,
     nonce: string,
     ISO8601_issuedAt: string
@@ -108,7 +105,7 @@ ${walletAddress}
 
 ${makeDeliveryStatement(deliveryAddress, termsURI)}
 
-URI: ${origin}
+URI: ${termsURI}
 Version: 1
 Chain ID: ${import.meta.env.VITE_WALLET_CONNECT_CHAIN_ID}
 Nonce: ${nonce}
@@ -141,9 +138,10 @@ export function treatSpecialChars(input: string): string {
     return asciiRepresentation.replace(/[^@:/\.a-zA-Z0-9 ]/g, "");
 }
 
-function makeAgreeToTermsStatement(email: string, _termsURI: string): string {
-    let statement = `I agree to the terms and conditions found in ${_termsURI}. ` +
-        `My e-mail address is: ${email}`;
+function makeAgreeToTermsStatement(email: string, _termsURI: string, chainId: string,
+    voucherAddress: string, crowdtainerAddress: string,): string {
+    let statement = `My e-mail address is: ${email}. I agree to the terms and conditions found in ${_termsURI}, for participation in Crowdtainer at network address as specified: \n\n` +
+        `voucher ${voucherAddress},\n crowdtainer: ${crowdtainerAddress}.`;
     return treatSpecialChars(statement);
 }
 
@@ -152,8 +150,8 @@ function makeDeliveryStatement(delivery: DeliveryDetails, _termsURI: string): st
     if (JSON.stringify(delivery.billingAddress) !== JSON.stringify(delivery.deliveryAddress)) {
         billingStatement = `My billing is: ` +
             `${delivery.billingAddress.firstName}, ${delivery.billingAddress.lastName}, ${delivery.billingAddress.address}, ` +
-            `${(delivery.billingAddress.complement !== '')? `${delivery.billingAddress.complement},` : ''} ${delivery.billingAddress.postalCode}, ` +
-            `${(delivery.billingAddress.state)? `${delivery.billingAddress.state},` : ''}  ${delivery.billingAddress.city}, ${delivery.billingAddress.country}. `
+            `${(delivery.billingAddress.complement !== '') ? `${delivery.billingAddress.complement},` : ''} ${delivery.billingAddress.postalCode}, ` +
+            `${(delivery.billingAddress.state) ? `${delivery.billingAddress.state},` : ''}  ${delivery.billingAddress.city}, ${delivery.billingAddress.country}. `
     } else {
         billingStatement = 'Billing address is the same as delivery address.'
     }
@@ -164,8 +162,8 @@ function makeDeliveryStatement(delivery: DeliveryDetails, _termsURI: string): st
         `Proof of payment: ${treatSpecialChars(delivery.vouchers721Address)}, token id: ${treatSpecialChars(`${delivery.voucherId}`)}. ` +
         `My delivery address is: ` +
         `${delivery.deliveryAddress.lastName}, ${delivery.deliveryAddress.firstName}, ${delivery.deliveryAddress.address}, ` +
-        `${(delivery.deliveryAddress.complement !== '')? `${delivery.deliveryAddress.complement},` : ''} ${delivery.deliveryAddress.postalCode}, ` +
-        `${(delivery.deliveryAddress.state !== '')? `${delivery.deliveryAddress.state},` : ''} ${delivery.deliveryAddress.city}, ${delivery.deliveryAddress.country}. ` +
+        `${(delivery.deliveryAddress.complement !== '') ? `${delivery.deliveryAddress.complement},` : ''} ${delivery.deliveryAddress.postalCode}, ` +
+        `${(delivery.deliveryAddress.state !== '') ? `${delivery.deliveryAddress.state},` : ''} ${delivery.deliveryAddress.city}, ${delivery.deliveryAddress.country}. ` +
         billingStatement;
     return statement;
 }

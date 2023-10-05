@@ -122,7 +122,6 @@ export async function callClaimRewards(crowdtainerAddress: string, modalDialog: 
             icon: ModalIcon.Exclamation
         });
     }
-    modalDialog.showDialog();
 };
 
 export async function callTransferParticipationProof(targetWallet: string,

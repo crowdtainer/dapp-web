@@ -68,7 +68,6 @@
 		const nonce = pseudoRandomNonce().toString();
 		const currentTime = new Date().toISOString();
 		const domain = window.location.host;
-		const origin = window.location.origin;
 
 		console.log(`Account: ${walletAddress}`);
 		// make sure address is check-summed; Some wallets don't use checksummed addresses (e.g. Metamask mobile)
@@ -80,7 +79,6 @@
 		let message = makeDeliveryRequestMessage(
 			walletAddress,
 			domain,
-			origin,
 			deliveryDetails,
 			nonce,
 			currentTime
@@ -94,7 +92,6 @@
 			let requestResult = await requestDeliveryAPI(
 				walletAddress,
 				domain,
-				origin,
 				nonce,
 				currentTime,
 				deliveryDetails,
