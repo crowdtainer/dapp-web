@@ -10,19 +10,19 @@
   },
   "ast": {
     "absolutePath": "src/contracts/States.sol",
-    "id": 25920,
+    "id": 26081,
     "exportedSymbols": {
       "CrowdtainerState": [
-        25919
+        26080
       ]
     },
     "nodeType": "SourceUnit",
-    "src": "36:109:32",
+    "src": "36:109:34",
     "nodes": [
       {
-        "id": 25914,
+        "id": 26075,
         "nodeType": "PragmaDirective",
-        "src": "36:24:32",
+        "src": "36:24:34",
         "nodes": [],
         "literals": [
           "solidity",
@@ -32,46 +32,46 @@
         ]
       },
       {
-        "id": 25919,
+        "id": 26080,
         "nodeType": "EnumDefinition",
-        "src": "62:82:32",
+        "src": "62:82:34",
         "nodes": [],
         "canonicalName": "CrowdtainerState",
         "members": [
           {
-            "id": 25915,
+            "id": 26076,
             "name": "Uninitialized",
-            "nameLocation": "90:13:32",
+            "nameLocation": "90:13:34",
             "nodeType": "EnumValue",
-            "src": "90:13:32"
+            "src": "90:13:34"
           },
           {
-            "id": 25916,
+            "id": 26077,
             "name": "Funding",
-            "nameLocation": "109:7:32",
+            "nameLocation": "109:7:34",
             "nodeType": "EnumValue",
-            "src": "109:7:32"
+            "src": "109:7:34"
           },
           {
-            "id": 25917,
+            "id": 26078,
             "name": "Delivery",
-            "nameLocation": "122:8:32",
+            "nameLocation": "122:8:34",
             "nodeType": "EnumValue",
-            "src": "122:8:32"
+            "src": "122:8:34"
           },
           {
-            "id": 25918,
+            "id": 26079,
             "name": "Failed",
-            "nameLocation": "136:6:32",
+            "nameLocation": "136:6:34",
             "nodeType": "EnumValue",
-            "src": "136:6:32"
+            "src": "136:6:34"
           }
         ],
         "name": "CrowdtainerState",
-        "nameLocation": "67:16:32"
+        "nameLocation": "67:16:34"
       }
     ],
     "license": "GPL-3.0"
   },
-  "id": 32
+  "id": 34
 }

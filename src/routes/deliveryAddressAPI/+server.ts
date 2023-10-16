@@ -15,7 +15,7 @@ import { Vouchers721__factory } from "../typechain/factories/Vouchers721__factor
 import { deliveryVoucherKey } from "$lib/Database/schemes";
 import { provider } from '$lib/ethersCalls/provider';
 import { loadTokenURIRepresentation, type TokenURIObject, type Description } from "$lib/Converters/tokenURI.js";
-import { Coin__factory, Crowdtainer__factory } from "../typechain/index.js";
+import { MockERC20__factory, Crowdtainer__factory } from "../typechain/index.js";
 import { camelToSentenceCase } from "$lib/Utils/camelCase.js";
 import { toHuman } from "$lib/Converters/CrowdtainerData.js";
 
@@ -89,7 +89,7 @@ async function getTokenDecimals(provider: ethers.Signer | undefined,
     try {
         let crowdtainerContract = Crowdtainer__factory.connect(crowdtainerAddress, provider);
         let tokenContractAddress = await crowdtainerContract.token();
-        const ERC20Contract = Coin__factory.connect(tokenContractAddress, provider);
+        const ERC20Contract = MockERC20__factory.connect(tokenContractAddress, provider);
         return Ok(await ERC20Contract.decimals());
     } catch (error) {
         console.log(`Error: ${error}`);

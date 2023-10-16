@@ -2,6 +2,8 @@ import WalletConnectProvider from '@walletconnect/web3-provider/dist/umd/index.m
 // Can't use proper import, see: https://github.com/WalletConnect/walletconnect-monorepo/issues/864
 // import WalletConnectProvider from "@walletconnect/web3-provider";
 import { ethers, providers, Signer } from 'ethers';
+import type { TypedDataSigner } from "@ethersproject/abstract-signer";
+
 
 import { writable, derived } from 'svelte/store';
 
@@ -168,7 +170,7 @@ export let wcProvider: WalletConnectProvider;
 
 async function setupWalletConnect() {
     wcProvider = new WalletConnectProvider({
-        qrcodeModalOptions: { desktopLinks: [] },
+        qrcodeModalOptions: { desktopLinks: [], mobileLinks: [] },
         bridge: VITE_WALLET_CONNECT_BRIDGE_SERVER,
         rpc: {
             // Only one network at a time is supported.
@@ -315,7 +317,7 @@ export async function tearDownWallet() {
     updatesCallbackFunction = undefined;
 }
 
-export function getSigner(): Signer | undefined {
+export function getSigner(): Signer & TypedDataSigner | undefined {
     if (web3Provider === undefined) {
         return undefined;
     }

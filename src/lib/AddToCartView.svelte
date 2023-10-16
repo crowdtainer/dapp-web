@@ -228,7 +228,7 @@
 		{#if campaignStaticUI}
 			<div class="flex flex-wrap">
 				{#each productOptions as productOption}
-					<div class='mx-0 max-w-md md:my-2'>
+					<div class="mx-0 max-w-md md:my-2">
 						<div class="text-black text-md font-medium dark:text-gray-200">
 							{productOption.name}
 						</div>

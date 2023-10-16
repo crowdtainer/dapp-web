@@ -67,6 +67,37 @@ export type CampaignDataStructOutput = [
   legalContractURI: string;
 };
 
+export type SignedPermitStruct = {
+  owner: PromiseOrValue<string>;
+  spender: PromiseOrValue<string>;
+  value: PromiseOrValue<BigNumberish>;
+  nonce: PromiseOrValue<BigNumberish>;
+  deadline: PromiseOrValue<BigNumberish>;
+  v: PromiseOrValue<BigNumberish>;
+  r: PromiseOrValue<BytesLike>;
+  s: PromiseOrValue<BytesLike>;
+};
+
+export type SignedPermitStructOutput = [
+  string,
+  string,
+  BigNumber,
+  BigNumber,
+  BigNumber,
+  number,
+  string,
+  string
+] & {
+  owner: string;
+  spender: string;
+  value: BigNumber;
+  nonce: BigNumber;
+  deadline: BigNumber;
+  v: number;
+  r: string;
+  s: string;
+};
+
 export interface Vouchers721Interface extends utils.Interface {
   functions: {
     "ID_MULTIPLE()": FunctionFragment;
@@ -82,9 +113,11 @@ export interface Vouchers721Interface extends utils.Interface {
     "getSignature(bytes)": FunctionFragment;
     "idForCrowdtainer(address)": FunctionFragment;
     "isApprovedForAll(address,address)": FunctionFragment;
+    "join(address,uint256[],bool,address,(address,address,uint256,uint256,uint256,uint8,bytes32,bytes32))": FunctionFragment;
     "join(address,uint256[])": FunctionFragment;
     "join(address,uint256[],bool,address)": FunctionFragment;
     "joinWithSignature(bytes,bytes)": FunctionFragment;
+    "joinWithSignatureAndPermit(bytes,bytes,(address,address,uint256,uint256,uint256,uint8,bytes32,bytes32))": FunctionFragment;
     "leave(uint256)": FunctionFragment;
     "metadataServiceForCrowdatinerId(uint256)": FunctionFragment;
     "name()": FunctionFragment;
@@ -120,9 +153,11 @@ export interface Vouchers721Interface extends utils.Interface {
       | "getSignature"
       | "idForCrowdtainer"
       | "isApprovedForAll"
+      | "join(address,uint256[],bool,address,(address,address,uint256,uint256,uint256,uint8,bytes32,bytes32))"
       | "join(address,uint256[])"
       | "join(address,uint256[],bool,address)"
       | "joinWithSignature"
+      | "joinWithSignatureAndPermit"
       | "leave"
       | "metadataServiceForCrowdatinerId"
       | "name"
@@ -200,6 +235,16 @@ export interface Vouchers721Interface extends utils.Interface {
     values: [PromiseOrValue<string>, PromiseOrValue<string>]
   ): string;
   encodeFunctionData(
+    functionFragment: "join(address,uint256[],bool,address,(address,address,uint256,uint256,uint256,uint8,bytes32,bytes32))",
+    values: [
+      PromiseOrValue<string>,
+      PromiseOrValue<BigNumberish>[],
+      PromiseOrValue<boolean>,
+      PromiseOrValue<string>,
+      SignedPermitStruct
+    ]
+  ): string;
+  encodeFunctionData(
     functionFragment: "join(address,uint256[])",
     values: [PromiseOrValue<string>, PromiseOrValue<BigNumberish>[]]
   ): string;
@@ -215,6 +260,14 @@ export interface Vouchers721Interface extends utils.Interface {
   encodeFunctionData(
     functionFragment: "joinWithSignature",
     values: [PromiseOrValue<BytesLike>, PromiseOrValue<BytesLike>]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "joinWithSignatureAndPermit",
+    values: [
+      PromiseOrValue<BytesLike>,
+      PromiseOrValue<BytesLike>,
+      SignedPermitStruct
+    ]
   ): string;
   encodeFunctionData(
     functionFragment: "leave",
@@ -343,6 +396,10 @@ export interface Vouchers721Interface extends utils.Interface {
     data: BytesLike
   ): Result;
   decodeFunctionResult(
+    functionFragment: "join(address,uint256[],bool,address,(address,address,uint256,uint256,uint256,uint8,bytes32,bytes32))",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
     functionFragment: "join(address,uint256[])",
     data: BytesLike
   ): Result;
@@ -352,6 +409,10 @@ export interface Vouchers721Interface extends utils.Interface {
   ): Result;
   decodeFunctionResult(
     functionFragment: "joinWithSignature",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "joinWithSignatureAndPermit",
     data: BytesLike
   ): Result;
   decodeFunctionResult(functionFragment: "leave", data: BytesLike): Result;
@@ -576,6 +637,15 @@ export interface Vouchers721 extends BaseContract {
       overrides?: CallOverrides
     ): Promise<[boolean]>;
 
+    "join(address,uint256[],bool,address,(address,address,uint256,uint256,uint256,uint8,bytes32,bytes32))"(
+      _crowdtainer: PromiseOrValue<string>,
+      _quantities: PromiseOrValue<BigNumberish>[],
+      _enableReferral: PromiseOrValue<boolean>,
+      _referrer: PromiseOrValue<string>,
+      _signedPermit: SignedPermitStruct,
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
+    ): Promise<ContractTransaction>;
+
     "join(address,uint256[])"(
       _crowdtainer: PromiseOrValue<string>,
       _quantities: PromiseOrValue<BigNumberish>[],
@@ -593,6 +663,13 @@ export interface Vouchers721 extends BaseContract {
     joinWithSignature(
       result: PromiseOrValue<BytesLike>,
       extraData: PromiseOrValue<BytesLike>,
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
+    ): Promise<ContractTransaction>;
+
+    joinWithSignatureAndPermit(
+      result: PromiseOrValue<BytesLike>,
+      extraData: PromiseOrValue<BytesLike>,
+      _signedPermit: SignedPermitStruct,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<ContractTransaction>;
 
@@ -753,6 +830,15 @@ export interface Vouchers721 extends BaseContract {
     overrides?: CallOverrides
   ): Promise<boolean>;
 
+  "join(address,uint256[],bool,address,(address,address,uint256,uint256,uint256,uint8,bytes32,bytes32))"(
+    _crowdtainer: PromiseOrValue<string>,
+    _quantities: PromiseOrValue<BigNumberish>[],
+    _enableReferral: PromiseOrValue<boolean>,
+    _referrer: PromiseOrValue<string>,
+    _signedPermit: SignedPermitStruct,
+    overrides?: Overrides & { from?: PromiseOrValue<string> }
+  ): Promise<ContractTransaction>;
+
   "join(address,uint256[])"(
     _crowdtainer: PromiseOrValue<string>,
     _quantities: PromiseOrValue<BigNumberish>[],
@@ -770,6 +856,13 @@ export interface Vouchers721 extends BaseContract {
   joinWithSignature(
     result: PromiseOrValue<BytesLike>,
     extraData: PromiseOrValue<BytesLike>,
+    overrides?: Overrides & { from?: PromiseOrValue<string> }
+  ): Promise<ContractTransaction>;
+
+  joinWithSignatureAndPermit(
+    result: PromiseOrValue<BytesLike>,
+    extraData: PromiseOrValue<BytesLike>,
+    _signedPermit: SignedPermitStruct,
     overrides?: Overrides & { from?: PromiseOrValue<string> }
   ): Promise<ContractTransaction>;
 
@@ -930,6 +1023,15 @@ export interface Vouchers721 extends BaseContract {
       overrides?: CallOverrides
     ): Promise<boolean>;
 
+    "join(address,uint256[],bool,address,(address,address,uint256,uint256,uint256,uint8,bytes32,bytes32))"(
+      _crowdtainer: PromiseOrValue<string>,
+      _quantities: PromiseOrValue<BigNumberish>[],
+      _enableReferral: PromiseOrValue<boolean>,
+      _referrer: PromiseOrValue<string>,
+      _signedPermit: SignedPermitStruct,
+      overrides?: CallOverrides
+    ): Promise<BigNumber>;
+
     "join(address,uint256[])"(
       _crowdtainer: PromiseOrValue<string>,
       _quantities: PromiseOrValue<BigNumberish>[],
@@ -947,6 +1049,13 @@ export interface Vouchers721 extends BaseContract {
     joinWithSignature(
       result: PromiseOrValue<BytesLike>,
       extraData: PromiseOrValue<BytesLike>,
+      overrides?: CallOverrides
+    ): Promise<BigNumber>;
+
+    joinWithSignatureAndPermit(
+      result: PromiseOrValue<BytesLike>,
+      extraData: PromiseOrValue<BytesLike>,
+      _signedPermit: SignedPermitStruct,
       overrides?: CallOverrides
     ): Promise<BigNumber>;
 
@@ -1159,6 +1268,15 @@ export interface Vouchers721 extends BaseContract {
       overrides?: CallOverrides
     ): Promise<BigNumber>;
 
+    "join(address,uint256[],bool,address,(address,address,uint256,uint256,uint256,uint8,bytes32,bytes32))"(
+      _crowdtainer: PromiseOrValue<string>,
+      _quantities: PromiseOrValue<BigNumberish>[],
+      _enableReferral: PromiseOrValue<boolean>,
+      _referrer: PromiseOrValue<string>,
+      _signedPermit: SignedPermitStruct,
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
+    ): Promise<BigNumber>;
+
     "join(address,uint256[])"(
       _crowdtainer: PromiseOrValue<string>,
       _quantities: PromiseOrValue<BigNumberish>[],
@@ -1176,6 +1294,13 @@ export interface Vouchers721 extends BaseContract {
     joinWithSignature(
       result: PromiseOrValue<BytesLike>,
       extraData: PromiseOrValue<BytesLike>,
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
+    ): Promise<BigNumber>;
+
+    joinWithSignatureAndPermit(
+      result: PromiseOrValue<BytesLike>,
+      extraData: PromiseOrValue<BytesLike>,
+      _signedPermit: SignedPermitStruct,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<BigNumber>;
 
@@ -1337,6 +1462,15 @@ export interface Vouchers721 extends BaseContract {
       overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
 
+    "join(address,uint256[],bool,address,(address,address,uint256,uint256,uint256,uint8,bytes32,bytes32))"(
+      _crowdtainer: PromiseOrValue<string>,
+      _quantities: PromiseOrValue<BigNumberish>[],
+      _enableReferral: PromiseOrValue<boolean>,
+      _referrer: PromiseOrValue<string>,
+      _signedPermit: SignedPermitStruct,
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
+    ): Promise<PopulatedTransaction>;
+
     "join(address,uint256[])"(
       _crowdtainer: PromiseOrValue<string>,
       _quantities: PromiseOrValue<BigNumberish>[],
@@ -1354,6 +1488,13 @@ export interface Vouchers721 extends BaseContract {
     joinWithSignature(
       result: PromiseOrValue<BytesLike>,
       extraData: PromiseOrValue<BytesLike>,
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
+    ): Promise<PopulatedTransaction>;
+
+    joinWithSignatureAndPermit(
+      result: PromiseOrValue<BytesLike>,
+      extraData: PromiseOrValue<BytesLike>,
+      _signedPermit: SignedPermitStruct,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<PopulatedTransaction>;
 

@@ -27,71 +27,45 @@ import type {
   PromiseOrValue,
 } from "../common";
 
-export interface CoinInterface extends utils.Interface {
+export interface MockERC20Interface extends utils.Interface {
   functions: {
     "DOMAIN_SEPARATOR()": FunctionFragment;
-    "PERMIT_TYPEHASH()": FunctionFragment;
-    "addAuthorization(address)": FunctionFragment;
     "allowance(address,address)": FunctionFragment;
     "approve(address,uint256)": FunctionFragment;
-    "authorizedAccounts(address)": FunctionFragment;
     "balanceOf(address)": FunctionFragment;
     "burn(address,uint256)": FunctionFragment;
-    "chainId()": FunctionFragment;
     "decimals()": FunctionFragment;
     "mint(address,uint256)": FunctionFragment;
-    "move(address,address,uint256)": FunctionFragment;
     "name()": FunctionFragment;
     "nonces(address)": FunctionFragment;
-    "permit(address,address,uint256,uint256,bool,uint8,bytes32,bytes32)": FunctionFragment;
-    "pull(address,uint256)": FunctionFragment;
-    "push(address,uint256)": FunctionFragment;
-    "removeAuthorization(address)": FunctionFragment;
+    "permit(address,address,uint256,uint256,uint8,bytes32,bytes32)": FunctionFragment;
     "symbol()": FunctionFragment;
     "totalSupply()": FunctionFragment;
     "transfer(address,uint256)": FunctionFragment;
     "transferFrom(address,address,uint256)": FunctionFragment;
-    "version()": FunctionFragment;
   };
 
   getFunction(
     nameOrSignatureOrTopic:
       | "DOMAIN_SEPARATOR"
-      | "PERMIT_TYPEHASH"
-      | "addAuthorization"
       | "allowance"
       | "approve"
-      | "authorizedAccounts"
       | "balanceOf"
       | "burn"
-      | "chainId"
       | "decimals"
       | "mint"
-      | "move"
       | "name"
       | "nonces"
       | "permit"
-      | "pull"
-      | "push"
-      | "removeAuthorization"
       | "symbol"
       | "totalSupply"
       | "transfer"
       | "transferFrom"
-      | "version"
   ): FunctionFragment;
 
   encodeFunctionData(
     functionFragment: "DOMAIN_SEPARATOR",
     values?: undefined
-  ): string;
-  encodeFunctionData(
-    functionFragment: "PERMIT_TYPEHASH",
-    values?: undefined
-  ): string;
-  encodeFunctionData(
-    functionFragment: "addAuthorization",
-    values: [PromiseOrValue<string>]
   ): string;
   encodeFunctionData(
     functionFragment: "allowance",
@@ -102,10 +76,6 @@ export interface CoinInterface extends utils.Interface {
     values: [PromiseOrValue<string>, PromiseOrValue<BigNumberish>]
   ): string;
   encodeFunctionData(
-    functionFragment: "authorizedAccounts",
-    values: [PromiseOrValue<string>]
-  ): string;
-  encodeFunctionData(
     functionFragment: "balanceOf",
     values: [PromiseOrValue<string>]
   ): string;
@@ -113,19 +83,10 @@ export interface CoinInterface extends utils.Interface {
     functionFragment: "burn",
     values: [PromiseOrValue<string>, PromiseOrValue<BigNumberish>]
   ): string;
-  encodeFunctionData(functionFragment: "chainId", values?: undefined): string;
   encodeFunctionData(functionFragment: "decimals", values?: undefined): string;
   encodeFunctionData(
     functionFragment: "mint",
     values: [PromiseOrValue<string>, PromiseOrValue<BigNumberish>]
-  ): string;
-  encodeFunctionData(
-    functionFragment: "move",
-    values: [
-      PromiseOrValue<string>,
-      PromiseOrValue<string>,
-      PromiseOrValue<BigNumberish>
-    ]
   ): string;
   encodeFunctionData(functionFragment: "name", values?: undefined): string;
   encodeFunctionData(
@@ -139,23 +100,10 @@ export interface CoinInterface extends utils.Interface {
       PromiseOrValue<string>,
       PromiseOrValue<BigNumberish>,
       PromiseOrValue<BigNumberish>,
-      PromiseOrValue<boolean>,
       PromiseOrValue<BigNumberish>,
       PromiseOrValue<BytesLike>,
       PromiseOrValue<BytesLike>
     ]
-  ): string;
-  encodeFunctionData(
-    functionFragment: "pull",
-    values: [PromiseOrValue<string>, PromiseOrValue<BigNumberish>]
-  ): string;
-  encodeFunctionData(
-    functionFragment: "push",
-    values: [PromiseOrValue<string>, PromiseOrValue<BigNumberish>]
-  ): string;
-  encodeFunctionData(
-    functionFragment: "removeAuthorization",
-    values: [PromiseOrValue<string>]
   ): string;
   encodeFunctionData(functionFragment: "symbol", values?: undefined): string;
   encodeFunctionData(
@@ -174,41 +122,20 @@ export interface CoinInterface extends utils.Interface {
       PromiseOrValue<BigNumberish>
     ]
   ): string;
-  encodeFunctionData(functionFragment: "version", values?: undefined): string;
 
   decodeFunctionResult(
     functionFragment: "DOMAIN_SEPARATOR",
     data: BytesLike
   ): Result;
-  decodeFunctionResult(
-    functionFragment: "PERMIT_TYPEHASH",
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(
-    functionFragment: "addAuthorization",
-    data: BytesLike
-  ): Result;
   decodeFunctionResult(functionFragment: "allowance", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "approve", data: BytesLike): Result;
-  decodeFunctionResult(
-    functionFragment: "authorizedAccounts",
-    data: BytesLike
-  ): Result;
   decodeFunctionResult(functionFragment: "balanceOf", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "burn", data: BytesLike): Result;
-  decodeFunctionResult(functionFragment: "chainId", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "decimals", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "mint", data: BytesLike): Result;
-  decodeFunctionResult(functionFragment: "move", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "name", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "nonces", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "permit", data: BytesLike): Result;
-  decodeFunctionResult(functionFragment: "pull", data: BytesLike): Result;
-  decodeFunctionResult(functionFragment: "push", data: BytesLike): Result;
-  decodeFunctionResult(
-    functionFragment: "removeAuthorization",
-    data: BytesLike
-  ): Result;
   decodeFunctionResult(functionFragment: "symbol", data: BytesLike): Result;
   decodeFunctionResult(
     functionFragment: "totalSupply",
@@ -219,36 +146,20 @@ export interface CoinInterface extends utils.Interface {
     functionFragment: "transferFrom",
     data: BytesLike
   ): Result;
-  decodeFunctionResult(functionFragment: "version", data: BytesLike): Result;
 
   events: {
-    "AddAuthorization(address)": EventFragment;
     "Approval(address,address,uint256)": EventFragment;
-    "RemoveAuthorization(address)": EventFragment;
     "Transfer(address,address,uint256)": EventFragment;
   };
 
-  getEvent(nameOrSignatureOrTopic: "AddAuthorization"): EventFragment;
   getEvent(nameOrSignatureOrTopic: "Approval"): EventFragment;
-  getEvent(nameOrSignatureOrTopic: "RemoveAuthorization"): EventFragment;
   getEvent(nameOrSignatureOrTopic: "Transfer"): EventFragment;
 }
-
-export interface AddAuthorizationEventObject {
-  account: string;
-}
-export type AddAuthorizationEvent = TypedEvent<
-  [string],
-  AddAuthorizationEventObject
->;
-
-export type AddAuthorizationEventFilter =
-  TypedEventFilter<AddAuthorizationEvent>;
 
 export interface ApprovalEventObject {
   owner: string;
   spender: string;
-  value: BigNumber;
+  amount: BigNumber;
 }
 export type ApprovalEvent = TypedEvent<
   [string, string, BigNumber],
@@ -257,21 +168,10 @@ export type ApprovalEvent = TypedEvent<
 
 export type ApprovalEventFilter = TypedEventFilter<ApprovalEvent>;
 
-export interface RemoveAuthorizationEventObject {
-  account: string;
-}
-export type RemoveAuthorizationEvent = TypedEvent<
-  [string],
-  RemoveAuthorizationEventObject
->;
-
-export type RemoveAuthorizationEventFilter =
-  TypedEventFilter<RemoveAuthorizationEvent>;
-
 export interface TransferEventObject {
   from: string;
   to: string;
-  value: BigNumber;
+  amount: BigNumber;
 }
 export type TransferEvent = TypedEvent<
   [string, string, BigNumber],
@@ -280,12 +180,12 @@ export type TransferEvent = TypedEvent<
 
 export type TransferEventFilter = TypedEventFilter<TransferEvent>;
 
-export interface Coin extends BaseContract {
+export interface MockERC20 extends BaseContract {
   connect(signerOrProvider: Signer | Provider | string): this;
   attach(addressOrName: string): this;
   deployed(): Promise<this>;
 
-  interface: CoinInterface;
+  interface: MockERC20Interface;
 
   queryFilter<TEvent extends TypedEvent>(
     event: TypedEventFilter<TEvent>,
@@ -309,13 +209,6 @@ export interface Coin extends BaseContract {
   functions: {
     DOMAIN_SEPARATOR(overrides?: CallOverrides): Promise<[string]>;
 
-    PERMIT_TYPEHASH(overrides?: CallOverrides): Promise<[string]>;
-
-    addAuthorization(
-      account: PromiseOrValue<string>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<ContractTransaction>;
-
     allowance(
       arg0: PromiseOrValue<string>,
       arg1: PromiseOrValue<string>,
@@ -323,15 +216,10 @@ export interface Coin extends BaseContract {
     ): Promise<[BigNumber]>;
 
     approve(
-      usr: PromiseOrValue<string>,
+      spender: PromiseOrValue<string>,
       amount: PromiseOrValue<BigNumberish>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<ContractTransaction>;
-
-    authorizedAccounts(
-      arg0: PromiseOrValue<string>,
-      overrides?: CallOverrides
-    ): Promise<[BigNumber]>;
 
     balanceOf(
       arg0: PromiseOrValue<string>,
@@ -339,25 +227,16 @@ export interface Coin extends BaseContract {
     ): Promise<[BigNumber]>;
 
     burn(
-      usr: PromiseOrValue<string>,
-      amount: PromiseOrValue<BigNumberish>,
+      from: PromiseOrValue<string>,
+      value: PromiseOrValue<BigNumberish>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<ContractTransaction>;
-
-    chainId(overrides?: CallOverrides): Promise<[BigNumber]>;
 
     decimals(overrides?: CallOverrides): Promise<[number]>;
 
     mint(
-      usr: PromiseOrValue<string>,
-      amount: PromiseOrValue<BigNumberish>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<ContractTransaction>;
-
-    move(
-      src: PromiseOrValue<string>,
-      dst: PromiseOrValue<string>,
-      amount: PromiseOrValue<BigNumberish>,
+      to: PromiseOrValue<string>,
+      value: PromiseOrValue<BigNumberish>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<ContractTransaction>;
 
@@ -369,31 +248,13 @@ export interface Coin extends BaseContract {
     ): Promise<[BigNumber]>;
 
     permit(
-      holder: PromiseOrValue<string>,
+      owner: PromiseOrValue<string>,
       spender: PromiseOrValue<string>,
-      nonce: PromiseOrValue<BigNumberish>,
-      expiry: PromiseOrValue<BigNumberish>,
-      allowed: PromiseOrValue<boolean>,
+      value: PromiseOrValue<BigNumberish>,
+      deadline: PromiseOrValue<BigNumberish>,
       v: PromiseOrValue<BigNumberish>,
       r: PromiseOrValue<BytesLike>,
       s: PromiseOrValue<BytesLike>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<ContractTransaction>;
-
-    pull(
-      usr: PromiseOrValue<string>,
-      amount: PromiseOrValue<BigNumberish>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<ContractTransaction>;
-
-    push(
-      usr: PromiseOrValue<string>,
-      amount: PromiseOrValue<BigNumberish>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<ContractTransaction>;
-
-    removeAuthorization(
-      account: PromiseOrValue<string>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<ContractTransaction>;
 
@@ -402,29 +263,20 @@ export interface Coin extends BaseContract {
     totalSupply(overrides?: CallOverrides): Promise<[BigNumber]>;
 
     transfer(
-      dst: PromiseOrValue<string>,
+      to: PromiseOrValue<string>,
       amount: PromiseOrValue<BigNumberish>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<ContractTransaction>;
 
     transferFrom(
-      src: PromiseOrValue<string>,
-      dst: PromiseOrValue<string>,
+      from: PromiseOrValue<string>,
+      to: PromiseOrValue<string>,
       amount: PromiseOrValue<BigNumberish>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<ContractTransaction>;
-
-    version(overrides?: CallOverrides): Promise<[string]>;
   };
 
   DOMAIN_SEPARATOR(overrides?: CallOverrides): Promise<string>;
-
-  PERMIT_TYPEHASH(overrides?: CallOverrides): Promise<string>;
-
-  addAuthorization(
-    account: PromiseOrValue<string>,
-    overrides?: Overrides & { from?: PromiseOrValue<string> }
-  ): Promise<ContractTransaction>;
 
   allowance(
     arg0: PromiseOrValue<string>,
@@ -433,15 +285,10 @@ export interface Coin extends BaseContract {
   ): Promise<BigNumber>;
 
   approve(
-    usr: PromiseOrValue<string>,
+    spender: PromiseOrValue<string>,
     amount: PromiseOrValue<BigNumberish>,
     overrides?: Overrides & { from?: PromiseOrValue<string> }
   ): Promise<ContractTransaction>;
-
-  authorizedAccounts(
-    arg0: PromiseOrValue<string>,
-    overrides?: CallOverrides
-  ): Promise<BigNumber>;
 
   balanceOf(
     arg0: PromiseOrValue<string>,
@@ -449,25 +296,16 @@ export interface Coin extends BaseContract {
   ): Promise<BigNumber>;
 
   burn(
-    usr: PromiseOrValue<string>,
-    amount: PromiseOrValue<BigNumberish>,
+    from: PromiseOrValue<string>,
+    value: PromiseOrValue<BigNumberish>,
     overrides?: Overrides & { from?: PromiseOrValue<string> }
   ): Promise<ContractTransaction>;
-
-  chainId(overrides?: CallOverrides): Promise<BigNumber>;
 
   decimals(overrides?: CallOverrides): Promise<number>;
 
   mint(
-    usr: PromiseOrValue<string>,
-    amount: PromiseOrValue<BigNumberish>,
-    overrides?: Overrides & { from?: PromiseOrValue<string> }
-  ): Promise<ContractTransaction>;
-
-  move(
-    src: PromiseOrValue<string>,
-    dst: PromiseOrValue<string>,
-    amount: PromiseOrValue<BigNumberish>,
+    to: PromiseOrValue<string>,
+    value: PromiseOrValue<BigNumberish>,
     overrides?: Overrides & { from?: PromiseOrValue<string> }
   ): Promise<ContractTransaction>;
 
@@ -479,31 +317,13 @@ export interface Coin extends BaseContract {
   ): Promise<BigNumber>;
 
   permit(
-    holder: PromiseOrValue<string>,
+    owner: PromiseOrValue<string>,
     spender: PromiseOrValue<string>,
-    nonce: PromiseOrValue<BigNumberish>,
-    expiry: PromiseOrValue<BigNumberish>,
-    allowed: PromiseOrValue<boolean>,
+    value: PromiseOrValue<BigNumberish>,
+    deadline: PromiseOrValue<BigNumberish>,
     v: PromiseOrValue<BigNumberish>,
     r: PromiseOrValue<BytesLike>,
     s: PromiseOrValue<BytesLike>,
-    overrides?: Overrides & { from?: PromiseOrValue<string> }
-  ): Promise<ContractTransaction>;
-
-  pull(
-    usr: PromiseOrValue<string>,
-    amount: PromiseOrValue<BigNumberish>,
-    overrides?: Overrides & { from?: PromiseOrValue<string> }
-  ): Promise<ContractTransaction>;
-
-  push(
-    usr: PromiseOrValue<string>,
-    amount: PromiseOrValue<BigNumberish>,
-    overrides?: Overrides & { from?: PromiseOrValue<string> }
-  ): Promise<ContractTransaction>;
-
-  removeAuthorization(
-    account: PromiseOrValue<string>,
     overrides?: Overrides & { from?: PromiseOrValue<string> }
   ): Promise<ContractTransaction>;
 
@@ -512,29 +332,20 @@ export interface Coin extends BaseContract {
   totalSupply(overrides?: CallOverrides): Promise<BigNumber>;
 
   transfer(
-    dst: PromiseOrValue<string>,
+    to: PromiseOrValue<string>,
     amount: PromiseOrValue<BigNumberish>,
     overrides?: Overrides & { from?: PromiseOrValue<string> }
   ): Promise<ContractTransaction>;
 
   transferFrom(
-    src: PromiseOrValue<string>,
-    dst: PromiseOrValue<string>,
+    from: PromiseOrValue<string>,
+    to: PromiseOrValue<string>,
     amount: PromiseOrValue<BigNumberish>,
     overrides?: Overrides & { from?: PromiseOrValue<string> }
   ): Promise<ContractTransaction>;
 
-  version(overrides?: CallOverrides): Promise<string>;
-
   callStatic: {
     DOMAIN_SEPARATOR(overrides?: CallOverrides): Promise<string>;
-
-    PERMIT_TYPEHASH(overrides?: CallOverrides): Promise<string>;
-
-    addAuthorization(
-      account: PromiseOrValue<string>,
-      overrides?: CallOverrides
-    ): Promise<void>;
 
     allowance(
       arg0: PromiseOrValue<string>,
@@ -543,15 +354,10 @@ export interface Coin extends BaseContract {
     ): Promise<BigNumber>;
 
     approve(
-      usr: PromiseOrValue<string>,
+      spender: PromiseOrValue<string>,
       amount: PromiseOrValue<BigNumberish>,
       overrides?: CallOverrides
     ): Promise<boolean>;
-
-    authorizedAccounts(
-      arg0: PromiseOrValue<string>,
-      overrides?: CallOverrides
-    ): Promise<BigNumber>;
 
     balanceOf(
       arg0: PromiseOrValue<string>,
@@ -559,25 +365,16 @@ export interface Coin extends BaseContract {
     ): Promise<BigNumber>;
 
     burn(
-      usr: PromiseOrValue<string>,
-      amount: PromiseOrValue<BigNumberish>,
+      from: PromiseOrValue<string>,
+      value: PromiseOrValue<BigNumberish>,
       overrides?: CallOverrides
     ): Promise<void>;
-
-    chainId(overrides?: CallOverrides): Promise<BigNumber>;
 
     decimals(overrides?: CallOverrides): Promise<number>;
 
     mint(
-      usr: PromiseOrValue<string>,
-      amount: PromiseOrValue<BigNumberish>,
-      overrides?: CallOverrides
-    ): Promise<void>;
-
-    move(
-      src: PromiseOrValue<string>,
-      dst: PromiseOrValue<string>,
-      amount: PromiseOrValue<BigNumberish>,
+      to: PromiseOrValue<string>,
+      value: PromiseOrValue<BigNumberish>,
       overrides?: CallOverrides
     ): Promise<void>;
 
@@ -589,31 +386,13 @@ export interface Coin extends BaseContract {
     ): Promise<BigNumber>;
 
     permit(
-      holder: PromiseOrValue<string>,
+      owner: PromiseOrValue<string>,
       spender: PromiseOrValue<string>,
-      nonce: PromiseOrValue<BigNumberish>,
-      expiry: PromiseOrValue<BigNumberish>,
-      allowed: PromiseOrValue<boolean>,
+      value: PromiseOrValue<BigNumberish>,
+      deadline: PromiseOrValue<BigNumberish>,
       v: PromiseOrValue<BigNumberish>,
       r: PromiseOrValue<BytesLike>,
       s: PromiseOrValue<BytesLike>,
-      overrides?: CallOverrides
-    ): Promise<void>;
-
-    pull(
-      usr: PromiseOrValue<string>,
-      amount: PromiseOrValue<BigNumberish>,
-      overrides?: CallOverrides
-    ): Promise<void>;
-
-    push(
-      usr: PromiseOrValue<string>,
-      amount: PromiseOrValue<BigNumberish>,
-      overrides?: CallOverrides
-    ): Promise<void>;
-
-    removeAuthorization(
-      account: PromiseOrValue<string>,
       overrides?: CallOverrides
     ): Promise<void>;
 
@@ -622,62 +401,45 @@ export interface Coin extends BaseContract {
     totalSupply(overrides?: CallOverrides): Promise<BigNumber>;
 
     transfer(
-      dst: PromiseOrValue<string>,
+      to: PromiseOrValue<string>,
       amount: PromiseOrValue<BigNumberish>,
       overrides?: CallOverrides
     ): Promise<boolean>;
 
     transferFrom(
-      src: PromiseOrValue<string>,
-      dst: PromiseOrValue<string>,
+      from: PromiseOrValue<string>,
+      to: PromiseOrValue<string>,
       amount: PromiseOrValue<BigNumberish>,
       overrides?: CallOverrides
     ): Promise<boolean>;
-
-    version(overrides?: CallOverrides): Promise<string>;
   };
 
   filters: {
-    "AddAuthorization(address)"(account?: null): AddAuthorizationEventFilter;
-    AddAuthorization(account?: null): AddAuthorizationEventFilter;
-
     "Approval(address,address,uint256)"(
       owner?: PromiseOrValue<string> | null,
       spender?: PromiseOrValue<string> | null,
-      value?: null
+      amount?: null
     ): ApprovalEventFilter;
     Approval(
       owner?: PromiseOrValue<string> | null,
       spender?: PromiseOrValue<string> | null,
-      value?: null
+      amount?: null
     ): ApprovalEventFilter;
-
-    "RemoveAuthorization(address)"(
-      account?: null
-    ): RemoveAuthorizationEventFilter;
-    RemoveAuthorization(account?: null): RemoveAuthorizationEventFilter;
 
     "Transfer(address,address,uint256)"(
       from?: PromiseOrValue<string> | null,
       to?: PromiseOrValue<string> | null,
-      value?: null
+      amount?: null
     ): TransferEventFilter;
     Transfer(
       from?: PromiseOrValue<string> | null,
       to?: PromiseOrValue<string> | null,
-      value?: null
+      amount?: null
     ): TransferEventFilter;
   };
 
   estimateGas: {
     DOMAIN_SEPARATOR(overrides?: CallOverrides): Promise<BigNumber>;
-
-    PERMIT_TYPEHASH(overrides?: CallOverrides): Promise<BigNumber>;
-
-    addAuthorization(
-      account: PromiseOrValue<string>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<BigNumber>;
 
     allowance(
       arg0: PromiseOrValue<string>,
@@ -686,14 +448,9 @@ export interface Coin extends BaseContract {
     ): Promise<BigNumber>;
 
     approve(
-      usr: PromiseOrValue<string>,
+      spender: PromiseOrValue<string>,
       amount: PromiseOrValue<BigNumberish>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<BigNumber>;
-
-    authorizedAccounts(
-      arg0: PromiseOrValue<string>,
-      overrides?: CallOverrides
     ): Promise<BigNumber>;
 
     balanceOf(
@@ -702,25 +459,16 @@ export interface Coin extends BaseContract {
     ): Promise<BigNumber>;
 
     burn(
-      usr: PromiseOrValue<string>,
-      amount: PromiseOrValue<BigNumberish>,
+      from: PromiseOrValue<string>,
+      value: PromiseOrValue<BigNumberish>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<BigNumber>;
-
-    chainId(overrides?: CallOverrides): Promise<BigNumber>;
 
     decimals(overrides?: CallOverrides): Promise<BigNumber>;
 
     mint(
-      usr: PromiseOrValue<string>,
-      amount: PromiseOrValue<BigNumberish>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<BigNumber>;
-
-    move(
-      src: PromiseOrValue<string>,
-      dst: PromiseOrValue<string>,
-      amount: PromiseOrValue<BigNumberish>,
+      to: PromiseOrValue<string>,
+      value: PromiseOrValue<BigNumberish>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<BigNumber>;
 
@@ -732,31 +480,13 @@ export interface Coin extends BaseContract {
     ): Promise<BigNumber>;
 
     permit(
-      holder: PromiseOrValue<string>,
+      owner: PromiseOrValue<string>,
       spender: PromiseOrValue<string>,
-      nonce: PromiseOrValue<BigNumberish>,
-      expiry: PromiseOrValue<BigNumberish>,
-      allowed: PromiseOrValue<boolean>,
+      value: PromiseOrValue<BigNumberish>,
+      deadline: PromiseOrValue<BigNumberish>,
       v: PromiseOrValue<BigNumberish>,
       r: PromiseOrValue<BytesLike>,
       s: PromiseOrValue<BytesLike>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<BigNumber>;
-
-    pull(
-      usr: PromiseOrValue<string>,
-      amount: PromiseOrValue<BigNumberish>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<BigNumber>;
-
-    push(
-      usr: PromiseOrValue<string>,
-      amount: PromiseOrValue<BigNumberish>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<BigNumber>;
-
-    removeAuthorization(
-      account: PromiseOrValue<string>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<BigNumber>;
 
@@ -765,30 +495,21 @@ export interface Coin extends BaseContract {
     totalSupply(overrides?: CallOverrides): Promise<BigNumber>;
 
     transfer(
-      dst: PromiseOrValue<string>,
+      to: PromiseOrValue<string>,
       amount: PromiseOrValue<BigNumberish>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<BigNumber>;
 
     transferFrom(
-      src: PromiseOrValue<string>,
-      dst: PromiseOrValue<string>,
+      from: PromiseOrValue<string>,
+      to: PromiseOrValue<string>,
       amount: PromiseOrValue<BigNumberish>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<BigNumber>;
-
-    version(overrides?: CallOverrides): Promise<BigNumber>;
   };
 
   populateTransaction: {
     DOMAIN_SEPARATOR(overrides?: CallOverrides): Promise<PopulatedTransaction>;
-
-    PERMIT_TYPEHASH(overrides?: CallOverrides): Promise<PopulatedTransaction>;
-
-    addAuthorization(
-      account: PromiseOrValue<string>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<PopulatedTransaction>;
 
     allowance(
       arg0: PromiseOrValue<string>,
@@ -797,14 +518,9 @@ export interface Coin extends BaseContract {
     ): Promise<PopulatedTransaction>;
 
     approve(
-      usr: PromiseOrValue<string>,
+      spender: PromiseOrValue<string>,
       amount: PromiseOrValue<BigNumberish>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<PopulatedTransaction>;
-
-    authorizedAccounts(
-      arg0: PromiseOrValue<string>,
-      overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
 
     balanceOf(
@@ -813,25 +529,16 @@ export interface Coin extends BaseContract {
     ): Promise<PopulatedTransaction>;
 
     burn(
-      usr: PromiseOrValue<string>,
-      amount: PromiseOrValue<BigNumberish>,
+      from: PromiseOrValue<string>,
+      value: PromiseOrValue<BigNumberish>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<PopulatedTransaction>;
-
-    chainId(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
     decimals(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
     mint(
-      usr: PromiseOrValue<string>,
-      amount: PromiseOrValue<BigNumberish>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<PopulatedTransaction>;
-
-    move(
-      src: PromiseOrValue<string>,
-      dst: PromiseOrValue<string>,
-      amount: PromiseOrValue<BigNumberish>,
+      to: PromiseOrValue<string>,
+      value: PromiseOrValue<BigNumberish>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<PopulatedTransaction>;
 
@@ -843,31 +550,13 @@ export interface Coin extends BaseContract {
     ): Promise<PopulatedTransaction>;
 
     permit(
-      holder: PromiseOrValue<string>,
+      owner: PromiseOrValue<string>,
       spender: PromiseOrValue<string>,
-      nonce: PromiseOrValue<BigNumberish>,
-      expiry: PromiseOrValue<BigNumberish>,
-      allowed: PromiseOrValue<boolean>,
+      value: PromiseOrValue<BigNumberish>,
+      deadline: PromiseOrValue<BigNumberish>,
       v: PromiseOrValue<BigNumberish>,
       r: PromiseOrValue<BytesLike>,
       s: PromiseOrValue<BytesLike>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<PopulatedTransaction>;
-
-    pull(
-      usr: PromiseOrValue<string>,
-      amount: PromiseOrValue<BigNumberish>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<PopulatedTransaction>;
-
-    push(
-      usr: PromiseOrValue<string>,
-      amount: PromiseOrValue<BigNumberish>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<PopulatedTransaction>;
-
-    removeAuthorization(
-      account: PromiseOrValue<string>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<PopulatedTransaction>;
 
@@ -876,18 +565,16 @@ export interface Coin extends BaseContract {
     totalSupply(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
     transfer(
-      dst: PromiseOrValue<string>,
+      to: PromiseOrValue<string>,
       amount: PromiseOrValue<BigNumberish>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<PopulatedTransaction>;
 
     transferFrom(
-      src: PromiseOrValue<string>,
-      dst: PromiseOrValue<string>,
+      from: PromiseOrValue<string>,
+      to: PromiseOrValue<string>,
       amount: PromiseOrValue<BigNumberish>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<PopulatedTransaction>;
-
-    version(overrides?: CallOverrides): Promise<PopulatedTransaction>;
   };
 }

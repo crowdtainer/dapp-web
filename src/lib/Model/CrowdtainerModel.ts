@@ -9,6 +9,7 @@ export type CrowdtainerDynamicModel = {
 }
 
 export type CrowdtainerStaticModel = {
+	chainId: number;
 	contractAddress: string;
 	serviceProvider: string;
 	startDate: BigNumber;
@@ -17,9 +18,11 @@ export type CrowdtainerStaticModel = {
 	maximumGoal: BigNumber;
 	productDescription: string[];
 	prices: BigNumber[];
-	token: string;
+	tokenAddress: string;
 	tokenDecimals: number;
 	tokenSymbol: string;
+	tokenName: string;
+	tokenVersion: string;
 	signer: string;
 	referralRate: BigNumber;
 }

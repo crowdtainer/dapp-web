@@ -185,6 +185,7 @@ export type UIFields = {
     minimum: string;
     maximum: string;
     tokenSymbol: string;
+    tokenName: string;
     tokenDecimals: number;
     prices: number[];
     descriptions: string[];
@@ -201,6 +202,7 @@ export function prepareForUI(data: CrowdtainerStaticModel): UIFields {
         minimum: toHuman(data.minimumGoal, data.tokenDecimals).toString(),
         maximum: toHuman(data.maximumGoal, data.tokenDecimals).toString(),
         tokenSymbol: tokenSymbolPretty(data.tokenSymbol),
+        tokenName: data.tokenName,
         tokenDecimals: data.tokenDecimals ? data.tokenDecimals : 0, // TODO
         prices: toHumanPrices(data.prices, data.tokenDecimals),
         descriptions: prettyDescription(data.productDescription),

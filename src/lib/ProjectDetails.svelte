@@ -147,11 +147,11 @@
 					<td>
 						<button
 							on:click={() => {
-								copyToClipBoardAndNotify('ERC-20 token addess', campaignStaticData.token);
+								copyToClipBoardAndNotify('ERC-20 token addess', campaignStaticData.tokenAddress);
 							}}
 						>
 							<span class="inline-flex items-baseline">
-								<span>{shortenAddress(campaignStaticData.token)} </span>
+								<span>{shortenAddress(campaignStaticData.tokenAddress)} </span>
 								<span
 									><Icon
 										src={Clipboard}

@@ -10,6 +10,8 @@ import { decodeEthersError } from '$lib/Converters/EthersErrorHandler';
 import { getSigner } from '$lib/Utils/wallet';
 import type { WalletCrowdtainerModel } from '$lib/Model/WalletCrowdtainerModel.js';
 import { toHuman } from '$lib/Converters/CrowdtainerData.js';
+import type { SignedPermitStruct } from '../../routes/typechain/Vouchers721.js';
+import { IERC20Permit__factory, type IERC20Permit } from '../../routes/typechain/index.js';
 
 function makeError(error: any): Result<ContractTransaction, string> {
     let errorDecoderResult = decodeEthersError(error);
@@ -157,7 +159,7 @@ export async function leaveProject(provider: ethers.Signer | undefined,
             if (crowdtainerAddress === tokenIdsAssociations.crowdtainerAddresses[index]) {
                 let leaveTransaction = await vouchers721Contract.leave(tokenIdsAssociations.foundTokenIds[index]);
                 let receipt = await leaveTransaction.wait();
-                if ( receipt === undefined || receipt.status === 0) {
+                if (receipt === undefined || receipt.status === 0) {
                     // tx failed
                     return Err('Leave transaction failed.');
                 }
@@ -263,7 +265,8 @@ export async function getSignerForCrowdtainer(provider: ethers.Signer, crowdtain
 export async function joinProjectWithSignature(provider: ethers.Signer | undefined, vouchers721Address: string,
     crowdtainerAddress: string,
     signedPayload: string,
-    calldata: string): Promise<Result<ContractTransaction, string>> {
+    calldata: string,
+    signedPermit: SignedPermitStruct | undefined): Promise<Result<ContractTransaction, string>> {
     if (provider === undefined) {
         return Err("Provider not available.");
     }
@@ -271,7 +274,15 @@ export async function joinProjectWithSignature(provider: ethers.Signer | undefin
         console.log(`EIP-3668: join with signature enabled. Vouchers721 @ ${vouchers721Address}; Crowdtainer @ ${crowdtainerAddress}`);
 
         const vouchers721Contract = Vouchers721__factory.connect(vouchers721Address, provider);
-        let result: ContractTransaction = await vouchers721Contract.joinWithSignature(signedPayload, calldata);
+
+        let result: ContractTransaction;
+        if (signedPermit) {
+            console.log(`Join with signature call invoked with allowance permit.`);
+            result = await vouchers721Contract.joinWithSignatureAndPermit(signedPayload, calldata, signedPermit);
+        } else {
+            result = await vouchers721Contract.joinWithSignature(signedPayload, calldata);
+            console.log(`Join with signature call invoked wihout allowance permit.`);
+        }
 
         return Ok(result);
     } catch (error) {
@@ -285,7 +296,8 @@ export async function joinProject(provider: ethers.Signer | undefined,
     crowdtainerAddress: string,
     quantities: number[],
     validUserCouponCode: string,
-    referralEnabled: boolean): Promise<Result<ContractTransaction, string>> {
+    referralEnabled: boolean,
+    signedPermit: SignedPermitStruct | undefined): Promise<Result<ContractTransaction, string>> {
 
     if (provider === undefined) {
         return Err("Provider not available.");
@@ -301,8 +313,18 @@ export async function joinProject(provider: ethers.Signer | undefined,
 
         console.log(`EIP-3668: join with signature disabled. Vouchers721 @ ${vouchers721Address}; Crowdtainer @ ${crowdtainerAddress}`);
 
-        let result: ContractTransaction = await vouchers721Contract['join(address,uint256[],bool,address)'](crowdtainerAddress, quantitiesBigNum, referralEnabled, validUserCouponCode)
-        return Ok(result);
+        if (signedPermit) {
+            console.log(`Join call invoked with permit/allowance.`);
+            let result: ContractTransaction = await vouchers721Contract['join(address,uint256[],bool,address,(address,address,uint256,uint256,uint256,uint8,bytes32,bytes32))'](crowdtainerAddress, quantitiesBigNum, referralEnabled, validUserCouponCode, signedPermit);
+            if (result) {
+                console.log(`raw data: ${JSON.stringify(result.raw)}`);
+            }
+            return Ok(result);
+        } else {
+            console.log(`Join call invoked wihout allowance permit.`);
+            let result: ContractTransaction = await vouchers721Contract['join(address,uint256[],bool,address)'](crowdtainerAddress, quantitiesBigNum, referralEnabled, validUserCouponCode)
+            return Ok(result);
+        }
 
     } catch (error) {
         return makeError(error);
@@ -331,7 +353,32 @@ export async function fetchUserBalancesData(provider: ethers.providers.JsonRpcPr
 
     console.log(`Fetched data. Balance: ${erc20Balance}; Allowance: ${erc20Allowance}, for ${signerAddress}`);
 
-    return Ok({ erc20Contract: erc20Contract.unwrap(), erc20Balance: erc20Balance, erc20Allowance: erc20Allowance });
+    return Ok({ erc20ContractAddress: erc20Contract.unwrap().address, erc20Balance: erc20Balance, erc20Allowance: erc20Allowance });
+}
+
+export async function fetchUserNonce(provider: ethers.providers.JsonRpcProvider | undefined,
+    erc20TokenAddress: string): Promise<Result<BigNumber, string>> {
+
+    if (!provider) {
+        return Err('Missing signer.');
+    }
+
+    console.log(`erc20TokenAddress: ${erc20TokenAddress}`);
+    let signer = getSigner();
+    if (signer === undefined) {
+        return Err('Signer not available.');
+    }
+    const signerAddress = await signer.getAddress();
+    let erc20nonce: BigNumber;
+    let erc20Contract: IERC20Permit;
+    try {
+        erc20Contract = IERC20Permit__factory.connect(erc20TokenAddress, provider);
+        erc20nonce = await erc20Contract.nonces(signerAddress);
+    } catch (error) {
+        return Err(`${error}`);
+    }
+
+    return Ok(erc20nonce);
 }
 
 export async function getTokenURI(
