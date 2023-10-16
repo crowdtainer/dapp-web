@@ -1,11 +1,12 @@
 <script lang="ts">
-	import { ethers, type BigNumber, type ContractReceipt } from 'ethers';
+	import { ethers, BigNumber, type ContractReceipt, type TypedDataDomain } from 'ethers';
 	import { onInterval } from './Utils/intervalTimer';
 
 	import type { UserStoreModel } from '$lib/Model/UserStoreModel';
 	import {
 		checkAllowance,
 		fetchUserBalancesData,
+		fetchUserNonce,
 		getERC20Contract,
 		joinProject,
 		joinProjectWithSignature
@@ -20,11 +21,17 @@
 	import type { IERC20 } from '../routes/typechain/IERC20.js';
 	import type { Result } from '@sniptt/monads';
 	import { MessageType } from './Toast/MessageType.js';
+	import type { SignedPermitStruct } from '../routes/typechain/Vouchers721.js';
+	import { getERC2612Permit } from './TokenUtils/permit.js';
 
 	export let crowdtainerId: number;
+	export let chainId: number;
 	export let crowdtainerAddress: string | undefined;
 	export let vouchers721Address: string | undefined;
+	export let tokenAddress: string | undefined;
 	export let tokenSymbol: string | undefined;
+	export let tokenName: string | undefined;
+	export let tokenVersion: string | undefined;
 	export let totalSum: number;
 	export let tokenDecimals: number;
 	export let totalCostInERCUnits: BigNumber;
@@ -116,15 +123,28 @@
 		return { signedPayload, extraData };
 	}
 
-	const callJoinProject = async (withSignature: boolean) => {
+	const callJoinProject = async (
+		withSignature: boolean,
+		withPermitValue: BigNumber | undefined
+	) => {
 		let userWallet = getSigner();
 
-		if (!crowdtainerAddress || !vouchers721Address) {
-			console.log('Error: missing required data (crowdtainerAddress || vouchers721Address)');
+		if (
+			!crowdtainerAddress ||
+			!vouchers721Address ||
+			!tokenName ||
+			!tokenVersion ||
+			!tokenAddress
+		) {
+			console.log(
+				'Error: missing required data (crowdtainerAddress || vouchers721Address || tokenName || tokenVersion || tokenAddress)'
+			);
+			console.log(
+				`${crowdtainerAddress}:${vouchers721Address}:${tokenName}:${tokenVersion}:${tokenAddress}`
+			);
 			return;
 		}
 
-		// Make the call to smart contract's join() method.
 		modalDialog.show({
 			id: 'joinProject',
 			title: 'Join project',
@@ -155,30 +175,98 @@
 			`Join parameters: vouchers721Address: ${vouchers721Address}; crowdtainerAddress ${crowdtainerAddress};validUserCouponCode:${validUserCouponCode}, referralEnabled: ${referralCheckBoxActivated} `
 		);
 		console.log(`Selection: ${$selection}`);
-		if (withSignature) {
-			let result = await generateSignedData(
-				userWalletAddress,
-				crowdtainerAddress,
-				$selection,
-				validUserCouponCode,
-				referralCheckBoxActivated
-			);
-			joinTransaction = await joinProjectWithSignature(
-				getSigner(),
-				vouchers721Address,
-				crowdtainerAddress,
-				result.signedPayload,
-				result.extraData
-			);
-		} else {
-			if (validUserCouponCode && ethers.utils.isAddress(validUserCouponCode)) {
-				joinTransaction = await joinProject(
-					getSigner(),
-					vouchers721Address,
+		if (!withPermitValue) {
+			if (withSignature) {
+				let result = await generateSignedData(
+					userWalletAddress,
 					crowdtainerAddress,
 					$selection,
 					validUserCouponCode,
 					referralCheckBoxActivated
+				);
+
+				joinTransaction = await joinProjectWithSignature(
+					userWallet,
+					vouchers721Address,
+					crowdtainerAddress,
+					result.signedPayload,
+					result.extraData,
+					undefined
+				);
+			} else {
+				joinTransaction = await joinProject(
+					userWallet,
+					vouchers721Address,
+					crowdtainerAddress,
+					$selection,
+					validUserCouponCode && ethers.utils.isAddress(validUserCouponCode)
+						? validUserCouponCode
+						: '0x0000000000000000000000000000000000000000',
+					referralCheckBoxActivated,
+					undefined
+				);
+			}
+		} else {
+			// with permit/allowance
+			let nonceResult = await fetchUserNonce(web3Provider, tokenAddress);
+			if (nonceResult.isErr()) {
+				console.log(`Unable to fetch the current nonce: ${nonceResult.unwrapErr()}`);
+				showToast('Operation failed: Unable to fetch the current nonce.');
+				modalDialog.show({
+					id: 'txRejected',
+					type: ModalType.ActionRequest,
+					title: 'Transaction rejected',
+					body: `An error ocurred when joining the project. ${nonceResult.unwrapErr()}`,
+					icon: ModalIcon.Exclamation,
+					animation: ModalAnimation.None
+				});
+				actionButtonEnabled = true;
+				return;
+			}
+
+			let signedPermit: SignedPermitStruct;
+			try {
+				let expirationInSeconds = (new Date().getTime() / 1000 + 30 * 60).toFixed(0); // 30 minutes from now
+				signedPermit = await getERC2612Permit(
+					userWallet,
+					tokenName,
+					tokenVersion,
+					BigNumber.from(chainId),
+					tokenAddress,
+					userWalletAddress,
+					crowdtainerAddress,
+					withPermitValue,
+					nonceResult.unwrap(),
+					BigNumber.from(expirationInSeconds)
+				);
+			} catch (error) {
+				modalDialog.show({
+					id: 'txRejected',
+					type: ModalType.ActionRequest,
+					title: 'Transaction rejected',
+					body: `An error ocurred when getting allowance signature.`,
+					icon: ModalIcon.Exclamation,
+					animation: ModalAnimation.None
+				});
+				actionButtonEnabled = true;
+				return;
+			}
+
+			if (withSignature) {
+				let result = await generateSignedData(
+					userWalletAddress,
+					crowdtainerAddress,
+					$selection,
+					validUserCouponCode,
+					referralCheckBoxActivated
+				);
+				joinTransaction = await joinProjectWithSignature(
+					getSigner(),
+					vouchers721Address,
+					crowdtainerAddress,
+					result.signedPayload,
+					result.extraData,
+					signedPermit
 				);
 			} else {
 				joinTransaction = await joinProject(
@@ -186,8 +274,11 @@
 					vouchers721Address,
 					crowdtainerAddress,
 					$selection,
-					'0x0000000000000000000000000000000000000000',
-					referralCheckBoxActivated
+					validUserCouponCode && ethers.utils.isAddress(validUserCouponCode)
+						? validUserCouponCode
+						: '0x0000000000000000000000000000000000000000',
+					referralCheckBoxActivated,
+					signedPermit
 				);
 			}
 		}
@@ -355,7 +446,10 @@
 			console.log(`${checkAllowanceResult.unwrapErr()}`);
 			return;
 		} else {
-			showToast('You have authorized spending to this campaign. You are ready to join the project 🎉', MessageType.Info);
+			showToast(
+				'You have authorized spending to this campaign. You are ready to join the project 🎉',
+				MessageType.Info
+			);
 			modalDialog.close();
 		}
 
@@ -390,43 +484,44 @@
 </script>
 
 <div class="flex justify-center">
-	<div class="max-w-xs mb-8">
+	<div class="max-w-sm mb-8">
 		<div class="grid grid-flow-col auto-cols-1">
 			{#if enoughFunds}
 				<p class="text-green-600">✔ Enough funds.</p>
 			{:else}
-				⚠ Not enough funds. Please top up your wallet with {tokenSymbol}.
+				⚠ Not enough funds. Please top up your wallet with {totalSum - discountValue} {tokenSymbol}.
 			{/if}
 		</div>
 		<div class="grid grid-flow-col auto-cols-1">
 			{#if enoughAllowance}
 				<p class="text-green-600">✔ Enough spend allowance.</p>
 			{:else}
-				⚠ Spend authorization required.
+				Spend allowance required: {totalSum - discountValue} {tokenSymbol}.
 			{/if}
 		</div>
 
-		<button
-			type="button"
-			disabled={!actionButtonEnabled || !enoughFunds}
-			class={actionButtonEnabled && enoughFunds ? 'btn btn-primary px-12 my-6' : 'gray-btn'}
-			on:click={() => {
-				if (enoughFunds && enoughAllowance) {
-					callJoinProject(withSignature);
-				} else if (enoughFunds && !enoughAllowance) {
-					callApproveSpending();
-				}
-			}}
-		>
-			{#if actionButtonEnabled && enoughFunds && !enoughAllowance}
-				{#if tokenSymbol !== undefined}
-					Allow spending ({totalSum - discountValue} {tokenSymbol})
-				{:else}
-					Allow spending
-				{/if}
-			{:else}
+		{#if actionButtonEnabled && enoughFunds}
+			<button
+				type="button"
+				disabled={!actionButtonEnabled || !enoughFunds}
+				class={actionButtonEnabled && enoughFunds ? 'btn btn-primary px-12 my-6' : 'gray-btn'}
+				on:click={() => {
+					if (enoughFunds) {
+						if (enoughAllowance) {
+							callJoinProject(withSignature, undefined);
+						} else {
+							callJoinProject(
+								withSignature,
+								BigNumber.from(Math.pow(10, tokenDecimals) * (totalSum - discountValue))
+							);
+							// TODO: Add support for ERC20's without ERC2612 support.
+							// Use separate call to callApproveSpending() in such cases.
+						}
+					}
+				}}
+			>
 				Confirm and Join
-			{/if}
-		</button>
+			</button>
+		{/if}
 	</div>
 </div>

@@ -2,14 +2,14 @@
 	"name": "dapp-web",
 	"version": "0.0.1",
 	"scripts": {
-		"dev": "vite dev --port 5173 --host 127.0.0.1" ,
+		"dev": "vite dev --port 5173 --host 127.0.0.1",
 		"build": "svelte-kit sync && vite build",
 		"preview": "vite preview",
 		"check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
 		"check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch",
 		"lint": "prettier --check --plugin-search-dir=. . && eslint .",
 		"format": "prettier --write --plugin-search-dir=. .",
-		"build-types": "typechain --target ethers-v5 \"./abi/**/*.json\" --out-dir=src/routes/typechain/",
+		"build-types": "typechain --target ethers-v5 \"./abi/*.sol/!(*.dbg).json\" --out-dir=src/routes/typechain/",
 		"postinstall": "#npm run build-types"
 	},
 	"devDependencies": {

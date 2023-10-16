@@ -28,7 +28,7 @@
 		ProjectStatusUI
 	} from '$lib/Converters/CrowdtainerData';
 
-	import { connected, getSigner, accountAddress } from '$lib/Utils/wallet';
+	import { connected, getSigner, accountAddress, walletState } from '$lib/Utils/wallet';
 	let modalDialog: ModalDialog;
 
 	import { OrderStatus } from './api';
@@ -63,7 +63,10 @@
 	let tokenIdAssociations: TokenIDAssociations | undefined;
 
 	async function refreshData() {
-		$joinSelection = $joinSelection;
+		if (staticDataLoadStatus !== LoadStatus.Loaded) {
+			return;
+		}
+
 		campaignDynamicData = initializeCampaignDynamicStores(crowdtainerId);
 		if ($connected) {
 			initializeDataForWallet(campaignStaticData?.contractAddress, $accountAddress);
@@ -125,7 +128,7 @@
 	$: joinViewEnabled =
 		state === ProjectStatusUI.Funding &&
 		$walletInCrowdtainer.fundsInCrowdtainer.isZero() &&
-		tokenIdAssociations?.foundTokenIds.length == 0;
+		($connected ? tokenIdAssociations?.foundTokenIds.length == 0 : true);
 
 	// $: $campaignDynamicData;
 	$: loadingAnimation = staticDataLoadStatus === LoadStatus.Loading;
@@ -257,6 +260,9 @@
 		{#if joinViewEnabled && campaignStaticData !== undefined && campaignStaticUI !== undefined}
 			<div class="dark:text-gray-100">
 				<JoinProject
+					tokenAddress={campaignStaticData.tokenAddress}
+					tokenVersion={campaignStaticData.tokenVersion}
+					chainId={campaignStaticData.chainId}
 					{vouchers721Address}
 					crowdtainerAddress={campaignStaticData?.contractAddress}
 					{campaignStaticUI}

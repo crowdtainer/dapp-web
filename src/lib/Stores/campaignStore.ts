@@ -1,6 +1,6 @@
 import { readable, writable, type Readable, type Writable, derived } from 'svelte/store';
 
-import type { CrowdtainerDynamicModel, CrowdtainerStaticModel } from '$lib/Model/CrowdtainerModel';
+import type { CrowdtainerDynamicModel } from '$lib/Model/CrowdtainerModel';
 import { fetchDynamicData, type Error } from '$lib/api';
 
 const fetchInterval: number = (import.meta.env.DEV ? 10000 : 18000);

@@ -1,12 +1,14 @@
 <script lang="ts">
 	export let campaignStaticUI: UIFields;
 	export let crowdtainerId: number;
+	export let chainId: number;
+	export let tokenAddress: string;
+	export let tokenVersion: string;
 	export let vouchers721Address: string | undefined;
 	export let crowdtainerAddress: string;
 	export let basePriceDenominator: number[];
 	export let basePriceUnit: string;
 	export let referralRate: BigNumber | undefined;
-	// export let splitSelectionBy: SplitSelection[];
 
 	import { onMount } from 'svelte';
 	import { slide } from 'svelte/transition';
@@ -40,8 +42,6 @@
 	import JoinProjectButton from './JoinProjectButton.svelte';
 
 	let modalDialog: ModalDialog;
-
-	// TODO: Clear all state (except joinSelection) if wallet is disconnected
 
 	enum JoinStep {
 		QuantitySelection = 0,
@@ -320,10 +320,14 @@
 
 				{#if $connected && crowdtainerId && crowdtainerAddress && vouchers721Address}
 					<JoinProjectButton
+						{tokenAddress}
+						{tokenVersion}
+						{chainId}
 						{crowdtainerId}
 						{crowdtainerAddress}
 						{vouchers721Address}
 						tokenSymbol={campaignStaticUI.tokenSymbol}
+						tokenName={campaignStaticUI.tokenName}
 						totalSum={$totalSum}
 						tokenDecimals={campaignStaticUI.tokenDecimals}
 						{totalCostInERCUnits}
@@ -420,10 +424,14 @@
 
 		{#if $connected && crowdtainerId && crowdtainerAddress && vouchers721Address}
 			<JoinProjectButton
+				{tokenAddress}
+				{tokenVersion}
+				{chainId}
 				{crowdtainerId}
 				{crowdtainerAddress}
 				{vouchers721Address}
 				tokenSymbol={campaignStaticUI.tokenSymbol}
+				tokenName={campaignStaticUI.tokenName}
 				totalSum={$totalSum}
 				tokenDecimals={campaignStaticUI.tokenDecimals}
 				{totalCostInERCUnits}
