@@ -1,4 +1,4 @@
-import { readable, writable, type Readable, type Writable, derived } from 'svelte/store';
+import { readable, writable, type Readable } from 'svelte/store';
 
 import type { CrowdtainerDynamicModel } from '$lib/Model/CrowdtainerModel';
 import { fetchDynamicData, type Error } from '$lib/api';

@@ -23,6 +23,13 @@ for (let result of projects) {
 
 let campaignStaticData: CrowdtainerStaticModel[] | undefined;
 
+if (!ethers.utils.isAddress(ethers.utils.computeAddress(AUTHORIZER_PRIVATE_KEY))) {
+    const message = 'Invalid AUTHORIZER_PRIVATE_KEY.';
+    console.log(message);
+    throw error(500, message);
+}
+let signer = new ethers.Wallet(AUTHORIZER_PRIVATE_KEY);
+
 async function loadCampaignData(): Promise<CrowdtainerStaticModel[]> {
     let campaignStaticData = new Array<CrowdtainerStaticModel>();
     try {
@@ -60,12 +67,6 @@ export const POST: RequestHandler = async ({ request, params }) => {
 
     let userWalletAddress = params.address;
     let returnValue: string;
-
-    if (!ethers.utils.isAddress(ethers.utils.computeAddress(AUTHORIZER_PRIVATE_KEY))) {
-        const message = 'Invalid AUTHORIZER_PRIVATE_KEY.';
-        console.log(message);
-        throw error(500, message);
-    }
 
     if (!userWalletAddress) {
         throw error(500, 'Missing wallet address parameter.');
@@ -182,7 +183,6 @@ export const POST: RequestHandler = async ({ request, params }) => {
         [crowdtainerAddress, userWalletAddress, quantities, enableReferral, referralAddress, epochExpiration, nonce]);
     let messageHashBinary = ethers.utils.arrayify(messageHash);
 
-    let signer = new ethers.Wallet(AUTHORIZER_PRIVATE_KEY);
     let signature = await signer.signMessage(messageHashBinary);
 
     returnValue = ethers.utils.defaultAbiCoder.encode(["address", "uint64", "bytes32", "bytes"], [crowdtainerAddress, epochExpiration, nonce, signature]);

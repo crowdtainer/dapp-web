@@ -3,7 +3,7 @@
 	import AddToCartView from './AddToCartView.svelte';
 
 	import { onMount } from 'svelte';
-	import type { Readable } from 'svelte/store';
+	import { derived, type Readable } from 'svelte/store';
 	import { goto } from '$app/navigation';
 
 	import JoinProject from '$lib/JoinProject.svelte';
@@ -18,12 +18,10 @@
 
 	import type {
 		CrowdtainerDynamicModel,
-		CrowdtainerStaticModel,
 		SplitSelection
 	} from '$lib/Model/CrowdtainerModel';
 	import {
 		toState,
-		type UIFields,
 		LoadStatus,
 		ProjectStatusUI
 	} from '$lib/Converters/CrowdtainerData';
@@ -40,6 +38,9 @@
 	import { findTokenIdsForWallet, type TokenIDAssociations } from './ethersCalls/rpcRequests.js';
 
 	export let vouchers721Address: string;
+	export let chainId: number;
+	export let tokenVersion: string;
+	export let txSponsoringEnabled: boolean;
 	export let crowdtainerId: number;
 	export let title: string;
 	export let subtitle: string;
@@ -53,8 +54,12 @@
 	export let projectId: number;
 	export let staticDataLoadStatus: LoadStatus = LoadStatus.Loading;
 
-	let campaignStaticUI: UIFields | undefined;
-	let campaignStaticData: CrowdtainerStaticModel | undefined;
+	export const campaignStaticData = derived(campaignStaticStores, ($campaignStaticStores) => {
+		return $campaignStaticStores.staticData[projectId];
+	});
+	export const campaignStaticUI = derived(campaignStaticStores, ($campaignStaticStores) => {
+		return $campaignStaticStores.UIData[projectId];
+	});
 
 	let campaignDynamicData: Readable<CrowdtainerDynamicModel> | undefined;
 
@@ -68,8 +73,8 @@
 		}
 
 		campaignDynamicData = initializeCampaignDynamicStores(crowdtainerId);
-		if ($connected) {
-			initializeDataForWallet(campaignStaticData?.contractAddress, $accountAddress);
+		if ($connected && $accountAddress) {
+			initializeDataForWallet($campaignStaticData.contractAddress, $accountAddress);
 
 			let tokenIdSearchResult = await findTokenIdsForWallet(getSigner(), vouchers721Address);
 			if (tokenIdSearchResult.isErr()) {
@@ -93,10 +98,6 @@
 			showToast(`Error fetching data: ${fetchError.details}`);
 			return;
 		}
-
-		campaignStaticData = $campaignStaticStores.staticData[projectId];
-		campaignStaticUI = $campaignStaticStores.UIData[projectId];
-
 		refreshData();
 	});
 
@@ -107,7 +108,7 @@
 			return;
 		}
 		tokenIdAssociations = undefined;
-		let quantities: number[] = new Array<number>(campaignStaticUI.prices.length).fill(0);
+		let quantities: number[] = new Array<number>($campaignStaticUI.prices.length).fill(0);
 		$joinSelection.set(crowdtainerId, quantities);
 		$joinSelection = $joinSelection;
 
@@ -124,7 +125,7 @@
 	}
 
 	// dynamic
-	$: state = toState($campaignDynamicData, campaignStaticData);
+	$: state = toState($campaignDynamicData, $campaignStaticData);
 	$: joinViewEnabled =
 		state === ProjectStatusUI.Funding &&
 		$walletInCrowdtainer.fundsInCrowdtainer.isZero() &&
@@ -136,10 +137,8 @@
 	// Immediatelly update UI elements related to connected wallet on wallet or connection change
 	$: $connected,
 		$accountAddress,
-		initializeDataForWallet(campaignStaticData?.contractAddress, $accountAddress),
+		initializeDataForWallet($campaignStaticData.contractAddress, $accountAddress),
 		refreshData();
-
-	$: campaignStaticUI, console.log(`campaignStaticUI: ${campaignStaticUI}`);
 </script>
 
 <ModalDialog bind:this={modalDialog} />
@@ -177,7 +176,7 @@
 				</div>
 			</div>
 
-			<div class="font-sans pr-2 pl-2 sm:pr-8 sm:pl-8 pt-8 pb-4">
+			<div class="font-sans px-4 sm:pr-8 sm:pl-8 pt-8 pb-4">
 				<div class="font-display uppercase tracking-wide text-primary">
 					{title}
 				</div>
@@ -229,7 +228,7 @@
 				{:else if tokenIdAssociations !== undefined}
 					<DetailedTokenIdState
 						walletData={$walletInCrowdtainer}
-						{campaignStaticUI}
+						campaignStaticUI={$campaignStaticUI}
 						{state}
 						{orderStatus}
 					/>
@@ -241,9 +240,9 @@
 								{projectURL}
 								tokenId={tokenIdAssociations.foundTokenIds[0]}
 								{vouchers721Address}
-								crowdtainerAddress={campaignStaticData?.contractAddress}
+								crowdtainerAddress={$campaignStaticData.contractAddress}
 								projectStatusUI={state}
-								tokenSymbol={campaignStaticUI.tokenSymbol}
+								tokenSymbol={$campaignStaticUI.tokenSymbol}
 								walletData={$walletInCrowdtainer}
 								{orderStatus}
 								on:userClaimedFundsEvent={(event) =>
@@ -260,16 +259,17 @@
 		{#if joinViewEnabled && campaignStaticData !== undefined && campaignStaticUI !== undefined}
 			<div class="dark:text-gray-100">
 				<JoinProject
-					tokenAddress={campaignStaticData.tokenAddress}
-					tokenVersion={campaignStaticData.tokenVersion}
-					chainId={campaignStaticData.chainId}
+					tokenAddress={$campaignStaticData.tokenAddress}
+					{tokenVersion}
+					{txSponsoringEnabled}
+					{chainId}
 					{vouchers721Address}
-					crowdtainerAddress={campaignStaticData?.contractAddress}
-					{campaignStaticUI}
+					crowdtainerAddress={$campaignStaticData.contractAddress}
+					campaignStaticUI={$campaignStaticUI}
 					{crowdtainerId}
 					{basePriceDenominator}
 					{basePriceUnit}
-					referralRate={campaignStaticData?.referralRate}
+					referralRate={$campaignStaticData.referralRate}
 					on:userJoinedCrowdtainerEvent={(event) => handleCampaignJoinedEvent(event, modalDialog)}
 				/>
 			</div>

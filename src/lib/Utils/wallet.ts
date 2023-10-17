@@ -90,23 +90,25 @@ function createWalletStore() {
         },
         setConnected: (truthy: boolean) => {
             let connected = truthy ? ConnectionState.Connected : ConnectionState.Disconnected;
-            if (connected !== wallet.connectionState) {
-                (connected) ?
-                    dispatchMessage("Wallet connected.", MessageType.Success)
-                    : dispatchMessage("Wallet disconnected.", MessageType.Warning);
-            }
             wallet.connectionState = connected;
             set(wallet);
             persistState(wallet);
+            if (connected !== wallet.connectionState) {
+                (connected) ?
+                    dispatchMessage("Wallet connected", MessageType.Success)
+                    : dispatchMessage("Wallet disconnected.", MessageType.Warning);
+            }
         },
         setChainId: (chainId: number) => {
             wallet.chainId = chainId;
-            console.log(`Detected chainId: ${chainId}`);
             let connected = supportedNetworks.includes(chainId)
                 ? ConnectionState.Connected
                 : ConnectionState.ConnectedToUnsupportedNetwork;
-            if (connected === ConnectionState.Connected) {
-                dispatchMessage("Wallet connected.", MessageType.Success);
+            if (!wallet.account) {
+                console.log("Wallet present, but no account connected yet. Make sure your wallet is unlocked.");
+            }
+            else if (connected === ConnectionState.Connected) {
+                dispatchMessage("Wallet connected", MessageType.Success);
             } else if (chainId == 1337) {
                 dispatchMessage(`For development / local node, please configure your wallet to chain ID 31337.`, MessageType.Info);
                 dispatchMessage(`Wallet configured with unsupported network: ` + chainId + `.`, MessageType.Warning);
@@ -131,7 +133,7 @@ function createWalletStore() {
             let lastWalletState = getLastState();
             if (lastWalletState != undefined) {
                 if (lastWalletState.type === WalletType.Injected) {
-                    if (supportedNetworks.includes(web3Provider.network.chainId)) {
+                    if (web3Provider.network.chainId && supportedNetworks.includes(web3Provider.network.chainId)) {
                         wallet.connectionState = ConnectionState.Connected;
                     } else {
                         wallet.connectionState = ConnectionState.ConnectedToUnsupportedNetwork;
@@ -228,9 +230,18 @@ async function setupInjectedProviderWallet() {
     web3Provider = new providers.Web3Provider(window.ethereum, "any");
     walletState.setWalletType(WalletType.Injected);
     // Events
-    web3Provider.on("network", (newNetwork: Network, oldNetwork: Network) => {
+    web3Provider.on("network", async (newNetwork: Network, oldNetwork: Network) => {
         console.log(`Network (` + newNetwork.chainId + `) detected.`);
-        walletState.setChainId(newNetwork.chainId);
+        try {
+            walletState.setChainId(newNetwork.chainId);
+            let accountAddress = await getAccountAddress();
+            if (accountAddress !== undefined && accountAddress != '') {
+                walletState.setAccount(accountAddress);
+            }
+        } catch (error) {
+            console.log(`Unable to get wallet address.`);
+            walletState.setConnected(false);
+        }
     });
 
     web3Provider.on('connect', () => {
@@ -247,15 +258,14 @@ async function setupInjectedProviderWallet() {
         }
     });
 
-    await web3Provider.send("eth_requestAccounts", []);
+    try {
+        await web3Provider.send("eth_requestAccounts", []);
+    } catch (error) {
+        console.log(`Unable to request accounts.`);
+    }
     if (web3Provider.network) {
         walletState.setChainId(web3Provider.network.chainId);
     }
-    let accountAddress = await getAccountAddress();
-    if (accountAddress !== undefined && accountAddress != '') {
-        walletState.setAccount(accountAddress);
-    }
-
 }
 
 function resetWalletConnectCallbacks() {

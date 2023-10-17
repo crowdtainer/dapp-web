@@ -49,9 +49,9 @@
 	<form method="dialog" class="modal-box text-black">
 		<h3 class="font-bold text-lg">{data.title}</h3>
 		<div class="h-auto flex justify-center mt-8">
-			<div class="flex flex-row">
+			<div class="flex flex-row items-center align-center">
 				{#if data.animation !== undefined && data.animation !== ModalAnimation.None}
-					<div in:blur|global={{ duration: 450 }} class="basis-1/4">
+					<div in:blur|global={{ duration: 450 }} class="basis-1/4 mx-4">
 						{#if data.animation === ModalAnimation.Diamonds}
 							<Diamonds size="60" unit="px" />
 						{:else if data.animation === ModalAnimation.Circle2}

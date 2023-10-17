@@ -1,7 +1,6 @@
 import { getDatabase } from "$lib/Database/redis";              // Database
 import { type Result, Ok, Err } from "@sniptt/monads";          // Monads
-import type { RequestHandler } from './$types';                 // Internal
-import { error } from '@sveltejs/kit';
+import { error, type RequestHandler } from '@sveltejs/kit';
 
 // POST Inputs: - { 
 //                     code: number,

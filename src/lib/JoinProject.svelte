@@ -4,6 +4,7 @@
 	export let chainId: number;
 	export let tokenAddress: string;
 	export let tokenVersion: string;
+	export let txSponsoringEnabled: boolean;
 	export let vouchers721Address: string | undefined;
 	export let crowdtainerAddress: string;
 	export let basePriceDenominator: number[];
@@ -322,6 +323,7 @@
 					<JoinProjectButton
 						{tokenAddress}
 						{tokenVersion}
+						{txSponsoringEnabled}
 						{chainId}
 						{crowdtainerId}
 						{crowdtainerAddress}
@@ -426,6 +428,7 @@
 			<JoinProjectButton
 				{tokenAddress}
 				{tokenVersion}
+				{txSponsoringEnabled}
 				{chainId}
 				{crowdtainerId}
 				{crowdtainerAddress}

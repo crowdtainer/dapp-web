@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
-	import type { Readable } from 'svelte/store';
+	import { derived, type Readable } from 'svelte/store';
 
 	import {
 		initializeCampaignDynamicStores,
@@ -12,13 +12,9 @@
 
 	import { campaignStaticStores } from './Stores/campaignStaticDataStore.js';
 
-	import type {
-		CrowdtainerDynamicModel,
-		CrowdtainerStaticModel
-	} from '$lib/Model/CrowdtainerModel';
+	import type { CrowdtainerDynamicModel } from '$lib/Model/CrowdtainerModel';
 	import {
 		toState,
-		type UIFields,
 		LoadStatus,
 		toStateString,
 		loadingString,
@@ -38,15 +34,19 @@
 	export let projectId: number;
 	export let staticDataLoadStatus: LoadStatus = LoadStatus.Loading;
 
-	let campaignStaticUI: UIFields | undefined;
-	let campaignStaticData: CrowdtainerStaticModel | undefined;
+	export const campaignStaticData = derived(campaignStaticStores, ($campaignStaticStores) => {
+		return $campaignStaticStores.staticData[projectId];
+	});
+	export const campaignStaticUI = derived(campaignStaticStores, ($campaignStaticStores) => {
+		return $campaignStaticStores.UIData[projectId];
+	});
 
 	let campaignDynamicData: Readable<CrowdtainerDynamicModel> | undefined;
 
 	let fundsInContract: number | undefined;
 	let raisedAmount: number | undefined;
 
-	initializeDataForWallet(campaignStaticData?.contractAddress, $accountAddress);
+	initializeDataForWallet($campaignStaticData.contractAddress, $accountAddress);
 
 	function loadData() {
 		$joinSelection = $joinSelection;
@@ -59,8 +59,6 @@
 		if (campaignStaticUI === undefined) {
 			return;
 		}
-
-		console.log(`campaignStaticUI.descriptions: ${JSON.stringify(campaignStaticUI?.descriptions)}`);
 	}
 
 	onMount(async () => {
@@ -69,15 +67,12 @@
 			showToast(`Error fetching data: ${fetchError.details}`);
 			return;
 		}
-		campaignStaticData = $campaignStaticStores.staticData[projectId];
-		campaignStaticUI = $campaignStaticStores.UIData[projectId];
-
 		loadData();
 	});
 
 	function setRaisedAmount() {
 		if (staticDataLoadStatus !== LoadStatus.FetchFailed) {
-			let decimals = campaignStaticUI ? campaignStaticUI.tokenDecimals : undefined;
+			let decimals = campaignStaticUI ? $campaignStaticUI.tokenDecimals : undefined;
 			fundsInContract = toHuman($campaignDynamicData?.fundsInContract, decimals);
 			raisedAmount = toHuman($campaignDynamicData?.raised, decimals);
 		}
@@ -87,11 +82,11 @@
 		staticDataLoadStatus !== LoadStatus.FetchFailed &&
 		$campaignDynamicData !== undefined &&
 		campaignStaticData !== undefined
-			? toStateString($campaignDynamicData, campaignStaticData)
+			? toStateString($campaignDynamicData, $campaignStaticData)
 			: loadingString;
 
 	// dynamic
-	$: state = toState($campaignDynamicData, campaignStaticData);
+	$: state = toState($campaignDynamicData, $campaignStaticData);
 
 	$: $campaignDynamicData, setRaisedAmount();
 	$: loadingAnimation = staticDataLoadStatus === LoadStatus.Loading;
@@ -99,16 +94,11 @@
 	// Immediatelly update UI elements related to connected wallet on wallet or connection change
 	$: $connected,
 		$accountAddress,
-		initializeDataForWallet(campaignStaticData?.contractAddress, $accountAddress);
-
-	$: campaignStaticUI, console.log(`campaignStaticUI: ${campaignStaticUI}`);
+		initializeDataForWallet($campaignStaticData.contractAddress, $accountAddress);
 </script>
 
 <!-- dark:backdrop-brightness-[0.8] -->
-<div
-	class:animate-pulse={loadingAnimation}
-	class="py-0 rounded-md w-full lg:w-auto"
->
+<div class:animate-pulse={loadingAnimation} class="py-0 rounded-md w-full lg:w-auto">
 	<ProjectRaisedAmount {crowdtainerId} {projectId} {staticDataLoadStatus} />
 
 	<!-- Main Status -->
@@ -118,12 +108,12 @@
 			<p class="projectDataSubtitle">Status</p>
 		</div>
 
-		<MoneyInContract {fundsInContract} {raisedAmount} {campaignStaticUI} {state} />
+		<MoneyInContract {fundsInContract} {raisedAmount} campaignStaticUI={$campaignStaticUI} {state} />
 
 		<div class="min-w-max">
 			{#if campaignStaticUI}
 				<p class="projectStatus">
-					<TimeLeft endTime={campaignStaticUI.endDate} />
+					<TimeLeft endTime={$campaignStaticUI.endDate} />
 				</p>
 				<p class="projectDataSubtitle">to go</p>
 			{:else}
@@ -139,13 +129,13 @@
 	<div class="flex py-4 justify-between gap-12">
 		<div class="">
 			<p class="projectData">
-				{campaignStaticUI ? campaignStaticUI.startDateString : loadingString}
+				{campaignStaticUI ? $campaignStaticUI.startDateString : loadingString}
 			</p>
 			<p class="projectDataSubtitle">Start</p>
 		</div>
 		<div class="">
 			<p class="projectData">
-				{campaignStaticUI ? campaignStaticUI.endDateString : loadingString}
+				{campaignStaticUI ? $campaignStaticUI.endDateString : loadingString}
 			</p>
 			<p class="projectDataSubtitle">End</p>
 		</div>
@@ -157,8 +147,8 @@
 			<ProjectDetails
 				{vouchers721Address}
 				{crowdtainerId}
-				{campaignStaticData}
-				{campaignStaticUI}
+				campaignStaticData={$campaignStaticData}
+				campaignStaticUI={$campaignStaticUI}
 			/>
 		{/if}
 	</div>

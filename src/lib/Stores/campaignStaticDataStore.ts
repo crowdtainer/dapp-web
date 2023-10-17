@@ -52,8 +52,8 @@ export function createStaticCampaignDataStore() {
                 } catch (error) {
                     return { details: `Failed fetching static data for crowdtainerIds ${missingItems}: ${error}` };
                 }
+                set(campaignData);
             }
-            set(campaignData);
             return;
         }
     };
