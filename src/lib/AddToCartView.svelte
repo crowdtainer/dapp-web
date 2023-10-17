@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import { blur } from 'svelte/transition';
-	import type { Readable } from 'svelte/store';
+	import { derived, type Readable } from 'svelte/store';
 
 	import {
 		initializeCampaignDynamicStores,
@@ -11,12 +11,8 @@
 
 	import { campaignStaticStores } from './Stores/campaignStaticDataStore.js';
 
-	import type {
-		CrowdtainerDynamicModel,
-		CrowdtainerStaticModel,
-		SplitSelection
-	} from '$lib/Model/CrowdtainerModel';
-	import { type UIFields, LoadStatus, loadingString } from '$lib/Converters/CrowdtainerData';
+	import type { CrowdtainerDynamicModel, SplitSelection } from '$lib/Model/CrowdtainerModel';
+	import { LoadStatus, loadingString } from '$lib/Converters/CrowdtainerData';
 
 	import { connected, accountAddress } from '$lib/Utils/wallet';
 
@@ -31,9 +27,12 @@
 	export let projectId: number;
 	export let staticDataLoadStatus: LoadStatus = LoadStatus.Loading;
 
-	let campaignStaticUI: UIFields | undefined;
-	let campaignStaticData: CrowdtainerStaticModel | undefined;
-
+	export const campaignStaticData = derived(campaignStaticStores, ($campaignStaticStores) => {
+		return $campaignStaticStores.staticData[projectId];
+	});
+	export const campaignStaticUI = derived(campaignStaticStores, ($campaignStaticStores) => {
+		return $campaignStaticStores.UIData[projectId];
+	});
 	let campaignDynamicData: Readable<CrowdtainerDynamicModel> | undefined;
 
 	let currentSelection = 0;
@@ -54,10 +53,10 @@
 
 	let userProductSelection = new Map<string, string>(); // <descriptor, sub-option value>
 
-	initializeDataForWallet(campaignStaticData?.contractAddress, $accountAddress);
+	initializeDataForWallet($campaignStaticData.contractAddress, $accountAddress);
 
 	function setUserSelection(descriptor: string, value: string) {
-		console.log(`Descriptor: ${descriptor}, Value: ${value}`);
+		// console.log(`Descriptor: ${descriptor}, Value: ${value}`);
 		userProductSelection.set(descriptor, value);
 
 		let categoryDescriptorIndex = productConfiguration.categoryDescriptors.indexOf(descriptor);
@@ -67,13 +66,13 @@
 		}
 
 		if (productConfiguration.categoryDescriptors.length !== userProductSelection.size) {
-			console.log('Missing user input selection');
+			console.log('No user product selection yet.');
 			return;
 		}
 
 		// Find Crowdtainer's index from selection
 		let delimiter = productConfiguration.categoryDelimiter;
-		campaignStaticUI?.descriptions.forEach((value, index) => {
+		$campaignStaticUI.descriptions.forEach((value, index) => {
 			let finalString = '';
 			userProductSelection.forEach((element) => {
 				finalString += `${element}${delimiter}`;
@@ -81,14 +80,14 @@
 			// drop last delimiter
 			finalString = finalString.substring(0, finalString.lastIndexOf(`${delimiter}`));
 			if (value === finalString) {
-				console.log(`Found match: ${finalString} at index ${index}`);
+				// console.log(`Found match: ${finalString} at index ${index}`);
 				currentSelection = index;
 			}
 		});
 
 		// Update current selection price
-		if (campaignStaticUI) {
-			currentPrice = campaignStaticUI.prices[currentSelection];
+		if ($campaignStaticUI) {
+			currentPrice = $campaignStaticUI.prices[currentSelection];
 			currentBasePrice = currentPrice / basePriceDenominator[currentSelection];
 		} else {
 			console.log(`Warning: prices not loaded yet.`);
@@ -104,20 +103,18 @@
 		} else {
 			campaignDynamicData = campaignDynamicStores.get(crowdtainerId);
 		}
-		if (campaignStaticUI === undefined) {
+		if ($campaignStaticUI === undefined) {
 			return;
 		}
 
-		updateCurrentSelection(0, campaignStaticUI.prices[0]);
-
-		console.log(`campaignStaticUI.descriptions: ${JSON.stringify(campaignStaticUI?.descriptions)}`);
+		updateCurrentSelection(0, $campaignStaticUI.prices[0]);
 
 		//  products display
 
 		productTypes = new Set<string>();
 		productTypesIndices = new Set<number>();
 		descriptorForProduct = new Map<string, number>();
-		campaignStaticUI.descriptions.forEach((productLine) => {
+		$campaignStaticUI.descriptions.forEach((productLine) => {
 			let items = productLine.split(productConfiguration.categoryDelimiter);
 			if (items.length != productConfiguration.categoryDescriptors.length) {
 				let errorMessage = `
@@ -146,7 +143,7 @@
 			let result = [...descriptorForProduct.entries()].filter(
 				(value: [string, number]) => value[1] === index
 			);
-			console.log(`Found ${result[0]} ${result[1]} @ index ${index}`);
+			// console.log(`Found ${result[0]} ${result[1]} @ index ${index}`);
 			let productSuboptions = new Array<string>();
 			result.forEach((item) => {
 				productSuboptions.push(item[0]);
@@ -168,9 +165,6 @@
 			showToast(`Error fetching data: ${fetchError.details}`);
 			return;
 		}
-		campaignStaticData = $campaignStaticStores.staticData[projectId];
-		campaignStaticUI = $campaignStaticStores.UIData[projectId];
-
 		loadData();
 	});
 
@@ -181,7 +175,7 @@
 	}
 
 	function addProduct() {
-		if (staticDataLoadStatus === LoadStatus.FetchFailed || campaignStaticUI === undefined) {
+		if (staticDataLoadStatus === LoadStatus.FetchFailed || $campaignStaticUI === undefined) {
 			return;
 		}
 		let updatedQuantity = $joinSelection.get(crowdtainerId);
@@ -190,7 +184,7 @@
 			$joinSelection.set(crowdtainerId, updatedQuantity);
 			$joinSelection = $joinSelection;
 		} else {
-			let quantities: number[] = new Array<number>(campaignStaticUI.prices.length).fill(0);
+			let quantities: number[] = new Array<number>($campaignStaticUI.prices.length).fill(0);
 			quantities[currentSelection]++;
 			$joinSelection.set(crowdtainerId, quantities);
 			$joinSelection = $joinSelection;
@@ -202,20 +196,18 @@
 	// Immediatelly update UI elements related to connected wallet on wallet or connection change
 	$: $connected,
 		$accountAddress,
-		initializeDataForWallet(campaignStaticData?.contractAddress, $accountAddress);
-
-	$: campaignStaticUI, console.log(`campaignStaticUI: ${campaignStaticUI}`);
+		initializeDataForWallet($campaignStaticData.contractAddress, $accountAddress);
 </script>
 
 <div class="grid w-full gap-2 md:grid-cols-1">
 	<div class="md:pt-4">
 		<div class="text-black text-md font-medium dark:text-gray-200">Price</div>
-		{#if campaignStaticUI !== undefined && staticDataLoadStatus === LoadStatus.Loaded && currentPrice}
+		{#if staticDataLoadStatus === LoadStatus.Loaded && currentPrice}
 			{#key currentPrice}
 				<p in:blur|global={{ duration: 200 }} class="text-primary productPrice">
 					{currentPrice}
-					{campaignStaticUI.tokenSymbol} ({`${currentBasePrice.toFixed(2)} ${
-						campaignStaticUI.tokenSymbol
+					{$campaignStaticUI.tokenSymbol} ({`${currentBasePrice.toFixed(2)} ${
+						$campaignStaticUI.tokenSymbol
 					}/${basePriceUnit}`})
 				</p>
 			{/key}
@@ -225,7 +217,7 @@
 	</div>
 	<fieldset class="mt-4">
 		<legend class="sr-only">Choose a product</legend>
-		{#if campaignStaticUI}
+		{#if productOptions && staticDataLoadStatus === LoadStatus.Loaded}
 			<div class="flex flex-wrap">
 				{#each productOptions as productOption}
 					<div class="mx-0 max-w-md md:my-2">

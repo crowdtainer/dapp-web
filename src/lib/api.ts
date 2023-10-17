@@ -1,6 +1,7 @@
 import { type Result, Ok, Err } from "@sniptt/monads";
 
 import type { CrowdtainerDynamicModel, CrowdtainerStaticModel } from '$lib/Model/CrowdtainerModel';
+import type { SignedPermitStruct } from '../routes/typechain/Vouchers721.js';
 
 export type Error = { code: number, message: string };
 
@@ -144,4 +145,39 @@ export async function requestAuthorizationProof(wallet: string,
 	response = [calldataValue, signedCalldata];
 
 	return Ok(response);
+}
+
+
+export async function requestSponsoredTx(
+	calldata: string,
+	calldataSignature: string,
+	signedPermit: SignedPermitStruct | undefined
+): Promise<Result<string, string>> {
+
+	let result: Response = await fetch(`backendJoinSteps/05_txSponsor`, {
+		method: 'POST',
+		body: JSON.stringify({ calldata, calldataSignature, signedPermit })
+	});
+
+	if (!result.ok) {
+
+		let message = '';
+
+		try {
+			let jsonResult = await JSON.parse(await result.text());
+			if (jsonResult.message) {
+				message = jsonResult.message;
+			}
+		} catch (error) {
+			return Err('Unknown server response');
+		}
+
+		if (message) {
+			return Err(message);
+		}
+
+		return Err(`${await result.text()}`);
+	}
+
+	return Ok("Success.");
 }

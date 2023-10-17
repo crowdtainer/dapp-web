@@ -102,8 +102,6 @@
 	$: $connected,
 		$accountAddress,
 		initializeDataForWallet(campaignStaticData?.contractAddress, $accountAddress);
-
-	$: campaignStaticUI, console.log(`campaignStaticUI: ${campaignStaticUI}`);
 </script>
 
 <!-- <div class="my-6 bg-gray-300 rounded-md w-full">

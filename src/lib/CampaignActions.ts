@@ -1,5 +1,3 @@
-
-
 import ModalDialog, {
     ModalAnimation,
     ModalIcon,
@@ -31,11 +29,11 @@ export async function callLeaveProject(vouchers721Address: string, crowdtainerAd
             body: 'Your request to leave the project was not completed.',
             icon: ModalIcon.Exclamation
         });
-        console.log(`Failure!? ${signResult.unwrapErr()}`);
+        console.log(`Failure: ${signResult.unwrapErr()}`);
         return;
     }
 
-    showToast('You have successfully left the campaign.');
+    showToast('Successfully left the campaign.');
 
     modalDialog.close();
     onUserLeftCrowdtainer(crowdtainerAddress);
@@ -60,7 +58,7 @@ export async function callClaimFunds(crowdtainerAddress: string, modalDialog: Mo
             body: 'Your request to leave the project was not completed.',
             icon: ModalIcon.Exclamation
         });
-        console.log(`Failure!? ${signResult.unwrapErr()}`);
+        console.log(`Failure: ${signResult.unwrapErr()}`);
         return;
     }
 

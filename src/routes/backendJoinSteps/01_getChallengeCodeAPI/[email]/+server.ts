@@ -1,7 +1,7 @@
 import { randomInt } from "crypto";                         // Random number
 import { getDatabase } from "$lib/Database/redis";          // Database
-import type { RequestHandler } from './$types';             // Internal
-import { error } from "@sveltejs/kit";
+import { error, type RequestHandler } from "@sveltejs/kit";
+import { validEmail } from "$lib/Validation/utils.js";
 
 const maxAPI_hits = 8;
 const codeExpireTimeInSeconds = 1800 // 30 minutes
@@ -15,6 +15,9 @@ export const GET: RequestHandler = async ({ params }) => {
     }
 
     let userEmail = params.email;
+    if(!userEmail || !validEmail(userEmail)) {
+        throw error(500, "Missing or invalid e-mail parameter");
+    }
 
     // TODO: encrypt user email client side
     let emailCodeKey = `userCode:${userEmail}`;

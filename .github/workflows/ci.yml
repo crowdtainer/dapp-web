@@ -22,4 +22,5 @@ jobs:
         with:
           node-version: ${{ matrix.node-version }}
       - run: npm install
-      - run: AUTHORIZER_PRIVATE_KEY='dummy' AUTHORIZER_SIGNATURE_EXPIRATION_TIME_IN_SECONDS=1800 SERVER_ETH_RPC=https://example.com npm run build
+      # ATTENTION: The private keys below are 'dummy'/ well known. **Never** add your actual private keys here!
+      - run: TX_SPONSOR_PRIVATE_KEY='0x47e179ec197488593b187f80a00eb0da91f1b9d0b13f8733639f19c30a34926a' AUTHORIZER_PRIVATE_KEY='0x47e179ec197488593b187f80a00eb0da91f1b9d0b13f8733639f19c30a34926a' AUTHORIZER_SIGNATURE_EXPIRATION_TIME_IN_SECONDS=1800 SERVER_ETH_RPC=https://example.com npm run build

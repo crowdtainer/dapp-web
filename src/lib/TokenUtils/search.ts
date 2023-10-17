@@ -1,5 +1,5 @@
 import { getSigner } from "$lib/Utils/wallet.js";
-import { getOrderDetailsAPI } from "$lib/api.js";
+import { OrderStatus, getOrderDetailsAPI } from "$lib/api.js";
 
 import { projects } from '../../routes/Data/projects.json';
 
@@ -10,7 +10,7 @@ export async function loadOrderDetails(vouchers721Address: string, tokenId: numb
     }
 
     if (tokenId.length === 0) {
-        console.log(`No tokenIDs detected.`);
+        console.log(`No tokenIDs detected for connected wallet.`);
         return;
     } else if (tokenId.length > 1) {
         console.log(`Multiple tokens detected.`);

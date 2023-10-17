@@ -182,7 +182,7 @@ export async function claimFunds(provider: ethers.Signer | undefined,
 
     try {
         const crowdtainerContract = Crowdtainer__factory.connect(crowdtainerAddress, provider);
-        let claimFundsTransaction = await crowdtainerContract.claimFunds();
+        let claimFundsTransaction = await crowdtainerContract['claimFunds()']();
         return Ok(claimFundsTransaction);
     } catch (error) {
         return makeError(error);
