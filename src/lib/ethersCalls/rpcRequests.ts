@@ -88,7 +88,7 @@ export async function hasEnoughFunds(erc20Contract: IERC20, signerAddress: strin
 }
 
 export async function findTokenIdsForWallet(provider: ethers.Signer | undefined,
-    vouchers721Address: string): Promise<Result<TokenIDAssociations, string>> {
+    vouchers721Address: string, walletAddress: string): Promise<Result<TokenIDAssociations, string>> {
 
     if (provider === undefined) {
         return Err("Provider not available.");
@@ -97,18 +97,20 @@ export async function findTokenIdsForWallet(provider: ethers.Signer | undefined,
     try {
         const vouchers721Contract = Vouchers721__factory.connect(vouchers721Address, provider);
 
-        let wallet = await provider.getAddress();
+        if (!walletAddress || walletAddress == '') {
+            return Err("Unable to read connected wallet address.");
+        }
 
-        let totalTokens = (await vouchers721Contract.balanceOf(wallet)).toNumber();
-        console.log(`totalTokens: ${totalTokens} for wallet ${wallet}`);
+        let totalTokens = (await vouchers721Contract.balanceOf(walletAddress)).toNumber();
+        console.log(`totalTokens: ${totalTokens} for wallet ${walletAddress}`);
 
         let tokenAssociations = makeNewTokenIDAssociations();
 
         for (let index = 0; index < totalTokens; index++) {
-            const tokenId = await vouchers721Contract.tokenOfOwnerByIndex(wallet, BigNumber.from(index));
+            const tokenId = await vouchers721Contract.tokenOfOwnerByIndex(walletAddress, BigNumber.from(index));
             let crowdtainerId = await vouchers721Contract.tokenIdToCrowdtainerId(tokenId);
             let foundCrowdtainerAddress = await vouchers721Contract.crowdtainerIdToAddress(crowdtainerId);
-            console.log(`Wallet ${wallet} is owner of tokenId: ${tokenId}, from crowdtainerId ${crowdtainerId} @ address ${foundCrowdtainerAddress}`);
+            console.log(`Wallet ${walletAddress} is owner of tokenId: ${tokenId}, from crowdtainerId ${crowdtainerId} @ address ${foundCrowdtainerAddress}`);
 
             tokenAssociations.foundTokenIds.push(tokenId.toNumber());
             tokenAssociations.crowdtainerIds.push(crowdtainerId.toNumber());
@@ -132,7 +134,7 @@ export async function isReferralEnabledForAddress(provider: ethers.Signer, crowd
     }
 }
 
-export async function leaveProject(provider: ethers.Signer | undefined,
+export async function leaveProject(provider: ethers.Signer | undefined, wallet:string,
     vouchers721Address: string,
     crowdtainerAddress: string): Promise<Result<ContractTransaction, string>> {
 
@@ -146,7 +148,7 @@ export async function leaveProject(provider: ethers.Signer | undefined,
     // 2- Filter by the crowdtainer project
     // 3- Call leave function
 
-    let searchResult = await findTokenIdsForWallet(provider, vouchers721Address);
+    let searchResult = await findTokenIdsForWallet(provider, vouchers721Address, wallet);
 
     if (searchResult.isErr()) {
         return Err(searchResult.unwrapErr());

@@ -9,7 +9,7 @@
 	export let projectStatusUI: ProjectStatusUI;
 	export let tokenSymbol: string;
 	export let walletData: WalletCrowdtainerModel | undefined;
-	export const wallet: string | undefined = undefined;
+	export let wallet: string | undefined;
 	export let orderStatus: OrderStatus;
 
 	import ModalDialog from './ModalDialog.svelte';
@@ -164,7 +164,12 @@
 				<button
 					class="relative inline-flex items-center justify-center overflow-hidden text-sm font-medium text-gray-900 rounded-lg group bg-gradient-to-br from-pink-500 to-orange-400 group-hover:from-cyan-500 group-hover:to-blue-500 focus:ring-4 focus:outline-none focus:ring-red-400"
 					on:click={() => {
+						if (!wallet) {
+							showToast('Wallet address not available.');
+							return;
+						}
 						callLeaveProject(
+							wallet,
 							vouchers721Address,
 							crowdtainerAddress,
 							modalDialog,

@@ -9,7 +9,7 @@ import { claimFunds, claimRewards, leaveProject, transferToken } from './ethersC
 import { getSigner } from './Utils/wallet.js';
 import { showToast } from './Toast/ToastStore.js';
 
-export async function callLeaveProject(vouchers721Address: string, crowdtainerAddress: string, modalDialog: ModalDialog, onUserLeftCrowdtainer: (crowdtainerAddress: string) => void) {
+export async function callLeaveProject(wallet: string, vouchers721Address: string, crowdtainerAddress: string, modalDialog: ModalDialog, onUserLeftCrowdtainer: (crowdtainerAddress: string) => void) {
     modalDialog.show({
         id: 'leaveCampaign',
         type: ModalType.ActionRequest,
@@ -19,7 +19,7 @@ export async function callLeaveProject(vouchers721Address: string, crowdtainerAd
         icon: ModalIcon.DeviceMobile
     });
 
-    let signResult = await leaveProject(getSigner(), vouchers721Address, crowdtainerAddress);
+    let signResult = await leaveProject(getSigner(), wallet, vouchers721Address, crowdtainerAddress);
 
     if (signResult.isErr()) {
         modalDialog.show({
@@ -179,7 +179,7 @@ export async function callTransferParticipationProof(targetWallet: string,
     onUserTransferredParticipation(resultDialogData);
 };
 
-export function handleCampaignJoinedEvent(event: CustomEvent, modalDialog: ModalDialog) {
+export function handleCampaignJoinedEvent(event: CustomEvent, modalDialog: ModalDialog, customCallback?: () => void) {
     console.log(`Detected event of type: ${event.type} : detail: ${event.detail.text}`);
     modalDialog.show({
         id: 'joinSuccess',
@@ -188,6 +188,8 @@ export function handleCampaignJoinedEvent(event: CustomEvent, modalDialog: Modal
         type: ModalType.Information,
         icon: ModalIcon.BadgeCheck
     });
+    if (customCallback)
+        customCallback();
 }
 
 export function handleUserClaimedFundsEvent(event: CustomEvent, modalDialog: ModalDialog) {

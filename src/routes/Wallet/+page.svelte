@@ -37,11 +37,15 @@
 	}
 
 	async function reloadUserData() {
-		if($connected == false) {
+		if ($connected == false) {
 			return;
 		}
 		resetState();
-		let tokenIdSearchResult = await findTokenIdsForWallet(getSigner(), Vouchers721Address);
+		let tokenIdSearchResult = await findTokenIdsForWallet(
+			getSigner(),
+			Vouchers721Address,
+			$accountAddress
+		);
 		if (tokenIdSearchResult.isErr()) {
 			showToast(`Error loading tokens for connected wallet: ${tokenIdSearchResult.unwrapErr()}`);
 			staticDataLoadStatus = LoadStatus.FetchFailed;
@@ -79,6 +83,7 @@
 	<div class="divide-y">
 		{#each tokenIdAssociations.foundTokenIds as tokenId, index}
 			<MyCampaign
+			wallet={$accountAddress}
 				{tokenId}
 				vouchers721Address={Vouchers721Address}
 				{...projectFromCrowdtainerId(tokenIdAssociations.crowdtainerIds[index])}

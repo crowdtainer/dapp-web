@@ -35,6 +35,7 @@
 	import { initializeDataForWallet, walletInCrowdtainer } from './Stores/dataForWalletStore.js';
 	import { handleUserClaimedFundsEvent } from './CampaignActions.js';
 
+	export let wallet: string;
 	export let tokenId: number;
 	export let vouchers721Address: string;
 	export let crowdtainerId: number;
@@ -202,6 +203,7 @@
 				<div class="w-auto flex">
 					{#if campaignStaticData !== undefined && campaignStaticUI !== undefined}
 						<CampaignActions
+							{wallet}
 							title={`${subtitle} - ${title}`}
 							{projectURL}
 							{tokenId}
