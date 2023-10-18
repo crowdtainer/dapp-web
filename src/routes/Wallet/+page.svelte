@@ -37,7 +37,8 @@
 	}
 
 	async function reloadUserData() {
-		if ($connected == false) {
+		if ($connected == false || !$accountAddress) {
+			console.log(`Skipping reloadUserData(); connected: ${$connected} accountAddress: ${$accountAddress}`);
 			return;
 		}
 		resetState();
@@ -79,11 +80,11 @@
 	</p>
 </div>
 
-{#if tokenIdAssociations !== undefined && $connected}
+{#if tokenIdAssociations !== undefined && $connected && $accountAddress}
 	<div class="divide-y">
 		{#each tokenIdAssociations.foundTokenIds as tokenId, index}
 			<MyCampaign
-			wallet={$accountAddress}
+				wallet={$accountAddress}
 				{tokenId}
 				vouchers721Address={Vouchers721Address}
 				{...projectFromCrowdtainerId(tokenIdAssociations.crowdtainerIds[index])}

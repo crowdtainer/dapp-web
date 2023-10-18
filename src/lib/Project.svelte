@@ -87,7 +87,7 @@
 				orderStatus = OrderStatus.Unknown;
 			}
 		} else {
-			console.log(`Skipped refresh: ${$connected} : ${accountAddress}`);
+			console.log(`Skipped refresh: ${$connected} : ${$accountAddress}`);
 		}
 	}
 
