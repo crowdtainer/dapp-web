@@ -16,17 +16,10 @@
 
 	import { campaignStaticStores } from './Stores/campaignStaticDataStore.js';
 
-	import type {
-		CrowdtainerDynamicModel,
-		SplitSelection
-	} from '$lib/Model/CrowdtainerModel';
-	import {
-		toState,
-		LoadStatus,
-		ProjectStatusUI
-	} from '$lib/Converters/CrowdtainerData';
+	import type { CrowdtainerDynamicModel, SplitSelection } from '$lib/Model/CrowdtainerModel';
+	import { toState, LoadStatus, ProjectStatusUI } from '$lib/Converters/CrowdtainerData';
 
-	import { connected, getSigner, accountAddress, walletState } from '$lib/Utils/wallet';
+	import { connected, getSigner, accountAddress } from '$lib/Utils/wallet';
 	let modalDialog: ModalDialog;
 
 	import { OrderStatus } from './api';
@@ -76,7 +69,11 @@
 		if ($connected && $accountAddress) {
 			initializeDataForWallet($campaignStaticData.contractAddress, $accountAddress);
 
-			let tokenIdSearchResult = await findTokenIdsForWallet(getSigner(), vouchers721Address);
+			let tokenIdSearchResult = await findTokenIdsForWallet(
+				getSigner(),
+				vouchers721Address,
+				$accountAddress
+			);
 			if (tokenIdSearchResult.isErr()) {
 				showToast(`Error loading tokens for connected wallet: ${tokenIdSearchResult.unwrapErr()}`);
 				return;
@@ -89,6 +86,8 @@
 			} else {
 				orderStatus = OrderStatus.Unknown;
 			}
+		} else {
+			console.log(`Skipped refresh: ${$connected} : ${accountAddress}`);
 		}
 	}
 
@@ -236,6 +235,7 @@
 					<div class="w-auto flex">
 						{#if campaignStaticData !== undefined && campaignStaticUI !== undefined}
 							<CampaignActions
+								wallet={$accountAddress}
 								title={`${subtitle} - ${title}`}
 								{projectURL}
 								tokenId={tokenIdAssociations.foundTokenIds[0]}
@@ -270,7 +270,10 @@
 					{basePriceDenominator}
 					{basePriceUnit}
 					referralRate={$campaignStaticData.referralRate}
-					on:userJoinedCrowdtainerEvent={(event) => handleCampaignJoinedEvent(event, modalDialog)}
+					on:userJoinedCrowdtainerEvent={(event) =>
+						handleCampaignJoinedEvent(event, modalDialog, () => {
+							refreshData();
+						})}
 				/>
 			</div>
 		{/if}

@@ -66,7 +66,7 @@
 
 		loadedWallet = await currentSigner.getAddress();
 
-		let walletTokensSearch = await findTokenIdsForWallet(currentSigner, vouchers721Address);
+		let walletTokensSearch = await findTokenIdsForWallet(currentSigner, vouchers721Address, loadedWallet);
 		if (walletTokensSearch.isErr()) {
 			console.log(`Unable to search wallet tokens: ${walletTokensSearch.unwrapErr()}`);
 			//TODO: inform user
