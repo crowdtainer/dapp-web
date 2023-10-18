@@ -150,7 +150,7 @@
 	}
 
 	// Immediatelly inform the user if wallet changes
-	$: $connected, $accountAddress, checkWalletValdity();
+	$: $connected, $accountAddress, loadUserData(), checkWalletValdity();
 
 	onMount(async () => {
 		loadUserData();
