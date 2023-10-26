@@ -51,7 +51,7 @@
 			animation: ModalAnimation.Circle2
 		});
 
-		let signer = getSigner();
+		let signer = await getSigner();
 		if (signer === undefined) {
 			console.log('Error: signer undefined');
 			return;
@@ -71,7 +71,7 @@
 		console.log(`Account: ${account}`);
 
 		// make sure address is check-summed; Some wallets don't use checksummed addresses (e.g. Metamask mobile)
-		account = ethers.utils.getAddress(account);
+		account = ethers.getAddress(account);
 
 		console.log(`Account check-summed: ${account}`);
 

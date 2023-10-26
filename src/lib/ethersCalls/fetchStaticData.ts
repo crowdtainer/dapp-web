@@ -2,27 +2,24 @@
 import { Vouchers721__factory } from '../../routes/typechain/factories/Vouchers721__factory';
 import { Crowdtainer__factory } from '../../routes/typechain/factories/Crowdtainer.sol/Crowdtainer__factory';
 
-// Ethers
-import { BigNumber, Contract } from 'ethers';
-
 // Monads
 import { type Result, Ok, Err } from "@sniptt/monads";
 
 import type { CrowdtainerStaticModel, Error } from '$lib/Model/CrowdtainerModel';
 import { Vouchers721Address } from '../../routes/Data/projects.json';
 import { projects } from '../../routes/Data/projects.json';
-import { MockERC20__factory } from '../../routes/typechain/';
+import { MockERC20__factory, type Crowdtainer } from '../../routes/typechain/';
 import { crowdtainerStaticDataMap } from '../../hooks/cache';
 import { provider } from '$lib/ethersCalls/provider';
 
-export async function fetchStaticData(crowdtainerId: BigNumber): Promise<Result<CrowdtainerStaticModel, Error>> {
+export async function fetchStaticData(crowdtainerId: bigint): Promise<Result<CrowdtainerStaticModel, Error>> {
 
    try {
-      if (crowdtainerId.toNumber() === 0) {
-         return Err({ error: `Invalid crowdtainerId: ${crowdtainerId.toNumber()}` });
+      if (Number(crowdtainerId) === 0) {
+         return Err({ error: `Invalid crowdtainerId: ${crowdtainerId}` });
       }
 
-      let crowdtainerStaticData: CrowdtainerStaticModel | undefined = crowdtainerStaticDataMap.get(crowdtainerId.toHexString());
+      let crowdtainerStaticData: CrowdtainerStaticModel | undefined = crowdtainerStaticDataMap.get(crowdtainerId.toString(16));
 
       if (crowdtainerStaticData) {
          return Ok(crowdtainerStaticData);
@@ -34,10 +31,10 @@ export async function fetchStaticData(crowdtainerId: BigNumber): Promise<Result<
       const vouchers721Contract = Vouchers721__factory.connect(Vouchers721Address, provider);
 
       console.log(`CrowdtainerId: ${crowdtainerId}`);
-      console.log(`vouchers721Contract.address: ${vouchers721Contract.address}`);
+      console.log(`vouchers721Contract.address: ${await vouchers721Contract.getAddress()}`);
 
       let crowdtainerAddress: string;
-      let crowdtainerContract: Contract;
+      let crowdtainerContract: Crowdtainer;
       try {
          crowdtainerAddress = await vouchers721Contract.crowdtainerForId(crowdtainerId);
 
@@ -50,13 +47,13 @@ export async function fetchStaticData(crowdtainerId: BigNumber): Promise<Result<
       let tokenContractAddress = await crowdtainerContract.token();
       const ERC20Contract = MockERC20__factory.connect(tokenContractAddress, provider);
 
-      let numberOfProducts = (await crowdtainerContract.numberOfProducts()).toNumber();
-      let prices: BigNumber[] = [];
+      let numberOfProducts = (await crowdtainerContract.numberOfProducts());
+      let prices: bigint[] = [];
       let descriptions: string[] = [];
       for (let i = 0; i < numberOfProducts; i++) {
          // fetch price
          let price = await crowdtainerContract.unitPricePerType(i);
-         if (price != null && price > BigNumber.from(0)) {
+         if (price != null && price > 0n) {
             prices.push(price);
          }
          // fetch product description
@@ -64,7 +61,7 @@ export async function fetchStaticData(crowdtainerId: BigNumber): Promise<Result<
          descriptions.push(description);
       }
 
-      let jsonData = projects.filter(e => e.crowdtainerId === crowdtainerId.toNumber());
+      let jsonData = projects.filter(e => e.crowdtainerId === Number(crowdtainerId));
       if (jsonData.length != 1) {
          return Err({ error: `Invalid projects.json configuration.` });
       }
@@ -80,7 +77,7 @@ export async function fetchStaticData(crowdtainerId: BigNumber): Promise<Result<
          productDescription: descriptions,
          prices: prices,
          tokenAddress: await crowdtainerContract.token(),
-         tokenDecimals: await ERC20Contract.decimals(),
+         tokenDecimals: Number(await ERC20Contract.decimals()),
          tokenSymbol: await ERC20Contract.symbol(),
          tokenName: await ERC20Contract.name(),
          signer: await crowdtainerContract.getSigner(),
@@ -88,7 +85,7 @@ export async function fetchStaticData(crowdtainerId: BigNumber): Promise<Result<
          tokenVersion: jsonData[0].tokenVersion
       }
 
-      crowdtainerStaticDataMap.set(crowdtainerId.toHexString(), crowdtainerData);
+      crowdtainerStaticDataMap.set(crowdtainerId.toString(16), crowdtainerData);
       console.log(`Done. Crowdtainer ID ${crowdtainerId} static data fetch took ${(Date.now() - start) / 1000} seconds.`);
       return Ok(crowdtainerData);
    } catch (errorMessage) {

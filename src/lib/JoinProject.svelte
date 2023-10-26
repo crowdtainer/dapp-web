@@ -9,12 +9,12 @@
 	export let crowdtainerAddress: string;
 	export let basePriceDenominator: number[];
 	export let basePriceUnit: string;
-	export let referralRate: BigNumber | undefined;
+	export let referralRate: bigint | undefined;
 
 	import { onMount } from 'svelte';
 	import { slide } from 'svelte/transition';
 
-	import { shortenAddress } from './Utils/wallet';
+	import { getProvider, shortenAddress } from './Utils/wallet';
 	import type { UIFields } from './Converters/CrowdtainerData';
 	import Quantity from '$lib/Quantity.svelte';
 	import { derived, type Readable } from 'svelte/store';
@@ -29,7 +29,7 @@
 	import { joinSelection } from '$lib/Stores/userStore';
 
 	// node rpc calls
-	import { BigNumber, ethers } from 'ethers';
+	import { ethers } from 'ethers';
 
 	// Wallet management
 	import { getSigner } from '$lib/Utils/wallet';
@@ -98,16 +98,16 @@
 		return totalSum;
 	});
 
-	$: referralEnabled = referralRate !== undefined && BigNumber.from(referralRate).toNumber() > 0;
-	$: ratePercentage = referralEnabled ? BigNumber.from(referralRate).toNumber() / 2 : 0;
+	$: referralEnabled = referralRate !== undefined && referralRate > 0n;
+	$: ratePercentage = referralEnabled && referralRate ? Number(referralRate) / 2 : 0;
 	$: discountValue =
 		ratePercentage > 0 && validUserCouponCode !== '' ? $totalSum * (ratePercentage / 100) : 0;
 
 	// UserStore
 	$: totalCostInERCUnits =
 		campaignStaticUI !== undefined && $totalSum !== undefined && !isNaN($totalSum)
-			? ethers.utils.parseUnits(`${$totalSum - discountValue}`, campaignStaticUI.tokenDecimals)
-			: BigNumber.from(0);
+			? ethers.parseUnits(`${$totalSum - discountValue}`, campaignStaticUI.tokenDecimals)
+			: 0n;
 
 	onMount(async () => {
 		$joinSelection = $joinSelection;
@@ -123,7 +123,7 @@
 
 		validUserCouponCode = '';
 
-		if (!ethers.utils.isAddress(couponCode)) {
+		if (!ethers.isAddress(couponCode)) {
 			// TODO: Support ENS resolution and short coupon codes
 			modalDialog.show({
 				id: 'invalidReferralAddress',
@@ -136,7 +136,7 @@
 			return;
 		}
 
-		let userWallet = getSigner();
+		let userWallet = getProvider();
 		if (userWallet === undefined) {
 			modalDialog.show({
 				id: 'missingSigner',

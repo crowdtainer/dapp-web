@@ -4,11 +4,9 @@
 
 	import { Icon } from '@steeze-ui/svelte-icon';
 	import { Clipboard } from '@steeze-ui/heroicons';
-	import { BigNumber } from 'ethers/lib/ethers.js';
 	import { copyToClipBoardAndNotify } from './Utils/clipboard.js';
 	import type { CrowdtainerStaticModel } from './Model/CrowdtainerModel.js';
 	import { moneyFormatter } from '$lib/Utils/moneyFormatter.js';
-	import { ethers } from 'ethers';
 	import type { UIFields } from './Converters/CrowdtainerData.js';
 
 	export let vouchers721Address: string;
@@ -22,9 +20,7 @@
 		visible = !visible;
 	}
 
-	$: discount = campaignStaticData.referralRate
-		? BigNumber.from(campaignStaticData.referralRate).toNumber() / 2
-		: BigNumber.from(0);
+	$: discount = campaignStaticData.referralRate ? Number(campaignStaticData.referralRate) / 2 : 0;
 </script>
 
 <div class="mb-4">
@@ -177,7 +173,7 @@
 						<span class="inline-flex items-baseline">
 							{#if campaignStaticData.referralRate === undefined}
 								<span> -- </span>
-							{:else if discount > BigNumber.from(0)}
+							{:else if discount > 0n}
 								<span> {discount} % off for referee.<br /> {discount}% cashback for referrer.</span>
 							{:else}
 								<span> disabled </span>

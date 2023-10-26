@@ -1,14 +1,18 @@
 import WalletConnectProvider from '@walletconnect/web3-provider/dist/umd/index.min.js';
 // Can't use proper import, see: https://github.com/WalletConnect/walletconnect-monorepo/issues/864
 // import WalletConnectProvider from "@walletconnect/web3-provider";
-import { ethers, providers, Signer } from 'ethers';
-import type { TypedDataSigner } from "@ethersproject/abstract-signer";
+import { getAddress, BrowserProvider, type Signer } from 'ethers';
+// import { mainnet } from 'viem/chains'
+
+// import { createWalletClient, custom, type Account, type WalletClient, type ProviderConnectInfo, type ProviderMessage, defineChain } from 'viem'
+import 'viem/window';
 
 
 import { writable, derived } from 'svelte/store';
 
 import { type WalletState, WalletType, ConnectionState, persistState, getLastState, resetStorageState } from '$lib/Utils/walletStorage';
 import { MessageType } from '../Toast/MessageType';
+import type { ProviderConnectInfo, ProviderMessage } from 'viem';
 
 const VITE_WALLET_CONNECT_BRIDGE_SERVER: string = import.meta.env.VITE_WALLET_CONNECT_BRIDGE_SERVER;
 const NO_WALLET_DETECTED = '---';
@@ -18,7 +22,7 @@ export const ssr = false;
 export const walletState = createWalletStore();
 export const connected = derived(walletState, $walletState => $walletState.connectionState === ConnectionState.Connected);
 export const accountAddress = derived(walletState, $walletState => {
-    return ($walletState.account) ? ethers.utils.getAddress($walletState.account) : '';
+    return ($walletState.account) ? getAddress($walletState.account) : '';
 });
 export const shortenedAccount = derived(walletState, $walletState => {
     return shortenAddress($walletState.account);
@@ -56,21 +60,38 @@ export function shortenAddress(walletAddress: string | undefined): string {
 const RPC_BACKEND: string = import.meta.env.VITE_WALLET_CONNECT_RPC;
 const CHAIN_ID: number = import.meta.env.VITE_WALLET_CONNECT_CHAIN_ID;
 
-interface Window {
-    ethereum?: import('ethers').providers.ExternalProvider;
-}
-declare var window: Window;
+// export const customChainDefinition = /*#__PURE__*/ defineChain({
+//     id: CHAIN_ID,
+//     name: RPC_BACKEND,
+//     network: 'localhost',
+//     nativeCurrency: {
+//         decimals: 18,
+//         name: 'Ether',
+//         symbol: 'ETH',
+//     },
+//     rpcUrls: {
+//         default: { http: ['RPC_BACKEND'] },
+//         public: { http: ['RPC_BACKEND'] },
+//     },
+// })
+
+// interface Window {
+//     ethereum?: import('ethers').Eip1193Provider;
+// }
+// declare var window: Window;
 interface Network {
     name: string,
     chainId: number,
     ensAddress?: string,
     _defaultProvider?: (providers: any, options?: any) => any
 }
-import type { ExternalProvider } from '@ethersproject/providers';
-type ExtensionForProvider = { on: (event: string, callback: (...params: any) => void) => void; };
-type EthersProvider = ExternalProvider & ExtensionForProvider;
+// import type { ExternalProvider } from '@ethersproject/providers';
+// type ExtensionForProvider = { on: (event: string, callback: (...params: any) => void) => void; };
+// type EthersProvider = ExternalProvider & ExtensionForProvider;
 
 let updatesCallbackFunction: ((message: string, type: MessageType) => void) | undefined;
+
+let signerAddress: string | undefined;
 
 function createWalletStore() {
 
@@ -123,19 +144,26 @@ function createWalletStore() {
             set(wallet);
             persistState(wallet);
         },
-        setAccount: (account: string) => {
+        setAccount: async (account: string) => {
             if (wallet.account !== undefined && wallet.account !== account) {
                 dispatchMessage(`Wallet detected: '${account}'`, MessageType.Info);
             }
             // check if wallet's network is supported
             let lastWalletState = getLastState();
             if (lastWalletState != undefined) {
-                let chainId = 0;
+                let chainId = -1;
                 if (lastWalletState.type === WalletType.Injected) {
-                    chainId = web3Provider.network.chainId;
+                    const ethereum: any = window.ethereum;
+                    let provider = ethereum || (window as any).web3?.currentProvider;
+                    if (!provider) {
+                        console.log('Injected provider not detected.');
+                        return;
+                    }
+                    chainId = Number.parseInt(await provider.request({ method: 'eth_chainId' }));
                 } else if (lastWalletState.type === WalletType.WalletConnect) {
                     chainId = wcProvider.chainId ?? -1;
                 }
+
                 if (chainId == CHAIN_ID) {
                     wallet.connectionState = ConnectionState.Connected;
                     console.log(`Connected to supported network: ` + chainId);
@@ -147,6 +175,7 @@ function createWalletStore() {
                 wallet.connectionState = ConnectionState.Disconnected;
             }
             wallet.account = account;
+            signerAddress = account;
             set(wallet);
             persistState(wallet);
         },
@@ -155,6 +184,7 @@ function createWalletStore() {
         },
         resetState: () => {
             wallet = { connectionState: ConnectionState.Disconnected };
+            signerAddress = undefined;
             set(wallet);
             dispatchMessage("Wallet disconnected.", MessageType.Info);
             resetStorageState();
@@ -162,8 +192,8 @@ function createWalletStore() {
     };
 }
 
-export let web3Provider: providers.Web3Provider;
-export let wcProvider: WalletConnectProvider;
+export let web3Provider: BrowserProvider;
+let wcProvider: WalletConnectProvider;
 
 async function setupWalletConnect() {
     wcProvider = new WalletConnectProvider({
@@ -181,7 +211,7 @@ async function setupWalletConnect() {
     });
 
     //  Wrap with Web3Provider from ethers.js
-    web3Provider = new providers.Web3Provider(wcProvider);
+    web3Provider = new BrowserProvider(wcProvider);
 
     walletState.setWalletType(WalletType.WalletConnect);
     wcProvider.on('accountsChanged', (accounts: string[]) => {
@@ -216,50 +246,127 @@ async function setupWalletConnect() {
     }
 }
 
+// let client: WalletClient;
+
 async function setupInjectedProviderWallet() {
-    if (window.ethereum === undefined) {
+    let provider = window.ethereum ? window.ethereum : (window as any).web3?.currentProvider;
+
+    if (!provider) {
         console.log('Error obtaining provider.')
         return;
     }
 
-    web3Provider = new providers.Web3Provider(window.ethereum, "any");
+    console.dir(`The provider: ${provider}`);
+
+    web3Provider = new BrowserProvider(provider);
     walletState.setWalletType(WalletType.Injected);
+
     // Events
-    web3Provider.on("network", async (newNetwork: Network, oldNetwork: Network) => {
-        console.log(`Network (` + newNetwork.chainId + `) detected.`);
-        try {
-            walletState.setChainId(newNetwork.chainId);
-            let accountAddress = await getAccountAddress();
-            if (accountAddress !== undefined && accountAddress != '') {
-                walletState.setAccount(accountAddress);
-            }
-        } catch (error) {
-            console.log(`Unable to get wallet address.`);
-            walletState.setConnected(false);
-        }
-    });
 
-    web3Provider.on('connect', () => {
-        walletState.setConnected(true);
-    });
-
-    (window.ethereum as EthersProvider).on('accountsChanged', (accounts) => {
+    provider.on('accountsChanged', (accounts: string[]) => {
+        console.log(`accountsChanged: ${JSON.stringify(accounts)}`);
         if (accounts.length === 0) {
             console.log("Wallet disconnected.");
             walletState.setConnected(false);
         } else {
-            console.log(`accountsChanged: ${accounts[0]}`);
             walletState.setAccount(accounts[0]);
+            signerAddress = accounts[0];
         }
     });
 
+    provider.on('chainChanged', (chainId: string) => {
+        console.log(`Network (` + chainId + `) detected.`);
+        walletState.setChainId(Number(chainId));
+    });
+
+    provider.on('connect', (connectInfo: ProviderConnectInfo) => {
+        console.log(`Connect event received: ${connectInfo}`);
+        walletState.setChainId(Number(connectInfo.chainId));
+    });
+
+    provider.on('message', (message: ProviderMessage) => {
+        console.log(`received a message: ${message}`);
+    });
+
+    // window.ethereum.on("*", (log, evt) => { console.log(`log: ${log} ; event: ${evt}`); })
+
+    // web3Provider.on("network", async (newNetwork: Network, oldNetwork: Network) => {
+    //     console.log(`Network (` + newNetwork.chainId + `) detected.`);
+    //     try {
+    //         walletState.setChainId(newNetwork.chainId);
+    //         let accountAddress = await getSignerAddress();
+    //         if (accountAddress !== undefined && accountAddress != '') {
+    //             walletState.setAccount(accountAddress);
+    //         }
+    //     } catch (error) {
+    //         console.log(`Unable to get wallet address.`);
+    //         walletState.setConnected(false);
+    //     }
+    // });
+
+    // web3Provider.provider.on('connect', () => {
+    //     walletState.setConnected(true);
+    // });
+
+    // web3Provider.provider.on('accountsChanged', (accounts: string[]) => {
+    //     if (accounts.length === 0) {
+    //         console.log("Wallet disconnected.");
+    //         walletState.setConnected(false);
+    //     } else {
+    //         console.log(`accountsChanged: ${accounts[0]}`);
+    //         walletState.setAccount(accounts[0]);
+    //     }
+    // }
+
+    // web3Provider.on('accountsChanged', (accounts) => {
+    //     if (accounts.length === 0) {
+    //         console.log("Wallet disconnected.");
+    //         walletState.setConnected(false);
+    //     } else {
+    //         console.log(`accountsChanged: ${accounts[0]}`);
+    //         walletState.setAccount(accounts[0]);
+    //     }
+    // });
+
+    const [account] = await provider.request({ method: 'eth_requestAccounts' })
+    if (!account) {
+        console.log(`Unable to find connected wallet.`);
+    } else { console.log(`Account is ${account}`) };
+    walletState.setAccount(account);
+    signerAddress = account
+
     try {
-        await web3Provider.send("eth_requestAccounts", []);
+        const response = await (provider as any).enable();
+        let accounts = response?.result || response;
+        console.log(`Obtained account via legacy approach: ${JSON.stringify(accounts)}`);
     } catch (error) {
-        console.log(`Unable to request accounts.`);
+        console.log(JSON.stringify(error));
     }
-    if (web3Provider.network) {
-        walletState.setChainId(web3Provider.network.chainId);
+
+
+    // client = createWalletClient({
+    //     account,
+    //     chain: mainnet,
+    //     transport: custom(window.ethereum)
+    // })
+
+    let chainId = Number.parseInt(await provider.request({ method: 'eth_chainId' }));
+
+
+    // await web3Provider.send("eth_requestAccounts", []);
+    // signerAddress = await signer.getAddress();
+    // let chainId = (await web3Provider.getNetwork()).chainId;
+    // if (signerAddress) {
+    //     walletState.setAccount(signerAddress);
+    // }
+
+    // //}
+    console.log(`Network (` + chainId + `) detected.`);
+    try {
+        walletState.setChainId(Number(chainId));
+        // walletState.setConnected(true);
+    } catch (error) {
+        console.log(`Error: ${error}`);
     }
 }
 
@@ -322,16 +429,22 @@ export async function tearDownWallet() {
     updatesCallbackFunction = undefined;
 }
 
-export function getSigner(): Signer & TypedDataSigner | undefined {
-    if (web3Provider === undefined) {
-        return undefined;
-    }
-    return web3Provider.getSigner();
+export async function getSigner(): Promise<Signer | undefined> {
+    console.log(`Get signer called, provider: ${web3Provider}`);
+    console.dir(web3Provider);
+    if (web3Provider) return await web3Provider.getSigner();
+    return undefined;
 }
 
-async function getAccountAddress(): Promise<string | undefined> {
-    if (connected) {
-        return await web3Provider.getSigner().getAddress();
-    }
-    return undefined;
+export function getProvider(): BrowserProvider | undefined {
+    console.log(`Get signer called, provider: ${web3Provider}`);
+    console.dir(web3Provider);
+    return web3Provider;
+}
+
+export function getSignerAddress(): string | undefined {
+    // if (connected) {
+    return signerAddress;
+    // }
+    // return undefined;
 }

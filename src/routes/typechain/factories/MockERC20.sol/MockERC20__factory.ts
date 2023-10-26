@@ -2,14 +2,18 @@
 /* tslint:disable */
 /* eslint-disable */
 import {
-  Signer,
-  utils,
   Contract,
-  ContractFactory
+  ContractFactory,
+  ContractTransactionResponse,
+  Interface,
 } from "ethers";
-import type { BigNumberish, Overrides } from "ethers";
-import type { Provider, TransactionRequest } from "@ethersproject/providers";
-import type { PromiseOrValue } from "../../common";
+import type {
+  Signer,
+  BigNumberish,
+  ContractDeployTransaction,
+  ContractRunner,
+} from "ethers";
+import type { NonPayableOverrides } from "../../common";
 import type {
   MockERC20,
   MockERC20Interface,
@@ -392,25 +396,12 @@ export class MockERC20__factory extends ContractFactory {
     }
   }
 
-  override deploy(
-    _name: PromiseOrValue<string>,
-    _symbol: PromiseOrValue<string>,
-    _decimals: PromiseOrValue<BigNumberish>,
-    overrides?: Overrides & { from?: PromiseOrValue<string> }
-  ): Promise<MockERC20> {
-    return super.deploy(
-      _name,
-      _symbol,
-      _decimals,
-      overrides || {}
-    ) as Promise<MockERC20>;
-  }
   override getDeployTransaction(
-    _name: PromiseOrValue<string>,
-    _symbol: PromiseOrValue<string>,
-    _decimals: PromiseOrValue<BigNumberish>,
-    overrides?: Overrides & { from?: PromiseOrValue<string> }
-  ): TransactionRequest {
+    _name: string,
+    _symbol: string,
+    _decimals: BigNumberish,
+    overrides?: NonPayableOverrides & { from?: string }
+  ): Promise<ContractDeployTransaction> {
     return super.getDeployTransaction(
       _name,
       _symbol,
@@ -418,22 +409,28 @@ export class MockERC20__factory extends ContractFactory {
       overrides || {}
     );
   }
-  override attach(address: string): MockERC20 {
-    return super.attach(address) as MockERC20;
+  override deploy(
+    _name: string,
+    _symbol: string,
+    _decimals: BigNumberish,
+    overrides?: NonPayableOverrides & { from?: string }
+  ) {
+    return super.deploy(_name, _symbol, _decimals, overrides || {}) as Promise<
+      MockERC20 & {
+        deploymentTransaction(): ContractTransactionResponse;
+      }
+    >;
   }
-  override connect(signer: Signer): MockERC20__factory {
-    return super.connect(signer) as MockERC20__factory;
+  override connect(runner: ContractRunner | null): MockERC20__factory {
+    return super.connect(runner) as MockERC20__factory;
   }
 
   static readonly bytecode = _bytecode;
   static readonly abi = _abi;
   static createInterface(): MockERC20Interface {
-    return new utils.Interface(_abi) as MockERC20Interface;
+    return new Interface(_abi) as MockERC20Interface;
   }
-  static connect(
-    address: string,
-    signerOrProvider: Signer | Provider
-  ): MockERC20 {
-    return new Contract(address, _abi, signerOrProvider) as MockERC20;
+  static connect(address: string, runner?: ContractRunner | null): MockERC20 {
+    return new Contract(address, _abi, runner) as unknown as MockERC20;
   }
 }

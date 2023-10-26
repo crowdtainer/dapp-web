@@ -3,111 +3,69 @@
 /* eslint-disable */
 import type {
   BaseContract,
-  BigNumber,
   BigNumberish,
   BytesLike,
-  CallOverrides,
-  ContractTransaction,
-  Overrides,
-  PopulatedTransaction,
-  Signer,
-  utils,
-} from "ethers";
-import type {
   FunctionFragment,
   Result,
+  Interface,
   EventFragment,
-} from "@ethersproject/abi";
-import type { Listener, Provider } from "@ethersproject/providers";
+  AddressLike,
+  ContractRunner,
+  ContractMethod,
+  Listener,
+} from "ethers";
 import type {
-  TypedEventFilter,
-  TypedEvent,
+  TypedContractEvent,
+  TypedDeferredTopicFilter,
+  TypedEventLog,
+  TypedLogDescription,
   TypedListener,
-  OnEvent,
-  PromiseOrValue,
+  TypedContractMethod,
 } from "../common";
 
 export type CampaignDataStruct = {
-  shippingAgent: PromiseOrValue<string>;
-  signer: PromiseOrValue<string>;
-  openingTime: PromiseOrValue<BigNumberish>;
-  expireTime: PromiseOrValue<BigNumberish>;
-  targetMinimum: PromiseOrValue<BigNumberish>;
-  targetMaximum: PromiseOrValue<BigNumberish>;
-  unitPricePerType: PromiseOrValue<BigNumberish>[];
-  referralRate: PromiseOrValue<BigNumberish>;
-  referralEligibilityValue: PromiseOrValue<BigNumberish>;
-  token: PromiseOrValue<string>;
-  legalContractURI: PromiseOrValue<string>;
+  shippingAgent: AddressLike;
+  signer: AddressLike;
+  openingTime: BigNumberish;
+  expireTime: BigNumberish;
+  targetMinimum: BigNumberish;
+  targetMaximum: BigNumberish;
+  unitPricePerType: BigNumberish[];
+  referralRate: BigNumberish;
+  referralEligibilityValue: BigNumberish;
+  token: AddressLike;
+  legalContractURI: string;
 };
 
 export type CampaignDataStructOutput = [
-  string,
-  string,
-  BigNumber,
-  BigNumber,
-  BigNumber,
-  BigNumber,
-  BigNumber[],
-  BigNumber,
-  BigNumber,
-  string,
-  string
+  shippingAgent: string,
+  signer: string,
+  openingTime: bigint,
+  expireTime: bigint,
+  targetMinimum: bigint,
+  targetMaximum: bigint,
+  unitPricePerType: bigint[],
+  referralRate: bigint,
+  referralEligibilityValue: bigint,
+  token: string,
+  legalContractURI: string
 ] & {
   shippingAgent: string;
   signer: string;
-  openingTime: BigNumber;
-  expireTime: BigNumber;
-  targetMinimum: BigNumber;
-  targetMaximum: BigNumber;
-  unitPricePerType: BigNumber[];
-  referralRate: BigNumber;
-  referralEligibilityValue: BigNumber;
+  openingTime: bigint;
+  expireTime: bigint;
+  targetMinimum: bigint;
+  targetMaximum: bigint;
+  unitPricePerType: bigint[];
+  referralRate: bigint;
+  referralEligibilityValue: bigint;
   token: string;
   legalContractURI: string;
 };
 
-export interface CrowdtainerInterface extends utils.Interface {
-  functions: {
-    "abortProject()": FunctionFragment;
-    "accumulatedRewards()": FunctionFragment;
-    "accumulatedRewardsOf(address)": FunctionFragment;
-    "claimFunds(address)": FunctionFragment;
-    "claimFunds()": FunctionFragment;
-    "claimRewards()": FunctionFragment;
-    "costForWallet(address)": FunctionFragment;
-    "crowdtainerState()": FunctionFragment;
-    "discountForUser(address)": FunctionFragment;
-    "enableReferral(address)": FunctionFragment;
-    "expireTime()": FunctionFragment;
-    "getPaidAndDeliver()": FunctionFragment;
-    "getSigner()": FunctionFragment;
-    "initialize(address,(address,address,uint256,uint256,uint256,uint256,uint256[],uint256,uint256,address,string))": FunctionFragment;
-    "join(address,uint256[])": FunctionFragment;
-    "join(address,uint256[],bool,address)": FunctionFragment;
-    "joinWithSignature(bytes,bytes)": FunctionFragment;
-    "leave(address)": FunctionFragment;
-    "legalContractURI()": FunctionFragment;
-    "numberOfProducts()": FunctionFragment;
-    "openingTime()": FunctionFragment;
-    "owner()": FunctionFragment;
-    "referralEligibilityValue()": FunctionFragment;
-    "referralRate()": FunctionFragment;
-    "referrerOfReferee(address)": FunctionFragment;
-    "setSigner(address)": FunctionFragment;
-    "setUrls(string[])": FunctionFragment;
-    "shippingAgent()": FunctionFragment;
-    "targetMaximum()": FunctionFragment;
-    "targetMinimum()": FunctionFragment;
-    "token()": FunctionFragment;
-    "totalValueRaised()": FunctionFragment;
-    "unitPricePerType(uint256)": FunctionFragment;
-    "urls(uint256)": FunctionFragment;
-    "usedNonces(address,bytes32)": FunctionFragment;
-  };
-
+export interface CrowdtainerInterface extends Interface {
   getFunction(
-    nameOrSignatureOrTopic:
+    nameOrSignature:
       | "abortProject"
       | "accumulatedRewards"
       | "accumulatedRewardsOf"
@@ -145,6 +103,20 @@ export interface CrowdtainerInterface extends utils.Interface {
       | "usedNonces"
   ): FunctionFragment;
 
+  getEvent(
+    nameOrSignatureOrTopic:
+      | "CCIPURLChanged"
+      | "CrowdtainerCreated"
+      | "CrowdtainerInDeliveryStage"
+      | "CrowdtainerInitialized"
+      | "FundsClaimed"
+      | "Initialized"
+      | "Joined"
+      | "Left"
+      | "RewardsClaimed"
+      | "SignerChanged"
+  ): EventFragment;
+
   encodeFunctionData(
     functionFragment: "abortProject",
     values?: undefined
@@ -155,11 +127,11 @@ export interface CrowdtainerInterface extends utils.Interface {
   ): string;
   encodeFunctionData(
     functionFragment: "accumulatedRewardsOf",
-    values: [PromiseOrValue<string>]
+    values: [AddressLike]
   ): string;
   encodeFunctionData(
     functionFragment: "claimFunds(address)",
-    values: [PromiseOrValue<string>]
+    values: [AddressLike]
   ): string;
   encodeFunctionData(
     functionFragment: "claimFunds()",
@@ -171,7 +143,7 @@ export interface CrowdtainerInterface extends utils.Interface {
   ): string;
   encodeFunctionData(
     functionFragment: "costForWallet",
-    values: [PromiseOrValue<string>]
+    values: [AddressLike]
   ): string;
   encodeFunctionData(
     functionFragment: "crowdtainerState",
@@ -179,11 +151,11 @@ export interface CrowdtainerInterface extends utils.Interface {
   ): string;
   encodeFunctionData(
     functionFragment: "discountForUser",
-    values: [PromiseOrValue<string>]
+    values: [AddressLike]
   ): string;
   encodeFunctionData(
     functionFragment: "enableReferral",
-    values: [PromiseOrValue<string>]
+    values: [AddressLike]
   ): string;
   encodeFunctionData(
     functionFragment: "expireTime",
@@ -196,29 +168,21 @@ export interface CrowdtainerInterface extends utils.Interface {
   encodeFunctionData(functionFragment: "getSigner", values?: undefined): string;
   encodeFunctionData(
     functionFragment: "initialize",
-    values: [PromiseOrValue<string>, CampaignDataStruct]
+    values: [AddressLike, CampaignDataStruct]
   ): string;
   encodeFunctionData(
     functionFragment: "join(address,uint256[])",
-    values: [PromiseOrValue<string>, PromiseOrValue<BigNumberish>[]]
+    values: [AddressLike, BigNumberish[]]
   ): string;
   encodeFunctionData(
     functionFragment: "join(address,uint256[],bool,address)",
-    values: [
-      PromiseOrValue<string>,
-      PromiseOrValue<BigNumberish>[],
-      PromiseOrValue<boolean>,
-      PromiseOrValue<string>
-    ]
+    values: [AddressLike, BigNumberish[], boolean, AddressLike]
   ): string;
   encodeFunctionData(
     functionFragment: "joinWithSignature",
-    values: [PromiseOrValue<BytesLike>, PromiseOrValue<BytesLike>]
+    values: [BytesLike, BytesLike]
   ): string;
-  encodeFunctionData(
-    functionFragment: "leave",
-    values: [PromiseOrValue<string>]
-  ): string;
+  encodeFunctionData(functionFragment: "leave", values: [AddressLike]): string;
   encodeFunctionData(
     functionFragment: "legalContractURI",
     values?: undefined
@@ -242,16 +206,13 @@ export interface CrowdtainerInterface extends utils.Interface {
   ): string;
   encodeFunctionData(
     functionFragment: "referrerOfReferee",
-    values: [PromiseOrValue<string>]
+    values: [AddressLike]
   ): string;
   encodeFunctionData(
     functionFragment: "setSigner",
-    values: [PromiseOrValue<string>]
+    values: [AddressLike]
   ): string;
-  encodeFunctionData(
-    functionFragment: "setUrls",
-    values: [PromiseOrValue<string>[]]
-  ): string;
+  encodeFunctionData(functionFragment: "setUrls", values: [string[]]): string;
   encodeFunctionData(
     functionFragment: "shippingAgent",
     values?: undefined
@@ -271,15 +232,12 @@ export interface CrowdtainerInterface extends utils.Interface {
   ): string;
   encodeFunctionData(
     functionFragment: "unitPricePerType",
-    values: [PromiseOrValue<BigNumberish>]
+    values: [BigNumberish]
   ): string;
-  encodeFunctionData(
-    functionFragment: "urls",
-    values: [PromiseOrValue<BigNumberish>]
-  ): string;
+  encodeFunctionData(functionFragment: "urls", values: [BigNumberish]): string;
   encodeFunctionData(
     functionFragment: "usedNonces",
-    values: [PromiseOrValue<string>, PromiseOrValue<BytesLike>]
+    values: [AddressLike, BytesLike]
   ): string;
 
   decodeFunctionResult(
@@ -392,958 +350,650 @@ export interface CrowdtainerInterface extends utils.Interface {
   ): Result;
   decodeFunctionResult(functionFragment: "urls", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "usedNonces", data: BytesLike): Result;
-
-  events: {
-    "CCIPURLChanged(string[])": EventFragment;
-    "CrowdtainerCreated(address,address)": EventFragment;
-    "CrowdtainerInDeliveryStage(address,uint256)": EventFragment;
-    "CrowdtainerInitialized(address,address,uint256,uint256,uint256,uint256,uint256[],uint256,uint256,string,address)": EventFragment;
-    "FundsClaimed(address,uint256)": EventFragment;
-    "Initialized(uint8)": EventFragment;
-    "Joined(address,uint256[],address,uint256,uint256,bool)": EventFragment;
-    "Left(address,uint256)": EventFragment;
-    "RewardsClaimed(address,uint256)": EventFragment;
-    "SignerChanged(address)": EventFragment;
-  };
-
-  getEvent(nameOrSignatureOrTopic: "CCIPURLChanged"): EventFragment;
-  getEvent(nameOrSignatureOrTopic: "CrowdtainerCreated"): EventFragment;
-  getEvent(nameOrSignatureOrTopic: "CrowdtainerInDeliveryStage"): EventFragment;
-  getEvent(nameOrSignatureOrTopic: "CrowdtainerInitialized"): EventFragment;
-  getEvent(nameOrSignatureOrTopic: "FundsClaimed"): EventFragment;
-  getEvent(nameOrSignatureOrTopic: "Initialized"): EventFragment;
-  getEvent(nameOrSignatureOrTopic: "Joined"): EventFragment;
-  getEvent(nameOrSignatureOrTopic: "Left"): EventFragment;
-  getEvent(nameOrSignatureOrTopic: "RewardsClaimed"): EventFragment;
-  getEvent(nameOrSignatureOrTopic: "SignerChanged"): EventFragment;
 }
 
-export interface CCIPURLChangedEventObject {
-  newUrls: string[];
+export namespace CCIPURLChangedEvent {
+  export type InputTuple = [newUrls: string[]];
+  export type OutputTuple = [newUrls: string[]];
+  export interface OutputObject {
+    newUrls: string[];
+  }
+  export type Event = TypedContractEvent<InputTuple, OutputTuple, OutputObject>;
+  export type Filter = TypedDeferredTopicFilter<Event>;
+  export type Log = TypedEventLog<Event>;
+  export type LogDescription = TypedLogDescription<Event>;
 }
-export type CCIPURLChangedEvent = TypedEvent<
-  [string[]],
-  CCIPURLChangedEventObject
->;
 
-export type CCIPURLChangedEventFilter = TypedEventFilter<CCIPURLChangedEvent>;
-
-export interface CrowdtainerCreatedEventObject {
-  owner: string;
-  shippingAgent: string;
+export namespace CrowdtainerCreatedEvent {
+  export type InputTuple = [owner: AddressLike, shippingAgent: AddressLike];
+  export type OutputTuple = [owner: string, shippingAgent: string];
+  export interface OutputObject {
+    owner: string;
+    shippingAgent: string;
+  }
+  export type Event = TypedContractEvent<InputTuple, OutputTuple, OutputObject>;
+  export type Filter = TypedDeferredTopicFilter<Event>;
+  export type Log = TypedEventLog<Event>;
+  export type LogDescription = TypedLogDescription<Event>;
 }
-export type CrowdtainerCreatedEvent = TypedEvent<
-  [string, string],
-  CrowdtainerCreatedEventObject
->;
 
-export type CrowdtainerCreatedEventFilter =
-  TypedEventFilter<CrowdtainerCreatedEvent>;
-
-export interface CrowdtainerInDeliveryStageEventObject {
-  shippingAgent: string;
-  totalValueRaised: BigNumber;
+export namespace CrowdtainerInDeliveryStageEvent {
+  export type InputTuple = [
+    shippingAgent: AddressLike,
+    totalValueRaised: BigNumberish
+  ];
+  export type OutputTuple = [shippingAgent: string, totalValueRaised: bigint];
+  export interface OutputObject {
+    shippingAgent: string;
+    totalValueRaised: bigint;
+  }
+  export type Event = TypedContractEvent<InputTuple, OutputTuple, OutputObject>;
+  export type Filter = TypedDeferredTopicFilter<Event>;
+  export type Log = TypedEventLog<Event>;
+  export type LogDescription = TypedLogDescription<Event>;
 }
-export type CrowdtainerInDeliveryStageEvent = TypedEvent<
-  [string, BigNumber],
-  CrowdtainerInDeliveryStageEventObject
->;
 
-export type CrowdtainerInDeliveryStageEventFilter =
-  TypedEventFilter<CrowdtainerInDeliveryStageEvent>;
-
-export interface CrowdtainerInitializedEventObject {
-  _owner: string;
-  _token: string;
-  _openingTime: BigNumber;
-  _expireTime: BigNumber;
-  _targetMinimum: BigNumber;
-  _targetMaximum: BigNumber;
-  _unitPricePerType: BigNumber[];
-  _referralRate: BigNumber;
-  _referralEligibilityValue: BigNumber;
-  _legalContractURI: string;
-  _signer: string;
+export namespace CrowdtainerInitializedEvent {
+  export type InputTuple = [
+    _owner: AddressLike,
+    _token: AddressLike,
+    _openingTime: BigNumberish,
+    _expireTime: BigNumberish,
+    _targetMinimum: BigNumberish,
+    _targetMaximum: BigNumberish,
+    _unitPricePerType: BigNumberish[],
+    _referralRate: BigNumberish,
+    _referralEligibilityValue: BigNumberish,
+    _legalContractURI: string,
+    _signer: AddressLike
+  ];
+  export type OutputTuple = [
+    _owner: string,
+    _token: string,
+    _openingTime: bigint,
+    _expireTime: bigint,
+    _targetMinimum: bigint,
+    _targetMaximum: bigint,
+    _unitPricePerType: bigint[],
+    _referralRate: bigint,
+    _referralEligibilityValue: bigint,
+    _legalContractURI: string,
+    _signer: string
+  ];
+  export interface OutputObject {
+    _owner: string;
+    _token: string;
+    _openingTime: bigint;
+    _expireTime: bigint;
+    _targetMinimum: bigint;
+    _targetMaximum: bigint;
+    _unitPricePerType: bigint[];
+    _referralRate: bigint;
+    _referralEligibilityValue: bigint;
+    _legalContractURI: string;
+    _signer: string;
+  }
+  export type Event = TypedContractEvent<InputTuple, OutputTuple, OutputObject>;
+  export type Filter = TypedDeferredTopicFilter<Event>;
+  export type Log = TypedEventLog<Event>;
+  export type LogDescription = TypedLogDescription<Event>;
 }
-export type CrowdtainerInitializedEvent = TypedEvent<
-  [
-    string,
-    string,
-    BigNumber,
-    BigNumber,
-    BigNumber,
-    BigNumber,
-    BigNumber[],
-    BigNumber,
-    BigNumber,
-    string,
-    string
-  ],
-  CrowdtainerInitializedEventObject
->;
 
-export type CrowdtainerInitializedEventFilter =
-  TypedEventFilter<CrowdtainerInitializedEvent>;
-
-export interface FundsClaimedEventObject {
-  wallet: string;
-  withdrawnAmount: BigNumber;
+export namespace FundsClaimedEvent {
+  export type InputTuple = [wallet: AddressLike, withdrawnAmount: BigNumberish];
+  export type OutputTuple = [wallet: string, withdrawnAmount: bigint];
+  export interface OutputObject {
+    wallet: string;
+    withdrawnAmount: bigint;
+  }
+  export type Event = TypedContractEvent<InputTuple, OutputTuple, OutputObject>;
+  export type Filter = TypedDeferredTopicFilter<Event>;
+  export type Log = TypedEventLog<Event>;
+  export type LogDescription = TypedLogDescription<Event>;
 }
-export type FundsClaimedEvent = TypedEvent<
-  [string, BigNumber],
-  FundsClaimedEventObject
->;
 
-export type FundsClaimedEventFilter = TypedEventFilter<FundsClaimedEvent>;
-
-export interface InitializedEventObject {
-  version: number;
+export namespace InitializedEvent {
+  export type InputTuple = [version: BigNumberish];
+  export type OutputTuple = [version: bigint];
+  export interface OutputObject {
+    version: bigint;
+  }
+  export type Event = TypedContractEvent<InputTuple, OutputTuple, OutputObject>;
+  export type Filter = TypedDeferredTopicFilter<Event>;
+  export type Log = TypedEventLog<Event>;
+  export type LogDescription = TypedLogDescription<Event>;
 }
-export type InitializedEvent = TypedEvent<[number], InitializedEventObject>;
 
-export type InitializedEventFilter = TypedEventFilter<InitializedEvent>;
-
-export interface JoinedEventObject {
-  wallet: string;
-  quantities: BigNumber[];
-  referrer: string;
-  finalCost: BigNumber;
-  appliedDiscount: BigNumber;
-  referralEnabled: boolean;
+export namespace JoinedEvent {
+  export type InputTuple = [
+    wallet: AddressLike,
+    quantities: BigNumberish[],
+    referrer: AddressLike,
+    finalCost: BigNumberish,
+    appliedDiscount: BigNumberish,
+    referralEnabled: boolean
+  ];
+  export type OutputTuple = [
+    wallet: string,
+    quantities: bigint[],
+    referrer: string,
+    finalCost: bigint,
+    appliedDiscount: bigint,
+    referralEnabled: boolean
+  ];
+  export interface OutputObject {
+    wallet: string;
+    quantities: bigint[];
+    referrer: string;
+    finalCost: bigint;
+    appliedDiscount: bigint;
+    referralEnabled: boolean;
+  }
+  export type Event = TypedContractEvent<InputTuple, OutputTuple, OutputObject>;
+  export type Filter = TypedDeferredTopicFilter<Event>;
+  export type Log = TypedEventLog<Event>;
+  export type LogDescription = TypedLogDescription<Event>;
 }
-export type JoinedEvent = TypedEvent<
-  [string, BigNumber[], string, BigNumber, BigNumber, boolean],
-  JoinedEventObject
->;
 
-export type JoinedEventFilter = TypedEventFilter<JoinedEvent>;
-
-export interface LeftEventObject {
-  wallet: string;
-  withdrawnAmount: BigNumber;
+export namespace LeftEvent {
+  export type InputTuple = [wallet: AddressLike, withdrawnAmount: BigNumberish];
+  export type OutputTuple = [wallet: string, withdrawnAmount: bigint];
+  export interface OutputObject {
+    wallet: string;
+    withdrawnAmount: bigint;
+  }
+  export type Event = TypedContractEvent<InputTuple, OutputTuple, OutputObject>;
+  export type Filter = TypedDeferredTopicFilter<Event>;
+  export type Log = TypedEventLog<Event>;
+  export type LogDescription = TypedLogDescription<Event>;
 }
-export type LeftEvent = TypedEvent<[string, BigNumber], LeftEventObject>;
 
-export type LeftEventFilter = TypedEventFilter<LeftEvent>;
-
-export interface RewardsClaimedEventObject {
-  wallet: string;
-  withdrawnAmount: BigNumber;
+export namespace RewardsClaimedEvent {
+  export type InputTuple = [wallet: AddressLike, withdrawnAmount: BigNumberish];
+  export type OutputTuple = [wallet: string, withdrawnAmount: bigint];
+  export interface OutputObject {
+    wallet: string;
+    withdrawnAmount: bigint;
+  }
+  export type Event = TypedContractEvent<InputTuple, OutputTuple, OutputObject>;
+  export type Filter = TypedDeferredTopicFilter<Event>;
+  export type Log = TypedEventLog<Event>;
+  export type LogDescription = TypedLogDescription<Event>;
 }
-export type RewardsClaimedEvent = TypedEvent<
-  [string, BigNumber],
-  RewardsClaimedEventObject
->;
 
-export type RewardsClaimedEventFilter = TypedEventFilter<RewardsClaimedEvent>;
-
-export interface SignerChangedEventObject {
-  newSigner: string;
+export namespace SignerChangedEvent {
+  export type InputTuple = [newSigner: AddressLike];
+  export type OutputTuple = [newSigner: string];
+  export interface OutputObject {
+    newSigner: string;
+  }
+  export type Event = TypedContractEvent<InputTuple, OutputTuple, OutputObject>;
+  export type Filter = TypedDeferredTopicFilter<Event>;
+  export type Log = TypedEventLog<Event>;
+  export type LogDescription = TypedLogDescription<Event>;
 }
-export type SignerChangedEvent = TypedEvent<[string], SignerChangedEventObject>;
-
-export type SignerChangedEventFilter = TypedEventFilter<SignerChangedEvent>;
 
 export interface Crowdtainer extends BaseContract {
-  connect(signerOrProvider: Signer | Provider | string): this;
-  attach(addressOrName: string): this;
-  deployed(): Promise<this>;
+  connect(runner?: ContractRunner | null): Crowdtainer;
+  waitForDeployment(): Promise<this>;
 
   interface: CrowdtainerInterface;
 
-  queryFilter<TEvent extends TypedEvent>(
-    event: TypedEventFilter<TEvent>,
+  queryFilter<TCEvent extends TypedContractEvent>(
+    event: TCEvent,
     fromBlockOrBlockhash?: string | number | undefined,
     toBlock?: string | number | undefined
-  ): Promise<Array<TEvent>>;
-
-  listeners<TEvent extends TypedEvent>(
-    eventFilter?: TypedEventFilter<TEvent>
-  ): Array<TypedListener<TEvent>>;
-  listeners(eventName?: string): Array<Listener>;
-  removeAllListeners<TEvent extends TypedEvent>(
-    eventFilter: TypedEventFilter<TEvent>
-  ): this;
-  removeAllListeners(eventName?: string): this;
-  off: OnEvent<this>;
-  on: OnEvent<this>;
-  once: OnEvent<this>;
-  removeListener: OnEvent<this>;
-
-  functions: {
-    abortProject(
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<ContractTransaction>;
-
-    accumulatedRewards(overrides?: CallOverrides): Promise<[BigNumber]>;
-
-    accumulatedRewardsOf(
-      arg0: PromiseOrValue<string>,
-      overrides?: CallOverrides
-    ): Promise<[BigNumber]>;
-
-    "claimFunds(address)"(
-      wallet: PromiseOrValue<string>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<ContractTransaction>;
+  ): Promise<Array<TypedEventLog<TCEvent>>>;
+  queryFilter<TCEvent extends TypedContractEvent>(
+    filter: TypedDeferredTopicFilter<TCEvent>,
+    fromBlockOrBlockhash?: string | number | undefined,
+    toBlock?: string | number | undefined
+  ): Promise<Array<TypedEventLog<TCEvent>>>;
+
+  on<TCEvent extends TypedContractEvent>(
+    event: TCEvent,
+    listener: TypedListener<TCEvent>
+  ): Promise<this>;
+  on<TCEvent extends TypedContractEvent>(
+    filter: TypedDeferredTopicFilter<TCEvent>,
+    listener: TypedListener<TCEvent>
+  ): Promise<this>;
 
-    "claimFunds()"(
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<ContractTransaction>;
+  once<TCEvent extends TypedContractEvent>(
+    event: TCEvent,
+    listener: TypedListener<TCEvent>
+  ): Promise<this>;
+  once<TCEvent extends TypedContractEvent>(
+    filter: TypedDeferredTopicFilter<TCEvent>,
+    listener: TypedListener<TCEvent>
+  ): Promise<this>;
 
-    claimRewards(
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<ContractTransaction>;
+  listeners<TCEvent extends TypedContractEvent>(
+    event: TCEvent
+  ): Promise<Array<TypedListener<TCEvent>>>;
+  listeners(eventName?: string): Promise<Array<Listener>>;
+  removeAllListeners<TCEvent extends TypedContractEvent>(
+    event?: TCEvent
+  ): Promise<this>;
 
-    costForWallet(
-      arg0: PromiseOrValue<string>,
-      overrides?: CallOverrides
-    ): Promise<[BigNumber]>;
+  abortProject: TypedContractMethod<[], [void], "nonpayable">;
 
-    crowdtainerState(overrides?: CallOverrides): Promise<[number]>;
-
-    discountForUser(
-      arg0: PromiseOrValue<string>,
-      overrides?: CallOverrides
-    ): Promise<[BigNumber]>;
-
-    enableReferral(
-      arg0: PromiseOrValue<string>,
-      overrides?: CallOverrides
-    ): Promise<[boolean]>;
+  accumulatedRewards: TypedContractMethod<[], [bigint], "view">;
 
-    expireTime(overrides?: CallOverrides): Promise<[BigNumber]>;
-
-    getPaidAndDeliver(
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<ContractTransaction>;
-
-    getSigner(overrides?: CallOverrides): Promise<[string]>;
-
-    initialize(
-      _owner: PromiseOrValue<string>,
-      _campaignData: CampaignDataStruct,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<ContractTransaction>;
-
-    "join(address,uint256[])"(
-      _wallet: PromiseOrValue<string>,
-      _quantities: PromiseOrValue<BigNumberish>[],
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<ContractTransaction>;
-
-    "join(address,uint256[],bool,address)"(
-      _wallet: PromiseOrValue<string>,
-      _quantities: PromiseOrValue<BigNumberish>[],
-      _enableReferral: PromiseOrValue<boolean>,
-      _referrer: PromiseOrValue<string>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<ContractTransaction>;
-
-    joinWithSignature(
-      result: PromiseOrValue<BytesLike>,
-      extraData: PromiseOrValue<BytesLike>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<ContractTransaction>;
-
-    leave(
-      _wallet: PromiseOrValue<string>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<ContractTransaction>;
-
-    legalContractURI(overrides?: CallOverrides): Promise<[string]>;
-
-    numberOfProducts(overrides?: CallOverrides): Promise<[BigNumber]>;
+  accumulatedRewardsOf: TypedContractMethod<
+    [arg0: AddressLike],
+    [bigint],
+    "view"
+  >;
 
-    openingTime(overrides?: CallOverrides): Promise<[BigNumber]>;
+  "claimFunds(address)": TypedContractMethod<
+    [wallet: AddressLike],
+    [void],
+    "nonpayable"
+  >;
 
-    owner(overrides?: CallOverrides): Promise<[string]>;
+  "claimFunds()": TypedContractMethod<[], [void], "nonpayable">;
 
-    referralEligibilityValue(overrides?: CallOverrides): Promise<[BigNumber]>;
+  claimRewards: TypedContractMethod<[], [void], "nonpayable">;
 
-    referralRate(overrides?: CallOverrides): Promise<[BigNumber]>;
+  costForWallet: TypedContractMethod<[arg0: AddressLike], [bigint], "view">;
 
-    referrerOfReferee(
-      arg0: PromiseOrValue<string>,
-      overrides?: CallOverrides
-    ): Promise<[string]>;
+  crowdtainerState: TypedContractMethod<[], [bigint], "view">;
 
-    setSigner(
-      _signer: PromiseOrValue<string>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<ContractTransaction>;
+  discountForUser: TypedContractMethod<[arg0: AddressLike], [bigint], "view">;
 
-    setUrls(
-      _urls: PromiseOrValue<string>[],
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<ContractTransaction>;
+  enableReferral: TypedContractMethod<[arg0: AddressLike], [boolean], "view">;
 
-    shippingAgent(overrides?: CallOverrides): Promise<[string]>;
-
-    targetMaximum(overrides?: CallOverrides): Promise<[BigNumber]>;
-
-    targetMinimum(overrides?: CallOverrides): Promise<[BigNumber]>;
-
-    token(overrides?: CallOverrides): Promise<[string]>;
-
-    totalValueRaised(overrides?: CallOverrides): Promise<[BigNumber]>;
-
-    unitPricePerType(
-      arg0: PromiseOrValue<BigNumberish>,
-      overrides?: CallOverrides
-    ): Promise<[BigNumber]>;
-
-    urls(
-      arg0: PromiseOrValue<BigNumberish>,
-      overrides?: CallOverrides
-    ): Promise<[string]>;
-
-    usedNonces(
-      arg0: PromiseOrValue<string>,
-      arg1: PromiseOrValue<BytesLike>,
-      overrides?: CallOverrides
-    ): Promise<[boolean]>;
-  };
-
-  abortProject(
-    overrides?: Overrides & { from?: PromiseOrValue<string> }
-  ): Promise<ContractTransaction>;
-
-  accumulatedRewards(overrides?: CallOverrides): Promise<BigNumber>;
-
-  accumulatedRewardsOf(
-    arg0: PromiseOrValue<string>,
-    overrides?: CallOverrides
-  ): Promise<BigNumber>;
-
-  "claimFunds(address)"(
-    wallet: PromiseOrValue<string>,
-    overrides?: Overrides & { from?: PromiseOrValue<string> }
-  ): Promise<ContractTransaction>;
-
-  "claimFunds()"(
-    overrides?: Overrides & { from?: PromiseOrValue<string> }
-  ): Promise<ContractTransaction>;
-
-  claimRewards(
-    overrides?: Overrides & { from?: PromiseOrValue<string> }
-  ): Promise<ContractTransaction>;
-
-  costForWallet(
-    arg0: PromiseOrValue<string>,
-    overrides?: CallOverrides
-  ): Promise<BigNumber>;
-
-  crowdtainerState(overrides?: CallOverrides): Promise<number>;
-
-  discountForUser(
-    arg0: PromiseOrValue<string>,
-    overrides?: CallOverrides
-  ): Promise<BigNumber>;
-
-  enableReferral(
-    arg0: PromiseOrValue<string>,
-    overrides?: CallOverrides
-  ): Promise<boolean>;
-
-  expireTime(overrides?: CallOverrides): Promise<BigNumber>;
-
-  getPaidAndDeliver(
-    overrides?: Overrides & { from?: PromiseOrValue<string> }
-  ): Promise<ContractTransaction>;
-
-  getSigner(overrides?: CallOverrides): Promise<string>;
-
-  initialize(
-    _owner: PromiseOrValue<string>,
-    _campaignData: CampaignDataStruct,
-    overrides?: Overrides & { from?: PromiseOrValue<string> }
-  ): Promise<ContractTransaction>;
-
-  "join(address,uint256[])"(
-    _wallet: PromiseOrValue<string>,
-    _quantities: PromiseOrValue<BigNumberish>[],
-    overrides?: Overrides & { from?: PromiseOrValue<string> }
-  ): Promise<ContractTransaction>;
-
-  "join(address,uint256[],bool,address)"(
-    _wallet: PromiseOrValue<string>,
-    _quantities: PromiseOrValue<BigNumberish>[],
-    _enableReferral: PromiseOrValue<boolean>,
-    _referrer: PromiseOrValue<string>,
-    overrides?: Overrides & { from?: PromiseOrValue<string> }
-  ): Promise<ContractTransaction>;
-
-  joinWithSignature(
-    result: PromiseOrValue<BytesLike>,
-    extraData: PromiseOrValue<BytesLike>,
-    overrides?: Overrides & { from?: PromiseOrValue<string> }
-  ): Promise<ContractTransaction>;
-
-  leave(
-    _wallet: PromiseOrValue<string>,
-    overrides?: Overrides & { from?: PromiseOrValue<string> }
-  ): Promise<ContractTransaction>;
-
-  legalContractURI(overrides?: CallOverrides): Promise<string>;
-
-  numberOfProducts(overrides?: CallOverrides): Promise<BigNumber>;
-
-  openingTime(overrides?: CallOverrides): Promise<BigNumber>;
-
-  owner(overrides?: CallOverrides): Promise<string>;
-
-  referralEligibilityValue(overrides?: CallOverrides): Promise<BigNumber>;
-
-  referralRate(overrides?: CallOverrides): Promise<BigNumber>;
-
-  referrerOfReferee(
-    arg0: PromiseOrValue<string>,
-    overrides?: CallOverrides
-  ): Promise<string>;
-
-  setSigner(
-    _signer: PromiseOrValue<string>,
-    overrides?: Overrides & { from?: PromiseOrValue<string> }
-  ): Promise<ContractTransaction>;
-
-  setUrls(
-    _urls: PromiseOrValue<string>[],
-    overrides?: Overrides & { from?: PromiseOrValue<string> }
-  ): Promise<ContractTransaction>;
-
-  shippingAgent(overrides?: CallOverrides): Promise<string>;
-
-  targetMaximum(overrides?: CallOverrides): Promise<BigNumber>;
-
-  targetMinimum(overrides?: CallOverrides): Promise<BigNumber>;
-
-  token(overrides?: CallOverrides): Promise<string>;
-
-  totalValueRaised(overrides?: CallOverrides): Promise<BigNumber>;
-
-  unitPricePerType(
-    arg0: PromiseOrValue<BigNumberish>,
-    overrides?: CallOverrides
-  ): Promise<BigNumber>;
-
-  urls(
-    arg0: PromiseOrValue<BigNumberish>,
-    overrides?: CallOverrides
-  ): Promise<string>;
-
-  usedNonces(
-    arg0: PromiseOrValue<string>,
-    arg1: PromiseOrValue<BytesLike>,
-    overrides?: CallOverrides
-  ): Promise<boolean>;
-
-  callStatic: {
-    abortProject(overrides?: CallOverrides): Promise<void>;
-
-    accumulatedRewards(overrides?: CallOverrides): Promise<BigNumber>;
-
-    accumulatedRewardsOf(
-      arg0: PromiseOrValue<string>,
-      overrides?: CallOverrides
-    ): Promise<BigNumber>;
-
-    "claimFunds(address)"(
-      wallet: PromiseOrValue<string>,
-      overrides?: CallOverrides
-    ): Promise<void>;
-
-    "claimFunds()"(overrides?: CallOverrides): Promise<void>;
-
-    claimRewards(overrides?: CallOverrides): Promise<void>;
-
-    costForWallet(
-      arg0: PromiseOrValue<string>,
-      overrides?: CallOverrides
-    ): Promise<BigNumber>;
-
-    crowdtainerState(overrides?: CallOverrides): Promise<number>;
-
-    discountForUser(
-      arg0: PromiseOrValue<string>,
-      overrides?: CallOverrides
-    ): Promise<BigNumber>;
-
-    enableReferral(
-      arg0: PromiseOrValue<string>,
-      overrides?: CallOverrides
-    ): Promise<boolean>;
-
-    expireTime(overrides?: CallOverrides): Promise<BigNumber>;
-
-    getPaidAndDeliver(overrides?: CallOverrides): Promise<void>;
-
-    getSigner(overrides?: CallOverrides): Promise<string>;
-
-    initialize(
-      _owner: PromiseOrValue<string>,
-      _campaignData: CampaignDataStruct,
-      overrides?: CallOverrides
-    ): Promise<void>;
-
-    "join(address,uint256[])"(
-      _wallet: PromiseOrValue<string>,
-      _quantities: PromiseOrValue<BigNumberish>[],
-      overrides?: CallOverrides
-    ): Promise<void>;
-
-    "join(address,uint256[],bool,address)"(
-      _wallet: PromiseOrValue<string>,
-      _quantities: PromiseOrValue<BigNumberish>[],
-      _enableReferral: PromiseOrValue<boolean>,
-      _referrer: PromiseOrValue<string>,
-      overrides?: CallOverrides
-    ): Promise<void>;
-
-    joinWithSignature(
-      result: PromiseOrValue<BytesLike>,
-      extraData: PromiseOrValue<BytesLike>,
-      overrides?: CallOverrides
-    ): Promise<void>;
-
-    leave(
-      _wallet: PromiseOrValue<string>,
-      overrides?: CallOverrides
-    ): Promise<void>;
-
-    legalContractURI(overrides?: CallOverrides): Promise<string>;
-
-    numberOfProducts(overrides?: CallOverrides): Promise<BigNumber>;
-
-    openingTime(overrides?: CallOverrides): Promise<BigNumber>;
-
-    owner(overrides?: CallOverrides): Promise<string>;
-
-    referralEligibilityValue(overrides?: CallOverrides): Promise<BigNumber>;
-
-    referralRate(overrides?: CallOverrides): Promise<BigNumber>;
-
-    referrerOfReferee(
-      arg0: PromiseOrValue<string>,
-      overrides?: CallOverrides
-    ): Promise<string>;
-
-    setSigner(
-      _signer: PromiseOrValue<string>,
-      overrides?: CallOverrides
-    ): Promise<void>;
-
-    setUrls(
-      _urls: PromiseOrValue<string>[],
-      overrides?: CallOverrides
-    ): Promise<void>;
-
-    shippingAgent(overrides?: CallOverrides): Promise<string>;
-
-    targetMaximum(overrides?: CallOverrides): Promise<BigNumber>;
-
-    targetMinimum(overrides?: CallOverrides): Promise<BigNumber>;
-
-    token(overrides?: CallOverrides): Promise<string>;
-
-    totalValueRaised(overrides?: CallOverrides): Promise<BigNumber>;
-
-    unitPricePerType(
-      arg0: PromiseOrValue<BigNumberish>,
-      overrides?: CallOverrides
-    ): Promise<BigNumber>;
-
-    urls(
-      arg0: PromiseOrValue<BigNumberish>,
-      overrides?: CallOverrides
-    ): Promise<string>;
-
-    usedNonces(
-      arg0: PromiseOrValue<string>,
-      arg1: PromiseOrValue<BytesLike>,
-      overrides?: CallOverrides
-    ): Promise<boolean>;
-  };
+  expireTime: TypedContractMethod<[], [bigint], "view">;
+
+  getPaidAndDeliver: TypedContractMethod<[], [void], "nonpayable">;
+
+  getSigner: TypedContractMethod<[], [string], "view">;
+
+  initialize: TypedContractMethod<
+    [_owner: AddressLike, _campaignData: CampaignDataStruct],
+    [void],
+    "nonpayable"
+  >;
+
+  "join(address,uint256[])": TypedContractMethod<
+    [_wallet: AddressLike, _quantities: BigNumberish[]],
+    [void],
+    "nonpayable"
+  >;
+
+  "join(address,uint256[],bool,address)": TypedContractMethod<
+    [
+      _wallet: AddressLike,
+      _quantities: BigNumberish[],
+      _enableReferral: boolean,
+      _referrer: AddressLike
+    ],
+    [void],
+    "nonpayable"
+  >;
+
+  joinWithSignature: TypedContractMethod<
+    [result: BytesLike, extraData: BytesLike],
+    [void],
+    "nonpayable"
+  >;
+
+  leave: TypedContractMethod<[_wallet: AddressLike], [void], "nonpayable">;
+
+  legalContractURI: TypedContractMethod<[], [string], "view">;
+
+  numberOfProducts: TypedContractMethod<[], [bigint], "view">;
+
+  openingTime: TypedContractMethod<[], [bigint], "view">;
+
+  owner: TypedContractMethod<[], [string], "view">;
+
+  referralEligibilityValue: TypedContractMethod<[], [bigint], "view">;
+
+  referralRate: TypedContractMethod<[], [bigint], "view">;
+
+  referrerOfReferee: TypedContractMethod<[arg0: AddressLike], [string], "view">;
+
+  setSigner: TypedContractMethod<[_signer: AddressLike], [void], "nonpayable">;
+
+  setUrls: TypedContractMethod<[_urls: string[]], [void], "nonpayable">;
+
+  shippingAgent: TypedContractMethod<[], [string], "view">;
+
+  targetMaximum: TypedContractMethod<[], [bigint], "view">;
+
+  targetMinimum: TypedContractMethod<[], [bigint], "view">;
+
+  token: TypedContractMethod<[], [string], "view">;
+
+  totalValueRaised: TypedContractMethod<[], [bigint], "view">;
+
+  unitPricePerType: TypedContractMethod<[arg0: BigNumberish], [bigint], "view">;
+
+  urls: TypedContractMethod<[arg0: BigNumberish], [string], "view">;
+
+  usedNonces: TypedContractMethod<
+    [arg0: AddressLike, arg1: BytesLike],
+    [boolean],
+    "view"
+  >;
+
+  getFunction<T extends ContractMethod = ContractMethod>(
+    key: string | FunctionFragment
+  ): T;
+
+  getFunction(
+    nameOrSignature: "abortProject"
+  ): TypedContractMethod<[], [void], "nonpayable">;
+  getFunction(
+    nameOrSignature: "accumulatedRewards"
+  ): TypedContractMethod<[], [bigint], "view">;
+  getFunction(
+    nameOrSignature: "accumulatedRewardsOf"
+  ): TypedContractMethod<[arg0: AddressLike], [bigint], "view">;
+  getFunction(
+    nameOrSignature: "claimFunds(address)"
+  ): TypedContractMethod<[wallet: AddressLike], [void], "nonpayable">;
+  getFunction(
+    nameOrSignature: "claimFunds()"
+  ): TypedContractMethod<[], [void], "nonpayable">;
+  getFunction(
+    nameOrSignature: "claimRewards"
+  ): TypedContractMethod<[], [void], "nonpayable">;
+  getFunction(
+    nameOrSignature: "costForWallet"
+  ): TypedContractMethod<[arg0: AddressLike], [bigint], "view">;
+  getFunction(
+    nameOrSignature: "crowdtainerState"
+  ): TypedContractMethod<[], [bigint], "view">;
+  getFunction(
+    nameOrSignature: "discountForUser"
+  ): TypedContractMethod<[arg0: AddressLike], [bigint], "view">;
+  getFunction(
+    nameOrSignature: "enableReferral"
+  ): TypedContractMethod<[arg0: AddressLike], [boolean], "view">;
+  getFunction(
+    nameOrSignature: "expireTime"
+  ): TypedContractMethod<[], [bigint], "view">;
+  getFunction(
+    nameOrSignature: "getPaidAndDeliver"
+  ): TypedContractMethod<[], [void], "nonpayable">;
+  getFunction(
+    nameOrSignature: "getSigner"
+  ): TypedContractMethod<[], [string], "view">;
+  getFunction(
+    nameOrSignature: "initialize"
+  ): TypedContractMethod<
+    [_owner: AddressLike, _campaignData: CampaignDataStruct],
+    [void],
+    "nonpayable"
+  >;
+  getFunction(
+    nameOrSignature: "join(address,uint256[])"
+  ): TypedContractMethod<
+    [_wallet: AddressLike, _quantities: BigNumberish[]],
+    [void],
+    "nonpayable"
+  >;
+  getFunction(
+    nameOrSignature: "join(address,uint256[],bool,address)"
+  ): TypedContractMethod<
+    [
+      _wallet: AddressLike,
+      _quantities: BigNumberish[],
+      _enableReferral: boolean,
+      _referrer: AddressLike
+    ],
+    [void],
+    "nonpayable"
+  >;
+  getFunction(
+    nameOrSignature: "joinWithSignature"
+  ): TypedContractMethod<
+    [result: BytesLike, extraData: BytesLike],
+    [void],
+    "nonpayable"
+  >;
+  getFunction(
+    nameOrSignature: "leave"
+  ): TypedContractMethod<[_wallet: AddressLike], [void], "nonpayable">;
+  getFunction(
+    nameOrSignature: "legalContractURI"
+  ): TypedContractMethod<[], [string], "view">;
+  getFunction(
+    nameOrSignature: "numberOfProducts"
+  ): TypedContractMethod<[], [bigint], "view">;
+  getFunction(
+    nameOrSignature: "openingTime"
+  ): TypedContractMethod<[], [bigint], "view">;
+  getFunction(
+    nameOrSignature: "owner"
+  ): TypedContractMethod<[], [string], "view">;
+  getFunction(
+    nameOrSignature: "referralEligibilityValue"
+  ): TypedContractMethod<[], [bigint], "view">;
+  getFunction(
+    nameOrSignature: "referralRate"
+  ): TypedContractMethod<[], [bigint], "view">;
+  getFunction(
+    nameOrSignature: "referrerOfReferee"
+  ): TypedContractMethod<[arg0: AddressLike], [string], "view">;
+  getFunction(
+    nameOrSignature: "setSigner"
+  ): TypedContractMethod<[_signer: AddressLike], [void], "nonpayable">;
+  getFunction(
+    nameOrSignature: "setUrls"
+  ): TypedContractMethod<[_urls: string[]], [void], "nonpayable">;
+  getFunction(
+    nameOrSignature: "shippingAgent"
+  ): TypedContractMethod<[], [string], "view">;
+  getFunction(
+    nameOrSignature: "targetMaximum"
+  ): TypedContractMethod<[], [bigint], "view">;
+  getFunction(
+    nameOrSignature: "targetMinimum"
+  ): TypedContractMethod<[], [bigint], "view">;
+  getFunction(
+    nameOrSignature: "token"
+  ): TypedContractMethod<[], [string], "view">;
+  getFunction(
+    nameOrSignature: "totalValueRaised"
+  ): TypedContractMethod<[], [bigint], "view">;
+  getFunction(
+    nameOrSignature: "unitPricePerType"
+  ): TypedContractMethod<[arg0: BigNumberish], [bigint], "view">;
+  getFunction(
+    nameOrSignature: "urls"
+  ): TypedContractMethod<[arg0: BigNumberish], [string], "view">;
+  getFunction(
+    nameOrSignature: "usedNonces"
+  ): TypedContractMethod<
+    [arg0: AddressLike, arg1: BytesLike],
+    [boolean],
+    "view"
+  >;
+
+  getEvent(
+    key: "CCIPURLChanged"
+  ): TypedContractEvent<
+    CCIPURLChangedEvent.InputTuple,
+    CCIPURLChangedEvent.OutputTuple,
+    CCIPURLChangedEvent.OutputObject
+  >;
+  getEvent(
+    key: "CrowdtainerCreated"
+  ): TypedContractEvent<
+    CrowdtainerCreatedEvent.InputTuple,
+    CrowdtainerCreatedEvent.OutputTuple,
+    CrowdtainerCreatedEvent.OutputObject
+  >;
+  getEvent(
+    key: "CrowdtainerInDeliveryStage"
+  ): TypedContractEvent<
+    CrowdtainerInDeliveryStageEvent.InputTuple,
+    CrowdtainerInDeliveryStageEvent.OutputTuple,
+    CrowdtainerInDeliveryStageEvent.OutputObject
+  >;
+  getEvent(
+    key: "CrowdtainerInitialized"
+  ): TypedContractEvent<
+    CrowdtainerInitializedEvent.InputTuple,
+    CrowdtainerInitializedEvent.OutputTuple,
+    CrowdtainerInitializedEvent.OutputObject
+  >;
+  getEvent(
+    key: "FundsClaimed"
+  ): TypedContractEvent<
+    FundsClaimedEvent.InputTuple,
+    FundsClaimedEvent.OutputTuple,
+    FundsClaimedEvent.OutputObject
+  >;
+  getEvent(
+    key: "Initialized"
+  ): TypedContractEvent<
+    InitializedEvent.InputTuple,
+    InitializedEvent.OutputTuple,
+    InitializedEvent.OutputObject
+  >;
+  getEvent(
+    key: "Joined"
+  ): TypedContractEvent<
+    JoinedEvent.InputTuple,
+    JoinedEvent.OutputTuple,
+    JoinedEvent.OutputObject
+  >;
+  getEvent(
+    key: "Left"
+  ): TypedContractEvent<
+    LeftEvent.InputTuple,
+    LeftEvent.OutputTuple,
+    LeftEvent.OutputObject
+  >;
+  getEvent(
+    key: "RewardsClaimed"
+  ): TypedContractEvent<
+    RewardsClaimedEvent.InputTuple,
+    RewardsClaimedEvent.OutputTuple,
+    RewardsClaimedEvent.OutputObject
+  >;
+  getEvent(
+    key: "SignerChanged"
+  ): TypedContractEvent<
+    SignerChangedEvent.InputTuple,
+    SignerChangedEvent.OutputTuple,
+    SignerChangedEvent.OutputObject
+  >;
 
   filters: {
-    "CCIPURLChanged(string[])"(
-      newUrls?: PromiseOrValue<string>[] | null
-    ): CCIPURLChangedEventFilter;
-    CCIPURLChanged(
-      newUrls?: PromiseOrValue<string>[] | null
-    ): CCIPURLChangedEventFilter;
-
-    "CrowdtainerCreated(address,address)"(
-      owner?: PromiseOrValue<string> | null,
-      shippingAgent?: PromiseOrValue<string> | null
-    ): CrowdtainerCreatedEventFilter;
-    CrowdtainerCreated(
-      owner?: PromiseOrValue<string> | null,
-      shippingAgent?: PromiseOrValue<string> | null
-    ): CrowdtainerCreatedEventFilter;
-
-    "CrowdtainerInDeliveryStage(address,uint256)"(
-      shippingAgent?: PromiseOrValue<string> | null,
-      totalValueRaised?: null
-    ): CrowdtainerInDeliveryStageEventFilter;
-    CrowdtainerInDeliveryStage(
-      shippingAgent?: PromiseOrValue<string> | null,
-      totalValueRaised?: null
-    ): CrowdtainerInDeliveryStageEventFilter;
-
-    "CrowdtainerInitialized(address,address,uint256,uint256,uint256,uint256,uint256[],uint256,uint256,string,address)"(
-      _owner?: PromiseOrValue<string> | null,
-      _token?: null,
-      _openingTime?: null,
-      _expireTime?: null,
-      _targetMinimum?: null,
-      _targetMaximum?: null,
-      _unitPricePerType?: null,
-      _referralRate?: null,
-      _referralEligibilityValue?: null,
-      _legalContractURI?: null,
-      _signer?: null
-    ): CrowdtainerInitializedEventFilter;
-    CrowdtainerInitialized(
-      _owner?: PromiseOrValue<string> | null,
-      _token?: null,
-      _openingTime?: null,
-      _expireTime?: null,
-      _targetMinimum?: null,
-      _targetMaximum?: null,
-      _unitPricePerType?: null,
-      _referralRate?: null,
-      _referralEligibilityValue?: null,
-      _legalContractURI?: null,
-      _signer?: null
-    ): CrowdtainerInitializedEventFilter;
-
-    "FundsClaimed(address,uint256)"(
-      wallet?: PromiseOrValue<string> | null,
-      withdrawnAmount?: null
-    ): FundsClaimedEventFilter;
-    FundsClaimed(
-      wallet?: PromiseOrValue<string> | null,
-      withdrawnAmount?: null
-    ): FundsClaimedEventFilter;
-
-    "Initialized(uint8)"(version?: null): InitializedEventFilter;
-    Initialized(version?: null): InitializedEventFilter;
-
-    "Joined(address,uint256[],address,uint256,uint256,bool)"(
-      wallet?: PromiseOrValue<string> | null,
-      quantities?: null,
-      referrer?: PromiseOrValue<string> | null,
-      finalCost?: null,
-      appliedDiscount?: null,
-      referralEnabled?: null
-    ): JoinedEventFilter;
-    Joined(
-      wallet?: PromiseOrValue<string> | null,
-      quantities?: null,
-      referrer?: PromiseOrValue<string> | null,
-      finalCost?: null,
-      appliedDiscount?: null,
-      referralEnabled?: null
-    ): JoinedEventFilter;
-
-    "Left(address,uint256)"(
-      wallet?: PromiseOrValue<string> | null,
-      withdrawnAmount?: null
-    ): LeftEventFilter;
-    Left(
-      wallet?: PromiseOrValue<string> | null,
-      withdrawnAmount?: null
-    ): LeftEventFilter;
-
-    "RewardsClaimed(address,uint256)"(
-      wallet?: PromiseOrValue<string> | null,
-      withdrawnAmount?: null
-    ): RewardsClaimedEventFilter;
-    RewardsClaimed(
-      wallet?: PromiseOrValue<string> | null,
-      withdrawnAmount?: null
-    ): RewardsClaimedEventFilter;
-
-    "SignerChanged(address)"(
-      newSigner?: PromiseOrValue<string> | null
-    ): SignerChangedEventFilter;
-    SignerChanged(
-      newSigner?: PromiseOrValue<string> | null
-    ): SignerChangedEventFilter;
-  };
-
-  estimateGas: {
-    abortProject(
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<BigNumber>;
-
-    accumulatedRewards(overrides?: CallOverrides): Promise<BigNumber>;
-
-    accumulatedRewardsOf(
-      arg0: PromiseOrValue<string>,
-      overrides?: CallOverrides
-    ): Promise<BigNumber>;
-
-    "claimFunds(address)"(
-      wallet: PromiseOrValue<string>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<BigNumber>;
-
-    "claimFunds()"(
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<BigNumber>;
-
-    claimRewards(
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<BigNumber>;
-
-    costForWallet(
-      arg0: PromiseOrValue<string>,
-      overrides?: CallOverrides
-    ): Promise<BigNumber>;
-
-    crowdtainerState(overrides?: CallOverrides): Promise<BigNumber>;
-
-    discountForUser(
-      arg0: PromiseOrValue<string>,
-      overrides?: CallOverrides
-    ): Promise<BigNumber>;
-
-    enableReferral(
-      arg0: PromiseOrValue<string>,
-      overrides?: CallOverrides
-    ): Promise<BigNumber>;
-
-    expireTime(overrides?: CallOverrides): Promise<BigNumber>;
-
-    getPaidAndDeliver(
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<BigNumber>;
-
-    getSigner(overrides?: CallOverrides): Promise<BigNumber>;
-
-    initialize(
-      _owner: PromiseOrValue<string>,
-      _campaignData: CampaignDataStruct,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<BigNumber>;
-
-    "join(address,uint256[])"(
-      _wallet: PromiseOrValue<string>,
-      _quantities: PromiseOrValue<BigNumberish>[],
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<BigNumber>;
-
-    "join(address,uint256[],bool,address)"(
-      _wallet: PromiseOrValue<string>,
-      _quantities: PromiseOrValue<BigNumberish>[],
-      _enableReferral: PromiseOrValue<boolean>,
-      _referrer: PromiseOrValue<string>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<BigNumber>;
-
-    joinWithSignature(
-      result: PromiseOrValue<BytesLike>,
-      extraData: PromiseOrValue<BytesLike>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<BigNumber>;
-
-    leave(
-      _wallet: PromiseOrValue<string>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<BigNumber>;
-
-    legalContractURI(overrides?: CallOverrides): Promise<BigNumber>;
-
-    numberOfProducts(overrides?: CallOverrides): Promise<BigNumber>;
-
-    openingTime(overrides?: CallOverrides): Promise<BigNumber>;
-
-    owner(overrides?: CallOverrides): Promise<BigNumber>;
-
-    referralEligibilityValue(overrides?: CallOverrides): Promise<BigNumber>;
-
-    referralRate(overrides?: CallOverrides): Promise<BigNumber>;
-
-    referrerOfReferee(
-      arg0: PromiseOrValue<string>,
-      overrides?: CallOverrides
-    ): Promise<BigNumber>;
-
-    setSigner(
-      _signer: PromiseOrValue<string>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<BigNumber>;
-
-    setUrls(
-      _urls: PromiseOrValue<string>[],
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<BigNumber>;
-
-    shippingAgent(overrides?: CallOverrides): Promise<BigNumber>;
-
-    targetMaximum(overrides?: CallOverrides): Promise<BigNumber>;
-
-    targetMinimum(overrides?: CallOverrides): Promise<BigNumber>;
-
-    token(overrides?: CallOverrides): Promise<BigNumber>;
-
-    totalValueRaised(overrides?: CallOverrides): Promise<BigNumber>;
-
-    unitPricePerType(
-      arg0: PromiseOrValue<BigNumberish>,
-      overrides?: CallOverrides
-    ): Promise<BigNumber>;
-
-    urls(
-      arg0: PromiseOrValue<BigNumberish>,
-      overrides?: CallOverrides
-    ): Promise<BigNumber>;
-
-    usedNonces(
-      arg0: PromiseOrValue<string>,
-      arg1: PromiseOrValue<BytesLike>,
-      overrides?: CallOverrides
-    ): Promise<BigNumber>;
-  };
-
-  populateTransaction: {
-    abortProject(
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<PopulatedTransaction>;
-
-    accumulatedRewards(
-      overrides?: CallOverrides
-    ): Promise<PopulatedTransaction>;
-
-    accumulatedRewardsOf(
-      arg0: PromiseOrValue<string>,
-      overrides?: CallOverrides
-    ): Promise<PopulatedTransaction>;
-
-    "claimFunds(address)"(
-      wallet: PromiseOrValue<string>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<PopulatedTransaction>;
-
-    "claimFunds()"(
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<PopulatedTransaction>;
-
-    claimRewards(
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<PopulatedTransaction>;
-
-    costForWallet(
-      arg0: PromiseOrValue<string>,
-      overrides?: CallOverrides
-    ): Promise<PopulatedTransaction>;
-
-    crowdtainerState(overrides?: CallOverrides): Promise<PopulatedTransaction>;
-
-    discountForUser(
-      arg0: PromiseOrValue<string>,
-      overrides?: CallOverrides
-    ): Promise<PopulatedTransaction>;
-
-    enableReferral(
-      arg0: PromiseOrValue<string>,
-      overrides?: CallOverrides
-    ): Promise<PopulatedTransaction>;
-
-    expireTime(overrides?: CallOverrides): Promise<PopulatedTransaction>;
-
-    getPaidAndDeliver(
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<PopulatedTransaction>;
-
-    getSigner(overrides?: CallOverrides): Promise<PopulatedTransaction>;
-
-    initialize(
-      _owner: PromiseOrValue<string>,
-      _campaignData: CampaignDataStruct,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<PopulatedTransaction>;
-
-    "join(address,uint256[])"(
-      _wallet: PromiseOrValue<string>,
-      _quantities: PromiseOrValue<BigNumberish>[],
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<PopulatedTransaction>;
-
-    "join(address,uint256[],bool,address)"(
-      _wallet: PromiseOrValue<string>,
-      _quantities: PromiseOrValue<BigNumberish>[],
-      _enableReferral: PromiseOrValue<boolean>,
-      _referrer: PromiseOrValue<string>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<PopulatedTransaction>;
-
-    joinWithSignature(
-      result: PromiseOrValue<BytesLike>,
-      extraData: PromiseOrValue<BytesLike>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<PopulatedTransaction>;
-
-    leave(
-      _wallet: PromiseOrValue<string>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<PopulatedTransaction>;
-
-    legalContractURI(overrides?: CallOverrides): Promise<PopulatedTransaction>;
-
-    numberOfProducts(overrides?: CallOverrides): Promise<PopulatedTransaction>;
-
-    openingTime(overrides?: CallOverrides): Promise<PopulatedTransaction>;
-
-    owner(overrides?: CallOverrides): Promise<PopulatedTransaction>;
-
-    referralEligibilityValue(
-      overrides?: CallOverrides
-    ): Promise<PopulatedTransaction>;
-
-    referralRate(overrides?: CallOverrides): Promise<PopulatedTransaction>;
-
-    referrerOfReferee(
-      arg0: PromiseOrValue<string>,
-      overrides?: CallOverrides
-    ): Promise<PopulatedTransaction>;
-
-    setSigner(
-      _signer: PromiseOrValue<string>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<PopulatedTransaction>;
-
-    setUrls(
-      _urls: PromiseOrValue<string>[],
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<PopulatedTransaction>;
-
-    shippingAgent(overrides?: CallOverrides): Promise<PopulatedTransaction>;
-
-    targetMaximum(overrides?: CallOverrides): Promise<PopulatedTransaction>;
-
-    targetMinimum(overrides?: CallOverrides): Promise<PopulatedTransaction>;
-
-    token(overrides?: CallOverrides): Promise<PopulatedTransaction>;
-
-    totalValueRaised(overrides?: CallOverrides): Promise<PopulatedTransaction>;
-
-    unitPricePerType(
-      arg0: PromiseOrValue<BigNumberish>,
-      overrides?: CallOverrides
-    ): Promise<PopulatedTransaction>;
-
-    urls(
-      arg0: PromiseOrValue<BigNumberish>,
-      overrides?: CallOverrides
-    ): Promise<PopulatedTransaction>;
-
-    usedNonces(
-      arg0: PromiseOrValue<string>,
-      arg1: PromiseOrValue<BytesLike>,
-      overrides?: CallOverrides
-    ): Promise<PopulatedTransaction>;
+    "CCIPURLChanged(string[])": TypedContractEvent<
+      CCIPURLChangedEvent.InputTuple,
+      CCIPURLChangedEvent.OutputTuple,
+      CCIPURLChangedEvent.OutputObject
+    >;
+    CCIPURLChanged: TypedContractEvent<
+      CCIPURLChangedEvent.InputTuple,
+      CCIPURLChangedEvent.OutputTuple,
+      CCIPURLChangedEvent.OutputObject
+    >;
+
+    "CrowdtainerCreated(address,address)": TypedContractEvent<
+      CrowdtainerCreatedEvent.InputTuple,
+      CrowdtainerCreatedEvent.OutputTuple,
+      CrowdtainerCreatedEvent.OutputObject
+    >;
+    CrowdtainerCreated: TypedContractEvent<
+      CrowdtainerCreatedEvent.InputTuple,
+      CrowdtainerCreatedEvent.OutputTuple,
+      CrowdtainerCreatedEvent.OutputObject
+    >;
+
+    "CrowdtainerInDeliveryStage(address,uint256)": TypedContractEvent<
+      CrowdtainerInDeliveryStageEvent.InputTuple,
+      CrowdtainerInDeliveryStageEvent.OutputTuple,
+      CrowdtainerInDeliveryStageEvent.OutputObject
+    >;
+    CrowdtainerInDeliveryStage: TypedContractEvent<
+      CrowdtainerInDeliveryStageEvent.InputTuple,
+      CrowdtainerInDeliveryStageEvent.OutputTuple,
+      CrowdtainerInDeliveryStageEvent.OutputObject
+    >;
+
+    "CrowdtainerInitialized(address,address,uint256,uint256,uint256,uint256,uint256[],uint256,uint256,string,address)": TypedContractEvent<
+      CrowdtainerInitializedEvent.InputTuple,
+      CrowdtainerInitializedEvent.OutputTuple,
+      CrowdtainerInitializedEvent.OutputObject
+    >;
+    CrowdtainerInitialized: TypedContractEvent<
+      CrowdtainerInitializedEvent.InputTuple,
+      CrowdtainerInitializedEvent.OutputTuple,
+      CrowdtainerInitializedEvent.OutputObject
+    >;
+
+    "FundsClaimed(address,uint256)": TypedContractEvent<
+      FundsClaimedEvent.InputTuple,
+      FundsClaimedEvent.OutputTuple,
+      FundsClaimedEvent.OutputObject
+    >;
+    FundsClaimed: TypedContractEvent<
+      FundsClaimedEvent.InputTuple,
+      FundsClaimedEvent.OutputTuple,
+      FundsClaimedEvent.OutputObject
+    >;
+
+    "Initialized(uint8)": TypedContractEvent<
+      InitializedEvent.InputTuple,
+      InitializedEvent.OutputTuple,
+      InitializedEvent.OutputObject
+    >;
+    Initialized: TypedContractEvent<
+      InitializedEvent.InputTuple,
+      InitializedEvent.OutputTuple,
+      InitializedEvent.OutputObject
+    >;
+
+    "Joined(address,uint256[],address,uint256,uint256,bool)": TypedContractEvent<
+      JoinedEvent.InputTuple,
+      JoinedEvent.OutputTuple,
+      JoinedEvent.OutputObject
+    >;
+    Joined: TypedContractEvent<
+      JoinedEvent.InputTuple,
+      JoinedEvent.OutputTuple,
+      JoinedEvent.OutputObject
+    >;
+
+    "Left(address,uint256)": TypedContractEvent<
+      LeftEvent.InputTuple,
+      LeftEvent.OutputTuple,
+      LeftEvent.OutputObject
+    >;
+    Left: TypedContractEvent<
+      LeftEvent.InputTuple,
+      LeftEvent.OutputTuple,
+      LeftEvent.OutputObject
+    >;
+
+    "RewardsClaimed(address,uint256)": TypedContractEvent<
+      RewardsClaimedEvent.InputTuple,
+      RewardsClaimedEvent.OutputTuple,
+      RewardsClaimedEvent.OutputObject
+    >;
+    RewardsClaimed: TypedContractEvent<
+      RewardsClaimedEvent.InputTuple,
+      RewardsClaimedEvent.OutputTuple,
+      RewardsClaimedEvent.OutputObject
+    >;
+
+    "SignerChanged(address)": TypedContractEvent<
+      SignerChangedEvent.InputTuple,
+      SignerChangedEvent.OutputTuple,
+      SignerChangedEvent.OutputObject
+    >;
+    SignerChanged: TypedContractEvent<
+      SignerChangedEvent.InputTuple,
+      SignerChangedEvent.OutputTuple,
+      SignerChangedEvent.OutputObject
+    >;
   };
 }

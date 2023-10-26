@@ -1,5 +1,5 @@
 import { getDatabase } from "$lib/Database/redis";                // Database
-import { BigNumber, ethers } from 'ethers';                        // Ethers
+import { BigNumber, BrowserProvider, ethers } from 'ethers';                        // Ethers
 import { type Result, Ok, Err } from "@sniptt/monads";  // Monads
 
 import { makeAgreeToTermsMessage, isTimeValid } from '$lib/Model/SignTerms';
@@ -9,8 +9,9 @@ import { error, type RequestHandler } from '@sveltejs/kit';
 import { validEmail } from "$lib/Validation/utils.js";
 import { Vouchers721Address } from '../../Data/projects.json';
 import { provider } from "$lib/ethersCalls/provider.js";
+import { getProvider } from "$lib/Utils/wallet.js";
 
-async function costForWalletInCrowdtainer(provider: ethers.Signer | undefined,
+async function costForWalletInCrowdtainer(provider: BrowserProvider | undefined,
     crowdtainerAddress: string,
     wallet: string): Promise<Result<BigNumber, string>> {
 
@@ -65,7 +66,7 @@ export const POST: RequestHandler = async ({ request }) => {
             throw error(400, "Invalid e-mail provided.");
         }
 
-        if (!ethers.utils.isAddress(userWalletAddress)) {
+        if (!ethers.isAddress(userWalletAddress)) {
             throw error(400, `Invalid wallet address (${userWalletAddress}).`);
         }
 
@@ -116,9 +117,9 @@ export const POST: RequestHandler = async ({ request }) => {
         let message = makeAgreeToTermsMessage(domain, email, userWalletAddress,
             chainId, voucherAddress, crowdtainerAddress, nonce, currentTimeISO);
 
-        let recoveredSigner = ethers.utils.verifyMessage(message, signatureHash);
+        let recoveredSigner = ethers.verifyMessage(message, signatureHash);
 
-        if (!ethers.utils.isAddress(userWalletAddress)) {
+        if (!ethers.isAddress(userWalletAddress)) {
             throw error(400, `Invalid wallet address (${userWalletAddress}).`);
         }
 
@@ -139,7 +140,7 @@ export const POST: RequestHandler = async ({ request }) => {
 
     if (walletResult != null) {
         console.log('Email formerly used.');
-        let signer = provider.getSigner()
+        let signer = getProvider()
         // Check if the wallet has already joined the respective campaign. If yes, fail.
         let userFundsResult = await costForWalletInCrowdtainer(signer, crowdtainerAddress, walletResult);
         if (userFundsResult.isErr()) {

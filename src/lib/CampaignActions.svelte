@@ -154,7 +154,7 @@
 		</div>
 	{/if}
 
-	{#if walletData !== undefined && !walletData.fundsInCrowdtainer.isZero() && walletData.accumulatedRewards.isZero() && projectStatusUI === ProjectStatusUI.Funding}
+	{#if walletData !== undefined && walletData.fundsInCrowdtainer > 0n && walletData.accumulatedRewards === 0n && projectStatusUI === ProjectStatusUI.Funding}
 		<!-- Leave button -->
 		<div class="p-0.5 mb-2 m-2">
 			<div
@@ -195,7 +195,7 @@
 		</div>
 	{/if}
 
-	{#if walletData !== undefined && !walletData.fundsInCrowdtainer.isZero() && (projectStatusUI === ProjectStatusUI.Failed || projectStatusUI === ProjectStatusUI.ServiceProviderDeclined)}
+	{#if walletData !== undefined && walletData.fundsInCrowdtainer > 0n && (projectStatusUI === ProjectStatusUI.Failed || projectStatusUI === ProjectStatusUI.ServiceProviderDeclined)}
 		<!-- Get pre-payment back -->
 
 		<div class="p-0.5 mb-2 m-2">
@@ -227,7 +227,7 @@
 	{/if}
 
 	<!-- Withdrawl referral rewards / cashback -->
-	{#if walletData !== undefined && !walletData.accumulatedRewards.isZero() && (projectStatusUI === ProjectStatusUI.Delivery || projectStatusUI === ProjectStatusUI.SuccessfulyFunded)}
+	{#if walletData !== undefined && walletData.accumulatedRewards > 0n && (projectStatusUI === ProjectStatusUI.Delivery || projectStatusUI === ProjectStatusUI.SuccessfulyFunded)}
 		<div class="p-0.5 mb-2 m-2">
 			<div
 				class="tooltip tooltip-right sm:tooltip-top rounded shadow-lg p-1 text-red-500 mt-4"

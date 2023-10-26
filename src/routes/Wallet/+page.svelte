@@ -4,7 +4,7 @@
 	import MyCampaign from '$lib/MyCampaign.svelte';
 
 	import { Vouchers721Address } from '../Data/projects.json';
-	import { connected, getSigner, accountAddress } from '$lib/Utils/wallet';
+	import { connected, getSigner, accountAddress, getProvider } from '$lib/Utils/wallet';
 	import EmptySection from '$lib/EmptySection.svelte';
 	import { connect } from '$lib/Utils/wallet';
 	import { WalletType } from '$lib/Utils/walletStorage';
@@ -43,7 +43,7 @@
 		}
 		resetState();
 		let tokenIdSearchResult = await findTokenIdsForWallet(
-			getSigner(),
+			getProvider(),
 			Vouchers721Address,
 			$accountAddress
 		);

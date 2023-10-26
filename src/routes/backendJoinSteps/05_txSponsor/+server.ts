@@ -1,7 +1,7 @@
 import { getDatabase } from "$lib/Database/redis";              // Database
 import { type Result, Ok, Err } from "@sniptt/monads";          // Monads
 import { error, type RequestHandler } from '@sveltejs/kit';
-import { BigNumber, ethers } from "ethers";
+import { ethers } from "ethers";
 import { TX_SPONSOR_PRIVATE_KEY } from '$env/static/private';
 import { AuthorizationGateway__factory, Vouchers721__factory } from "../../typechain/index.js";
 import { joinProjectWithSignature } from "$lib/ethersCalls/rpcRequests.js";
@@ -9,16 +9,17 @@ import type { SignedPermitStruct } from '../../typechain/Vouchers721.js';
 import { Vouchers721Address, projects } from '../../Data/projects.json';
 
 import { provider } from "$lib/ethersCalls/provider.js";
+import { getProvider } from "$lib/Utils/wallet.js";
 
 let signer = new ethers.Wallet(TX_SPONSOR_PRIVATE_KEY, provider);
-if (!ethers.utils.isAddress(ethers.utils.computeAddress(TX_SPONSOR_PRIVATE_KEY))) {
+if (!ethers.isAddress(ethers.computeAddress(TX_SPONSOR_PRIVATE_KEY))) {
     const message = 'Invalid TX_SPONSOR_PRIVATE_KEY.';
     console.log(message);
     throw error(500, message);
 }
 let serviceProviderPK = await signer.getAddress();
 
-const vouchers721Contract = Vouchers721__factory.connect(Vouchers721Address, provider.getSigner());
+const vouchers721Contract = Vouchers721__factory.connect(Vouchers721Address, getProvider());
 
 let crowdtainerAddressToId: { [key: string]: number } = {};
 
@@ -44,21 +45,21 @@ export const POST: RequestHandler = async ({ request }) => {
 
     let [calldata, calldataSignature, signedPermit] = result.unwrap();
 
-    if (!ethers.utils.isBytesLike(calldata)) {
+    if (!ethers.isBytesLike(calldata)) {
         throw error(400, "Invalid calldata parameter.");
     }
 
-    if (!ethers.utils.isBytesLike(calldataSignature)) {
+    if (!ethers.isBytesLike(calldataSignature)) {
         throw error(400, "Invalid calldataSignature parameter.");
     }
 
-    let hexCalldata = ethers.utils.hexlify(calldata);
+    let hexCalldata = ethers.hexlify(calldata);
     const functionSelector = hexCalldata.slice(0, 10).toLowerCase();
     if (functionSelector !== `0xed52b41c`) { //getSignedJoinApproval().selector
         throw error(400, `Incorrect payload. Function selector: ${functionSelector}. Expected: 0x566a2cc2`);
     }
 
-    const abiInterface = new ethers.utils.Interface(JSON.stringify(AuthorizationGateway__factory.abi));
+    const abiInterface = new ethers.Interface(JSON.stringify(AuthorizationGateway__factory.abi));
 
     // Decode function arguments
     const args = abiInterface.decodeFunctionData("getSignedJoinApproval", `${hexCalldata}`);
@@ -111,16 +112,16 @@ export const POST: RequestHandler = async ({ request }) => {
     // Check if service provider signature is valid by reconstructing the message and recovering the signer.
 
     // Get epochExpiration and nonce
-    let [signedCrowdtainerAddress, epochExpiration, nonce, signature] = ethers.utils.defaultAbiCoder.decode(["address", "uint64", "bytes32", "bytes"], calldataSignature);
+    let [signedCrowdtainerAddress, epochExpiration, nonce, signature] = ethers.defaultAbiCoder.decode(["address", "uint64", "bytes32", "bytes"], calldataSignature);
 
     if (signedCrowdtainerAddress != crowdtainerAddress) {
         throw error(400, `CrowdtainerAddress mismatch between calldata input and signed calldata input.`);
     }
 
-    let messageHash = ethers.utils.solidityKeccak256(["address", "address", "uint256[]", "bool", "address", "uint64", "bytes32"],
+    let messageHash = ethers.solidityKeccak256(["address", "address", "uint256[]", "bool", "address", "uint64", "bytes32"],
         [crowdtainerAddress, decodedWalletAddress, quantities, enableReferral, referralAddress, epochExpiration, nonce]);
-    let messageHashBinary = ethers.utils.arrayify(messageHash);
-    let recoveredSigner = ethers.utils.verifyMessage(messageHashBinary, signature);
+    let messageHashBinary = ethers.arrayify(messageHash);
+    let recoveredSigner = ethers.verifyMessage(messageHashBinary, signature);
 
     if (serviceProviderPK != recoveredSigner) {
         throw error(400, `Service provider signature invalid: ${serviceProviderPK} ${recoveredSigner} `);
@@ -128,13 +129,13 @@ export const POST: RequestHandler = async ({ request }) => {
 
     // All checks succeeded. Attempt to include the transaction on behalf of the user.
 
-    let crowdtainerExtraData = ethers.utils.defaultAbiCoder.encode(
+    let crowdtainerExtraData = ethers.defaultAbiCoder.encode(
         ['address', 'uint256[]', 'bool', 'address'],
         [decodedWalletAddress, quantities, enableReferral, referralAddress]
     );
-    let extraData = ethers.utils.defaultAbiCoder.encode(
+    let extraData = ethers.defaultAbiCoder.encode(
         ['address', 'bytes4', 'bytes'],
-        [crowdtainerAddress, ethers.utils.hexlify('0x566a2cc2'), crowdtainerExtraData]
+        [crowdtainerAddress, ethers.hexlify('0x566a2cc2'), crowdtainerExtraData]
     );
 
     let joinTransaction = await joinProjectWithSignature(signer, Vouchers721Address, crowdtainerAddress,

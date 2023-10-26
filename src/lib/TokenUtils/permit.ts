@@ -1,5 +1,4 @@
-import type { TypedDataSigner } from "@ethersproject/abstract-signer";
-import { ethers, BigNumber, type Signer, type TypedDataDomain } from "ethers";
+import { ethers, type Signer, type TypedDataDomain } from "ethers";
 import type { SignedPermitStruct } from "../../routes/typechain/Vouchers721.js";
 import { fetchUserNonce } from "$lib/ethersCalls/rpcRequests.js";
 import { web3Provider } from "$lib/Utils/wallet.js";
@@ -18,15 +17,15 @@ const types = {
 type PermitValues = {
     owner: string;
     spender: string;
-    value: BigNumber;
-    nonce: BigNumber;
-    deadline: BigNumber;
+    value: bigint;
+    nonce: bigint;
+    deadline: bigint;
 }
 
-const getERC2612Permit = async (signer: Signer & TypedDataSigner,
-    tokenName: string, version: string, chainId: BigNumber,
+const getERC2612Permit = async (signer: Signer,
+    tokenName: string, version: string, chainId: bigint,
     tokenAddress: string, ownerAddress: string, spenderAddress: string,
-    value: BigNumber, nonce: BigNumber, deadline: BigNumber): Promise<SignedPermitStruct> => {
+    value: bigint, nonce: bigint, deadline: bigint): Promise<SignedPermitStruct> => {
     console.log(`ChainID: ${chainId}`);
     console.log(`tokenName: ${tokenName}`);
     console.log(`tokenVersion: ${version}`);
@@ -46,9 +45,9 @@ const getERC2612Permit = async (signer: Signer & TypedDataSigner,
         deadline: deadline
     };
 
-    const rawSignature = await signer._signTypedData(domainData, types, permitInput);
+    const rawSignature = await signer.signTypedData(domainData, types, permitInput);
 
-    let signature: ethers.Signature = ethers.utils.splitSignature(rawSignature);
+    let signature: ethers.Signature = ethers.Signature.from(rawSignature);
 
     let signedPermit: SignedPermitStruct;
     return signedPermit = {
@@ -70,8 +69,8 @@ export interface ERC2612_Input {
     tokenAddress: string,
     tokenName: string,
     tokenVersion: string,
-    withPermitValue: BigNumber,
-    signer: ethers.Signer & TypedDataSigner | undefined
+    withPermitValue: bigint,
+    signer: Signer | undefined
 }
 
 export const getSignedPermit = async (
@@ -89,20 +88,21 @@ export const getSignedPermit = async (
     let signedPermit: SignedPermitStruct;
     try {
         let expirationInSeconds = (new Date().getTime() / 1000 + 30 * 60).toFixed(0); // 30 minutes from now
+
         signedPermit = await getERC2612Permit(
             input.signer,
             input.tokenName,
             input.tokenVersion,
-            BigNumber.from(input.chainId),
+            BigInt(input.chainId),
             input.tokenAddress,
             input.userWalletAddress,
             input.crowdtainerAddress,
             input.withPermitValue,
             nonceResult.unwrap(),
-            BigNumber.from(expirationInSeconds)
+            BigInt(expirationInSeconds)
         );
     } catch (error) {
-        return Err(`Spending allowance signature rejected.`);
+        return Err(`Spending allowance signature rejected.: ${error}`);
     }
     return Ok(signedPermit);
 };

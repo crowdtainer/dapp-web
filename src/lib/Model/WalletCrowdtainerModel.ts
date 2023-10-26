@@ -1,13 +1,11 @@
-import { BigNumber, type Wallet } from "ethers";
-
 export type WalletCrowdtainerModel = {
-	fundsInCrowdtainer: BigNumber;
-	accumulatedRewards: BigNumber;
+	fundsInCrowdtainer: bigint;
+	accumulatedRewards: bigint;
 }
 
 export function createWalletCrowdtainerData(): WalletCrowdtainerModel {
 	return {
-		fundsInCrowdtainer: BigNumber.from(0),
-		accumulatedRewards: BigNumber.from(0)
+		fundsInCrowdtainer: 0n,
+		accumulatedRewards: 0n
 	}
 }

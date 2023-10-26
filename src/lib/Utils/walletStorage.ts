@@ -14,6 +14,10 @@ export type WalletState = {
 
 const STORAGE_KEY = 'WALLET_STATE';
 
+(BigInt.prototype as any).toJSON = function () {
+    return this.toString();
+ };
+ 
 export function persistState(walletState: WalletState) {
     if (browser) {
         localStorage.setItem(STORAGE_KEY, JSON.stringify(walletState));

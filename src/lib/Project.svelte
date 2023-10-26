@@ -19,7 +19,7 @@
 	import type { CrowdtainerDynamicModel, SplitSelection } from '$lib/Model/CrowdtainerModel';
 	import { toState, LoadStatus, ProjectStatusUI } from '$lib/Converters/CrowdtainerData';
 
-	import { connected, getSigner, accountAddress } from '$lib/Utils/wallet';
+	import { connected, getSigner, accountAddress, walletState } from '$lib/Utils/wallet';
 	let modalDialog: ModalDialog;
 
 	import { OrderStatus } from './api';
@@ -64,13 +64,14 @@
 		if (staticDataLoadStatus !== LoadStatus.Loaded) {
 			return;
 		}
-
+		let signer = await getSigner();
+		let chainId = $walletState.chainId;
 		campaignDynamicData = initializeCampaignDynamicStores(crowdtainerId);
-		if ($connected && $accountAddress) {
+		if ($connected && $accountAddress && signer && chainId) {
 			initializeDataForWallet($campaignStaticData.contractAddress, $accountAddress);
 
 			let tokenIdSearchResult = await findTokenIdsForWallet(
-				getSigner(),
+				signer,
 				vouchers721Address,
 				$accountAddress
 			);
@@ -79,7 +80,11 @@
 				return;
 			}
 			tokenIdAssociations = tokenIdSearchResult.unwrap();
-			let order = await loadOrderDetails(vouchers721Address, tokenIdAssociations?.foundTokenIds);
+			let order = await loadOrderDetails(
+				chainId,
+				vouchers721Address,
+				tokenIdAssociations?.foundTokenIds
+			);
 			if (order) {
 				console.log(`Updated order status: ${order}`);
 				orderStatus = order;
@@ -127,7 +132,7 @@
 	$: state = toState($campaignDynamicData, $campaignStaticData);
 	$: joinViewEnabled =
 		state === ProjectStatusUI.Funding &&
-		$walletInCrowdtainer.fundsInCrowdtainer.isZero() &&
+		$walletInCrowdtainer.fundsInCrowdtainer == 0n &&
 		($connected ? tokenIdAssociations?.foundTokenIds.length == 0 : true);
 
 	// $: $campaignDynamicData;

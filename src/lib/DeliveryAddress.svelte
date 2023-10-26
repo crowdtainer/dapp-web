@@ -15,6 +15,7 @@
 	import { pseudoRandomNonce } from './Utils/random';
 	import { slide } from 'svelte/transition';
 	import countries from 'iso-3166-1/dist/iso-3166.js';
+	import { VITE_WALLET_CONNECT_CHAIN_ID } from '$env/static/private';
 
 	let modalDialog: ModalDialog;
 
@@ -34,13 +35,13 @@
 	}
 
 	const callSubmitDelivery = async () => {
-		let signer = getSigner();
+		let signer = await getSigner();
 		if (signer === undefined) {
 			console.log('Error: signer undefined');
 			return;
 		}
 
-		let chainId = await signer.getChainId();
+		let chainId = Number(VITE_WALLET_CONNECT_CHAIN_ID);
 
 		let deliveryDetails: DeliveryDetails = {
 			vouchers721Address,
@@ -71,7 +72,7 @@
 
 		console.log(`Account: ${walletAddress}`);
 		// make sure address is check-summed; Some wallets don't use checksummed addresses (e.g. Metamask mobile)
-		walletAddress = ethers.utils.getAddress(walletAddress);
+		walletAddress = ethers.getAddress(walletAddress);
 		console.log(`Account check-summed: ${walletAddress}`);
 
 		deliveryDetails = normalizeDeliveryDetails(deliveryDetails);

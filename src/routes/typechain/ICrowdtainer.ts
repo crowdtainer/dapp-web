@@ -3,80 +3,67 @@
 /* eslint-disable */
 import type {
   BaseContract,
-  BigNumber,
   BigNumberish,
   BytesLike,
-  CallOverrides,
-  ContractTransaction,
-  Overrides,
-  PopulatedTransaction,
-  Signer,
-  utils,
+  FunctionFragment,
+  Result,
+  Interface,
+  AddressLike,
+  ContractRunner,
+  ContractMethod,
+  Listener,
 } from "ethers";
-import type { FunctionFragment, Result } from "@ethersproject/abi";
-import type { Listener, Provider } from "@ethersproject/providers";
 import type {
-  TypedEventFilter,
-  TypedEvent,
+  TypedContractEvent,
+  TypedDeferredTopicFilter,
+  TypedEventLog,
   TypedListener,
-  OnEvent,
-  PromiseOrValue,
+  TypedContractMethod,
 } from "./common";
 
 export type CampaignDataStruct = {
-  shippingAgent: PromiseOrValue<string>;
-  signer: PromiseOrValue<string>;
-  openingTime: PromiseOrValue<BigNumberish>;
-  expireTime: PromiseOrValue<BigNumberish>;
-  targetMinimum: PromiseOrValue<BigNumberish>;
-  targetMaximum: PromiseOrValue<BigNumberish>;
-  unitPricePerType: PromiseOrValue<BigNumberish>[];
-  referralRate: PromiseOrValue<BigNumberish>;
-  referralEligibilityValue: PromiseOrValue<BigNumberish>;
-  token: PromiseOrValue<string>;
-  legalContractURI: PromiseOrValue<string>;
+  shippingAgent: AddressLike;
+  signer: AddressLike;
+  openingTime: BigNumberish;
+  expireTime: BigNumberish;
+  targetMinimum: BigNumberish;
+  targetMaximum: BigNumberish;
+  unitPricePerType: BigNumberish[];
+  referralRate: BigNumberish;
+  referralEligibilityValue: BigNumberish;
+  token: AddressLike;
+  legalContractURI: string;
 };
 
 export type CampaignDataStructOutput = [
-  string,
-  string,
-  BigNumber,
-  BigNumber,
-  BigNumber,
-  BigNumber,
-  BigNumber[],
-  BigNumber,
-  BigNumber,
-  string,
-  string
+  shippingAgent: string,
+  signer: string,
+  openingTime: bigint,
+  expireTime: bigint,
+  targetMinimum: bigint,
+  targetMaximum: bigint,
+  unitPricePerType: bigint[],
+  referralRate: bigint,
+  referralEligibilityValue: bigint,
+  token: string,
+  legalContractURI: string
 ] & {
   shippingAgent: string;
   signer: string;
-  openingTime: BigNumber;
-  expireTime: BigNumber;
-  targetMinimum: BigNumber;
-  targetMaximum: BigNumber;
-  unitPricePerType: BigNumber[];
-  referralRate: BigNumber;
-  referralEligibilityValue: BigNumber;
+  openingTime: bigint;
+  expireTime: bigint;
+  targetMinimum: bigint;
+  targetMaximum: bigint;
+  unitPricePerType: bigint[];
+  referralRate: bigint;
+  referralEligibilityValue: bigint;
   token: string;
   legalContractURI: string;
 };
 
-export interface ICrowdtainerInterface extends utils.Interface {
-  functions: {
-    "crowdtainerState()": FunctionFragment;
-    "initialize(address,(address,address,uint256,uint256,uint256,uint256,uint256[],uint256,uint256,address,string))": FunctionFragment;
-    "join(address,uint256[])": FunctionFragment;
-    "join(address,uint256[],bool,address)": FunctionFragment;
-    "leave(address)": FunctionFragment;
-    "numberOfProducts()": FunctionFragment;
-    "shippingAgent()": FunctionFragment;
-    "unitPricePerType(uint256)": FunctionFragment;
-  };
-
+export interface ICrowdtainerInterface extends Interface {
   getFunction(
-    nameOrSignatureOrTopic:
+    nameOrSignature:
       | "crowdtainerState"
       | "initialize"
       | "join(address,uint256[])"
@@ -93,25 +80,17 @@ export interface ICrowdtainerInterface extends utils.Interface {
   ): string;
   encodeFunctionData(
     functionFragment: "initialize",
-    values: [PromiseOrValue<string>, CampaignDataStruct]
+    values: [AddressLike, CampaignDataStruct]
   ): string;
   encodeFunctionData(
     functionFragment: "join(address,uint256[])",
-    values: [PromiseOrValue<string>, PromiseOrValue<BigNumberish>[]]
+    values: [AddressLike, BigNumberish[]]
   ): string;
   encodeFunctionData(
     functionFragment: "join(address,uint256[],bool,address)",
-    values: [
-      PromiseOrValue<string>,
-      PromiseOrValue<BigNumberish>[],
-      PromiseOrValue<boolean>,
-      PromiseOrValue<string>
-    ]
+    values: [AddressLike, BigNumberish[], boolean, AddressLike]
   ): string;
-  encodeFunctionData(
-    functionFragment: "leave",
-    values: [PromiseOrValue<string>]
-  ): string;
+  encodeFunctionData(functionFragment: "leave", values: [AddressLike]): string;
   encodeFunctionData(
     functionFragment: "numberOfProducts",
     values?: undefined
@@ -122,7 +101,7 @@ export interface ICrowdtainerInterface extends utils.Interface {
   ): string;
   encodeFunctionData(
     functionFragment: "unitPricePerType",
-    values: [PromiseOrValue<BigNumberish>]
+    values: [BigNumberish]
   ): string;
 
   decodeFunctionResult(
@@ -151,223 +130,129 @@ export interface ICrowdtainerInterface extends utils.Interface {
     functionFragment: "unitPricePerType",
     data: BytesLike
   ): Result;
-
-  events: {};
 }
 
 export interface ICrowdtainer extends BaseContract {
-  connect(signerOrProvider: Signer | Provider | string): this;
-  attach(addressOrName: string): this;
-  deployed(): Promise<this>;
+  connect(runner?: ContractRunner | null): ICrowdtainer;
+  waitForDeployment(): Promise<this>;
 
   interface: ICrowdtainerInterface;
 
-  queryFilter<TEvent extends TypedEvent>(
-    event: TypedEventFilter<TEvent>,
+  queryFilter<TCEvent extends TypedContractEvent>(
+    event: TCEvent,
     fromBlockOrBlockhash?: string | number | undefined,
     toBlock?: string | number | undefined
-  ): Promise<Array<TEvent>>;
+  ): Promise<Array<TypedEventLog<TCEvent>>>;
+  queryFilter<TCEvent extends TypedContractEvent>(
+    filter: TypedDeferredTopicFilter<TCEvent>,
+    fromBlockOrBlockhash?: string | number | undefined,
+    toBlock?: string | number | undefined
+  ): Promise<Array<TypedEventLog<TCEvent>>>;
 
-  listeners<TEvent extends TypedEvent>(
-    eventFilter?: TypedEventFilter<TEvent>
-  ): Array<TypedListener<TEvent>>;
-  listeners(eventName?: string): Array<Listener>;
-  removeAllListeners<TEvent extends TypedEvent>(
-    eventFilter: TypedEventFilter<TEvent>
-  ): this;
-  removeAllListeners(eventName?: string): this;
-  off: OnEvent<this>;
-  on: OnEvent<this>;
-  once: OnEvent<this>;
-  removeListener: OnEvent<this>;
+  on<TCEvent extends TypedContractEvent>(
+    event: TCEvent,
+    listener: TypedListener<TCEvent>
+  ): Promise<this>;
+  on<TCEvent extends TypedContractEvent>(
+    filter: TypedDeferredTopicFilter<TCEvent>,
+    listener: TypedListener<TCEvent>
+  ): Promise<this>;
 
-  functions: {
-    crowdtainerState(overrides?: CallOverrides): Promise<[number]>;
+  once<TCEvent extends TypedContractEvent>(
+    event: TCEvent,
+    listener: TypedListener<TCEvent>
+  ): Promise<this>;
+  once<TCEvent extends TypedContractEvent>(
+    filter: TypedDeferredTopicFilter<TCEvent>,
+    listener: TypedListener<TCEvent>
+  ): Promise<this>;
 
-    initialize(
-      owner: PromiseOrValue<string>,
-      _campaignData: CampaignDataStruct,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<ContractTransaction>;
+  listeners<TCEvent extends TypedContractEvent>(
+    event: TCEvent
+  ): Promise<Array<TypedListener<TCEvent>>>;
+  listeners(eventName?: string): Promise<Array<Listener>>;
+  removeAllListeners<TCEvent extends TypedContractEvent>(
+    event?: TCEvent
+  ): Promise<this>;
 
-    "join(address,uint256[])"(
-      _wallet: PromiseOrValue<string>,
-      _quantities: PromiseOrValue<BigNumberish>[],
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<ContractTransaction>;
+  crowdtainerState: TypedContractMethod<[], [bigint], "view">;
 
-    "join(address,uint256[],bool,address)"(
-      _wallet: PromiseOrValue<string>,
-      _quantities: PromiseOrValue<BigNumberish>[],
-      _enableReferral: PromiseOrValue<boolean>,
-      _referrer: PromiseOrValue<string>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<ContractTransaction>;
+  initialize: TypedContractMethod<
+    [owner: AddressLike, _campaignData: CampaignDataStruct],
+    [void],
+    "nonpayable"
+  >;
 
-    leave(
-      _wallet: PromiseOrValue<string>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<ContractTransaction>;
+  "join(address,uint256[])": TypedContractMethod<
+    [_wallet: AddressLike, _quantities: BigNumberish[]],
+    [void],
+    "nonpayable"
+  >;
 
-    numberOfProducts(overrides?: CallOverrides): Promise<[BigNumber]>;
+  "join(address,uint256[],bool,address)": TypedContractMethod<
+    [
+      _wallet: AddressLike,
+      _quantities: BigNumberish[],
+      _enableReferral: boolean,
+      _referrer: AddressLike
+    ],
+    [void],
+    "nonpayable"
+  >;
 
-    shippingAgent(overrides?: CallOverrides): Promise<[string]>;
+  leave: TypedContractMethod<[_wallet: AddressLike], [void], "nonpayable">;
 
-    unitPricePerType(
-      arg0: PromiseOrValue<BigNumberish>,
-      overrides?: CallOverrides
-    ): Promise<[BigNumber]>;
-  };
+  numberOfProducts: TypedContractMethod<[], [bigint], "view">;
 
-  crowdtainerState(overrides?: CallOverrides): Promise<number>;
+  shippingAgent: TypedContractMethod<[], [string], "view">;
 
-  initialize(
-    owner: PromiseOrValue<string>,
-    _campaignData: CampaignDataStruct,
-    overrides?: Overrides & { from?: PromiseOrValue<string> }
-  ): Promise<ContractTransaction>;
+  unitPricePerType: TypedContractMethod<[arg0: BigNumberish], [bigint], "view">;
 
-  "join(address,uint256[])"(
-    _wallet: PromiseOrValue<string>,
-    _quantities: PromiseOrValue<BigNumberish>[],
-    overrides?: Overrides & { from?: PromiseOrValue<string> }
-  ): Promise<ContractTransaction>;
+  getFunction<T extends ContractMethod = ContractMethod>(
+    key: string | FunctionFragment
+  ): T;
 
-  "join(address,uint256[],bool,address)"(
-    _wallet: PromiseOrValue<string>,
-    _quantities: PromiseOrValue<BigNumberish>[],
-    _enableReferral: PromiseOrValue<boolean>,
-    _referrer: PromiseOrValue<string>,
-    overrides?: Overrides & { from?: PromiseOrValue<string> }
-  ): Promise<ContractTransaction>;
-
-  leave(
-    _wallet: PromiseOrValue<string>,
-    overrides?: Overrides & { from?: PromiseOrValue<string> }
-  ): Promise<ContractTransaction>;
-
-  numberOfProducts(overrides?: CallOverrides): Promise<BigNumber>;
-
-  shippingAgent(overrides?: CallOverrides): Promise<string>;
-
-  unitPricePerType(
-    arg0: PromiseOrValue<BigNumberish>,
-    overrides?: CallOverrides
-  ): Promise<BigNumber>;
-
-  callStatic: {
-    crowdtainerState(overrides?: CallOverrides): Promise<number>;
-
-    initialize(
-      owner: PromiseOrValue<string>,
-      _campaignData: CampaignDataStruct,
-      overrides?: CallOverrides
-    ): Promise<void>;
-
-    "join(address,uint256[])"(
-      _wallet: PromiseOrValue<string>,
-      _quantities: PromiseOrValue<BigNumberish>[],
-      overrides?: CallOverrides
-    ): Promise<void>;
-
-    "join(address,uint256[],bool,address)"(
-      _wallet: PromiseOrValue<string>,
-      _quantities: PromiseOrValue<BigNumberish>[],
-      _enableReferral: PromiseOrValue<boolean>,
-      _referrer: PromiseOrValue<string>,
-      overrides?: CallOverrides
-    ): Promise<void>;
-
-    leave(
-      _wallet: PromiseOrValue<string>,
-      overrides?: CallOverrides
-    ): Promise<void>;
-
-    numberOfProducts(overrides?: CallOverrides): Promise<BigNumber>;
-
-    shippingAgent(overrides?: CallOverrides): Promise<string>;
-
-    unitPricePerType(
-      arg0: PromiseOrValue<BigNumberish>,
-      overrides?: CallOverrides
-    ): Promise<BigNumber>;
-  };
+  getFunction(
+    nameOrSignature: "crowdtainerState"
+  ): TypedContractMethod<[], [bigint], "view">;
+  getFunction(
+    nameOrSignature: "initialize"
+  ): TypedContractMethod<
+    [owner: AddressLike, _campaignData: CampaignDataStruct],
+    [void],
+    "nonpayable"
+  >;
+  getFunction(
+    nameOrSignature: "join(address,uint256[])"
+  ): TypedContractMethod<
+    [_wallet: AddressLike, _quantities: BigNumberish[]],
+    [void],
+    "nonpayable"
+  >;
+  getFunction(
+    nameOrSignature: "join(address,uint256[],bool,address)"
+  ): TypedContractMethod<
+    [
+      _wallet: AddressLike,
+      _quantities: BigNumberish[],
+      _enableReferral: boolean,
+      _referrer: AddressLike
+    ],
+    [void],
+    "nonpayable"
+  >;
+  getFunction(
+    nameOrSignature: "leave"
+  ): TypedContractMethod<[_wallet: AddressLike], [void], "nonpayable">;
+  getFunction(
+    nameOrSignature: "numberOfProducts"
+  ): TypedContractMethod<[], [bigint], "view">;
+  getFunction(
+    nameOrSignature: "shippingAgent"
+  ): TypedContractMethod<[], [string], "view">;
+  getFunction(
+    nameOrSignature: "unitPricePerType"
+  ): TypedContractMethod<[arg0: BigNumberish], [bigint], "view">;
 
   filters: {};
-
-  estimateGas: {
-    crowdtainerState(overrides?: CallOverrides): Promise<BigNumber>;
-
-    initialize(
-      owner: PromiseOrValue<string>,
-      _campaignData: CampaignDataStruct,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<BigNumber>;
-
-    "join(address,uint256[])"(
-      _wallet: PromiseOrValue<string>,
-      _quantities: PromiseOrValue<BigNumberish>[],
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<BigNumber>;
-
-    "join(address,uint256[],bool,address)"(
-      _wallet: PromiseOrValue<string>,
-      _quantities: PromiseOrValue<BigNumberish>[],
-      _enableReferral: PromiseOrValue<boolean>,
-      _referrer: PromiseOrValue<string>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<BigNumber>;
-
-    leave(
-      _wallet: PromiseOrValue<string>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<BigNumber>;
-
-    numberOfProducts(overrides?: CallOverrides): Promise<BigNumber>;
-
-    shippingAgent(overrides?: CallOverrides): Promise<BigNumber>;
-
-    unitPricePerType(
-      arg0: PromiseOrValue<BigNumberish>,
-      overrides?: CallOverrides
-    ): Promise<BigNumber>;
-  };
-
-  populateTransaction: {
-    crowdtainerState(overrides?: CallOverrides): Promise<PopulatedTransaction>;
-
-    initialize(
-      owner: PromiseOrValue<string>,
-      _campaignData: CampaignDataStruct,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<PopulatedTransaction>;
-
-    "join(address,uint256[])"(
-      _wallet: PromiseOrValue<string>,
-      _quantities: PromiseOrValue<BigNumberish>[],
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<PopulatedTransaction>;
-
-    "join(address,uint256[],bool,address)"(
-      _wallet: PromiseOrValue<string>,
-      _quantities: PromiseOrValue<BigNumberish>[],
-      _enableReferral: PromiseOrValue<boolean>,
-      _referrer: PromiseOrValue<string>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<PopulatedTransaction>;
-
-    leave(
-      _wallet: PromiseOrValue<string>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<PopulatedTransaction>;
-
-    numberOfProducts(overrides?: CallOverrides): Promise<PopulatedTransaction>;
-
-    shippingAgent(overrides?: CallOverrides): Promise<PopulatedTransaction>;
-
-    unitPricePerType(
-      arg0: PromiseOrValue<BigNumberish>,
-      overrides?: CallOverrides
-    ): Promise<PopulatedTransaction>;
-  };
 }

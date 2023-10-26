@@ -1,4 +1,4 @@
-import { BigNumber, ethers } from "ethers";
+import { ethers } from "ethers";
 import type {
     CrowdtainerStaticModel,
     CrowdtainerDynamicModel
@@ -33,8 +33,8 @@ export function toState(dynamicData: CrowdtainerDynamicModel | undefined, static
     let nowInMs = (new Date).getTime();
     let startInMs = toDate(staticData.startDate).getTime();
     let endInMs = toDate(staticData.endDate).getTime();
-    let raised = Number(ethers.utils.formatUnits(dynamicData.raised, staticData.tokenDecimals));
-    let minimumGoal = Number(ethers.utils.formatUnits(staticData.minimumGoal, staticData.tokenDecimals));
+    let raised = Number(ethers.formatUnits(dynamicData.raised, staticData.tokenDecimals));
+    let minimumGoal = Number(ethers.formatUnits(staticData.minimumGoal, staticData.tokenDecimals));
     switch (dynamicData.status) {
         case 0:
             return ProjectStatusUI.Uninitialized;
@@ -106,29 +106,29 @@ export function prettifyAddress(address: string | undefined): string {
     return address;
 }
 
-export function toDate(epoch: BigNumber | undefined): Date {
+export function toDate(epoch: bigint | undefined): Date {
     if (epoch === undefined) {
         throw Error("Invalid date input");
     }
-    return new Date(BigNumber.from(epoch).toNumber() * 1000);
+    return new Date(Number(epoch) * 1000);
 }
 
-export function toFormattedDate(epoch: BigNumber | undefined): string {
+export function toFormattedDate(epoch: bigint | undefined): string {
     if (epoch === undefined) {
         return loadingString;
     }
-    let date = new Date(BigNumber.from(epoch).toNumber() * 1000);
+    let date = new Date(Number(epoch) * 1000);
     return date.toLocaleString("en-GB", { dateStyle: 'short', timeStyle: 'short' });
 }
 
-export function toHuman(value: BigNumber | undefined, decimals: number | undefined): number {
+export function toHuman(value: bigint | undefined, decimals: number | undefined): number {
     if (value === undefined || decimals === undefined) {
         return 0;
     }
-    return Number(ethers.utils.formatUnits(value, decimals));
+    return Number(ethers.formatUnits(value, decimals));
 }
 
-export function toHumanPrices(value: BigNumber[] | undefined, decimals: number | undefined): number[] {
+export function toHumanPrices(value: bigint[] | undefined, decimals: number | undefined): number[] {
     let prices: number[];
     if (value === undefined || decimals === undefined) {
         prices = new Array(value?.length);
@@ -137,7 +137,7 @@ export function toHumanPrices(value: BigNumber[] | undefined, decimals: number |
     }
     prices = new Array();
     value.forEach(element => {
-        let priceValue = Number(ethers.utils.formatUnits(element, decimals));
+        let priceValue = Number(ethers.formatUnits(element, decimals));
         prices.push(priceValue);
     });
     return prices;

@@ -2,8 +2,7 @@
 /* tslint:disable */
 /* eslint-disable */
 
-import { Contract, Signer, utils } from "ethers";
-import type { Provider } from "@ethersproject/providers";
+import { Contract, Interface, type ContractRunner } from "ethers";
 import type {
   IMetadataService,
   IMetadataServiceInterface,
@@ -76,12 +75,12 @@ const _abi = [
 export class IMetadataService__factory {
   static readonly abi = _abi;
   static createInterface(): IMetadataServiceInterface {
-    return new utils.Interface(_abi) as IMetadataServiceInterface;
+    return new Interface(_abi) as IMetadataServiceInterface;
   }
   static connect(
     address: string,
-    signerOrProvider: Signer | Provider
+    runner?: ContractRunner | null
   ): IMetadataService {
-    return new Contract(address, _abi, signerOrProvider) as IMetadataService;
+    return new Contract(address, _abi, runner) as unknown as IMetadataService;
   }
 }

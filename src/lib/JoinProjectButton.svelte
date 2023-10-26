@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { ethers, BigNumber, type ContractReceipt } from 'ethers';
+	import { AbiCoder, ContractTransactionReceipt, ethers } from 'ethers';
 	import { onInterval } from './Utils/intervalTimer';
 
 	import type { UserStoreModel } from '$lib/Model/UserStoreModel';
@@ -10,7 +10,7 @@
 		joinProject,
 		joinProjectWithSignature
 	} from './ethersCalls/rpcRequests';
-	import { getSigner, walletState, web3Provider } from './Utils/wallet';
+	import { getSigner, getSignerAddress, walletState, web3Provider } from './Utils/wallet';
 
 	import { ModalAnimation, ModalIcon, ModalType } from '$lib/ModalDialog.svelte';
 	import { requestAuthorizationProof, requestSponsoredTx } from './api.js';
@@ -35,7 +35,7 @@
 	export let txSponsoringEnabled: boolean;
 	export let totalSum: number;
 	export let tokenDecimals: number;
-	export let totalCostInERCUnits: BigNumber;
+	export let totalCostInERCUnits: bigint;
 	export let discountValue: number;
 	export let validUserCouponCode: string;
 	export let referralCheckBoxActivated: boolean;
@@ -47,7 +47,7 @@
 
 	export let userJoinedSuccess: () => void;
 
-	const interval = 10000;
+	const interval = 50000;
 	let walletData: UserStoreModel;
 
 	export let refreshWalletData = async () => {
@@ -102,13 +102,14 @@
 		let [calldata, signedPayload] = authorizationResult.unwrap();
 		console.log(`Calldata: ${calldata}; \nsignedPayload: ${signedPayload}`);
 
-		let crowdtainerExtraData = ethers.utils.defaultAbiCoder.encode(
+		let abiCoder = AbiCoder.defaultAbiCoder();
+		let crowdtainerExtraData = abiCoder.encode(
 			['address', 'uint256[]', 'bool', 'address'],
 			[userWalletAddress, selection, referralEnabled, couponCodeAddress]
 		);
-		let extraData = ethers.utils.defaultAbiCoder.encode(
+		let extraData = abiCoder.encode(
 			['address', 'bytes4', 'bytes'],
-			[crowdtainerAddress, ethers.utils.hexlify('0x566a2cc2'), crowdtainerExtraData]
+			[crowdtainerAddress, ethers.hexlify('0x566a2cc2'), crowdtainerExtraData]
 		);
 
 		return Ok({ calldata, signedPayload, extraData });
@@ -118,14 +119,15 @@
 		withSignature: boolean,
 		withPermitValues: ERC2612_Input | undefined
 	) => {
-		let userWallet = getSigner();
+		console.log('before getsigner');
+		let userWallet = await getSigner();
 
 		if (userWallet === undefined) {
 			showToast('Error: Missing signer.', MessageType.Warning);
 			return;
 		}
 
-		let userWalletAddress = await userWallet.getAddress();
+		let userWalletAddress = getSignerAddress();
 		if (!userWalletAddress || userWalletAddress === '') {
 			showToast(`Unable to get wallet signer address.`);
 			console.log(`Unable to get wallet signer address.`);
@@ -166,7 +168,7 @@
 			signedPermit = signedPermitResult.unwrap();
 		}
 
-		let joinTransaction: Result<ethers.ContractTransaction, string> | undefined;
+		let joinTransaction: Result<ethers.ContractTransactionResponse, string> | undefined;
 
 		if (withSignature) {
 			modalDialog.show({
@@ -201,7 +203,7 @@
 
 			let serviceProviderAuth = serviceProviderAuthResult.unwrap();
 
-			let sponsoredTxResult: Result<string,string> | undefined;
+			let sponsoredTxResult: Result<string, string> | undefined;
 			if (txSponsoringEnabled) {
 				modalDialog.show({
 					id: 'joinProject',
@@ -265,7 +267,7 @@
 				vouchers721Address!,
 				crowdtainerAddress!,
 				$selection,
-				validUserCouponCode && ethers.utils.isAddress(validUserCouponCode)
+				validUserCouponCode && ethers.isAddress(validUserCouponCode)
 					? validUserCouponCode
 					: '0x0000000000000000000000000000000000000000',
 				referralCheckBoxActivated,
@@ -274,15 +276,15 @@
 		}
 
 		if (await joinTransactionSuccessful(joinTransaction)) {
-			actionButtonEnabled = true;
 			let noSelection = Array(productListLength).fill(0);
 			$joinSelection.set(crowdtainerId, noSelection);
 			userJoinedSuccess();
 		}
+		actionButtonEnabled = true;
 	};
 
 	const joinTransactionSuccessful = async (
-		joinTransaction: Result<ethers.ContractTransaction, string>
+		joinTransaction: Result<ethers.ContractTransactionResponse, string>
 	): Promise<boolean> => {
 		if (joinTransaction.isErr()) {
 			let errorString = joinTransaction.unwrapErr();
@@ -300,7 +302,6 @@
 			});
 
 			console.log(`${joinTransaction.unwrapErr()}`);
-			actionButtonEnabled = true;
 			return false;
 		}
 
@@ -315,7 +316,7 @@
 		let txResult = await joinTransaction.unwrap().wait();
 		modalDialog.close();
 
-		if (txResult.status !== 1) {
+		if (!txResult || txResult.status !== 1) {
 			modalDialog.show({
 				id: 'joinProjectConfirmation',
 				type: ModalType.Information,
@@ -335,11 +336,11 @@
 			return;
 		}
 
-		let erc20ContractResult = await getERC20Contract(getSigner(), crowdtainerAddress);
+		let erc20ContractResult = await getERC20Contract(await getSigner(), crowdtainerAddress);
 		let erc20Contract: IERC20;
 
 		if (erc20ContractResult.isErr()) {
-			showToast('Error connecting to ERC20 contract. Internet down?', MessageType.Warning);
+			showToast('Error connecting to ERC20 contract.', MessageType.Warning);
 			console.log(erc20ContractResult.unwrapErr());
 			return;
 		} else {
@@ -370,7 +371,7 @@
 
 		actionButtonEnabled = false;
 
-		let permitApproveTx: undefined | ethers.ContractTransaction;
+		let permitApproveTx: undefined | ethers.ContractTransactionResponse;
 
 		try {
 			permitApproveTx = await erc20Contract.approve(crowdtainerAddress, totalCostInERCUnits);
@@ -381,7 +382,7 @@
 				id: 'walletApprovalFailed',
 				type: ModalType.Information,
 				title: 'Spending approval',
-				body: `Spending approval failed: request rejected.`,
+				body: `Spending approval failed: request rejected: ${error}`,
 				icon: ModalIcon.Exclamation,
 				animation: ModalAnimation.None
 			});
@@ -397,7 +398,7 @@
 			animation: ModalAnimation.Diamonds
 		});
 
-		let receipt: ContractReceipt | undefined;
+		let receipt: ContractTransactionReceipt | null = null;
 		let error: string = '';
 		try {
 			receipt = await permitApproveTx.wait();
@@ -405,7 +406,7 @@
 			error = `${_error}`;
 		}
 
-		if (error !== '' || receipt === undefined || receipt.status === 0) {
+		if (error !== '' || !receipt || receipt.status === 0) {
 			// tx failed
 			let message = 'Transaction failed';
 			if (error !== '') {
@@ -458,13 +459,13 @@
 	$: enoughFunds =
 		walletData &&
 		walletData.erc20Balance !== undefined &&
-		totalCostInERCUnits.lt(walletData.erc20Balance)
+		totalCostInERCUnits < walletData.erc20Balance
 			? true
 			: false;
 	$: enoughAllowance =
 		walletData &&
 		walletData.erc20Allowance !== undefined &&
-		walletData.erc20Allowance.lt(totalCostInERCUnits)
+		walletData.erc20Allowance < totalCostInERCUnits
 			? false
 			: true;
 
@@ -497,44 +498,50 @@
 			{/if}
 		</div>
 
-		{#if actionButtonEnabled && enoughFunds}
-			<button
-				type="button"
-				disabled={!actionButtonEnabled || !enoughFunds}
-				class={actionButtonEnabled && enoughFunds ? 'btn btn-primary px-12 my-6' : 'gray-btn'}
-				on:click={async () => {
-					actionButtonEnabled = false;
+		<!-- {#if actionButtonEnabled && enoughFunds} -->
+		<button
+			type="button"
+			disabled={!actionButtonEnabled || !enoughFunds}
+			class={actionButtonEnabled && enoughFunds ? 'btn btn-primary px-12 my-6' : 'gray-btn'}
+			on:click={async () => {
+				console.log('clicked');
+				let signer = await getSigner();
+				if (!signer) {
+					showToast('Missing signer.');
+				}
 
-					let signer = getSigner();
-					if (!signer) {
-						showToast('Missing signer.');
-					}
-
-					if (enoughFunds && signer) {
-						if (enoughAllowance) {
-							callJoinProject(withSignature, undefined);
-						} else {
-							// Call with permit data
-							// TODO: Add support for smart contract wallets and ERC20's lacking ERC2612 support.
-							// Use separate call to callApproveSpending() beforehand in these cases.
-							callJoinProject(withSignature, {
-								userWalletAddress: await signer.getAddress(),
-								crowdtainerAddress: crowdtainerAddress,
-								chainId: chainId,
-								tokenAddress: tokenAddress,
-								tokenName: tokenName,
-								tokenVersion: tokenVersion,
-								withPermitValue: BigNumber.from(
-									Math.pow(10, tokenDecimals) * (totalSum - discountValue)
-								),
-								signer: signer
-							});
+				if (enoughFunds && signer) {
+					if (enoughAllowance) {
+						console.log(`withSignature? ${withSignature}`);
+						callJoinProject(withSignature, undefined);
+					} else {
+						// Call with permit data
+						// TODO: Add support for smart contract wallets and ERC20's lacking ERC2612 support.
+						// Use separate call to callApproveSpending() beforehand in these cases.
+						console.log(`without permit`);
+						let account = $walletState.account;
+						if (!account) {
+							console.log(`Error: missing account.`);
+							return;
 						}
+						await callJoinProject(withSignature, {
+							userWalletAddress: account,
+							crowdtainerAddress: crowdtainerAddress,
+							chainId: chainId,
+							tokenAddress: tokenAddress,
+							tokenName: tokenName,
+							tokenVersion: tokenVersion,
+							withPermitValue: BigInt(Math.pow(10, tokenDecimals) * (totalSum - discountValue)),
+							signer: signer
+						});
+						await callApproveSpending();
+						// await callJoinProject(withSignature, undefined);
 					}
-				}}
-			>
-				Confirm and Join
-			</button>
-		{/if}
+				}
+			}}
+		>
+			Confirm and Join
+		</button>
+		<!-- {/if} -->
 	</div>
 </div>

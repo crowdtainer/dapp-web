@@ -1,11 +1,13 @@
 import { walletFundsInCrowdtainer } from '$lib/ethersCalls/rpcRequests';
-import { getSigner } from '$lib/Utils/wallet';
+import { getProvider, getSigner } from '$lib/Utils/wallet';
 
 import { createWalletCrowdtainerData } from '$lib/Model/WalletCrowdtainerModel.js';
 import { readable } from 'svelte/store';
 
 let _campaignContractAddress: string | undefined;
 let _accountAddress: string;
+
+const pollInterval = 20000;
 
 export const initializeDataForWallet = (campaignContractAddress: string | undefined, accountAddress: string) => {
     _campaignContractAddress = campaignContractAddress;
@@ -21,7 +23,7 @@ export const walletInCrowdtainer = readable(createWalletCrowdtainerData(), funct
         }
 
         let funds = await walletFundsInCrowdtainer(
-            getSigner(),
+            getProvider(),
             _campaignContractAddress,
             _accountAddress
         );
@@ -33,7 +35,7 @@ export const walletInCrowdtainer = readable(createWalletCrowdtainerData(), funct
         let userWalletInCrowdtainer = funds.unwrap();
 
 		set(userWalletInCrowdtainer);
-	}, 5000);
+	}, pollInterval);
 
 	return function stop() {
         console.log(`walletFundsInCrowdtainer loop terminated.`);

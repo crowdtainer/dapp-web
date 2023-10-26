@@ -2,8 +2,7 @@
 /* tslint:disable */
 /* eslint-disable */
 
-import { Contract, Signer, utils } from "ethers";
-import type { Provider } from "@ethersproject/providers";
+import { Contract, Interface, type ContractRunner } from "ethers";
 import type { ICrowdtainer, ICrowdtainerInterface } from "../ICrowdtainer";
 
 const _abi = [
@@ -204,12 +203,12 @@ const _abi = [
 export class ICrowdtainer__factory {
   static readonly abi = _abi;
   static createInterface(): ICrowdtainerInterface {
-    return new utils.Interface(_abi) as ICrowdtainerInterface;
+    return new Interface(_abi) as ICrowdtainerInterface;
   }
   static connect(
     address: string,
-    signerOrProvider: Signer | Provider
+    runner?: ContractRunner | null
   ): ICrowdtainer {
-    return new Contract(address, _abi, signerOrProvider) as ICrowdtainer;
+    return new Contract(address, _abi, runner) as unknown as ICrowdtainer;
   }
 }

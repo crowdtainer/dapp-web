@@ -2,14 +2,18 @@
 /* tslint:disable */
 /* eslint-disable */
 import {
-  Signer,
-  utils,
   Contract,
-  ContractFactory
+  ContractFactory,
+  ContractTransactionResponse,
+  Interface,
 } from "ethers";
-import type { Provider, TransactionRequest } from "@ethersproject/providers";
-import type { BytesLike, Overrides } from "ethers";
-import type { PromiseOrValue } from "../common";
+import type {
+  Signer,
+  BytesLike,
+  ContractDeployTransaction,
+  ContractRunner,
+} from "ethers";
+import type { NonPayableOverrides } from "../common";
 import type { SigUtils, SigUtilsInterface } from "../SigUtils";
 
 const _abi = [
@@ -105,37 +109,32 @@ export class SigUtils__factory extends ContractFactory {
     }
   }
 
-  override deploy(
-    _DOMAIN_SEPARATOR: PromiseOrValue<BytesLike>,
-    overrides?: Overrides & { from?: PromiseOrValue<string> }
-  ): Promise<SigUtils> {
-    return super.deploy(
-      _DOMAIN_SEPARATOR,
-      overrides || {}
-    ) as Promise<SigUtils>;
-  }
   override getDeployTransaction(
-    _DOMAIN_SEPARATOR: PromiseOrValue<BytesLike>,
-    overrides?: Overrides & { from?: PromiseOrValue<string> }
-  ): TransactionRequest {
+    _DOMAIN_SEPARATOR: BytesLike,
+    overrides?: NonPayableOverrides & { from?: string }
+  ): Promise<ContractDeployTransaction> {
     return super.getDeployTransaction(_DOMAIN_SEPARATOR, overrides || {});
   }
-  override attach(address: string): SigUtils {
-    return super.attach(address) as SigUtils;
+  override deploy(
+    _DOMAIN_SEPARATOR: BytesLike,
+    overrides?: NonPayableOverrides & { from?: string }
+  ) {
+    return super.deploy(_DOMAIN_SEPARATOR, overrides || {}) as Promise<
+      SigUtils & {
+        deploymentTransaction(): ContractTransactionResponse;
+      }
+    >;
   }
-  override connect(signer: Signer): SigUtils__factory {
-    return super.connect(signer) as SigUtils__factory;
+  override connect(runner: ContractRunner | null): SigUtils__factory {
+    return super.connect(runner) as SigUtils__factory;
   }
 
   static readonly bytecode = _bytecode;
   static readonly abi = _abi;
   static createInterface(): SigUtilsInterface {
-    return new utils.Interface(_abi) as SigUtilsInterface;
+    return new Interface(_abi) as SigUtilsInterface;
   }
-  static connect(
-    address: string,
-    signerOrProvider: Signer | Provider
-  ): SigUtils {
-    return new Contract(address, _abi, signerOrProvider) as SigUtils;
+  static connect(address: string, runner?: ContractRunner | null): SigUtils {
+    return new Contract(address, _abi, runner) as unknown as SigUtils;
   }
 }

@@ -1,11 +1,12 @@
-// Ethers
-import { BigNumber } from 'ethers';
-
 // Internal
 import type { RequestHandler } from './$types';
 import type { CrowdtainerStaticModel, Error } from '$lib/Model/CrowdtainerModel';
-import { error } from '@sveltejs/kit';
+import { error, json } from '@sveltejs/kit';
 import { fetchStaticData } from '$lib/ethersCalls/fetchStaticData.js';
+
+(BigInt.prototype as any).toJSON = function () {
+   return this.toString();
+};
 
 export const GET: RequestHandler = async ({ params }) => {
    try {
@@ -17,7 +18,7 @@ export const GET: RequestHandler = async ({ params }) => {
       projectIds = params.id.split(",");
 
       for (let i = 0; i < projectIds.length; i++) {
-         let crowdtainer = BigNumber.from(Number(projectIds[i]));
+         let crowdtainer = BigInt(projectIds[i]);
          let result = await fetchStaticData(crowdtainer);
 
          if (result.isOk()) {
@@ -28,7 +29,7 @@ export const GET: RequestHandler = async ({ params }) => {
          }
       }
 
-      return new Response(JSON.stringify(responses));
+      return json(responses);
    } catch (_error) {
       console.log(_error);
       throw error(500, `${_error}`);

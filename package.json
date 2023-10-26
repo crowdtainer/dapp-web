@@ -9,7 +9,7 @@
 		"check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch",
 		"lint": "prettier --check --plugin-search-dir=. . && eslint .",
 		"format": "prettier --write --plugin-search-dir=. .",
-		"build-types": "typechain --target ethers-v5 \"./abi/*.sol/!(*.dbg).json\" --out-dir=src/routes/typechain/",
+		"build-types": "typechain --target ethers-v6 \"./abi/*.sol/!(*.dbg).json\" --out-dir=src/routes/typechain/",
 		"postinstall": "#npm run build-types"
 	},
 	"devDependencies": {
@@ -24,7 +24,6 @@
 		"@sveltejs/kit": "^1.24.0",
 		"@tailwindcss/forms": "^0.5.4",
 		"@tailwindcss/typography": "^0.5.9",
-		"@typechain/ethers-v5": "^10.1.1",
 		"@types/node": "^18.7.14",
 		"@walletconnect/web3-provider": "^1.8.0",
 		"autoprefixer": "^10.4.7",
@@ -32,7 +31,6 @@
 		"dotenv": "^16.0.3",
 		"eslint": "^8.43.0",
 		"eslint-plugin-svelte": "^2.31.1",
-		"ethers": "^5.7.2",
 		"postcss": "^8.4.14",
 		"prettier": "^2.6.2",
 		"prettier-plugin-svelte": "^2.10.1",
@@ -43,25 +41,25 @@
 		"tailwindcss": "^3.3.3",
 		"transliteration": "^2.3.5",
 		"tslib": "^2.4.1",
-		"typechain": "^8.1.1",
+		"typechain": "^8.3.2",
 		"typescript": "^5.0.0"
 	},
 	"type": "module",
 	"dependencies": {
 		"@sniptt/monads": "^0.5.10",
-		"@typechain/ethers-v5": "^10.1.1",
+		"@typechain/ethers-v6": "^0.5.1",
 		"@vitejs/plugin-basic-ssl": "^1.0.1",
 		"autoprefixer": "^10.4.7",
 		"dotenv": "^16.0.3",
-		"ethers": "^5.7.2",
+		"ethers": "^6.8.0",
 		"ioredis": "^5.2.3",
 		"iso-3166-1": "^2.1.1",
 		"prettier": "^2.6.2",
 		"prettier-plugin-svelte": "^2.10.1",
 		"transliteration": "^2.3.5",
 		"tslib": "^2.4.1",
-		"typechain": "^8.1.1",
 		"typescript": "^5.0.0",
+		"viem": "^1.16.6",
 		"vite": "^4.1.1"
 	}
 }

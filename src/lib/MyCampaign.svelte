@@ -24,7 +24,7 @@
 		loadingString
 	} from '$lib/Converters/CrowdtainerData';
 
-	import { connected, getSigner, accountAddress } from '$lib/Utils/wallet';
+	import { connected, getSigner, accountAddress, getProvider } from '$lib/Utils/wallet';
 
 	import ModalDialog from './ModalDialog.svelte';
 	let modalDialog: ModalDialog;
@@ -34,6 +34,7 @@
 	import ProjectDetails from './ProjectDetails.svelte';
 	import { initializeDataForWallet, walletInCrowdtainer } from './Stores/dataForWalletStore.js';
 	import { handleUserClaimedFundsEvent } from './CampaignActions.js';
+	import { VITE_WALLET_CONNECT_CHAIN_ID } from '$env/static/private';
 
 	export let wallet: string;
 	export let tokenId: number;
@@ -75,12 +76,12 @@
 		} else {
 			campaignDynamicData = campaignDynamicStores.get(crowdtainerId);
 		}
-		let signer = getSigner();
-		if (signer === undefined) {
+		let provider = getProvider();
+		if (provider === undefined) {
 			return;
 		}
 
-		let imageDataJSON = await loadTokenURIRepresentation(signer, vouchers721Address, tokenId);
+		let imageDataJSON = await loadTokenURIRepresentation(provider, vouchers721Address, tokenId);
 		if (imageDataJSON === undefined) {
 			console.log('Unable to decode tokenURI.');
 			return;
@@ -92,9 +93,9 @@
 	});
 
 	async function loadOrderDetails() {
-		let signer = getSigner();
-		if (!signer) {
-			console.log('Unable to load order details, missing signer.');
+		let provider = getProvider();
+		if (!provider) {
+			console.log('Unable to load order details, missing let provider.');
 			return;
 		}
 
@@ -102,7 +103,7 @@
 			return;
 		}
 
-		let result = await getOrderDetailsAPI(await signer.getChainId(), vouchers721Address, tokenId);
+		let result = await getOrderDetailsAPI(Number(VITE_WALLET_CONNECT_CHAIN_ID), vouchers721Address, tokenId);
 
 		if (result.isErr()) {
 			console.log(`${result.unwrapErr()}`);

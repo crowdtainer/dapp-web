@@ -3,9 +3,6 @@ import { Vouchers721__factory } from '../../typechain/factories/Vouchers721__fac
 import { Crowdtainer__factory } from '../../typechain/factories/Crowdtainer.sol/Crowdtainer__factory';
 import type { IERC20 } from '../../typechain';
 
-// Ethers
-import { BigNumber } from 'ethers';
-
 // Monads
 import { type Result, Ok, Err } from "@sniptt/monads";
 
@@ -16,17 +13,22 @@ import { Vouchers721Address } from '../../Data/projects.json';
 import { crowdtainerStaticDataMap, crowdtainerDynamicDataMap } from '../../../hooks/cache';
 import { getERC20Contract } from '$lib/ethersCalls/rpcRequests';
 import { provider } from '$lib/ethersCalls/provider';
+import { json } from '@sveltejs/kit';
+
+(BigInt.prototype as any).toJSON = function () {
+   return this.toString();
+};
 
 let lastFetchEpochTimeInMilliseconds = 0;
 const cacheExpirationTimeInMilliseconds = 6 * 1000; // 6 seconds
 
-async function fetchData(crowdtainerId: BigNumber): Promise<Result<CrowdtainerDynamicModel, Error>> {
+async function fetchData(crowdtainerId: bigint): Promise<Result<CrowdtainerDynamicModel, Error>> {
    try {
-      if (crowdtainerId.toNumber() === 0) {
-         return Err({ error: `Invalid crowdtainerId: ${crowdtainerId.toNumber()}` });
+      if (Number(crowdtainerId) === 0) {
+         return Err({ error: `Invalid crowdtainerId: ${Number(crowdtainerId)}` });
       }
 
-      let crowdtainerDynamicData: CrowdtainerDynamicModel | undefined = crowdtainerDynamicDataMap.get(crowdtainerId.toHexString());
+      let crowdtainerDynamicData: CrowdtainerDynamicModel | undefined = crowdtainerDynamicDataMap.get(crowdtainerId.toString(16));
       const start = Date.now();
       const elapsed = start - lastFetchEpochTimeInMilliseconds;
       if (crowdtainerDynamicData !== undefined && elapsed < cacheExpirationTimeInMilliseconds) {
@@ -35,7 +37,7 @@ async function fetchData(crowdtainerId: BigNumber): Promise<Result<CrowdtainerDy
 
       console.log(`Fetching dynamic data for Crowdtainer ID ${crowdtainerId}..`);
       let crowdtainerAddress: string;
-      let crowdtainerStaticData: CrowdtainerStaticModel | undefined = crowdtainerStaticDataMap.get(crowdtainerId.toHexString());
+      let crowdtainerStaticData: CrowdtainerStaticModel | undefined = crowdtainerStaticDataMap.get(crowdtainerId.toString(16));
       await provider.ready;
 
       const vouchers721Contract = Vouchers721__factory.connect(Vouchers721Address, provider);
@@ -48,7 +50,7 @@ async function fetchData(crowdtainerId: BigNumber): Promise<Result<CrowdtainerDy
 
       const crowdtainerContract = Crowdtainer__factory.connect(crowdtainerAddress, provider);
 
-      let state: number = await crowdtainerContract.crowdtainerState();
+      let state = await crowdtainerContract.crowdtainerState();
       let erc20ContractResult = await getERC20Contract(provider, crowdtainerAddress);
       let erc20Contract: IERC20;
 
@@ -61,14 +63,14 @@ async function fetchData(crowdtainerId: BigNumber): Promise<Result<CrowdtainerDy
       }
 
       let crowdtainerData: CrowdtainerDynamicModel = {
-         status: state,
+         status: Number(state),
          raised: await crowdtainerContract.totalValueRaised(),
          fundsInContract: await erc20Contract.balanceOf(crowdtainerAddress)
       }
 
-      crowdtainerDynamicDataMap.set(crowdtainerId.toHexString(), crowdtainerData);
+      crowdtainerDynamicDataMap.set(crowdtainerId.toString(16), crowdtainerData);
       lastFetchEpochTimeInMilliseconds = Date.now();
-      console.log(`Done. Crowdtainer ID ${crowdtainerId} dynamic data fetch took ${(lastFetchEpochTimeInMilliseconds - start)/1000} seconds.`);
+      console.log(`Done. Crowdtainer ID ${crowdtainerId} dynamic data fetch took ${(lastFetchEpochTimeInMilliseconds - start) / 1000} seconds.`);
 
       return Ok(crowdtainerData);
    } catch (errorMessage) {
@@ -79,12 +81,12 @@ async function fetchData(crowdtainerId: BigNumber): Promise<Result<CrowdtainerDy
 
 export const GET: RequestHandler = async ({ params }) => {
 
-   let crowdtainerId = BigNumber.from(params.id);
+   let crowdtainerId = BigInt(params.id);
    let result = await fetchData(crowdtainerId);
 
    if (result.isOk()) {
-      return new Response(JSON.stringify(result.unwrap()));
+      return json(result.unwrap());
    } else {
-      return new Response(JSON.stringify(result.unwrapErr()));
+      return json(result.unwrapErr());
    }
 }

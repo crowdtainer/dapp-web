@@ -1,5 +1,5 @@
 import { getTokenURI } from "$lib/ethersCalls/rpcRequests";
-import type { Signer } from "ethers";
+import type { BrowserProvider, Signer } from "ethers";
 
 export interface Description {
     description: string;
@@ -19,7 +19,7 @@ export interface TokenURIObject {
 }
 
 export async function loadTokenURIRepresentation(
-    signer: Signer,
+    signer: BrowserProvider,
     vouchers721Address: string,
     tokenId: number
 ): Promise<TokenURIObject | undefined> {

@@ -3,130 +3,110 @@
 /* eslint-disable */
 import type {
   BaseContract,
-  BigNumber,
   BigNumberish,
   BytesLike,
-  CallOverrides,
-  PopulatedTransaction,
-  Signer,
-  utils,
+  FunctionFragment,
+  Result,
+  Interface,
+  AddressLike,
+  ContractRunner,
+  ContractMethod,
+  Listener,
 } from "ethers";
-import type { FunctionFragment, Result } from "@ethersproject/abi";
-import type { Listener, Provider } from "@ethersproject/providers";
 import type {
-  TypedEventFilter,
-  TypedEvent,
+  TypedContractEvent,
+  TypedDeferredTopicFilter,
+  TypedEventLog,
   TypedListener,
-  OnEvent,
-  PromiseOrValue,
+  TypedContractMethod,
 } from "../common";
 
-export interface AuthorizationGatewayInterface extends utils.Interface {
-  functions: {
-    "getSignedJoinApproval(address,address,uint256[],bool,address)": FunctionFragment;
-  };
-
-  getFunction(
-    nameOrSignatureOrTopic: "getSignedJoinApproval"
-  ): FunctionFragment;
+export interface AuthorizationGatewayInterface extends Interface {
+  getFunction(nameOrSignature: "getSignedJoinApproval"): FunctionFragment;
 
   encodeFunctionData(
     functionFragment: "getSignedJoinApproval",
-    values: [
-      PromiseOrValue<string>,
-      PromiseOrValue<string>,
-      PromiseOrValue<BigNumberish>[],
-      PromiseOrValue<boolean>,
-      PromiseOrValue<string>
-    ]
+    values: [AddressLike, AddressLike, BigNumberish[], boolean, AddressLike]
   ): string;
 
   decodeFunctionResult(
     functionFragment: "getSignedJoinApproval",
     data: BytesLike
   ): Result;
-
-  events: {};
 }
 
 export interface AuthorizationGateway extends BaseContract {
-  connect(signerOrProvider: Signer | Provider | string): this;
-  attach(addressOrName: string): this;
-  deployed(): Promise<this>;
+  connect(runner?: ContractRunner | null): AuthorizationGateway;
+  waitForDeployment(): Promise<this>;
 
   interface: AuthorizationGatewayInterface;
 
-  queryFilter<TEvent extends TypedEvent>(
-    event: TypedEventFilter<TEvent>,
+  queryFilter<TCEvent extends TypedContractEvent>(
+    event: TCEvent,
     fromBlockOrBlockhash?: string | number | undefined,
     toBlock?: string | number | undefined
-  ): Promise<Array<TEvent>>;
+  ): Promise<Array<TypedEventLog<TCEvent>>>;
+  queryFilter<TCEvent extends TypedContractEvent>(
+    filter: TypedDeferredTopicFilter<TCEvent>,
+    fromBlockOrBlockhash?: string | number | undefined,
+    toBlock?: string | number | undefined
+  ): Promise<Array<TypedEventLog<TCEvent>>>;
 
-  listeners<TEvent extends TypedEvent>(
-    eventFilter?: TypedEventFilter<TEvent>
-  ): Array<TypedListener<TEvent>>;
-  listeners(eventName?: string): Array<Listener>;
-  removeAllListeners<TEvent extends TypedEvent>(
-    eventFilter: TypedEventFilter<TEvent>
-  ): this;
-  removeAllListeners(eventName?: string): this;
-  off: OnEvent<this>;
-  on: OnEvent<this>;
-  once: OnEvent<this>;
-  removeListener: OnEvent<this>;
+  on<TCEvent extends TypedContractEvent>(
+    event: TCEvent,
+    listener: TypedListener<TCEvent>
+  ): Promise<this>;
+  on<TCEvent extends TypedContractEvent>(
+    filter: TypedDeferredTopicFilter<TCEvent>,
+    listener: TypedListener<TCEvent>
+  ): Promise<this>;
 
-  functions: {
-    getSignedJoinApproval(
-      crowdtainerAddress: PromiseOrValue<string>,
-      addr: PromiseOrValue<string>,
-      quantities: PromiseOrValue<BigNumberish>[],
-      _enableReferral: PromiseOrValue<boolean>,
-      _referrer: PromiseOrValue<string>,
-      overrides?: CallOverrides
-    ): Promise<[string] & { signature: string }>;
-  };
+  once<TCEvent extends TypedContractEvent>(
+    event: TCEvent,
+    listener: TypedListener<TCEvent>
+  ): Promise<this>;
+  once<TCEvent extends TypedContractEvent>(
+    filter: TypedDeferredTopicFilter<TCEvent>,
+    listener: TypedListener<TCEvent>
+  ): Promise<this>;
 
-  getSignedJoinApproval(
-    crowdtainerAddress: PromiseOrValue<string>,
-    addr: PromiseOrValue<string>,
-    quantities: PromiseOrValue<BigNumberish>[],
-    _enableReferral: PromiseOrValue<boolean>,
-    _referrer: PromiseOrValue<string>,
-    overrides?: CallOverrides
-  ): Promise<string>;
+  listeners<TCEvent extends TypedContractEvent>(
+    event: TCEvent
+  ): Promise<Array<TypedListener<TCEvent>>>;
+  listeners(eventName?: string): Promise<Array<Listener>>;
+  removeAllListeners<TCEvent extends TypedContractEvent>(
+    event?: TCEvent
+  ): Promise<this>;
 
-  callStatic: {
-    getSignedJoinApproval(
-      crowdtainerAddress: PromiseOrValue<string>,
-      addr: PromiseOrValue<string>,
-      quantities: PromiseOrValue<BigNumberish>[],
-      _enableReferral: PromiseOrValue<boolean>,
-      _referrer: PromiseOrValue<string>,
-      overrides?: CallOverrides
-    ): Promise<string>;
-  };
+  getSignedJoinApproval: TypedContractMethod<
+    [
+      crowdtainerAddress: AddressLike,
+      addr: AddressLike,
+      quantities: BigNumberish[],
+      _enableReferral: boolean,
+      _referrer: AddressLike
+    ],
+    [string],
+    "view"
+  >;
+
+  getFunction<T extends ContractMethod = ContractMethod>(
+    key: string | FunctionFragment
+  ): T;
+
+  getFunction(
+    nameOrSignature: "getSignedJoinApproval"
+  ): TypedContractMethod<
+    [
+      crowdtainerAddress: AddressLike,
+      addr: AddressLike,
+      quantities: BigNumberish[],
+      _enableReferral: boolean,
+      _referrer: AddressLike
+    ],
+    [string],
+    "view"
+  >;
 
   filters: {};
-
-  estimateGas: {
-    getSignedJoinApproval(
-      crowdtainerAddress: PromiseOrValue<string>,
-      addr: PromiseOrValue<string>,
-      quantities: PromiseOrValue<BigNumberish>[],
-      _enableReferral: PromiseOrValue<boolean>,
-      _referrer: PromiseOrValue<string>,
-      overrides?: CallOverrides
-    ): Promise<BigNumber>;
-  };
-
-  populateTransaction: {
-    getSignedJoinApproval(
-      crowdtainerAddress: PromiseOrValue<string>,
-      addr: PromiseOrValue<string>,
-      quantities: PromiseOrValue<BigNumberish>[],
-      _enableReferral: PromiseOrValue<boolean>,
-      _referrer: PromiseOrValue<string>,
-      overrides?: CallOverrides
-    ): Promise<PopulatedTransaction>;
-  };
 }

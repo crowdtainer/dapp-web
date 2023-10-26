@@ -23,7 +23,7 @@ for (let result of projects) {
 
 let campaignStaticData: CrowdtainerStaticModel[] | undefined;
 
-if (!ethers.utils.isAddress(ethers.utils.computeAddress(AUTHORIZER_PRIVATE_KEY))) {
+if (!ethers.isAddress(ethers.computeAddress(AUTHORIZER_PRIVATE_KEY))) {
     const message = 'Invalid AUTHORIZER_PRIVATE_KEY.';
     console.log(message);
     throw error(500, message);
@@ -72,7 +72,7 @@ export const POST: RequestHandler = async ({ request, params }) => {
         throw error(500, 'Missing wallet address parameter.');
     }
 
-    if (!ethers.utils.isAddress(userWalletAddress)) {
+    if (!ethers.isAddress(userWalletAddress)) {
         throw error(400, "Invalid wallet address.");
     }
 
@@ -84,18 +84,18 @@ export const POST: RequestHandler = async ({ request, params }) => {
 
     let calldata = calldataResult.unwrap();
 
-    if (!ethers.utils.isBytesLike(calldata)) {
+    if (!ethers.isBytesLike(calldata)) {
         throw error(400, "Invalid calldata parameter.");
     }
 
-    // console.log(`Selector: ${ethers.utils.id('joinWithSignature(bytes,bytes)')}`);
-    let hexCalldata = ethers.utils.hexlify(calldata);
+    // console.log(`Selector: ${ethers.id('joinWithSignature(bytes,bytes)')}`);
+    let hexCalldata = ethers.hexlify(calldata);
     const functionSelector = hexCalldata.slice(0, 10).toLowerCase();
     if (functionSelector !== `0xed52b41c`) { //getSignedJoinApproval().selector
         throw error(400, `Incorrect payload. Function selector: ${functionSelector}. Expected: 0x566a2cc2`);
     }
 
-    const abiInterface = new ethers.utils.Interface(JSON.stringify(AuthorizationGateway__factory.abi));
+    const abiInterface = new ethers.Interface(JSON.stringify(AuthorizationGateway__factory.abi));
 
     console.log(`Authorization request received from wallet: ${userWalletAddress}`);
     // Decode function arguments
@@ -136,7 +136,7 @@ export const POST: RequestHandler = async ({ request, params }) => {
     }
 
     console.log(`raw nonce: ${walletNonceResult}`);
-    const nonce = ethers.utils.hexZeroPad(ethers.utils.hexlify(walletNonceResult), 32);
+    const nonce = ethers.hexZeroPad(ethers.hexlify(walletNonceResult), 32);
     console.log(`actual: ${nonce}`);
 
     // Apply other sanity checks and restrictions
@@ -158,7 +158,7 @@ export const POST: RequestHandler = async ({ request, params }) => {
         totalValue = totalValue.add(campaignData.prices[i].mul(BigNumber.from(quantities[i])));
     }
 
-    let maxCost = ethers.utils.parseUnits(`${ERC20_MaximumPurchaseValuePerWallet}`, campaignData.tokenDecimals);
+    let maxCost = ethers.parseUnits(`${ERC20_MaximumPurchaseValuePerWallet}`, campaignData.tokenDecimals);
 
     console.log(`total order value: ${totalValue}`);
     console.log(`max allowed: ${maxCost}`);
@@ -179,13 +179,13 @@ export const POST: RequestHandler = async ({ request, params }) => {
     }
 
     let epochExpiration = BigNumber.from(Math.floor(Date.now() / 1000) + AUTHORIZER_SIGNATURE_EXPIRATION_TIME_IN_SECONDS);
-    let messageHash = ethers.utils.solidityKeccak256(["address", "address", "uint256[]", "bool", "address", "uint64", "bytes32"],
+    let messageHash = ethers.solidityKeccak256(["address", "address", "uint256[]", "bool", "address", "uint64", "bytes32"],
         [crowdtainerAddress, userWalletAddress, quantities, enableReferral, referralAddress, epochExpiration, nonce]);
-    let messageHashBinary = ethers.utils.arrayify(messageHash);
+    let messageHashBinary = ethers.arrayify(messageHash);
 
     let signature = await signer.signMessage(messageHashBinary);
 
-    returnValue = ethers.utils.defaultAbiCoder.encode(["address", "uint64", "bytes32", "bytes"], [crowdtainerAddress, epochExpiration, nonce, signature]);
+    returnValue = ethers.defaultAbiCoder.encode(["address", "uint64", "bytes32", "bytes"], [crowdtainerAddress, epochExpiration, nonce, signature]);
     console.log(`Authorization granted for wallet: ${userWalletAddress}`);
 
     return new Response(returnValue);

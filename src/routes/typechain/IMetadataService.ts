@@ -3,115 +3,115 @@
 /* eslint-disable */
 import type {
   BaseContract,
-  BigNumber,
   BigNumberish,
   BytesLike,
-  CallOverrides,
-  PopulatedTransaction,
-  Signer,
-  utils,
+  FunctionFragment,
+  Result,
+  Interface,
+  AddressLike,
+  ContractRunner,
+  ContractMethod,
+  Listener,
 } from "ethers";
-import type { FunctionFragment, Result } from "@ethersproject/abi";
-import type { Listener, Provider } from "@ethersproject/providers";
 import type {
-  TypedEventFilter,
-  TypedEvent,
+  TypedContractEvent,
+  TypedDeferredTopicFilter,
+  TypedEventLog,
   TypedListener,
-  OnEvent,
-  PromiseOrValue,
+  TypedContractMethod,
 } from "./common";
 
 export type MetadataStruct = {
-  crowdtainerId: PromiseOrValue<BigNumberish>;
-  tokenId: PromiseOrValue<BigNumberish>;
-  currentOwner: PromiseOrValue<string>;
-  claimed: PromiseOrValue<boolean>;
-  unitPricePerType: PromiseOrValue<BigNumberish>[];
-  quantities: PromiseOrValue<BigNumberish>[];
-  productDescription: PromiseOrValue<string>[];
-  numberOfProducts: PromiseOrValue<BigNumberish>;
+  crowdtainerId: BigNumberish;
+  tokenId: BigNumberish;
+  currentOwner: AddressLike;
+  claimed: boolean;
+  unitPricePerType: BigNumberish[];
+  quantities: BigNumberish[];
+  productDescription: string[];
+  numberOfProducts: BigNumberish;
 };
 
 export type MetadataStructOutput = [
-  BigNumber,
-  BigNumber,
-  string,
-  boolean,
-  BigNumber[],
-  BigNumber[],
-  string[],
-  BigNumber
+  crowdtainerId: bigint,
+  tokenId: bigint,
+  currentOwner: string,
+  claimed: boolean,
+  unitPricePerType: bigint[],
+  quantities: bigint[],
+  productDescription: string[],
+  numberOfProducts: bigint
 ] & {
-  crowdtainerId: BigNumber;
-  tokenId: BigNumber;
+  crowdtainerId: bigint;
+  tokenId: bigint;
   currentOwner: string;
   claimed: boolean;
-  unitPricePerType: BigNumber[];
-  quantities: BigNumber[];
+  unitPricePerType: bigint[];
+  quantities: bigint[];
   productDescription: string[];
-  numberOfProducts: BigNumber;
+  numberOfProducts: bigint;
 };
 
-export interface IMetadataServiceInterface extends utils.Interface {
-  functions: {
-    "uri((uint256,uint256,address,bool,uint256[],uint256[],string[],uint256))": FunctionFragment;
-  };
-
-  getFunction(nameOrSignatureOrTopic: "uri"): FunctionFragment;
+export interface IMetadataServiceInterface extends Interface {
+  getFunction(nameOrSignature: "uri"): FunctionFragment;
 
   encodeFunctionData(functionFragment: "uri", values: [MetadataStruct]): string;
 
   decodeFunctionResult(functionFragment: "uri", data: BytesLike): Result;
-
-  events: {};
 }
 
 export interface IMetadataService extends BaseContract {
-  connect(signerOrProvider: Signer | Provider | string): this;
-  attach(addressOrName: string): this;
-  deployed(): Promise<this>;
+  connect(runner?: ContractRunner | null): IMetadataService;
+  waitForDeployment(): Promise<this>;
 
   interface: IMetadataServiceInterface;
 
-  queryFilter<TEvent extends TypedEvent>(
-    event: TypedEventFilter<TEvent>,
+  queryFilter<TCEvent extends TypedContractEvent>(
+    event: TCEvent,
     fromBlockOrBlockhash?: string | number | undefined,
     toBlock?: string | number | undefined
-  ): Promise<Array<TEvent>>;
+  ): Promise<Array<TypedEventLog<TCEvent>>>;
+  queryFilter<TCEvent extends TypedContractEvent>(
+    filter: TypedDeferredTopicFilter<TCEvent>,
+    fromBlockOrBlockhash?: string | number | undefined,
+    toBlock?: string | number | undefined
+  ): Promise<Array<TypedEventLog<TCEvent>>>;
 
-  listeners<TEvent extends TypedEvent>(
-    eventFilter?: TypedEventFilter<TEvent>
-  ): Array<TypedListener<TEvent>>;
-  listeners(eventName?: string): Array<Listener>;
-  removeAllListeners<TEvent extends TypedEvent>(
-    eventFilter: TypedEventFilter<TEvent>
-  ): this;
-  removeAllListeners(eventName?: string): this;
-  off: OnEvent<this>;
-  on: OnEvent<this>;
-  once: OnEvent<this>;
-  removeListener: OnEvent<this>;
+  on<TCEvent extends TypedContractEvent>(
+    event: TCEvent,
+    listener: TypedListener<TCEvent>
+  ): Promise<this>;
+  on<TCEvent extends TypedContractEvent>(
+    filter: TypedDeferredTopicFilter<TCEvent>,
+    listener: TypedListener<TCEvent>
+  ): Promise<this>;
 
-  functions: {
-    uri(arg0: MetadataStruct, overrides?: CallOverrides): Promise<[string]>;
-  };
+  once<TCEvent extends TypedContractEvent>(
+    event: TCEvent,
+    listener: TypedListener<TCEvent>
+  ): Promise<this>;
+  once<TCEvent extends TypedContractEvent>(
+    filter: TypedDeferredTopicFilter<TCEvent>,
+    listener: TypedListener<TCEvent>
+  ): Promise<this>;
 
-  uri(arg0: MetadataStruct, overrides?: CallOverrides): Promise<string>;
+  listeners<TCEvent extends TypedContractEvent>(
+    event: TCEvent
+  ): Promise<Array<TypedListener<TCEvent>>>;
+  listeners(eventName?: string): Promise<Array<Listener>>;
+  removeAllListeners<TCEvent extends TypedContractEvent>(
+    event?: TCEvent
+  ): Promise<this>;
 
-  callStatic: {
-    uri(arg0: MetadataStruct, overrides?: CallOverrides): Promise<string>;
-  };
+  uri: TypedContractMethod<[arg0: MetadataStruct], [string], "view">;
+
+  getFunction<T extends ContractMethod = ContractMethod>(
+    key: string | FunctionFragment
+  ): T;
+
+  getFunction(
+    nameOrSignature: "uri"
+  ): TypedContractMethod<[arg0: MetadataStruct], [string], "view">;
 
   filters: {};
-
-  estimateGas: {
-    uri(arg0: MetadataStruct, overrides?: CallOverrides): Promise<BigNumber>;
-  };
-
-  populateTransaction: {
-    uri(
-      arg0: MetadataStruct,
-      overrides?: CallOverrides
-    ): Promise<PopulatedTransaction>;
-  };
 }

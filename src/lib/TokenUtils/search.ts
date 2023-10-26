@@ -1,9 +1,9 @@
-import { getSigner } from "$lib/Utils/wallet.js";
+import { getSigner, walletState } from "$lib/Utils/wallet.js";
 import { OrderStatus, getOrderDetailsAPI } from "$lib/api.js";
 
 import { projects } from '../../routes/Data/projects.json';
 
-export async function loadOrderDetails(vouchers721Address: string, tokenId: number[] | undefined): Promise<OrderStatus | undefined> {
+export async function loadOrderDetails(chainId: number, vouchers721Address: string, tokenId: number[] | undefined): Promise<OrderStatus | undefined> {
     if (tokenId === undefined) {
         console.log(`tokenIdAssociations === undefined`);
         return;
@@ -17,14 +17,8 @@ export async function loadOrderDetails(vouchers721Address: string, tokenId: numb
         return;
     }
 
-    let signer = getSigner();
-    if (!signer) {
-        console.log('Error: Unable to load order details, missing signer.');
-        return;
-    }
-
     let result = await getOrderDetailsAPI(
-        await signer.getChainId(),
+        chainId,
         vouchers721Address,
         tokenId[0]
     );

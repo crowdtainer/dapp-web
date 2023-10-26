@@ -107,13 +107,13 @@ export async function requestAuthorizationProof(wallet: string,
 	referralAddress: string
 ): Promise<Result<[string, string], string>> {
 
-	const abiInterface = new ethers.utils.Interface(JSON.stringify(AuthorizationGateway__factory.abi));
+	const abiInterface = new ethers.Interface(JSON.stringify(AuthorizationGateway__factory.abi));
 
 	const calldataValue = abiInterface.encodeFunctionData('getSignedJoinApproval',
 		[crowdtainerAddress, wallet, quantities, enableReferral, referralAddress]);
 
 	// make sure address is check-summed
-	let walletWithChecksum = ethers.utils.getAddress(wallet);
+	let walletWithChecksum = ethers.getAddress(wallet);
 	let result: Response = await fetch(`backendJoinSteps/04_authProofAPI/${walletWithChecksum}`, {
 		method: 'POST',
 		body: JSON.stringify({ calldata: calldataValue })

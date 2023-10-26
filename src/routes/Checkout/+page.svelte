@@ -7,13 +7,12 @@
 	import { LoadStatus, ProjectStatusUI, toState } from '$lib/Converters/CrowdtainerData';
 	import type { CrowdtainerDynamicModel } from '$lib/Model/CrowdtainerModel';
 
-	import { connected, getSigner, accountAddress } from '$lib/Utils/wallet';
+	import { connected, getSigner, accountAddress, getSignerAddress, getProvider } from '$lib/Utils/wallet';
 	import EmptySection from '$lib/EmptySection.svelte';
 	import { connect } from '$lib/Utils/wallet';
 	import { WalletType } from '$lib/Utils/walletStorage';
 
 	import { findTokenIdsForWallet, type TokenIDAssociations } from '$lib/ethersCalls/rpcRequests';
-	import { BigNumber } from 'ethers';
 	import { loadTokenURIRepresentation, type TokenURIObject } from '$lib/Converters/tokenURI';
 	import DeliveryAddress from '$lib/DeliveryAddress.svelte';
 
@@ -22,13 +21,13 @@
 	let projectStatusUI: ProjectStatusUI;
 	let svg: string;
 	let tokenJSON: TokenURIObject;
-	let loadedWallet: string;
+	let loadedWallet: string | undefined;
 	let userWalletInvalid: boolean;
 	let tokenIdAssociations: TokenIDAssociations;
 
 	let projectTitle: string | null;
 	let projectURL: string | null;
-	let voucherId: BigNumber;
+	let voucherId: bigint;
 	let vouchers721Address: string;
 
 	let tokenValidForWallet: boolean;
@@ -42,31 +41,39 @@
 				'vouchers721Address'
 			)}`
 		);
+		let voucherIdInput = $page.url.searchParams.get('voucherId');
+		if (voucherIdInput == null) {
+			return;
+		}
 
 		try {
 			projectTitle = $page.url.searchParams.get('projectTitle');
 			projectURL = $page.url.searchParams.get('projectURL');
-			voucherId = BigNumber.from(Number($page.url.searchParams.get('voucherId')));
+			voucherId = BigInt(voucherIdInput);
 			vouchers721Address = String($page.url.searchParams.get('vouchers721Address'));
 		} catch (error) {
 			console.log(`URL path invalid.. ${error}`);
 			return;
 		}
 
-		if (voucherId.eq(0) || vouchers721Address === '') {
+		if (voucherId === 0n || vouchers721Address === '') {
 			console.log(`Missing parameters`);
 			return;
 		}
 
-		let currentSigner = getSigner();
-		if (currentSigner === undefined) {
+		let currentSigner = getProvider();
+		loadedWallet = await getSignerAddress();
+
+		if (currentSigner === undefined || !loadedWallet) {
 			console.log('Missing wallet');
 			return;
 		}
 
-		loadedWallet = await currentSigner.getAddress();
-
-		let walletTokensSearch = await findTokenIdsForWallet(currentSigner, vouchers721Address, loadedWallet);
+		let walletTokensSearch = await findTokenIdsForWallet(
+			currentSigner,
+			vouchers721Address,
+			loadedWallet
+		);
 		if (walletTokensSearch.isErr()) {
 			console.log(`Unable to search wallet tokens: ${walletTokensSearch.unwrapErr()}`);
 			//TODO: inform user
@@ -82,7 +89,9 @@
 		}
 
 		// parameter needs to match token owner
-		let foundToken = tokenIdAssociations.foundTokenIds.filter((item) => item === voucherId.toNumber());
+		let foundToken = tokenIdAssociations.foundTokenIds.filter(
+			(item) => BigInt(item) === voucherId
+		);
 		if (foundToken.length === 0) {
 			console.log('The specified token does not belong to the connected wallet.');
 			return;
@@ -137,7 +146,7 @@
 	async function checkWalletValdity() {
 		console.log('Checking wallet..');
 		let currentSigner = getSigner();
-		let currentWalletAddress = await currentSigner?.getAddress();
+		let currentWalletAddress = getSignerAddress();
 		if (
 			staticDataLoadStatus === LoadStatus.Loaded &&
 			currentSigner !== undefined &&
@@ -161,10 +170,10 @@
 	<div class="max-w-7xl mx-auto py-4 px-4 sm:px-6 lg:px-8">
 		<div class="text-md breadcrumbs text-white">
 			<ul>
-			  <li><a href={projectURL}>{(projectTitle)? `${projectTitle}`: ''}</a></li> 
-			  <li>Checkout &nbsp; 🛍️</li>
+				<li><a href={projectURL}>{projectTitle ? `${projectTitle}` : ''}</a></li>
+				<li>Checkout &nbsp; 🛍️</li>
 			</ul>
-		  </div>
+		</div>
 	</div>
 </header>
 
@@ -174,7 +183,7 @@
 			<p>The wallet was either disconected or changed.</p>
 			<p>Please reconnect the following wallet: {loadedWallet} or restart Checkout.</p>
 		</div>
-	{:else if $connected && staticDataLoadStatus == LoadStatus.Loaded && projectStatusUI === ProjectStatusUI.Delivery}
+	{:else if loadedWallet && $connected && staticDataLoadStatus == LoadStatus.Loaded && projectStatusUI === ProjectStatusUI.Delivery}
 		<div class="md:flex">
 			<div class="md:shrink-0">
 				<div class="flex justify-center">
@@ -188,7 +197,7 @@
 			<DeliveryAddress
 				walletAddress={loadedWallet}
 				{vouchers721Address}
-				voucherId={voucherId.toNumber()}
+				voucherId={Number(voucherId)}
 			/>
 		</div>
 	{:else if projectStatusUI === ProjectStatusUI.Loading}

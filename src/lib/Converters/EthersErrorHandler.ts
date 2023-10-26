@@ -76,7 +76,7 @@ function capitalizeFirstLetter(input: string) {
 
 let functionSignatures = new Map<string, string>(); // key: function signature (hash) -> value: function name (ABI)
 let errorsABI = new Array<string>();                // Known errors
-let ethersInterface: ethers.utils.Interface;
+let ethersInterface: ethers.Interface;
 
 export function decodeEthersError(error: any): Result<string, string> {
   // Note: Ethers.js seems to return different error formats depending on the error..
@@ -87,10 +87,10 @@ export function decodeEthersError(error: any): Result<string, string> {
         errorsABI.push(`function ${CrowdtainerErrors[index]}`);
       }
 
-      ethersInterface = new ethers.utils.Interface(errorsABI);
+      ethersInterface = new ethers.Interface(errorsABI);
 
       for (var index in CrowdtainerErrors) {
-        functionSignatures.set(ethersInterface.getSighash(CrowdtainerErrors[index]), CrowdtainerErrors[index]);
+        functionSignatures.set(ethersInterface.getFunctionName(CrowdtainerErrors[index]), CrowdtainerErrors[index]);
       }
     }
 
@@ -128,7 +128,7 @@ export function decodeEthersError(error: any): Result<string, string> {
         let theError = knownError.substring(0, knownError.indexOf('('));
         if (theError === 'CallerNotAllowed') {
           const decoded = ethersInterface.decodeFunctionData(
-            ethersInterface.functions["CallerNotAllowed(address,address)"],
+            ethersInterface.getFunctionName("CallerNotAllowed(address,address)"),
             errorData
           );
           let fullMessage = "\nCaller not allowed. " +

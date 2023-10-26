@@ -1,6 +1,6 @@
 import { getDatabase } from "$lib/Database/redis";              // Database
 
-import { BigNumber, ethers } from 'ethers';                     // Ethers
+import { ethers } from 'ethers';                     // Ethers
 import { type Result, Ok, Err, } from "@sniptt/monads";         // Monads
 // const countryISO = require('iso-3166-1');
 import { whereAlpha2 } from 'iso-3166-1';
@@ -18,9 +18,10 @@ import { loadTokenURIRepresentation, type TokenURIObject, type Description } fro
 import { MockERC20__factory, Crowdtainer__factory } from "../typechain/index.js";
 import { camelToSentenceCase } from "$lib/Utils/camelCase.js";
 import { toHuman } from "$lib/Converters/CrowdtainerData.js";
+import { getSignerAddress } from "$lib/Utils/wallet.js";
 
 async function getDiscountForWallet(provider: ethers.Signer | undefined,
-    vouchers721Address: string, crowdtainerAddress: string, walletAdress: string): Promise<Result<BigNumber, string>> {
+    vouchers721Address: string, crowdtainerAddress: string, walletAdress: string): Promise<Result<bigint, string>> {
 
     if (provider === undefined) {
         return Err("Provider not available.");
@@ -39,7 +40,7 @@ async function getDiscountForWallet(provider: ethers.Signer | undefined,
 
 interface CrowdtainerReference {
     contractAddress: string;
-    crowdtainerId: BigNumber;
+    crowdtainerId: bigint;
 }
 
 async function getCrowdtainerFromTokenId(provider: ethers.Signer | undefined,
@@ -72,7 +73,7 @@ async function getCampaignState(provider: ethers.Signer | undefined,
         console.log(`vouchers721Address: ${vouchers721Address}`);
         const crowdtainerContract = Crowdtainer__factory.connect(crowdtainerAddress, provider);
         let campaignState = await crowdtainerContract.crowdtainerState();
-        return Ok(campaignState);
+        return Ok(Number(campaignState));
     } catch (error) {
         console.log(`Error: ${error}`);
         return Err(`${error}`);
@@ -90,7 +91,7 @@ async function getTokenDecimals(provider: ethers.Signer | undefined,
         let crowdtainerContract = Crowdtainer__factory.connect(crowdtainerAddress, provider);
         let tokenContractAddress = await crowdtainerContract.token();
         const ERC20Contract = MockERC20__factory.connect(tokenContractAddress, provider);
-        return Ok(await ERC20Contract.decimals());
+        return Ok(Number(await ERC20Contract.decimals()));
     } catch (error) {
         console.log(`Error: ${error}`);
         return Err(`${error}`);
@@ -184,11 +185,11 @@ export const POST: RequestHandler = async ({ request }) => {
         // Check signature
         let message = makeDeliveryRequestMessage(signerAddress, domain, deliveryDetails, nonce, currentTimeISO);
 
-        let recoveredSigner = ethers.utils.verifyMessage(message, signatureHash);
+        let recoveredSigner = ethers.verifyMessage(message, signatureHash);
 
         console.log(`Derived signer address: ${recoveredSigner}`);
 
-        if (!ethers.utils.isAddress(signerAddress)) {
+        if (!ethers.isAddress(signerAddress)) {
             throw error(400, "Invalid wallet address.");
         }
 
@@ -227,8 +228,11 @@ export const POST: RequestHandler = async ({ request }) => {
     }
 
     try {
-        let signer = provider.getSigner();
-        let signerWallet = await signer.getAddress();
+        let signer = await provider.getSigner();
+        let signerWallet = getSignerAddress();
+        if(!signerWallet) {
+            throw error(500, "Invalid signerWallet");
+        }
 
         // Check if token is owned by wallet
         if (!(await isOwnerOf(signerWallet, signer, Vouchers721Address, deliveryDetails.voucherId))) {

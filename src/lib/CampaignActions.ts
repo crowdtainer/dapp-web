@@ -19,7 +19,7 @@ export async function callLeaveProject(wallet: string, vouchers721Address: strin
         icon: ModalIcon.DeviceMobile
     });
 
-    let signResult = await leaveProject(getSigner(), wallet, vouchers721Address, crowdtainerAddress);
+    let signResult = await leaveProject(await getSigner(), wallet, vouchers721Address, crowdtainerAddress);
 
     if (signResult.isErr()) {
         modalDialog.show({
@@ -48,7 +48,7 @@ export async function callClaimFunds(crowdtainerAddress: string, modalDialog: Mo
         icon: ModalIcon.Exclamation
     });
 
-    let signResult = await claimFunds(getSigner(), crowdtainerAddress);
+    let signResult = await claimFunds(await getSigner(), crowdtainerAddress);
 
     if (signResult.isErr()) {
         modalDialog.show({
@@ -84,7 +84,7 @@ export async function callClaimRewards(crowdtainerAddress: string, modalDialog: 
         animation: ModalAnimation.Circle2
     });
 
-    let signResult = await claimRewards(getSigner(), crowdtainerAddress);
+    let signResult = await claimRewards(await getSigner(), crowdtainerAddress);
 
     if (signResult.isErr()) {
         modalDialog.show({
@@ -102,7 +102,7 @@ export async function callClaimRewards(crowdtainerAddress: string, modalDialog: 
     let confirmation = await signResult.unwrap().wait();
     modalDialog.close();
 
-    if (confirmation.status === 1) {
+    if (confirmation?.status === 1) {
         modalDialog.show({
             id: 'rewardsClaimResultDialog',
             type: ModalType.Information,
@@ -110,7 +110,7 @@ export async function callClaimRewards(crowdtainerAddress: string, modalDialog: 
             body: 'Rewards transfer complete.',
             icon: ModalIcon.Exclamation
         });
-        console.log(`Claim rewards transaction hash: ${confirmation.transactionHash}`);
+        console.log(`Claim rewards transaction hash: ${confirmation.hash}`);
     } else {
         modalDialog.show({
             id: 'rewardsClaimResultDialog',
@@ -137,7 +137,7 @@ export async function callTransferParticipationProof(targetWallet: string,
     });
 
     // TODO: Check if ENS resolution is working
-    let signResult = await transferToken(getSigner(), vouchers721Address, targetWallet, tokenId);
+    let signResult = await transferToken(await getSigner(), vouchers721Address, targetWallet, tokenId);
 
     if (signResult.isErr()) {
         modalDialog.show({
@@ -157,7 +157,7 @@ export async function callTransferParticipationProof(targetWallet: string,
     modalDialog.close();
 
     let resultDialogData: ModalDialogData;
-    if (confirmation.status === 1) {
+    if (confirmation?.status === 1) {
         resultDialogData = {
             id: 'resultDialog',
             title: 'Success',
@@ -165,7 +165,7 @@ export async function callTransferParticipationProof(targetWallet: string,
             body: 'Transfer complete.',
             icon: ModalIcon.BadgeCheck
         };
-        console.log(`Transfer transaction hash: ${confirmation.transactionHash}`);
+        console.log(`Transfer transaction hash: ${confirmation.hash}`);
     } else {
         resultDialogData = {
             id: 'resultDialog',
