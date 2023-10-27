@@ -14,6 +14,7 @@
 	import { onMount } from 'svelte';
 	import { showToast } from '$lib/Toast/ToastStore.js';
 	import { MessageType } from '$lib/Toast/MessageType.js';
+	import ConnectWallet from '$lib/ConnectWallet.svelte';
 
 	export let userEmail: string;
 	export let termsAcceptanceSuccess: () => void;
@@ -146,7 +147,7 @@
 </script>
 
 {#if $connected}
-	<div class="text-left">
+	<div class="text-left mx-4">
 		<div class="flex justify-center gap-2 my-2">
 			<div class="grid grid-flow-col auto-cols-max my-2">
 				<div><Icon src={ShieldCheck} class="text-green-600" size="24" /></div>
@@ -250,37 +251,5 @@
 		</button>
 	</div>
 {:else}
-	<p class="text-center mx-2 my-2">
-		Please connect your wallet in order to sign the Terms and Conditions.
-	</p>
-	<br />
-
-	<div class="flex justify-center">
-		<button
-			class="btn btn-outline"
-			on:click={() => {
-				connect(WalletType.WalletConnect);
-			}}
-		>
-			Connect Wallet
-		</button>
-	</div>
-
-	<div class="flex justify-center">
-		<div class="text-md my-4 sm:w-full md:w-4/5 lg:w-4/6 xl:w-3/6">
-			<div class="text-md my-4 mx-4">
-				<div class="grid grid-flow-col auto-cols-max my-4">
-					<div><Icon src={InformationCircle} class="text-green-700" size="24" /></div>
-					<p class="px-2 text-md">Tips</p>
-				</div>
-				<ul class="list-disc mx-5">
-					<li class="my-2">For privacy reasons, we recommend using a brand new wallet.</li>
-					<li class="my-2">
-						We are working on solutions to unlink the funding wallet from the participation proof.
-						Stay tuned!
-					</li>
-				</ul>
-			</div>
-		</div>
-	</div>
+	<ConnectWallet />
 {/if}

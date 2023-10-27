@@ -171,7 +171,7 @@
 					<div
 						use:clickOutside={() => (profileMenuOpen = false)}
 						transition:fade|global={{ duration: 130 }}
-						class="origin-top-right absolute right-0 mt-2 w-48 rounded-md shadow-lg py-1 bg-white ring-1 ring-black ring-opacity-5 focus:outline-none"
+						class="origin-top-right absolute right-0 mt-2 w-52 rounded-md shadow-lg py-1 bg-white text-gray-800 dark:text-gray-200 dark:bg-gray-800 ring-1 ring-black ring-opacity-5 focus:outline-none"
 						role="menu"
 						aria-orientation="vertical"
 						aria-labelledby="user-menu-button"
@@ -185,7 +185,7 @@
 									await disconnect();
 									profileMenuOpen = false;
 								}}
-								class="block px-4 py-2 text-sm text-gray-700"
+								class="block px-4 py-2 text-sm"
 								role="menuitem"
 								tabindex="-1"
 								id="user-menu-item-0">Disconnect wallet</a
@@ -198,10 +198,10 @@
 									await connect(WalletType.WalletConnect);
 									profileMenuOpen = false;
 								}}
-								class="block px-4 py-2 text-sm text-gray-700"
+								class="block px-4 py-2 text-sm"
 								role="menuitem"
 								tabindex="-1"
-								id="user-menu-item-0">Connect wallet</a
+								id="user-menu-item-0">Connect to external wallet</a
 							>
 							<!-- {#if import.meta.env.MODE === 'development'} -->
 							<!-- svelte-ignore a11y-invalid-attribute -->
@@ -211,10 +211,10 @@
 									await connect(WalletType.Injected);
 									profileMenuOpen = false;
 								}}
-								class="block px-4 py-2 text-sm text-gray-700"
+								class="block px-4 py-2 text-sm"
 								role="menuitem"
 								tabindex="-1"
-								id="user-menu-item-0">Connect to browser extension wallet</a
+								id="user-menu-item-0">Connect to browser wallet</a
 							>
 							<!-- {/if} -->
 						{/if}
