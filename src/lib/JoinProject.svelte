@@ -343,7 +343,7 @@
 							userJoinedCrowdtainer();
 							preOrderStep++;
 						}}
-						withSignature={projectHasSigner}
+						{projectHasSigner}
 					/>
 				{:else}
 					<ConnectWallet />
@@ -448,7 +448,7 @@
 					userJoinedCrowdtainer();
 					preOrderStep = JoinStep.ThankYouMessage;
 				}}
-				withSignature={projectHasSigner}
+				{projectHasSigner}
 			/>
 		{:else}
 			<ConnectWallet />

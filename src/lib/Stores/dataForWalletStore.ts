@@ -13,15 +13,16 @@ export const initializeDataForWallet = (campaignContractAddress: string | undefi
 }
 
 export const walletInCrowdtainer = readable(createWalletCrowdtainerData(), function start(set) {
-	const interval = setInterval(async () => {
+    const interval = setInterval(async () => {
 
         if (_campaignContractAddress === undefined || _accountAddress === undefined) {
             console.log(`Missing campaign | wallet address.`);
             return;
         }
 
+        let signer = getSigner();
         let funds = await walletFundsInCrowdtainer(
-            getSigner(),
+            signer,
             _campaignContractAddress,
             _accountAddress
         );
@@ -32,11 +33,11 @@ export const walletInCrowdtainer = readable(createWalletCrowdtainerData(), funct
 
         let userWalletInCrowdtainer = funds.unwrap();
 
-		set(userWalletInCrowdtainer);
-	}, 5000);
+        set(userWalletInCrowdtainer);
+    }, 5000);
 
-	return function stop() {
+    return function stop() {
         console.log(`walletFundsInCrowdtainer loop terminated.`);
-		clearInterval(interval);
-	};
+        clearInterval(interval);
+    };
 });

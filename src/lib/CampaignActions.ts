@@ -10,6 +10,7 @@ import { getSigner } from './Utils/wallet.js';
 import { showToast } from './Toast/ToastStore.js';
 
 export async function callLeaveProject(wallet: string, vouchers721Address: string, crowdtainerAddress: string, modalDialog: ModalDialog, onUserLeftCrowdtainer: (crowdtainerAddress: string) => void) {
+    console.log(`callLeaveProject(wallet: ${wallet}, vouchers721Address: ${vouchers721Address}, crowdtainerAddress: ${crowdtainerAddress})`);
     modalDialog.show({
         id: 'leaveCampaign',
         type: ModalType.ActionRequest,
@@ -19,17 +20,18 @@ export async function callLeaveProject(wallet: string, vouchers721Address: strin
         icon: ModalIcon.DeviceMobile
     });
 
-    let signResult = await leaveProject(getSigner(), wallet, vouchers721Address, crowdtainerAddress);
-
+    let signer = getSigner();
+    let signResult = await leaveProject(signer, wallet, vouchers721Address, crowdtainerAddress);
+    
     if (signResult.isErr()) {
+        console.log(`Failure: ${signResult.unwrapErr()}`);
         modalDialog.show({
             id: 'leaveCampaignError',
             type: ModalType.ActionRequest,
             title: 'Transaction rejected',
-            body: 'Your request to leave the project was not completed.',
+            body: 'Your request to leave the project was not completed',
             icon: ModalIcon.Exclamation
         });
-        console.log(`Failure: ${signResult.unwrapErr()}`);
         return;
     }
 
@@ -48,14 +50,15 @@ export async function callClaimFunds(crowdtainerAddress: string, modalDialog: Mo
         icon: ModalIcon.Exclamation
     });
 
-    let signResult = await claimFunds(getSigner(), crowdtainerAddress);
+    let signer = getSigner();
+    let signResult = await claimFunds(signer, crowdtainerAddress);
 
     if (signResult.isErr()) {
         modalDialog.show({
             id: 'claimFundsTxRejected',
             type: ModalType.ActionRequest,
             title: 'Transaction rejected',
-            body: 'Your request to leave the project was not completed.',
+            body: 'Your request to claim funds was not completed.',
             icon: ModalIcon.Exclamation
         });
         console.log(`Failure: ${signResult.unwrapErr()}`);

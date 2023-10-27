@@ -7,10 +7,10 @@ import { type Result, Ok, Err } from "@sniptt/monads";
 import type { IERC20 } from '../../routes/typechain/IERC20';
 import type { UserStoreModel } from '$lib/Model/UserStoreModel';
 import { decodeEthersError } from '$lib/Converters/EthersErrorHandler';
-import { getSigner } from '$lib/Utils/wallet';
+import { accountAddress, getSigner } from '$lib/Utils/wallet';
 import type { WalletCrowdtainerModel } from '$lib/Model/WalletCrowdtainerModel.js';
 import { toHuman } from '$lib/Converters/CrowdtainerData.js';
-import type { SignedPermitStruct } from '../../routes/typechain/Vouchers721.js';
+import type { SignedPermitStruct, Vouchers721 } from '../../routes/typechain/Vouchers721.js';
 import { IERC20Permit__factory, type IERC20Permit } from '../../routes/typechain/index.js';
 
 function makeError(error: any): Result<ContractTransaction, string> {
@@ -28,6 +28,10 @@ export async function walletFundsInCrowdtainer(provider: ethers.Signer | undefin
 
     if (!provider) {
         return Err("Provider not available.");
+    }
+
+    if (!accountAddress) {
+        return Err("Account not available.");
     }
 
     let walletCrowdtainerData: WalletCrowdtainerModel = {
@@ -141,13 +145,18 @@ export async function leaveProject(provider: ethers.Signer | undefined, wallet:s
     if (provider === undefined) {
         return Err("Provider not available.");
     }
-
-    const vouchers721Contract = Vouchers721__factory.connect(vouchers721Address, provider);
+    
+    let vouchers721Contract: Vouchers721;
+    try {
+        vouchers721Contract = Vouchers721__factory.connect(vouchers721Address, provider);
+    } catch (error) {
+        console.log(`Unable to connect to vouchers contract: ${error}`);
+        return Err(`Unable to connect to vouchers contract: ${error}`);
+    }
 
     // 1- Get token ids for connected wallet
     // 2- Filter by the crowdtainer project
     // 3- Call leave function
-
     let searchResult = await findTokenIdsForWallet(provider, vouchers721Address, wallet);
 
     if (searchResult.isErr()) {
@@ -158,21 +167,26 @@ export async function leaveProject(provider: ethers.Signer | undefined, wallet:s
 
     try {
         for (let index = 0; index < tokenIdsAssociations.foundTokenIds.length; index++) {
-            if (crowdtainerAddress === tokenIdsAssociations.crowdtainerAddresses[index]) {
-                let leaveTransaction = await vouchers721Contract.leave(tokenIdsAssociations.foundTokenIds[index]);
+            if (crowdtainerAddress.toLowerCase() === tokenIdsAssociations.crowdtainerAddresses[index].toLowerCase()) {
+
+                console.log(`Calling leave with parameter: ${tokenIdsAssociations.foundTokenIds[index]}`);
+                let leaveTransaction = await vouchers721Contract.leave(BigNumber.from(tokenIdsAssociations.foundTokenIds[index]));
                 let receipt = await leaveTransaction.wait();
+
                 if (receipt === undefined || receipt.status === 0) {
                     // tx failed
+                    console.log(`Failed to leave project.`);
                     return Err('Leave transaction failed.');
                 }
                 return Ok(leaveTransaction);
             }
         }
     } catch (error) {
+        console.log(error);
         return makeError(error);
     }
 
-    return Err("Did not find token for given wallet.")
+    return Err(`Did not find token for given wallet: ${wallet}`)
 }
 
 export async function claimFunds(provider: ethers.Signer | undefined,
@@ -344,7 +358,7 @@ export async function fetchUserBalancesData(provider: ethers.providers.JsonRpcPr
     if (signer === undefined) {
         return Err('Signer not available.');
     }
-    const signerAddress = signer.getAddress();
+    const signerAddress = await signer.getAddress();
     let erc20Contract = await getERC20Contract(provider, crowdtainerAddress);
     if (erc20Contract.isErr()) {
         return Err(erc20Contract.unwrapErr());

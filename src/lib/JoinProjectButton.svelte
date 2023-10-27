@@ -41,7 +41,7 @@
 	export let referralCheckBoxActivated: boolean;
 	export let actionButtonEnabled: boolean;
 	export let productListLength: number;
-	export let withSignature: boolean;
+	export let projectHasSigner: boolean;
 
 	export let modalDialog: ModalDialog;
 
@@ -59,11 +59,14 @@
 				console.log(
 					`crowdtainerAddress: ${crowdtainerAddress} allowance: ${walletData.erc20Allowance}, balance: ${walletData.erc20Balance}`
 				);
+				return true;
 			} else {
 				console.log(`hm, ${response.unwrapErr()}`);
+				return false;
 			}
 		} else {
 			console.log('No crowdtainerAddress defined.');
+			return false;
 		}
 	};
 
@@ -87,6 +90,7 @@
 				? couponCode
 				: '0x0000000000000000000000000000000000000000';
 
+		console.log('reqqq..');
 		let authorizationResult = await requestAuthorizationProof(
 			userWalletAddress,
 			crowdtainerAddress,
@@ -114,10 +118,7 @@
 		return Ok({ calldata, signedPayload, extraData });
 	}
 
-	const callJoinProject = async (
-		withSignature: boolean,
-		withPermitValues: ERC2612_Input | undefined
-	) => {
+	const callJoinProject = async (modalDialog: ModalDialog, projectHasSigner: boolean) => {
 		let userWallet = getSigner();
 
 		if (userWallet === undefined) {
@@ -139,8 +140,9 @@
 		console.log(`userWalletAddress: ${userWalletAddress}`);
 
 		let signedPermit: SignedPermitStruct | undefined;
-		if (withPermitValues) {
-			// with permit/allowance
+
+		if (projectHasSigner && txSponsoringEnabled && !enoughAllowance) {
+			// get signed permit/allowance
 			modalDialog.show({
 				id: 'joinProject',
 				title: 'Join project',
@@ -150,7 +152,16 @@
 				animation: ModalAnimation.Circle2
 			});
 
-			let signedPermitResult = await getSignedPermit(withPermitValues);
+			let signedPermitResult = await getSignedPermit({
+				userWalletAddress: userWalletAddress,
+				crowdtainerAddress: crowdtainerAddress,
+				chainId: chainId,
+				tokenAddress: tokenAddress,
+				tokenName: tokenName,
+				tokenVersion: tokenVersion,
+				withPermitValue: totalCostInERCUnits,
+				signer: userWallet
+			});
 			if (signedPermitResult.isErr()) {
 				modalDialog.show({
 					id: 'txRejected',
@@ -160,23 +171,33 @@
 					icon: ModalIcon.Exclamation,
 					animation: ModalAnimation.None
 				});
-				actionButtonEnabled = true;
 				return;
 			}
 			signedPermit = signedPermitResult.unwrap();
 		}
+		if (!signedPermit && !enoughAllowance) {
+			// txSponsoring not available, user must pay the transaction cost.
+			if (!(await callApproveSpending())) {
+				return;
+			}
+		}
 
 		let joinTransaction: Result<ethers.ContractTransaction, string> | undefined;
 
-		if (withSignature) {
-			modalDialog.show({
-				id: 'joinProject',
-				title: 'Join project',
-				type: ModalType.Information,
-				icon: ModalIcon.None,
-				body: `Getting service provider authorization..`,
-				animation: ModalAnimation.Circle2
-			});
+		if (projectHasSigner) {
+			console.log('Getting service provider authorization..');
+			try {
+				modalDialog.show({
+					id: 'joinProject',
+					title: 'Join project',
+					type: ModalType.Information,
+					icon: ModalIcon.None,
+					body: `Getting service provider authorization..`,
+					animation: ModalAnimation.Circle2
+				});
+			} catch (error) {
+				console.log(`Mother of lords: ${error}`);
+			}
 			let serviceProviderAuthResult = await getServiceProviderAuthorization(
 				userWalletAddress,
 				crowdtainerAddress!,
@@ -195,14 +216,14 @@
 					icon: ModalIcon.Exclamation,
 					animation: ModalAnimation.None
 				});
-				actionButtonEnabled = true;
 				return;
+			} else {
+				modalDialog.close();
 			}
 
 			let serviceProviderAuth = serviceProviderAuthResult.unwrap();
 
-			let sponsoredTxResult: Result<string,string> | undefined;
-			if (txSponsoringEnabled) {
+			if (projectHasSigner && txSponsoringEnabled) {
 				modalDialog.show({
 					id: 'joinProject',
 					title: 'Join project',
@@ -211,6 +232,8 @@
 					body: `Joining project..`,
 					animation: ModalAnimation.Circle2
 				});
+
+				let sponsoredTxResult: Result<string, string> | undefined;
 				sponsoredTxResult = await requestSponsoredTx(
 					serviceProviderAuth.calldata,
 					serviceProviderAuth.signedPayload,
@@ -219,20 +242,17 @@
 
 				if (!sponsoredTxResult.isErr()) {
 					modalDialog.close();
-
-					actionButtonEnabled = true;
 					let noSelection = Array(productListLength).fill(0);
 					$joinSelection.set(crowdtainerId, noSelection);
 					userJoinedSuccess();
 					return;
 				}
-			}
-
-			if (txSponsoringEnabled && sponsoredTxResult?.isErr()) {
-				//Fallback to user-paid transaction.
-				showToast(
-					`Falling back to user's wallet, since meta-transaction sponsoring failed: ${sponsoredTxResult.unwrapErr()}`
-				);
+				if (sponsoredTxResult?.isErr()) {
+					//Fallback to user-paid transaction.
+					showToast(
+						`Falling back to user's wallet, as transaction sponsoring failed: ${sponsoredTxResult.unwrapErr()}.`
+					);
+				}
 			}
 
 			modalDialog.show({
@@ -252,6 +272,11 @@
 				signedPermit
 			);
 		} else {
+			if (txSponsoringEnabled) {
+				console.warn(
+					'Transaction sponsoring not avaialble for projects without a signer. Falling back to user-paid transaction call.'
+				);
+			}
 			modalDialog.show({
 				id: 'joinProject',
 				title: 'Join project',
@@ -274,7 +299,6 @@
 		}
 
 		if (await joinTransactionSuccessful(joinTransaction)) {
-			actionButtonEnabled = true;
 			let noSelection = Array(productListLength).fill(0);
 			$joinSelection.set(crowdtainerId, noSelection);
 			userJoinedSuccess();
@@ -300,7 +324,6 @@
 			});
 
 			console.log(`${joinTransaction.unwrapErr()}`);
-			actionButtonEnabled = true;
 			return false;
 		}
 
@@ -329,19 +352,19 @@
 		return true;
 	};
 
-	const callApproveSpending = async () => {
+	const callApproveSpending = async (): Promise<boolean> => {
 		if (!crowdtainerAddress) {
 			console.log('Error: missing required data (crowdtainerAddress)');
-			return;
+			return false;
 		}
-
-		let erc20ContractResult = await getERC20Contract(getSigner(), crowdtainerAddress);
+		let signer = getSigner();
+		let erc20ContractResult = await getERC20Contract(signer, crowdtainerAddress);
 		let erc20Contract: IERC20;
 
 		if (erc20ContractResult.isErr()) {
 			showToast('Error connecting to ERC20 contract. Internet down?', MessageType.Warning);
 			console.log(erc20ContractResult.unwrapErr());
-			return;
+			return false;
 		} else {
 			erc20Contract = erc20ContractResult.unwrap();
 		}
@@ -354,7 +377,7 @@
 		) {
 			console.log('A required object is undefined');
 			// TODO: Show UI dialog
-			return;
+			return false;
 		}
 
 		modalDialog.show({
@@ -368,24 +391,24 @@
 			animation: ModalAnimation.Circle2
 		});
 
-		actionButtonEnabled = false;
-
 		let permitApproveTx: undefined | ethers.ContractTransaction;
 
 		try {
+			console.log(
+				`approve call : crowdtainerAddress: ${crowdtainerAddress}; totalCostInERCUnits: ${totalCostInERCUnits}`
+			);
 			permitApproveTx = await erc20Contract.approve(crowdtainerAddress, totalCostInERCUnits);
 		} catch (error) {
 			console.log(error);
-			actionButtonEnabled = true;
 			modalDialog.show({
 				id: 'walletApprovalFailed',
 				type: ModalType.Information,
 				title: 'Spending approval',
-				body: `Spending approval failed: request rejected.`,
+				body: `Spending approval call failed: request rejected by wallet.`,
 				icon: ModalIcon.Exclamation,
 				animation: ModalAnimation.None
 			});
-			return;
+			return false;
 		}
 
 		modalDialog.show({
@@ -420,7 +443,7 @@
 				body: message,
 				icon: ModalIcon.Exclamation
 			});
-			return;
+			return false;
 		}
 
 		let checkAllowanceResult = await checkAllowance(
@@ -439,9 +462,8 @@
 				body: `Unable to authorize ERC20 spending. ${checkAllowanceResult.unwrapErr()}`,
 				icon: ModalIcon.Exclamation
 			});
-			actionButtonEnabled = true;
 			console.log(`${checkAllowanceResult.unwrapErr()}`);
-			return;
+			return false;
 		} else {
 			showToast(
 				'You have authorized spending to this campaign. You are ready to join the project 🎉',
@@ -450,9 +472,8 @@
 			modalDialog.close();
 		}
 
-		await refreshWalletData;
-
-		actionButtonEnabled = true;
+		refreshWalletData();
+		return true;
 	};
 
 	$: enoughFunds =
@@ -481,7 +502,7 @@
 </script>
 
 <div class="flex justify-center">
-	<div class="max-w-sm mb-8">
+	<div class="max-w-sm mb-8 mx-4">
 		<div class="grid grid-flow-col auto-cols-1">
 			{#if enoughFunds}
 				<p class="text-green-600">✔ Enough funds.</p>
@@ -497,40 +518,13 @@
 			{/if}
 		</div>
 
-		{#if actionButtonEnabled && enoughFunds}
+		{#if enoughFunds}
 			<button
 				type="button"
 				disabled={!actionButtonEnabled || !enoughFunds}
 				class={actionButtonEnabled && enoughFunds ? 'btn btn-primary px-12 my-6' : 'gray-btn'}
 				on:click={async () => {
-					actionButtonEnabled = false;
-
-					let signer = getSigner();
-					if (!signer) {
-						showToast('Missing signer.');
-					}
-
-					if (enoughFunds && signer) {
-						if (enoughAllowance) {
-							callJoinProject(withSignature, undefined);
-						} else {
-							// Call with permit data
-							// TODO: Add support for smart contract wallets and ERC20's lacking ERC2612 support.
-							// Use separate call to callApproveSpending() beforehand in these cases.
-							callJoinProject(withSignature, {
-								userWalletAddress: await signer.getAddress(),
-								crowdtainerAddress: crowdtainerAddress,
-								chainId: chainId,
-								tokenAddress: tokenAddress,
-								tokenName: tokenName,
-								tokenVersion: tokenVersion,
-								withPermitValue: BigNumber.from(
-									Math.pow(10, tokenDecimals) * (totalSum - discountValue)
-								),
-								signer: signer
-							});
-						}
-					}
+					await callJoinProject(modalDialog, projectHasSigner);
 				}}
 			>
 				Confirm and Join
