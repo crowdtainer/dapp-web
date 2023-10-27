@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { ProjectStatusUI } from '$lib/Converters/CrowdtainerData';
+	import ModalDialog from './ModalDialog.svelte';
 
 	export let projectURL: string | undefined;
 	export let title: string | undefined;
@@ -11,10 +12,8 @@
 	export let walletData: WalletCrowdtainerModel | undefined;
 	export let wallet: string | undefined;
 	export let orderStatus: OrderStatus;
+	export let modalDialog: ModalDialog;
 
-	import ModalDialog from './ModalDialog.svelte';
-
-	let modalDialog: ModalDialog;
 	let transferWalletModalDialog: ModalDialog;
 
 	// Wallet management
@@ -37,8 +36,6 @@
 
 	const dispatch = createEventDispatcher();
 </script>
-
-<ModalDialog bind:this={modalDialog} />
 
 <ModalDialog bind:this={transferWalletModalDialog}>
 	<label class="block mt-2">
@@ -163,12 +160,12 @@
 			>
 				<button
 					class="relative inline-flex items-center justify-center overflow-hidden text-sm font-medium text-gray-900 rounded-lg group bg-gradient-to-br from-pink-500 to-orange-400 group-hover:from-cyan-500 group-hover:to-blue-500 focus:ring-4 focus:outline-none focus:ring-red-400"
-					on:click={() => {
+					on:click={async () => {
 						if (!wallet) {
 							showToast('Wallet address not available.');
 							return;
 						}
-						callLeaveProject(
+						await callLeaveProject(
 							wallet,
 							vouchers721Address,
 							crowdtainerAddress,

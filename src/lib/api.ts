@@ -107,6 +107,7 @@ export async function requestAuthorizationProof(wallet: string,
 	referralAddress: string
 ): Promise<Result<[string, string], string>> {
 
+	console.log("Request authorization received..");
 	const abiInterface = new ethers.utils.Interface(JSON.stringify(AuthorizationGateway__factory.abi));
 
 	const calldataValue = abiInterface.encodeFunctionData('getSignedJoinApproval',

@@ -38,12 +38,15 @@
 
 	async function reloadUserData() {
 		if ($connected == false || !$accountAddress) {
-			console.log(`Skipping reloadUserData(); connected: ${$connected} accountAddress: ${$accountAddress}`);
+			console.log(
+				`Skipping reloadUserData(); connected: ${$connected} accountAddress: ${$accountAddress}`
+			);
 			return;
 		}
 		resetState();
+		let signer = getSigner();
 		let tokenIdSearchResult = await findTokenIdsForWallet(
-			getSigner(),
+			signer,
 			Vouchers721Address,
 			$accountAddress
 		);

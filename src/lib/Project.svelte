@@ -87,7 +87,7 @@
 				orderStatus = OrderStatus.Unknown;
 			}
 		} else {
-			console.log(`Skipped refresh: ${$connected} : ${$accountAddress}`);
+			console.log(`Skipped refresh: wallet connected? ${$connected} : address ? ${$accountAddress}`);
 		}
 	}
 
@@ -245,6 +245,7 @@
 								tokenSymbol={$campaignStaticUI.tokenSymbol}
 								walletData={$walletInCrowdtainer}
 								{orderStatus}
+								{modalDialog}
 								on:userClaimedFundsEvent={(event) =>
 									handleUserClaimedFundsEvent(event, modalDialog)}
 								on:userLeftCrowdtainerEvent={handleUserLeftCrowdtainerEvent}
