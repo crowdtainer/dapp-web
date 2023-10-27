@@ -203,7 +203,8 @@
 				<div class="w-auto flex">
 					{#if campaignStaticData !== undefined && campaignStaticUI !== undefined}
 						<CampaignActions
-							{wallet}
+							wallet={$accountAddress}
+							{modalDialog}
 							title={`${subtitle} - ${title}`}
 							{projectURL}
 							{tokenId}
