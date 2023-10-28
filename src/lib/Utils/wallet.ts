@@ -107,12 +107,9 @@ function createWalletStore() {
             }
             else if (connected === ConnectionState.Connected) {
                 dispatchMessage("Wallet connected", MessageType.Success);
-            } else if (chainId == 1337) {
-                dispatchMessage(`For development / local node, please configure your wallet to chain ID 31337.`, MessageType.Info);
-                dispatchMessage(`Wallet configured with unsupported network: ` + chainId + `.`, MessageType.Warning);
             }
             else {
-                dispatchMessage(`Wallet configured with unsupported network: ` + chainId + `.`, MessageType.Warning);
+                dispatchMessage(`Wallet configured with unsupported network: ` + chainId + `. Switch to network chain id ${CHAIN_ID}`, MessageType.Warning);
             }
             wallet.connectionState = connected;
             set(wallet);
@@ -172,6 +169,7 @@ async function setupWalletConnect() {
         rpc: {
             // Only one network at a time is supported.
             // Add all supported networks here; Then configure .env accordingly.
+            1: RPC_BACKEND,
             10: RPC_BACKEND,
             420: RPC_BACKEND,
             5: RPC_BACKEND,
@@ -214,6 +212,15 @@ async function setupWalletConnect() {
         console.log(`Error:`)
         console.dir(error);
     }
+
+    let currentChainID = wcProvider.chainId;
+    if (currentChainID !== CHAIN_ID) {
+        await requestSwitchToNetwork(CHAIN_ID);
+    }
+}
+
+export function hasInjectedProviderNow() {
+    return window.ethereum !== undefined;
 }
 
 async function setupInjectedProviderWallet() {
@@ -258,8 +265,21 @@ async function setupInjectedProviderWallet() {
     } catch (error) {
         console.log(`Unable to request accounts.`);
     }
+
     if (web3Provider.network) {
-        walletState.setChainId(web3Provider.network.chainId);
+        let currentChainID = web3Provider.network.chainId;
+        walletState.setChainId(currentChainID);
+        if (currentChainID !== CHAIN_ID) {
+            await requestSwitchToNetwork(CHAIN_ID);
+        }
+    }
+}
+
+async function requestSwitchToNetwork(chainId: number) {
+    try {
+        await web3Provider.send("wallet_switchEthereumChain", [{ chainId: '0x' + CHAIN_ID.toString(16) }]);
+    } catch (error) {
+        console.log(`User rejected switching chains: ${error}`);
     }
 }
 

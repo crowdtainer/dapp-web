@@ -50,22 +50,27 @@
 	const interval = 10000;
 	let walletData: UserStoreModel;
 
-	export let refreshWalletData = async () => {
+	export let refreshWalletData = async (): Promise<boolean> => {
 		console.log(`refreshWalletData...`);
-		if (crowdtainerAddress) {
-			let response = await fetchUserBalancesData(web3Provider, crowdtainerAddress);
-			if (response.isOk()) {
-				walletData = response.unwrap();
-				console.log(
-					`crowdtainerAddress: ${crowdtainerAddress} allowance: ${walletData.erc20Allowance}, balance: ${walletData.erc20Balance}`
-				);
-				return true;
+		try {
+			if (crowdtainerAddress) {
+				let response = await fetchUserBalancesData(web3Provider, crowdtainerAddress);
+				if (response.isOk()) {
+					walletData = response.unwrap();
+					console.log(
+						`crowdtainerAddress: ${crowdtainerAddress} allowance: ${walletData.erc20Allowance}, balance: ${walletData.erc20Balance}`
+					);
+					return true;
+				} else {
+					console.log(`hm, ${response.unwrapErr()}`);
+					return false;
+				}
 			} else {
-				console.log(`hm, ${response.unwrapErr()}`);
+				console.log('No crowdtainerAddress defined.');
 				return false;
 			}
-		} else {
-			console.log('No crowdtainerAddress defined.');
+		} catch (error) {
+			console.log(`Error fetching wallet balances.`);
 			return false;
 		}
 	};
@@ -180,6 +185,7 @@
 			if (!(await callApproveSpending())) {
 				return;
 			}
+			refreshWalletData();
 		}
 
 		let joinTransaction: Result<ethers.ContractTransaction, string> | undefined;
@@ -336,7 +342,6 @@
 			animation: ModalAnimation.Diamonds
 		});
 		let txResult = await joinTransaction.unwrap().wait();
-		modalDialog.close();
 
 		if (txResult.status !== 1) {
 			modalDialog.show({
@@ -349,6 +354,7 @@
 			});
 			return false;
 		}
+		modalDialog.close();
 		return true;
 	};
 
@@ -393,6 +399,7 @@
 
 		let permitApproveTx: undefined | ethers.ContractTransaction;
 
+		let approveException: unknown;
 		try {
 			console.log(
 				`approve call : crowdtainerAddress: ${crowdtainerAddress}; totalCostInERCUnits: ${totalCostInERCUnits}`
@@ -400,6 +407,11 @@
 			permitApproveTx = await erc20Contract.approve(crowdtainerAddress, totalCostInERCUnits);
 		} catch (error) {
 			console.log(error);
+			approveException = error;
+		}
+
+		if (!permitApproveTx || approveException) {
+			console.log(approveException);
 			modalDialog.show({
 				id: 'walletApprovalFailed',
 				type: ModalType.Information,
@@ -426,9 +438,10 @@
 			receipt = await permitApproveTx.wait();
 		} catch (_error) {
 			error = `${_error}`;
+			return false;
 		}
 
-		if (error !== '' || receipt === undefined || receipt.status === 0) {
+		if (!receipt || error !== '' || receipt.status !== 1) {
 			// tx failed
 			let message = 'Transaction failed';
 			if (error !== '') {
@@ -471,8 +484,6 @@
 			);
 			modalDialog.close();
 		}
-
-		refreshWalletData();
 		return true;
 	};
 

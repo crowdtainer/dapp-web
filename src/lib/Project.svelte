@@ -28,7 +28,11 @@
 	import { showToast } from './Toast/ToastStore.js';
 	import { handleCampaignJoinedEvent, handleUserClaimedFundsEvent } from './CampaignActions.js';
 	import { loadOrderDetails } from './TokenUtils/search.js';
-	import { findTokenIdsForWallet, type TokenIDAssociations } from './ethersCalls/rpcRequests.js';
+	import {
+		findTokenIdsForWallet,
+		makeNewTokenIDAssociations,
+		type TokenIDAssociations
+	} from './ethersCalls/rpcRequests.js';
 
 	export let vouchers721Address: string;
 	export let chainId: number;
@@ -87,7 +91,10 @@
 				orderStatus = OrderStatus.Unknown;
 			}
 		} else {
-			console.log(`Skipped refresh: wallet connected? ${$connected} : address ? ${$accountAddress}`);
+			console.log(
+				`Skipped refresh: wallet connected? ${$connected} : address ? ${$accountAddress}`
+			);
+			tokenIdAssociations = undefined;
 		}
 	}
 
@@ -128,7 +135,8 @@
 	$: joinViewEnabled =
 		state === ProjectStatusUI.Funding &&
 		$walletInCrowdtainer.fundsInCrowdtainer.isZero() &&
-		($connected ? tokenIdAssociations?.foundTokenIds.length == 0 : true);
+		(tokenIdAssociations === undefined ||
+			($connected ? tokenIdAssociations?.foundTokenIds.length == 0 : true));
 
 	// $: $campaignDynamicData;
 	$: loadingAnimation = staticDataLoadStatus === LoadStatus.Loading;
@@ -181,7 +189,7 @@
 				</div>
 				<a
 					href={projectURL}
-					class="font-sans text-black dark:text-gray-200 block mt-1 text-2xl leading-tight font-medium hover:underline"
+					class="link font-sans text-black dark:text-gray-200 block mt-1 text-2xl leading-tight font-medium hover:underline"
 					>{subtitle}</a
 				>
 				<div class="font-text my-4 text-slate-700 dark:text-gray-200">

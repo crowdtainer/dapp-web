@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { connect } from '$lib/Utils/wallet';
+	import { connect, hasInjectedProviderNow } from '$lib/Utils/wallet';
 	import { WalletType } from '$lib/Utils/walletStorage';
 	import { Icon } from '@steeze-ui/svelte-icon';
 	import { InformationCircle } from '@steeze-ui/heroicons';
@@ -8,11 +8,15 @@
 <p class="text-center mx-2 my-4">Please connect your wallet to continue.</p>
 <br />
 
-<div class="flex justify-center ">
+<div class="flex justify-center">
 	<button
-		class="btn btn-outline"
+		class="btn btn-outline dark:text-white"
 		on:click={() => {
-			connect(WalletType.WalletConnect);
+			if (hasInjectedProviderNow()) {
+				connect(WalletType.Injected);
+			} else {
+				connect(WalletType.WalletConnect);
+			}
 		}}
 	>
 		Connect Wallet
@@ -20,8 +24,8 @@
 </div>
 
 <div class="flex justify-center">
-	<div class="text-md my-4 sm:w-full md:w-4/5 lg:w-4/6 xl:w-5/6">
-		<div class="text-md my-4  mx-4">
+	<div class="text-md my-4 sm:w-full md:w-4/5 lg:w-4/6 xl:w-3/6">
+		<div class="text-md my-4 mx-4">
 			<div class="grid grid-flow-col auto-cols-max my-4">
 				<div><Icon src={InformationCircle} class="text-green-700" size="24" /></div>
 				<p class="px-2 text-md">Tips</p>
