@@ -1,9 +1,7 @@
 import { browser } from '$app/environment';
 
-export const ssr = false;
-
 export enum WalletType { Injected, WalletConnect }
-export enum ConnectionState { Disconnected, Connected, ConnectedToUnsupportedNetwork }
+export enum ConnectionState { Disconnected, Connected, ConnectedToUnsupportedNetwork, ConnectedButNoAccountAvailable }
 
 export type WalletState = {
     type?: WalletType,
@@ -31,7 +29,10 @@ export function resetStorageState() {
 }
 
 export function getLastState(): WalletState | undefined {
-    const walletStateJson = window.localStorage.getItem(STORAGE_KEY);
-    if(walletStateJson == null) return undefined;
-    return JSON.parse(walletStateJson);
+    if (browser) {
+        const walletStateJson = window.localStorage.getItem(STORAGE_KEY);
+        if (walletStateJson == null) return undefined;
+        return JSON.parse(walletStateJson);
+    }
+    return undefined;
 }

@@ -28,11 +28,7 @@
 	import { showToast } from './Toast/ToastStore.js';
 	import { handleCampaignJoinedEvent, handleUserClaimedFundsEvent } from './CampaignActions.js';
 	import { loadOrderDetails } from './TokenUtils/search.js';
-	import {
-		findTokenIdsForWallet,
-		makeNewTokenIDAssociations,
-		type TokenIDAssociations
-	} from './ethersCalls/rpcRequests.js';
+	import { findTokenIdsForWallet, type TokenIDAssociations } from './ethersCalls/rpcRequests.js';
 
 	export let vouchers721Address: string;
 	export let chainId: number;
@@ -104,7 +100,6 @@
 			showToast(`Error fetching data: ${fetchError.details}`);
 			return;
 		}
-		refreshData();
 	});
 
 	async function handleUserLeftCrowdtainerEvent(event: CustomEvent) {
@@ -132,18 +127,15 @@
 
 	// dynamic
 	$: state = toState($campaignDynamicData, $campaignStaticData);
-	$: joinViewEnabled =
+	$: joinViewEnabled = !$connected || !tokenIdAssociations || tokenIdAssociations.foundTokenIds.length == 0 && 
 		state === ProjectStatusUI.Funding &&
-		$walletInCrowdtainer.fundsInCrowdtainer.isZero() &&
-		(tokenIdAssociations === undefined ||
-			($connected ? tokenIdAssociations?.foundTokenIds.length == 0 : true));
+		$walletInCrowdtainer.fundsInCrowdtainer.isZero();
 
 	// $: $campaignDynamicData;
 	$: loadingAnimation = staticDataLoadStatus === LoadStatus.Loading;
 
 	// Immediatelly update UI elements related to connected wallet on wallet or connection change
-	$: $connected,
-		$accountAddress,
+	$: $accountAddress,
 		initializeDataForWallet($campaignStaticData.contractAddress, $accountAddress),
 		refreshData();
 </script>
