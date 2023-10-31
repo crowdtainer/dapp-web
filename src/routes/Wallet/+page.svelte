@@ -51,7 +51,7 @@
 			$accountAddress
 		);
 		if (tokenIdSearchResult.isErr()) {
-			showToast(`Error loading tokens for connected wallet: ${tokenIdSearchResult.unwrapErr()}`);
+			console.warn(`Error loading tokens for connected wallet: ${tokenIdSearchResult.unwrapErr()}`);
 			staticDataLoadStatus = LoadStatus.FetchFailed;
 			return;
 		}
