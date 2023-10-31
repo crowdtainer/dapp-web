@@ -7,7 +7,7 @@
 	import { LoadStatus, ProjectStatusUI, toState } from '$lib/Converters/CrowdtainerData';
 	import type { CrowdtainerDynamicModel } from '$lib/Model/CrowdtainerModel';
 
-	import { connected, getSigner, accountAddress } from '$lib/Utils/wallet';
+	import { connected, getSigner, accountAddress, injectedProviderAvailableNow } from '$lib/Utils/wallet';
 	import EmptySection from '$lib/EmptySection.svelte';
 	import { connect } from '$lib/Utils/wallet';
 	import { WalletType } from '$lib/Utils/walletStorage';
@@ -204,7 +204,11 @@
 				<button
 					class="btn btn-outline text-black dark:text-white"
 					on:click={() => {
-						connect(WalletType.WalletConnect);
+						if (injectedProviderAvailableNow()) {
+							connect(WalletType.Injected);
+						} else {
+							connect(WalletType.WalletConnect);
+						}
 					}}
 				>
 					Connect Wallet

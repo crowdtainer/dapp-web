@@ -60,7 +60,7 @@
 				<div class="flex items-center">
 					<!-- Row start -->
 					<div class="w-6/12">
-						<p class="text-center text-sm md:text-base dark:text-white py-2 m-1">
+						<p class="text-center text-xs sm:text-sm md:text-base dark:text-white py-2 m-1">
 							<b>{`${product}`} {`- ${(prices[index]/basePriceDenominator[index]).toFixed(2)} ${tokenSymbol}/${basePriceUnit}`}</b>
 						</p>
 					</div>
@@ -68,7 +68,7 @@
 						<div class="">
 							<button
 								type="button"
-								class="m-3 py-2 px-2 sm:px-4 border-2 border-gray-600 dark:border-gray-200 text-gray-800 dark:text-white font-medium rounded-3xl text-xs leading-tight uppercase hover:bg-black hover:bg-opacity-5 focus:outline-none focus:ring-0"
+								class="m-2 py-2 px-2 sm:px-4 border-2 border-gray-600 dark:border-gray-200 text-gray-800 dark:text-white font-medium rounded-3xl text-xs leading-tight uppercase hover:bg-black hover:bg-opacity-5 focus:outline-none focus:ring-0"
 								on:click={() => {
 									decrementProduct(index);
 								}}
@@ -76,13 +76,13 @@
 								-
 							</button>
 						</div>
-						<div in:fade|global class="my-2 py-2 dark:text-white">
+						<div in:fade|global class="my-1 py-2 dark:text-white">
 							<p in:fade|global>{$selection[index]}</p>
 						</div>
 						<div class="">
 							<button
 								type="button"
-								class="m-3 py-2 px-2 sm:px-4 border-2 border-gray-600 dark:border-gray-200 text-gray-800 dark:text-white font-medium rounded-3xl text-xs leading-tight uppercase hover:bg-black hover:bg-opacity-5 focus:outline-none focus:ring-0"
+								class="m-2 py-2 px-2 sm:px-4 border-2 border-gray-600 dark:border-gray-200 text-gray-800 dark:text-white font-medium rounded-3xl text-xs leading-tight uppercase hover:bg-black hover:bg-opacity-5 focus:outline-none focus:ring-0"
 								on:click={() => {
 									incrementProduct(index);
 								}}
@@ -93,7 +93,7 @@
 					</div>
 					<div class="pl-0 py-4 pr-1 w-3/12">
 						{#key $selection[index]}
-						<p in:fade|global="{{ duration: 200 }}" class="text-center dark:text-white">{prices[index] * $selection[index]} {tokenSymbol}</p>
+						<p in:fade|global="{{ duration: 200 }}" class="text-xs sm:text-sm md:text-lg text-center dark:text-white">{prices[index] * $selection[index]} {tokenSymbol}</p>
 						{/key}
 					</div>
 					<!-- Row end -->
