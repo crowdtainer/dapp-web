@@ -491,6 +491,7 @@
 		// 	console.log(`${checkAllowanceResult.unwrapErr()}`);
 		// 	return false;
 		// } else {
+		await new Promise((f) => setTimeout(f, 2500)); // Avoid tx simulation race condition on mobile wallets
 		showToast(
 			'You have authorized spending to this campaign. You are ready to join the project 🎉',
 			MessageType.Info
