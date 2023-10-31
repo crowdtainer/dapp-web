@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
-	import { onInterval } from '$lib/Utils/intervalTimer';
+	import { onInterval } from '$lib/Utils/timer';
 	import { getTimeRemaining } from '$lib/Converters/time';
 
 	export let endTime: Date;

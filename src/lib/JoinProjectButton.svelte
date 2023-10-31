@@ -1,6 +1,6 @@
 <script lang="ts">
-	import { ethers, BigNumber, type ContractReceipt } from 'ethers';
-	import { onInterval } from './Utils/intervalTimer';
+	import { ethers, BigNumber } from 'ethers';
+	import { onInterval } from '$lib/Utils/timer';
 
 	import type { UserStoreModel } from '$lib/Model/UserStoreModel';
 	import {
@@ -10,7 +10,7 @@
 		joinProject,
 		joinProjectWithSignature
 	} from './ethersCalls/rpcRequests';
-	import { getSigner, walletState, web3Provider } from './Utils/wallet';
+	import { getProvider, getSigner, walletState, web3Provider } from './Utils/wallet';
 
 	import { ModalAnimation, ModalIcon, ModalType } from '$lib/ModalDialog.svelte';
 	import { requestAuthorizationProof, requestSponsoredTx } from './api.js';
@@ -21,8 +21,9 @@
 	import { Err, Ok, type Result } from '@sniptt/monads';
 	import { MessageType } from './Toast/MessageType.js';
 	import type { SignedPermitStruct } from '../routes/typechain/Vouchers721.js';
-	import { getSignedPermit, type ERC2612_Input } from './TokenUtils/permit.js';
+	import { getSignedPermit } from './TokenUtils/permit.js';
 	import type ModalDialog from '$lib/ModalDialog.svelte';
+	import { waitForTransaction } from './Utils/transactionHandling.js';
 
 	export let crowdtainerId: number;
 	export let chainId: number;
@@ -266,7 +267,7 @@
 				title: 'Join project',
 				type: ModalType.ActionRequest,
 				icon: ModalIcon.DeviceMobile,
-				body: `Please approve the transaction from your wallet.`,
+				body: `Allowance granted. Now please approve the join transaction from your wallet.`,
 				animation: ModalAnimation.Circle2
 			});
 			joinTransaction = await joinProjectWithSignature(
@@ -341,9 +342,16 @@
 			icon: ModalIcon.None,
 			animation: ModalAnimation.Diamonds
 		});
-		let txResult = await joinTransaction.unwrap().wait();
 
-		if (txResult.status !== 1) {
+		let transactionReceipt: ethers.providers.TransactionReceipt | undefined = undefined;
+		let error: string = '';
+		try {
+			transactionReceipt = await waitForTransaction(joinTransaction.unwrap().hash);
+		} catch (_error) {
+			error = `${_error}`;
+		}
+
+		if (!joinTransaction.unwrap().hash || !transactionReceipt) {
 			modalDialog.show({
 				id: 'joinProjectConfirmation',
 				type: ModalType.Information,
@@ -364,11 +372,15 @@
 			return false;
 		}
 		let signer = getSigner();
+		if (!signer) {
+			showToast('Missing signer. Transaction failed.', MessageType.Warning);
+			return false;
+		}
 		let erc20ContractResult = await getERC20Contract(signer, crowdtainerAddress);
 		let erc20Contract: IERC20;
 
 		if (erc20ContractResult.isErr()) {
-			showToast('Error connecting to ERC20 contract. Internet down?', MessageType.Warning);
+			showToast('Error connecting to ERC20 contract.', MessageType.Warning);
 			console.log(erc20ContractResult.unwrapErr());
 			return false;
 		} else {
@@ -432,19 +444,19 @@
 			animation: ModalAnimation.Diamonds
 		});
 
-		let receipt: ContractReceipt | undefined;
+		let transactionReceipt: ethers.providers.TransactionReceipt | undefined = undefined;
 		let error: string = '';
 		try {
-			receipt = await permitApproveTx.wait();
+			transactionReceipt = await waitForTransaction(permitApproveTx.hash);
 		} catch (_error) {
 			error = `${_error}`;
 		}
 
-		if (!receipt || error !== '' || receipt.status !== 1) {
+		if (!permitApproveTx.hash || error !== '' || !transactionReceipt) {
 			// tx failed
-			let message = 'Transaction failed';
+			let message = 'Transaction failed.';
 			if (error !== '') {
-				message += `. Reason: ${error}`;
+				message += error ? `Reason: + ${error}` : '';
 			} else {
 				message += `.`;
 			}

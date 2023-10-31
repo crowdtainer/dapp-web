@@ -7,3 +7,7 @@ export function onInterval(callback: () => void, milliseconds: number | undefine
 		clearInterval(interval);
 	});
 }
+
+export function timeout(ms: number) {
+	return new Promise((resolve) => setTimeout(resolve, ms));
+};

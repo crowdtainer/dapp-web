@@ -12,6 +12,7 @@ import type { WalletCrowdtainerModel } from '$lib/Model/WalletCrowdtainerModel.j
 import { toHuman } from '$lib/Converters/CrowdtainerData.js';
 import type { SignedPermitStruct, Vouchers721 } from '../../routes/typechain/Vouchers721.js';
 import { IERC20Permit__factory, type IERC20Permit } from '../../routes/typechain/index.js';
+import { waitForTransaction } from '$lib/Utils/transactionHandling.js';
 
 function makeError(error: any): Result<ContractTransaction, string> {
     let errorDecoderResult = decodeEthersError(error);
@@ -138,14 +139,14 @@ export async function isReferralEnabledForAddress(provider: ethers.Signer, crowd
     }
 }
 
-export async function leaveProject(provider: ethers.Signer | undefined, wallet:string,
+export async function leaveProject(provider: ethers.Signer | undefined, wallet: string,
     vouchers721Address: string,
     crowdtainerAddress: string): Promise<Result<ContractTransaction, string>> {
 
     if (provider === undefined) {
         return Err("Provider not available.");
     }
-    
+
     let vouchers721Contract: Vouchers721;
     try {
         vouchers721Contract = Vouchers721__factory.connect(vouchers721Address, provider);
@@ -171,9 +172,16 @@ export async function leaveProject(provider: ethers.Signer | undefined, wallet:s
 
                 console.log(`Calling leave with parameter: ${tokenIdsAssociations.foundTokenIds[index]}`);
                 let leaveTransaction = await vouchers721Contract.leave(BigNumber.from(tokenIdsAssociations.foundTokenIds[index]));
-                let receipt = await leaveTransaction.wait();
 
-                if (receipt === undefined || receipt.status === 0) {
+                let transactionReceipt: ethers.providers.TransactionReceipt | undefined = undefined;
+                let error: string = '';
+                try {
+                    transactionReceipt = await waitForTransaction(leaveTransaction.hash);
+                } catch (_error) {
+                    error = `${_error}`;
+                }
+
+                if (!transactionReceipt || transactionReceipt.confirmations < 1) {
                     // tx failed
                     console.log(`Failed to leave project.`);
                     return Err('Leave transaction failed.');

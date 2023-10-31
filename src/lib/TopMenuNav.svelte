@@ -153,7 +153,15 @@
 					{/await}
 				</div>
 			{:else if $walletState.connectionState === ConnectionState.ConnectedButNoAccountAvailable}
-				<p class="pt-1 text-right text-sm text-white invisible sm:visible">Wallet locked.</p>
+				<div class="inline-flex items-baseline">
+					<span class="relative flex h-2 w-2 mx-2 float-right">
+						<span
+							class="animate-ping absolute inline-flex h-full w-full rounded-full bg-yellow-400 opacity-75"
+						/>
+						<span class="relative inline-flex rounded-full h-2 w-2 bg-yellow-400" />
+					</span>
+					<p class="pt-1 text-right text-sm text-white invisible sm:visible">Wallet locked</p>
+				</div>
 			{:else if $walletState.connectionState === ConnectionState.ConnectedToUnsupportedNetwork}
 				<div class="inline-flex items-baseline">
 					<span class="relative flex h-2 w-2 mx-2 float-right">
@@ -163,7 +171,7 @@
 						<span class="relative inline-flex rounded-full h-2 w-2 bg-yellow-400" />
 					</span>
 					<p class="hidden md:block pt-1 text-right text-sm text-white invisible sm:visible">
-						Change your wallet to chain id {VITE_WALLET_CONNECT_CHAIN_ID}.
+						Change your wallet to chain id {VITE_WALLET_CONNECT_CHAIN_ID}
 					</p>
 				</div>
 			{:else if $walletState.connectionState === ConnectionState.Disconnected}

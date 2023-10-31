@@ -8,6 +8,8 @@ import ModalDialog, {
 import { claimFunds, claimRewards, leaveProject, transferToken } from './ethersCalls/rpcRequests.js';
 import { getSigner } from './Utils/wallet.js';
 import { showToast } from './Toast/ToastStore.js';
+import type { ethers } from 'ethers';
+import { waitForTransaction } from './Utils/transactionHandling.js';
 
 export async function callLeaveProject(wallet: string, vouchers721Address: string, crowdtainerAddress: string, modalDialog: ModalDialog, onUserLeftCrowdtainer: (crowdtainerAddress: string) => void) {
     console.log(`callLeaveProject(wallet: ${wallet}, vouchers721Address: ${vouchers721Address}, crowdtainerAddress: ${crowdtainerAddress})`);
@@ -22,7 +24,7 @@ export async function callLeaveProject(wallet: string, vouchers721Address: strin
 
     let signer = getSigner();
     let signResult = await leaveProject(signer, wallet, vouchers721Address, crowdtainerAddress);
-    
+
     if (signResult.isErr()) {
         console.log(`Failure: ${signResult.unwrapErr()}`);
         modalDialog.show({
@@ -102,10 +104,17 @@ export async function callClaimRewards(crowdtainerAddress: string, modalDialog: 
         return;
     }
 
-    let confirmation = await signResult.unwrap().wait();
+    let transactionReceipt: ethers.providers.TransactionReceipt | undefined = undefined;
+    let error: string = '';
+    try {
+        transactionReceipt = await waitForTransaction(signResult.unwrap().hash);
+    } catch (_error) {
+        error = `${_error}`;
+    }
+
     modalDialog.close();
 
-    if (confirmation.status === 1) {
+    if (transactionReceipt && transactionReceipt.confirmations >= 1) {
         modalDialog.show({
             id: 'rewardsClaimResultDialog',
             type: ModalType.Information,
@@ -113,7 +122,7 @@ export async function callClaimRewards(crowdtainerAddress: string, modalDialog: 
             body: 'Rewards transfer complete.',
             icon: ModalIcon.Exclamation
         });
-        console.log(`Claim rewards transaction hash: ${confirmation.transactionHash}`);
+        console.log(`Claim rewards transaction hash: ${transactionReceipt.transactionHash}`);
     } else {
         modalDialog.show({
             id: 'rewardsClaimResultDialog',
@@ -155,12 +164,18 @@ export async function callTransferParticipationProof(targetWallet: string,
         return;
     }
 
-    let confirmation = await signResult.unwrap().wait();
+    let transactionReceipt: ethers.providers.TransactionReceipt | undefined = undefined;
+    let error: string = '';
+    try {
+        transactionReceipt = await waitForTransaction(signResult.unwrap().hash);
+    } catch (_error) {
+        error = `${_error}`;
+    }
 
     modalDialog.close();
 
     let resultDialogData: ModalDialogData;
-    if (confirmation.status === 1) {
+    if (transactionReceipt && transactionReceipt.confirmations >= 1) {
         resultDialogData = {
             id: 'resultDialog',
             title: 'Success',
@@ -168,7 +183,7 @@ export async function callTransferParticipationProof(targetWallet: string,
             body: 'Transfer complete.',
             icon: ModalIcon.BadgeCheck
         };
-        console.log(`Transfer transaction hash: ${confirmation.transactionHash}`);
+        console.log(`Transfer transaction hash: ${transactionReceipt.transactionHash}`);
     } else {
         resultDialogData = {
             id: 'resultDialog',
