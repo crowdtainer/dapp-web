@@ -75,7 +75,7 @@
 				$accountAddress
 			);
 			if (tokenIdSearchResult.isErr()) {
-				showToast(`Error loading tokens for connected wallet: ${tokenIdSearchResult.unwrapErr()}`);
+				console.warn(`Error loading tokens for connected wallet: ${tokenIdSearchResult.unwrapErr()}`);
 				return;
 			}
 			tokenIdAssociations = tokenIdSearchResult.unwrap();
