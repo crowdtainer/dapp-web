@@ -438,7 +438,6 @@
 			receipt = await permitApproveTx.wait();
 		} catch (_error) {
 			error = `${_error}`;
-			return false;
 		}
 
 		if (!receipt || error !== '' || receipt.status !== 1) {

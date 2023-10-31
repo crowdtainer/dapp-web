@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { connect, hasInjectedProviderNow } from '$lib/Utils/wallet';
+	import { connect, injectedProviderAvailableNow } from '$lib/Utils/wallet';
 	import { WalletType } from '$lib/Utils/walletStorage';
 	import { Icon } from '@steeze-ui/svelte-icon';
 	import { InformationCircle } from '@steeze-ui/heroicons';
@@ -12,7 +12,7 @@
 	<button
 		class="btn btn-outline dark:text-white"
 		on:click={() => {
-			if (hasInjectedProviderNow()) {
+			if (injectedProviderAvailableNow()) {
 				connect(WalletType.Injected);
 			} else {
 				connect(WalletType.WalletConnect);

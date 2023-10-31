@@ -67,7 +67,7 @@
 	}
 
 	// Immediatelly update UI elements related to connected wallet on wallet or connection change
-	$: $connected, $accountAddress, reloadUserData();
+	$: $accountAddress, reloadUserData();
 </script>
 
 <ModalDialog bind:this={modalDialog} />

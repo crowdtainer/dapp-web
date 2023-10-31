@@ -2,7 +2,6 @@
 	import '../app.css';
 	import TopMenuNav from '$lib/TopMenuNav.svelte';
 	import FooterNav from '$lib/FooterNav.svelte';
-	// import '@fontsource/open-sans';
 	import '@fontsource/red-hat-display';
 
 	import { page } from '$app/stores';

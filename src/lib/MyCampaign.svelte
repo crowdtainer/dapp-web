@@ -35,7 +35,6 @@
 	import { initializeDataForWallet, walletInCrowdtainer } from './Stores/dataForWalletStore.js';
 	import { handleUserClaimedFundsEvent } from './CampaignActions.js';
 
-	export let wallet: string;
 	export let tokenId: number;
 	export let vouchers721Address: string;
 	export let crowdtainerId: number;
@@ -43,6 +42,14 @@
 	export let subtitle: string;
 	export let projectURL: string;
 
+	// svelte-ignore unused-export-let
+	export let wallet: string;
+	// svelte-ignore unused-export-let
+	export let chainId: number;
+	// svelte-ignore unused-export-let
+	export let tokenVersion: string;
+	// svelte-ignore unused-export-let
+	export let txSponsoringEnabled: boolean;
 	// svelte-ignore unused-export-let
 	export let description: string;
 	// svelte-ignore unused-export-let

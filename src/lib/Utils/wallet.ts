@@ -4,7 +4,6 @@ import WalletConnectProvider from '@walletconnect/web3-provider/dist/umd/index.m
 import { ethers, providers, Signer } from 'ethers';
 import type { TypedDataSigner } from "@ethersproject/abstract-signer";
 
-
 import { writable, derived } from 'svelte/store';
 
 import { type WalletState, WalletType, ConnectionState, persistState, getLastState, resetStorageState } from '$lib/Utils/walletStorage';
@@ -34,7 +33,7 @@ export const shortOrENSNamedAccount = derived(walletState, async $walletState =>
         return NO_WALLET_DETECTED;
     }
     else if (web3Provider === undefined) {
-        dispatchMessage("web3Provider not found.", MessageType.Warning);
+        console.log("web3Provider not found.");
         return NO_WALLET_DETECTED;
     }
     let reversedResolve: string | null;
@@ -51,6 +50,10 @@ export const shortOrENSNamedAccount = derived(walletState, async $walletState =>
 
 export function shortenAddress(walletAddress: string | undefined): string {
     return (walletAddress) ? walletAddress.slice(0, 6) + '...' + walletAddress.slice(-4) : NO_WALLET_DETECTED;
+}
+
+export function injectedProviderAvailableNow(): boolean {
+    return window.ethereum !== undefined;
 }
 
 const RPC_BACKEND: string = import.meta.env.VITE_WALLET_CONNECT_RPC;
@@ -74,7 +77,12 @@ let updatesCallbackFunction: ((message: string, type: MessageType) => void) | un
 
 function createWalletStore() {
 
-    let wallet: WalletState = { connectionState: ConnectionState.Disconnected };
+    let wallet: WalletState;
+    let lastWalletState = getLastState();
+    if (!lastWalletState)
+        wallet = { connectionState: ConnectionState.Disconnected };
+    else
+        wallet = lastWalletState;
 
     const { subscribe, set } = writable(wallet);
     return {
@@ -86,32 +94,40 @@ function createWalletStore() {
             set(walletState);
             persistState(wallet);
         },
-        setConnected: (truthy: boolean) => {
-            let connected = truthy ? ConnectionState.Connected : ConnectionState.Disconnected;
-            if (connected !== wallet.connectionState) {
-                (connected) ?
-                    dispatchMessage("Wallet connected", MessageType.Success)
-                    : dispatchMessage("Wallet disconnected.", MessageType.Warning);
+        setConnected: (connectionState: ConnectionState) => {
+            if (connectionState !== wallet.connectionState) {
+                if (connectionState === ConnectionState.Connected) {
+                    dispatchMessage("Wallet connected.", MessageType.Success)
+                } else if (connectionState === ConnectionState.Disconnected) {
+                    dispatchMessage("Wallet disconnected.", MessageType.Warning);
+                } else if (connectionState === ConnectionState.ConnectedButNoAccountAvailable) {
+                    dispatchMessage("Wallet detected but no accounts available.", MessageType.Warning);
+                }
+                else {
+                    dispatchMessage("Wallet connected to unsupported network.", MessageType.Warning);
+                }
             }
-            wallet.connectionState = connected;
+            wallet.connectionState = connectionState;
             set(wallet);
             persistState(wallet);
         },
         setChainId: (chainId: number) => {
-            wallet.chainId = chainId;
-            let connected = chainId == CHAIN_ID
-                ? ConnectionState.Connected
-                : ConnectionState.ConnectedToUnsupportedNetwork;
-            if (!wallet.account) {
-                console.log("Wallet present, but no account connected yet. Make sure your wallet is unlocked.");
+            if (wallet.chainId == chainId) {
+                return;
             }
-            else if (connected === ConnectionState.Connected) {
-                dispatchMessage("Wallet connected", MessageType.Success);
-            }
-            else {
+            let supportedChainId = chainId == CHAIN_ID;
+            if (!supportedChainId) {
+                wallet.connectionState = ConnectionState.ConnectedToUnsupportedNetwork;
                 dispatchMessage(`Wallet configured with unsupported network: ` + chainId + `. Switch to network chain id ${CHAIN_ID}`, MessageType.Warning);
             }
-            wallet.connectionState = connected;
+            else if (supportedChainId && !wallet.account) {
+                dispatchMessage("Wallet present, but no account connected yet. Make sure your wallet is unlocked.", MessageType.Warning);
+                wallet.connectionState = ConnectionState.ConnectedButNoAccountAvailable;
+            } else if (supportedChainId && wallet.account && wallet.account != '') {
+                wallet.connectionState = ConnectionState.Connected;
+                dispatchMessage("Wallet connected", MessageType.Success);
+            }
+            wallet.chainId = chainId;
             set(wallet);
             persistState(wallet);
         },
@@ -120,18 +136,20 @@ function createWalletStore() {
             set(wallet);
             persistState(wallet);
         },
-        setAccount: (account: string) => {
-            if (wallet.account !== undefined && wallet.account !== account) {
-                dispatchMessage(`Wallet detected: '${account}'`, MessageType.Info);
+        setAccount: async (account: string) => {
+            // console.log(`called Former: ${wallet.account} , current: ${account}`);
+            if (account !== undefined && wallet.account !== undefined && wallet.account != account) {
+                dispatchMessage(`Wallet detected: '${shortenAddress(account)}'`, MessageType.Info);
             }
             // check if wallet's network is supported
-            let lastWalletState = getLastState();
-            if (lastWalletState != undefined) {
+            if (wallet.type != undefined) {
                 let chainId = 0;
-                if (lastWalletState.type === WalletType.Injected) {
+                if (web3Provider && wallet.type === WalletType.Injected) {
                     chainId = web3Provider.network.chainId;
-                } else if (lastWalletState.type === WalletType.WalletConnect) {
-                    chainId = wcProvider.chainId ?? -1;
+                } else if (wcProvider && wallet.type === WalletType.WalletConnect) {
+                    // chainId = await wcProvider.send("eth_chainId", []) ?? -1 ;
+                    // chainId = web3Provider?.network.chainIdwc ?? -1;
+                    // wallect connect library not returning the correct id, skip.
                 }
                 if (chainId == CHAIN_ID) {
                     wallet.connectionState = ConnectionState.Connected;
@@ -159,8 +177,8 @@ function createWalletStore() {
     };
 }
 
-export let web3Provider: providers.Web3Provider;
-export let wcProvider: WalletConnectProvider;
+export let web3Provider: providers.Web3Provider | undefined;
+export let wcProvider: WalletConnectProvider | undefined;
 
 async function setupWalletConnect() {
     wcProvider = new WalletConnectProvider({
@@ -180,8 +198,9 @@ async function setupWalletConnect() {
 
     //  Wrap with Web3Provider from ethers.js
     web3Provider = new providers.Web3Provider(wcProvider);
-
     walletState.setWalletType(WalletType.WalletConnect);
+
+    // Setup event listeners
     wcProvider.on('accountsChanged', (accounts: string[]) => {
         console.log(`accountsChanged: ${accounts}`);
         walletState.setAccount(accounts[0]);
@@ -195,15 +214,21 @@ async function setupWalletConnect() {
 
     wcProvider.on('connect', () => {
         console.log(`Connect event.`);
-        if (CHAIN_ID == wcProvider.chainId) {
-            walletState.setConnected(true);
+        if (wcProvider && CHAIN_ID === wcProvider.chainId) {
+            if (wcProvider.accounts.length === 0) {
+                walletState.setConnected(ConnectionState.ConnectedButNoAccountAvailable);
+            } else {
+                walletState.setConnected(ConnectionState.Connected);
+            }
+        } else if (wcProvider && CHAIN_ID != wcProvider.chainId) {
+            walletState.setConnected(ConnectionState.ConnectedToUnsupportedNetwork);
         }
     });
 
     // Subscribe to session disconnection
     wcProvider.on('disconnect', (code: number, reason: string) => {
         console.log(`Disconnected. Code: ${code} , reason: ${reason}`);
-        walletState.setConnected(false);
+        walletState.setConnected(ConnectionState.Disconnected);
     });
 
     try {
@@ -215,12 +240,8 @@ async function setupWalletConnect() {
 
     let currentChainID = wcProvider.chainId;
     if (currentChainID !== CHAIN_ID) {
-        await requestSwitchToNetwork(CHAIN_ID);
+        await requestSwitchToNetwork(web3Provider, CHAIN_ID);
     }
-}
-
-export function hasInjectedProviderNow() {
-    return window.ethereum !== undefined;
 }
 
 async function setupInjectedProviderWallet() {
@@ -231,55 +252,55 @@ async function setupInjectedProviderWallet() {
 
     web3Provider = new providers.Web3Provider(window.ethereum, "any");
     walletState.setWalletType(WalletType.Injected);
-    // Events
+
+    // Setup event listeners
     web3Provider.on("network", async (newNetwork: Network, oldNetwork: Network) => {
         console.log(`Network (` + newNetwork.chainId + `) detected.`);
         try {
-            walletState.setChainId(newNetwork.chainId);
             let accountAddress = await getAccountAddress();
             if (accountAddress !== undefined && accountAddress != '') {
                 walletState.setAccount(accountAddress);
             }
+            walletState.setChainId(newNetwork.chainId);
         } catch (error) {
             console.log(`Unable to get wallet address.`);
-            walletState.setConnected(false);
+            walletState.setConnected(ConnectionState.ConnectedButNoAccountAvailable);
         }
     });
 
-    web3Provider.on('connect', () => {
-        walletState.setConnected(true);
+    web3Provider.on('connect', async () => {
+        console.log('connect event received..');
+        if (web3Provider?.network.chainId === CHAIN_ID) {
+            if ((await web3Provider.listAccounts()).length === 0) {
+                walletState.setConnected(ConnectionState.ConnectedButNoAccountAvailable);
+            } else {
+                walletState.setConnected(ConnectionState.Connected);
+            }
+        } else if (web3Provider?.network.chainId != CHAIN_ID) {
+            walletState.setConnected(ConnectionState.ConnectedToUnsupportedNetwork);
+        }
     });
 
     (window.ethereum as EthersProvider).on('accountsChanged', (accounts) => {
-        if (accounts.length === 0) {
-            console.log("Wallet disconnected.");
-            walletState.setConnected(false);
-        } else {
-            console.log(`accountsChanged: ${accounts[0]}`);
-            walletState.setAccount(accounts[0]);
-        }
+        console.log(`accountsChanged: ${accounts}`);
+        walletState.setAccount(accounts[0]);
     });
-
-    try {
-        await web3Provider.send("eth_requestAccounts", []);
-    } catch (error) {
-        console.log(`Unable to request accounts.`);
-    }
 
     if (web3Provider.network) {
         let currentChainID = web3Provider.network.chainId;
         walletState.setChainId(currentChainID);
         if (currentChainID !== CHAIN_ID) {
-            await requestSwitchToNetwork(CHAIN_ID);
+            await requestSwitchToNetwork(web3Provider, CHAIN_ID);
         }
     }
 }
 
-async function requestSwitchToNetwork(chainId: number) {
+async function requestSwitchToNetwork(provider: ethers.providers.Web3Provider, chainId: number) {
     try {
-        await web3Provider.send("wallet_switchEthereumChain", [{ chainId: '0x' + CHAIN_ID.toString(16) }]);
+        await provider.send("wallet_switchEthereumChain", [{ chainId: '0x' + chainId.toString(16) }]);
     } catch (error) {
         console.log(`User rejected switching chains: ${error}`);
+        dispatchMessage(`The connected wallet doesn't support the chain used by this app.`, MessageType.Warning);
     }
 }
 
@@ -290,18 +311,24 @@ function resetWalletConnectCallbacks() {
         wcProvider.on('connect', () => { });
         wcProvider.on('disconnect', () => { });
     }
+    wcProvider = undefined;
     if (web3Provider) {
         web3Provider.removeAllListeners();
     }
+    web3Provider = undefined
 }
 
 export function dispatchMessage(message: string, type: MessageType) {
     if (updatesCallbackFunction) {
         updatesCallbackFunction(message, type);
+    } else {
+        console.warn(`Callback function missing. Can't deliver message: ${message}`);
     }
 }
 
 export async function connect(walletType: WalletType) {
+    walletState.persistState();
+    resetWalletConnectCallbacks();;
     try {
         if (walletType === WalletType.WalletConnect) {
             setupWalletConnect();
@@ -315,8 +342,8 @@ export async function connect(walletType: WalletType) {
 
 export async function disconnect() {
     if (wcProvider) {
-        resetWalletConnectCallbacks();
         wcProvider.disconnect();
+        resetWalletConnectCallbacks();
     } else if (web3Provider) {
         web3Provider.removeAllListeners();
     }
@@ -350,7 +377,7 @@ export function getSigner(): Signer & TypedDataSigner | undefined {
 }
 
 async function getAccountAddress(): Promise<string | undefined> {
-    if (connected) {
+    if (web3Provider && connected) {
         return await web3Provider.getSigner().getAddress();
     }
     return undefined;

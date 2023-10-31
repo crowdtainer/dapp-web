@@ -16,13 +16,14 @@
 		setupWallet,
 		tearDownWallet
 	} from '$lib/Utils/wallet';
-	import { WalletType } from '$lib/Utils/walletStorage';
+	import { ConnectionState, WalletType } from '$lib/Utils/walletStorage';
 
 	// Toast
 	import { addToast, type ToastData } from '$lib/Toast/ToastStore';
 	import type { MessageType } from './Toast/MessageType';
 	import { copyToClipBoardAndNotify } from './Utils/clipboard.js';
 	import { Icon } from '@steeze-ui/svelte-icon';
+	export let VITE_WALLET_CONNECT_CHAIN_ID = import.meta.env.VITE_WALLET_CONNECT_CHAIN_ID;
 
 	let mobileMenuOpen = false,
 		profileMenuOpen = false;
@@ -48,14 +49,13 @@
 	};
 
 	onMount(() => {
-		setupWallet();
-		walletState.setUpdatesCallback(updatesCallbackFunction);
 		console.log(`import.meta.env.MODE: ` + import.meta.env.MODE);
+		walletState.setUpdatesCallback(updatesCallbackFunction);
+		setupWallet();
 	});
 
 	onDestroy(() => {
 		tearDownWallet();
-		walletState.setUpdatesCallback(undefined);
 	});
 
 	$: path = $page.url.pathname;
@@ -127,15 +127,13 @@
 			</div>
 		</div>
 		<div
-			class="absolute inset-y-0 right-0 flex items-center pr-2 sm:static sm:inset-auto sm:ml-6 sm:pr-0"
+			class="absolute inset-y-0 right-0 flex items-center pr-2 sm:static sm:inset-auto sm:ml-3 sm:pr-0"
 		>
 			<!-- Profile dropdown -->
-			{#if !$connected}
-				<p class="pt-1 text-right text-sm text-white invisible sm:visible">Disconnected</p>
-			{:else}
+			{#if $connected}
 				<div class="pr-2 md:pr-4 text-right text-sm text-white">
 					{#await $shortOrENSNamedAccount}
-						"Loading"
+						Loading
 					{:then address}
 						<div class="flex justify-center">
 							<button
@@ -144,6 +142,9 @@
 								}}
 							>
 								<span class="inline-flex items-center">
+									<span class="relative flex h-2 w-2 mx-2">
+										<span class="relative inline-flex rounded-full h-2 w-2 bg-green-400" />
+									</span>
 									<span>{address} </span>
 									<span><Icon src={Clipboard} class="self-center ml-2" size="16" /></span>
 								</span>
@@ -151,8 +152,31 @@
 						</div>
 					{/await}
 				</div>
+			{:else if $walletState.connectionState === ConnectionState.ConnectedButNoAccountAvailable}
+				<p class="pt-1 text-right text-sm text-white invisible sm:visible">Wallet locked.</p>
+			{:else if $walletState.connectionState === ConnectionState.ConnectedToUnsupportedNetwork}
+				<div class="inline-flex items-baseline">
+					<span class="relative flex h-2 w-2 mx-2 float-right">
+						<span
+							class="animate-ping absolute inline-flex h-full w-full rounded-full bg-yellow-400 opacity-75"
+						/>
+						<span class="relative inline-flex rounded-full h-2 w-2 bg-yellow-400" />
+					</span>
+					<p class="hidden md:block pt-1 text-right text-sm text-white invisible sm:visible">
+						Change your wallet to chain id {VITE_WALLET_CONNECT_CHAIN_ID}.
+					</p>
+				</div>
+			{:else if $walletState.connectionState === ConnectionState.Disconnected}
+				<div class="inline-flex items-baseline">
+					<span class="relative flex h-2 w-2 mx-2 float-right">
+						<span class="relative inline-flex rounded-full h-2 w-2 bg-red-400" />
+					</span>
+					<p class="hidden md:block pt-1 text-right text-sm text-white invisible sm:visible">
+						Disconnected
+					</p>
+				</div>
 			{/if}
-			<div class="ml-3 relative">
+			<div class="ml-2 relative">
 				<div>
 					<button
 						on:click={flipProfileMenu}
@@ -177,7 +201,7 @@
 						aria-labelledby="user-menu-button"
 						tabindex="-1"
 					>
-						{#if $connected}
+						{#if $walletState.connectionState !== ConnectionState.Disconnected}
 							<!-- svelte-ignore a11y-invalid-attribute -->
 							<a
 								href="#"
@@ -185,7 +209,7 @@
 									await disconnect();
 									profileMenuOpen = false;
 								}}
-								class="block px-4 py-2 text-sm"
+								class="block px-4 py-4 text-sm"
 								role="menuitem"
 								tabindex="-1"
 								id="user-menu-item-0">Disconnect wallet</a
@@ -198,12 +222,11 @@
 									await connect(WalletType.WalletConnect);
 									profileMenuOpen = false;
 								}}
-								class="block px-4 py-2 text-sm"
+								class="block px-4 py-4 text-sm"
 								role="menuitem"
 								tabindex="-1"
 								id="user-menu-item-0">Connect to external wallet</a
 							>
-							<!-- {#if import.meta.env.MODE === 'development'} -->
 							<!-- svelte-ignore a11y-invalid-attribute -->
 							<a
 								href="#"
@@ -211,12 +234,11 @@
 									await connect(WalletType.Injected);
 									profileMenuOpen = false;
 								}}
-								class="block px-4 py-2 text-sm"
+								class="block px-4 py-4 text-sm"
 								role="menuitem"
 								tabindex="-1"
 								id="user-menu-item-0">Connect to browser wallet</a
 							>
-							<!-- {/if} -->
 						{/if}
 					</div>
 				{/if}
