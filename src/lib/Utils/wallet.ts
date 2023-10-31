@@ -376,6 +376,10 @@ export function getSigner(): Signer & TypedDataSigner | undefined {
     return web3Provider.getSigner();
 }
 
+export function getProvider() {
+    return web3Provider;
+}
+
 async function getAccountAddress(): Promise<string | undefined> {
     if (web3Provider && connected) {
         return await web3Provider.getSigner().getAddress();
