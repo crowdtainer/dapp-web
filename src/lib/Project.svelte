@@ -127,9 +127,8 @@
 
 	// dynamic
 	$: state = toState($campaignDynamicData, $campaignStaticData);
-	$: joinViewEnabled = !$connected || !tokenIdAssociations || tokenIdAssociations.foundTokenIds.length == 0 && 
-		state === ProjectStatusUI.Funding &&
-		$walletInCrowdtainer.fundsInCrowdtainer.isZero();
+	$: joinViewEnabled = state === ProjectStatusUI.Funding && (!$connected || !tokenIdAssociations || tokenIdAssociations.foundTokenIds.length == 0 &&
+		$walletInCrowdtainer.fundsInCrowdtainer.isZero());
 
 	// $: $campaignDynamicData;
 	$: loadingAnimation = staticDataLoadStatus === LoadStatus.Loading;

@@ -334,34 +334,35 @@
 			return false;
 		}
 
-		modalDialog.show({
-			id: 'joinProjectConfirmationWait',
-			type: ModalType.ActionRequest,
-			title: 'Join project',
-			body: 'Waiting for transaction confirmation..',
-			icon: ModalIcon.None,
-			animation: ModalAnimation.Diamonds
-		});
+		// Temporarily commenting until we find out why it doesn't work on injected provider of mobile wallets.
+		// modalDialog.show({
+		// 	id: 'joinProjectConfirmationWait',
+		// 	type: ModalType.ActionRequest,
+		// 	title: 'Join project',
+		// 	body: 'Waiting for transaction confirmation..',
+		// 	icon: ModalIcon.None,
+		// 	animation: ModalAnimation.Diamonds
+		// });
 
-		let transactionReceipt: ethers.providers.TransactionReceipt | undefined = undefined;
-		let error: string = '';
-		try {
-			transactionReceipt = await waitForTransaction(joinTransaction.unwrap().hash);
-		} catch (_error) {
-			error = `${_error}`;
-		}
+		// let transactionReceipt: ethers.providers.TransactionReceipt | undefined = undefined;
+		// let error: string = '';
+		// try {
+		// 	transactionReceipt = await waitForTransaction(joinTransaction.unwrap().hash);
+		// } catch (_error) {
+		// 	error = `${_error}`;
+		// }
 
-		if (!joinTransaction.unwrap().hash || !transactionReceipt) {
-			modalDialog.show({
-				id: 'joinProjectConfirmation',
-				type: ModalType.Information,
-				title: 'Join project failed',
-				body: `The transaction to join the campaing failed.`,
-				icon: ModalIcon.Exclamation,
-				animation: ModalAnimation.None
-			});
-			return false;
-		}
+		// if (!joinTransaction.unwrap().hash || !transactionReceipt) {
+		// 	modalDialog.show({
+		// 		id: 'joinProjectConfirmation',
+		// 		type: ModalType.Information,
+		// 		title: 'Join project failed',
+		// 		body: `The transaction to join the campaing failed.`,
+		// 		icon: ModalIcon.Exclamation,
+		// 		animation: ModalAnimation.None
+		// 	});
+		// 	return false;
+		// }
 		modalDialog.close();
 		return true;
 	};
@@ -435,66 +436,67 @@
 			return false;
 		}
 
-		modalDialog.show({
-			id: 'walletWaitForSpendingApproval',
-			type: ModalType.Information,
-			title: 'Spending approval',
-			body: `Waiting for transaction confirmation..`,
-			icon: ModalIcon.None,
-			animation: ModalAnimation.Diamonds
-		});
+		// Temporarily commenting until we find out why waiting is stuck on injected mobile wallets.
+		// modalDialog.show({
+		// 	id: 'walletWaitForSpendingApproval',
+		// 	type: ModalType.Information,
+		// 	title: 'Spending approval',
+		// 	body: `Waiting for transaction confirmation..`,
+		// 	icon: ModalIcon.None,
+		// 	animation: ModalAnimation.Diamonds
+		// });
 
-		let transactionReceipt: ethers.providers.TransactionReceipt | undefined = undefined;
-		let error: string = '';
-		try {
-			transactionReceipt = await waitForTransaction(permitApproveTx.hash);
-		} catch (_error) {
-			error = `${_error}`;
-		}
+		// let transactionReceipt: ethers.providers.TransactionReceipt | undefined = undefined;
+		// let error: string = '';
+		// try {
+		// 	transactionReceipt = await waitForTransaction(permitApproveTx.hash);
+		// } catch (_error) {
+		// 	error = `${_error}`;
+		// }
 
-		if (!permitApproveTx.hash || error !== '' || !transactionReceipt) {
-			// tx failed
-			let message = 'Transaction failed.';
-			if (error !== '') {
-				message += error ? `Reason: + ${error}` : '';
-			} else {
-				message += `.`;
-			}
-			modalDialog.show({
-				id: 'walletWaitForSpendingApproval',
-				type: ModalType.Information,
-				title: 'Spending approval',
-				body: message,
-				icon: ModalIcon.Exclamation
-			});
-			return false;
-		}
+		// if (!permitApproveTx.hash || error !== '' || !transactionReceipt) {
+		// 	// tx failed
+		// 	let message = 'Transaction failed.';
+		// 	if (error !== '') {
+		// 		message += error ? `Reason: + ${error}` : '';
+		// 	} else {
+		// 		message += `.`;
+		// 	}
+		// 	modalDialog.show({
+		// 		id: 'walletWaitForSpendingApproval',
+		// 		type: ModalType.Information,
+		// 		title: 'Spending approval',
+		// 		body: message,
+		// 		icon: ModalIcon.Exclamation
+		// 	});
+		// 	return false;
+		// }
 
-		let checkAllowanceResult = await checkAllowance(
-			String(accountAddress),
-			erc20Contract,
-			tokenDecimals,
-			crowdtainerAddress,
-			totalCostInERCUnits
+		// let checkAllowanceResult = await checkAllowance(
+		// 	String(accountAddress),
+		// 	erc20Contract,
+		// 	tokenDecimals,
+		// 	crowdtainerAddress,
+		// 	totalCostInERCUnits
+		// );
+
+		// if (checkAllowanceResult.isErr()) {
+		// 	modalDialog.show({
+		// 		id: 'walletWaitForSpendingApprovalError',
+		// 		type: ModalType.Information,
+		// 		title: 'Spending approval',
+		// 		body: `Unable to authorize ERC20 spending. ${checkAllowanceResult.unwrapErr()}`,
+		// 		icon: ModalIcon.Exclamation
+		// 	});
+		// 	console.log(`${checkAllowanceResult.unwrapErr()}`);
+		// 	return false;
+		// } else {
+		showToast(
+			'You have authorized spending to this campaign. You are ready to join the project 🎉',
+			MessageType.Info
 		);
-
-		if (checkAllowanceResult.isErr()) {
-			modalDialog.show({
-				id: 'walletWaitForSpendingApprovalError',
-				type: ModalType.Information,
-				title: 'Spending approval',
-				body: `Unable to authorize ERC20 spending. ${checkAllowanceResult.unwrapErr()}`,
-				icon: ModalIcon.Exclamation
-			});
-			console.log(`${checkAllowanceResult.unwrapErr()}`);
-			return false;
-		} else {
-			showToast(
-				'You have authorized spending to this campaign. You are ready to join the project 🎉',
-				MessageType.Info
-			);
-			modalDialog.close();
-		}
+		modalDialog.close();
+		// }
 		return true;
 	};
 
