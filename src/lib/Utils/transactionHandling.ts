@@ -9,15 +9,14 @@ export const waitForTransaction = async (transactionHash: string, confirmations:
     while (true) {
         try {
             let provider = getProvider();
-            if (provider) {
-                transactionReceipt = await provider.getTransactionReceipt(transactionHash);
-
-                if (transactionReceipt && transactionReceipt.confirmations >= confirmations) {
-                    console.log(`Transaction confirmation(s): ${transactionReceipt.confirmations}`);
-                    break;
-                }
-            } else {
+            if (!provider) {
                 throw new Error(`Provider not available.`);
+            }
+            transactionReceipt = await provider.getTransactionReceipt(transactionHash);
+
+            if (transactionReceipt && transactionReceipt.confirmations >= confirmations) {
+                console.log(`Transaction confirmation(s): ${transactionReceipt.confirmations}`);
+                break;
             }
 
             if (Date.now() - startTime > timeoutSeconds / 1000) {

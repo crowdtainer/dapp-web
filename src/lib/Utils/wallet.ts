@@ -147,9 +147,8 @@ function createWalletStore() {
                 if (web3Provider && wallet.type === WalletType.Injected) {
                     chainId = web3Provider.network.chainId;
                 } else if (wcProvider && wallet.type === WalletType.WalletConnect) {
-                    // chainId = await wcProvider.send("eth_chainId", []) ?? -1 ;
-                    // chainId = web3Provider?.network.chainIdwc ?? -1;
-                    // wallect connect library not returning the correct id, skip.
+                    chainId = await wcProvider.send("eth_chainId", []) ?? -1 ;
+                    // chainId = web3Provider?.network.chainId ?? -1;
                 }
                 if (chainId == CHAIN_ID) {
                     wallet.connectionState = ConnectionState.Connected;
@@ -297,7 +296,7 @@ async function setupInjectedProviderWallet() {
 
 async function requestSwitchToNetwork(provider: ethers.providers.Web3Provider, chainId: number) {
     try {
-        await provider.send("wallet_switchEthereumChain", [{ chainId: '0x' + chainId.toString(16) }]);
+        await provider.send("wallet_switchEthereumChain", [{ chainId: chainId }]);
     } catch (error) {
         console.log(`User rejected switching chains: ${error}`);
         dispatchMessage(`The connected wallet doesn't support the chain used by this app.`, MessageType.Warning);
