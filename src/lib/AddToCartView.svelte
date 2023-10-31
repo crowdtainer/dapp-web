@@ -224,7 +224,7 @@
 						<div class="text-black text-md font-medium dark:text-gray-200">
 							{productOption.name}
 						</div>
-						<ul class="grid grid-flow-col auto-cols-max my-2 items-center mx-4">
+						<ul class="grid grid-flow-col auto-cols my-2 items-center mx-0 md:mx-4">
 							{#each productOption.productSubOptions as subOption, index}
 								<li class="mx-2">
 									<input

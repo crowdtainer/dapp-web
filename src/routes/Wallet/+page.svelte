@@ -4,7 +4,7 @@
 	import MyCampaign from '$lib/MyCampaign.svelte';
 
 	import { Vouchers721Address } from '../Data/projects.json';
-	import { connected, getSigner, accountAddress } from '$lib/Utils/wallet';
+	import { connected, getSigner, accountAddress, injectedProviderAvailableNow } from '$lib/Utils/wallet';
 	import EmptySection from '$lib/EmptySection.svelte';
 	import { connect } from '$lib/Utils/wallet';
 	import { WalletType } from '$lib/Utils/walletStorage';
@@ -123,7 +123,11 @@
 			<button
 				class="btn btn-outline text-black dark:text-gray-200 mb-6"
 				on:click={() => {
-					connect(WalletType.WalletConnect);
+					if (injectedProviderAvailableNow()) {
+						connect(WalletType.Injected);
+					} else {
+						connect(WalletType.WalletConnect);
+					}
 				}}
 			>
 				Connect Wallet

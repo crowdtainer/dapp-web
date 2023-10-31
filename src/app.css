@@ -71,7 +71,7 @@
 
   .productPrice {
     @apply font-display;
-    @apply text-xl font-medium;
+    @apply text-lg md:text-xl font-medium;
   }
 
   .toastBox {
