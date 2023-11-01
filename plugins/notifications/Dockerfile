@@ -1,4 +1,4 @@
-FROM node:19.6.0-alpine3.16 AS mailerPluginBuilder
+FROM node:21.1.0-alpine3.18 AS mailerPluginBuilder
 RUN apk update && apk add --no-cache curl py-pip make g++
 WORKDIR /app
 COPY package.json package-lock.json ./
@@ -7,7 +7,7 @@ RUN npm install
 COPY . .
 RUN npm run build
 
-FROM node:19.6.0-alpine3.16 as mailerPlugin
+FROM node:21.1.0-alpine3.18 as mailerPlugin
 USER node:node
 WORKDIR /app
 COPY --from=mailerPluginBuilder --chown=node:node /app/dist ./dist

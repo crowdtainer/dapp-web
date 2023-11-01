@@ -1,4 +1,4 @@
-FROM node:19.6.0-alpine3.16 AS wooCommerceBuilder
+FROM node:21.1.0-alpine3.18 AS wooCommerceBuilder
 RUN apk update && apk add --no-cache curl py-pip make g++
 WORKDIR /app
 COPY package.json package-lock.json ./
@@ -7,7 +7,7 @@ RUN npm install
 COPY . .
 RUN npm run build
 
-FROM node:19.6.0-alpine3.16 as wooCommerceOrder
+FROM node:21.1.0-alpine3.18 as wooCommerceOrder
 USER node:node
 WORKDIR /app
 COPY --from=mailerPluginBuilder --chown=node:node /app/dist ./dist
