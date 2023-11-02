@@ -62,6 +62,7 @@
 
 	async function refreshData() {
 		if (staticDataLoadStatus !== LoadStatus.Loaded) {
+			console.log('Skipped wallet data refresh, project data still loading.');
 			return;
 		}
 

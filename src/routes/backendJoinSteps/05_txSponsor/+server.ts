@@ -9,6 +9,7 @@ import type { SignedPermitStruct } from '../../typechain/Vouchers721.js';
 import { Vouchers721Address, projects } from '../../Data/projects.json';
 
 import { provider } from "$lib/ethersCalls/provider.js";
+import { promiseWithTimeout } from "$lib/Utils/transactionHandling.js";
 
 let signer = new ethers.Wallet(TX_SPONSOR_PRIVATE_KEY, provider);
 if (!ethers.utils.isAddress(ethers.utils.computeAddress(TX_SPONSOR_PRIVATE_KEY))) {
@@ -153,9 +154,17 @@ export const POST: RequestHandler = async ({ request }) => {
         throw error(400, `Tx failed to join. ${errorDescription}`);
     }
 
-    let txResult = await joinTransaction.unwrap().wait();
+    let txResult: ethers.ContractReceipt;
+
+    try {
+        txResult = await promiseWithTimeout(joinTransaction.unwrap().wait(), 8000, new Error("Unable to get transaction confirmation."));
+    } catch (error: any) {
+        console.log(`${error}`);
+        throw error(400, 'The sponsored transaction to join the campaing failed. Please try again.');
+    }
+
     if (txResult.status !== 1) {
-        throw error(400, 'The transaction to join the campaing failed.');
+        throw error(400, 'The sponsored transaction to join the campaing failed. Please try again.');
     }
 
     return new Response("OK");
