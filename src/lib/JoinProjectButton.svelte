@@ -96,7 +96,6 @@
 				? couponCode
 				: '0x0000000000000000000000000000000000000000';
 
-		console.log('reqqq..');
 		let authorizationResult = await requestAuthorizationProof(
 			userWalletAddress,
 			crowdtainerAddress,

@@ -2,20 +2,30 @@
 	import { MessageType } from '$lib/Toast/MessageType.js';
 	import { showToast } from '$lib/Toast/ToastStore.js';
 	import { validEmail } from '$lib/Validation/utils.js';
-	import { requestEmailAuthorizationAPI, sendChallengeCodeAPI } from '$lib/api.js';
+	import {
+		requestCaptchaChallenge,
+		requestEmailAuthorizationAPI,
+		sendChallengeCodeAPI
+	} from '$lib/api.js';
+	import type { Result } from '@sniptt/monads';
 	import { Check, InformationCircle } from '@steeze-ui/heroicons';
 	import { Icon } from '@steeze-ui/svelte-icon';
+	import { onMount } from 'svelte';
 	import { slide } from 'svelte/transition';
 
 	export let nextClicked: (verifiedEmail: string, providedCode: string) => void;
 	export let emailVerificationRequired: boolean;
+	export let captchaVerificationRequired: boolean;
 
-    let emailValidated = false;
+	let emailValidated = false;
 	let userEmail: string;
 	let userEmailCode: string = '';
 	let invalidCodeWarning: boolean;
 	let codeValidatorError: string;
 	let emailSent: boolean;
+	let captchaSVG: string | undefined = undefined;
+	let captchaId: number | undefined = undefined;
+	let userCaptchaCode: string;
 
 	const callRequestEmailAuthorizationAPI = async () => {
 		let result = await requestEmailAuthorizationAPI(userEmail, userEmailCode);
@@ -31,81 +41,151 @@
 	};
 
 	const callSendChallengeCodeAPI = async () => {
-		let emailSentResult = await sendChallengeCodeAPI(userEmail);
-		if(!emailSentResult.ok){
-			console.log(`result: ${emailSentResult.status}`)
-			if(emailSentResult.status == 429) {
-				showToast(`${emailSentResult.statusText}. Please try again later.`, MessageType.Warning);
-			} else {
-				showToast('Unable to send challenge code.', MessageType.Warning);
+		type Error = { code: number; message: string };
+		let emailSentResult: Result<string, Error>;
+		if (captchaVerificationRequired) {
+			if (!captchaId || !captchaSVG) {
+				showToast('Unable to get captcha challenge.');
+				return;
 			}
+			emailSentResult = await sendChallengeCodeAPI(
+				userEmail,
+				captchaId.toString(),
+				userCaptchaCode
+			);
+		} else {
+			emailSentResult = await sendChallengeCodeAPI(userEmail);
+		}
+		if (emailSentResult.isErr()) {
+			showToast(`${emailSentResult.unwrapErr().message}`, MessageType.Warning);
 			return;
 		}
 
 		emailSent = true;
-		setTimeout(function () {
-			emailSent = false;
-		}, 15000);
 	};
 
 	$: emailValid = validEmail(userEmail);
+
+	async function doRequestCaptchaChallenge() {
+		let captchaChallengeResult = await requestCaptchaChallenge();
+		if (captchaChallengeResult.isErr()) {
+			showToast(
+				`Unable to get captcha challenge. ${
+					captchaChallengeResult.unwrapErr().message
+						? captchaChallengeResult.unwrapErr().message
+						: ''
+				}`,
+				MessageType.Warning
+			);
+			return;
+		}
+		captchaSVG = captchaChallengeResult.unwrap().svg;
+		captchaId = captchaChallengeResult.unwrap().id;
+	}
+
+	onMount(async () => {
+		if (captchaVerificationRequired) doRequestCaptchaChallenge();
+	});
 </script>
 
 <div class="">
 	<div class="m-6">
 		{#if emailVerificationRequired && !emailValidated}
-			<p class="text-lg bold text-center">Please verify your E-mail:</p>
-			<br />
-			<div class="flex justify-center">
-				<input
-					type="text"
-					bind:value={userEmail}
-					placeholder="E-mail"
-					class="{emailValid
-						? 'border-lime-600 border-2'
-						: ''} input input-primary w-full max-w-xs dark:text-black"
-				/>
-				<button
-					class="btn btn-outline mx-2 w-28 dark:text-white dark:disabled:text-gray-200"
-					disabled={!emailValid || emailSent}
-					on:click={callSendChallengeCodeAPI}
-				>
-					{#if emailSent}
-						<p in:slide|global={{ duration: 300 }}>Sent!</p>
-					{:else}
-						<p in:slide|global={{ duration: 300 }}>Send</p>
-					{/if}
-				</button>
-			</div>
-			<br />
-			<div class="flex justify-center">
-				<input
-					type="text"
-					bind:value={userEmailCode}
-					placeholder={invalidCodeWarning ? 'Invalid code' : 'Confirmation code'}
-					class="{invalidCodeWarning
-						? 'border-red-500 border-2'
-						: ''} input input-bordered input-info w-full max-w-xs dark:text-black"
-				/>
+			<p class="text-lg bold text-center my-2">
+				{captchaVerificationRequired && !emailSent ? 'Type the captcha and v' : 'V'}erify your
+				Email:
+			</p>
 
-				<button
-					class="btn btn-outline mx-2 w-28 dark:text-white dark:disabled:text-gray-200"
-					on:click={callRequestEmailAuthorizationAPI}
-				>
-					{#if invalidCodeWarning}
-						{codeValidatorError}
-					{:else}
-						Verify
-					{/if}
-				</button>
-			</div>
+			{#if !emailSent}
+				{#if captchaVerificationRequired}
+					<div class="flex justify-center items-center">
+						<div class="m-2 p-2 dark:bg-gray-100">
+							{@html captchaSVG}
+						</div>
+						<div>
+							<button
+								class=" mx-2 dark:text-white dark:disabled:text-gray-200"
+								on:click={doRequestCaptchaChallenge}
+							>
+								<p>Retry 🔄</p>
+							</button>
+						</div>
+					</div>
+				{/if}
+
+				<div class="flex justify-center">
+					<div class="form-group">
+						{#if captchaVerificationRequired}
+							<div>
+								<input
+									type="text"
+									name="postalCode"
+									class="input input-bordered input-info max-w-xs dark:text-black w-full max-w-xs dark:text-black my-2"
+									placeholder="Captcha"
+									bind:value={userCaptchaCode}
+								/>
+							</div>
+						{/if}
+						<div>
+							<input
+								type="text"
+								placeholder="Email"
+								bind:value={userEmail}
+								class="{emailValid
+									? 'border-lime-600 border-2'
+									: ''} input input-bordered input-info max-w-xs dark:text-black w-full max-w-xs dark:text-black my-2"
+							/>
+						</div>
+						<div class="flex justify-center">
+							<button
+								class="sky-btn mx-2 dark:text-white dark:disabled:text-gray-200"
+								disabled={!emailValid || emailSent}
+								on:click={callSendChallengeCodeAPI}
+							>
+								<p in:slide|global={{ duration: 300 }}>Send</p>
+							</button>
+						</div>
+					</div>
+				</div>
+			{/if}
+
+			{#if emailSent}
+				<p class="text-lg bold text-center my-4 mt-8">Enter the code sent to your Email:</p>
+				<div class="flex justify-center">
+					<input
+						type="text"
+						bind:value={userEmailCode}
+						placeholder={invalidCodeWarning ? 'Invalid code' : 'Code'}
+						class="{invalidCodeWarning
+							? 'border-red-500 border-2'
+							: ''} input input-bordered input-info w-28 dark:text-black mx-2"
+					/>
+					<button
+						class="btn btn-outline mx-2 w-28 dark:text-white dark:disabled:text-gray-200"
+						on:click={async () => {
+							await callRequestEmailAuthorizationAPI();
+						}}
+					>
+						{#if invalidCodeWarning}
+							{codeValidatorError}
+						{:else}
+							Verify
+						{/if}
+					</button>
+				</div>
+			{/if}
 		{:else}
 			<div class="flex justify-center my-12">
 				<p class="text-lg bold">E-mail validated!</p>
 				<div><Icon src={Check} class="text-green-600" size="24" /></div>
 			</div>
 			<div class="flex justify-center">
-				<button class="btn btn-primary m-4 px-12" on:click={() => { nextClicked(userEmail, userEmailCode)}}>Next</button>
+				<button
+					class="btn btn-primary m-4 px-12"
+					on:click={() => {
+						nextClicked(userEmail, userEmailCode);
+					}}>Next</button
+				>
 			</div>
 		{/if}
 		<div class="flex justify-center mt-4">
@@ -116,16 +196,12 @@
 				</div>
 				<ul class="list-disc mx-5">
 					<li class="mt-2">
-						If the project is succesfully funded, we will send you an e-mail asking you to provide
-						us your delivery address.
+						European laws requires us communicate in a "durable medium", of which Email is the most
+						recognized at this time.
 					</li>
 					<li class="mt-2">
-						To avoid collecting personal data before knowing for sure we will need it, you do not
-						need to provide us your delivery address at this stage (funding).
-					</li>
-					<li class="mt-2">
-						We will <b>never</b> use your e-mail or all personal data for purposes other than fulfilling
-						our legal obligations.
+						You don't need to provide the product delivery address at this stage (funding), but only
+						if the campaign is successful.
 					</li>
 				</ul>
 			</div>

@@ -93,7 +93,7 @@ export async function hasEnoughFunds(erc20Contract: IERC20, signerAddress: strin
 }
 
 export async function findTokenIdsForWallet(provider: ethers.Signer | undefined,
-    vouchers721Address: string, walletAddress: string): Promise<Result<TokenIDAssociations, string>> {
+    vouchers721Address: string, walletAddress: string, crowdtainerIdFilter: number | undefined = undefined): Promise<Result<TokenIDAssociations, string>> {
 
     if (provider === undefined) {
         return Err("Provider not available.");
@@ -117,9 +117,11 @@ export async function findTokenIdsForWallet(provider: ethers.Signer | undefined,
             let foundCrowdtainerAddress = await vouchers721Contract.crowdtainerIdToAddress(crowdtainerId);
             console.log(`Wallet ${walletAddress} is owner of tokenId: ${tokenId}, from crowdtainerId ${crowdtainerId} @ address ${foundCrowdtainerAddress}`);
 
-            tokenAssociations.foundTokenIds.push(tokenId.toNumber());
-            tokenAssociations.crowdtainerIds.push(crowdtainerId.toNumber());
-            tokenAssociations.crowdtainerAddresses.push(foundCrowdtainerAddress);
+            if(!crowdtainerIdFilter || (crowdtainerIdFilter && crowdtainerId.toNumber() == crowdtainerIdFilter)) {
+                tokenAssociations.foundTokenIds.push(tokenId.toNumber());
+                tokenAssociations.crowdtainerIds.push(crowdtainerId.toNumber());
+                tokenAssociations.crowdtainerAddresses.push(foundCrowdtainerAddress);    
+            }
         }
 
         return Ok(tokenAssociations);

@@ -21,6 +21,7 @@
 	import ProductQuantity from './ProductQuantity.svelte';
 
 	import { ModalAnimation, ModalIcon, ModalType } from './ModalDialog.svelte';
+	import { captchaEnabled } from '../routes/Data/projects.json';
 	import ModalDialog from '$lib/ModalDialog.svelte';
 
 	import { createEventDispatcher } from 'svelte';
@@ -242,6 +243,7 @@
 				</div>
 			{:else if preOrderStep === JoinStep.EMailCheck}
 				<EmailCheck
+					captchaVerificationRequired={captchaEnabled}
 					{emailVerificationRequired}
 					nextClicked={(verifiedEmail, providedCode) => {
 						if (verifiedEmail) {
