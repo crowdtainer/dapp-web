@@ -1,4 +1,5 @@
 import { getDatabase } from "$lib/Database/redis";              // Database
+import { validEmail } from "$lib/Validation/utils.js";
 import { type Result, Ok, Err } from "@sniptt/monads";          // Monads
 import { error, type RequestHandler } from '@sveltejs/kit';
 
@@ -14,7 +15,7 @@ export const POST: RequestHandler = async ({ request, params }) => {
 
     let userEmail = params.email;
 
-    if (userEmail == undefined || userEmail === "") {
+    if (userEmail == undefined || !validEmail(userEmail)) {
         throw error(400, "Missing email field.");
     }
 

@@ -31,8 +31,37 @@ export async function fetchStaticData(projectIds: number[]): Promise<Result<Crow
 
 // Pre-order steps
 
-export async function sendChallengeCodeAPI(email: string): Promise<Response> {
-	return await fetch(`backendJoinSteps/01_getChallengeCodeAPI/${email}`);
+export async function requestCaptchaChallenge(): Promise<Result<CaptchaResponse, Error>> {
+	let response: Response;
+
+	response = await fetch(`CaptchaAPI/`, {
+		method: 'POST',
+	});
+
+	const jsonResponse = await response.json();
+	if (response.status != 200) {
+		return Err({ code: response.status, message: jsonResponse.error });
+	}
+	return Ok(jsonResponse);
+}
+
+export async function sendChallengeCodeAPI(email: string, captchaId: string | undefined = undefined, captchaCode: string | undefined = undefined): Promise<Result<string, Error>> {
+	let content = captchaId && captchaCode ?
+		{ captchaId: captchaId, captchaCode: captchaCode, email: email } :
+		{ email: email };
+
+	let response = await fetch(`backendJoinSteps/01_getChallengeCodeAPI/`,
+		{
+			method: 'POST',
+			body: JSON.stringify(content)
+		}
+	);
+
+	const jsonResponse = await response.json();
+	if (!response.ok) {
+		return Err({ code: response.status, message: jsonResponse.message });
+	}
+	return Ok(jsonResponse);
 }
 
 export async function requestEmailAuthorizationAPI(email: string, code: string): Promise<string> {
@@ -100,6 +129,7 @@ export async function getOrderDetailsAPI(chainId: number, vouchers721Address: st
 import { AuthorizationGateway__factory } from '../routes/typechain/factories/Crowdtainer.sol/AuthorizationGateway__factory';
 import { ethers } from "ethers";
 import type { DeliveryDetails } from "./Model/SignTerms";
+import type { CaptchaResponse } from "../routes/CaptchaAPI/+server.js";
 export async function requestAuthorizationProof(wallet: string,
 	crowdtainerAddress: string,
 	quantities: number[],

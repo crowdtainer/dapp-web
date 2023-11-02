@@ -72,7 +72,8 @@
 			let tokenIdSearchResult = await findTokenIdsForWallet(
 				getSigner(),
 				vouchers721Address,
-				$accountAddress
+				$accountAddress,
+				crowdtainerId
 			);
 			if (tokenIdSearchResult.isErr()) {
 				console.warn(`Error loading tokens for connected wallet: ${tokenIdSearchResult.unwrapErr()}`);
