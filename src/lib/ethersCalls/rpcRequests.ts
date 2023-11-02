@@ -183,9 +183,9 @@ export async function leaveProject(provider: ethers.Signer | undefined, wallet: 
                     error = `${_error}`;
                 }
 
-                if (!transactionReceipt || transactionReceipt.confirmations < 1) {
+                if (error != '' || !transactionReceipt || transactionReceipt.confirmations < 1) {
                     // tx failed
-                    console.log(`Failed to leave project.`);
+                    console.warn(`Failed to leave project. ${error} ${JSON.stringify(transactionReceipt)}}`);
                     return Err('Leave transaction failed.');
                 }
                 return Ok(leaveTransaction);
