@@ -1,4 +1,4 @@
-FROM node:19.5.0-alpine3.16 AS builder
+FROM node:21.1.0-alpine3.18 AS builder
 RUN apk update && apk add --no-cache curl py-pip make g++
 WORKDIR /app
 COPY package.json package-lock.json ./
@@ -8,7 +8,7 @@ COPY . .
 RUN npm run build
 # RUN npm ci --omit=dev
 
-FROM node:19.5.0-alpine3.16 as deploy-node
+FROM node:21.1.0-alpine3.18 as deploy-node
 USER node:node
 WORKDIR /app
 COPY --from=builder --chown=node:node /app/build ./build
@@ -17,7 +17,7 @@ COPY --chown=node:node package.json .
 CMD ["node","-r", "dotenv/config", "build"]
 # CMD ["npm","run", "start"]
 
-FROM node:19.5.0-alpine3.16 as debugger
+FROM node:21.1.0-alpine3.18 as debugger
 USER node:node
 WORKDIR /app
 COPY --from=builder --chown=node:node /app/build ./build
