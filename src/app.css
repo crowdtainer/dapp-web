@@ -40,6 +40,26 @@
     @apply rounded-md;
   }
 
+  .squared-btn {
+    @apply h-auto w-40 relative px-5 py-6 transition-all ease-in duration-75 bg-[#f4fbfc] rounded-md group-hover:bg-opacity-0;
+  }
+
+  .promoted-btn {
+		background-color: rgb(15, 121, 71);
+		color: #ffffff;
+		padding: 8px 16px;
+		border-radius: 8px;
+		border-width: thin;
+		border-color: greenyellow;
+		font-size: 18px;
+		font-weight: semibold;
+		transition: all 0.3s;
+	}
+  .promoted-btn:hover {
+    background-color: rgb(127, 212, 127);
+    color: black;
+  }
+
   .campaignSection {
     @apply border-b-4 border-double dark:border-gray-400 border-gray-700;
     @apply text-black dark:text-gray-200;

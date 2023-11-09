@@ -32,6 +32,7 @@ export const walletInCrowdtainer = readable(createWalletCrowdtainerData(), funct
         }
 
         let userWalletInCrowdtainer = funds.unwrap();
+        userWalletInCrowdtainer.lastLoadedEpochTimeInMs = Date.now();
 
         set(userWalletInCrowdtainer);
     }, 5000);

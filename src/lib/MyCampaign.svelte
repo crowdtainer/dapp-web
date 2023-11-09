@@ -188,6 +188,7 @@
 				{:else}
 					<p class="my-6 text-red-800">Error fetching data.</p>
 				{/if}
+
 				<!-- Smart contract details -->
 				{#if campaignStaticData && campaignStaticUI}
 					<div class="dark:text-white">
@@ -198,6 +199,10 @@
 							{campaignStaticUI}
 						/>
 					</div>
+				{/if}
+
+				{#if projectURL && projectURL !== ''}
+					<a href={projectURL}><button class="promoted-btn my-2">Project Page ></button></a>
 				{/if}
 
 				<DetailedTokenIdState

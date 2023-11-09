@@ -29,6 +29,7 @@
 	import { handleCampaignJoinedEvent, handleUserClaimedFundsEvent } from './CampaignActions.js';
 	import { loadOrderDetails } from './TokenUtils/search.js';
 	import { findTokenIdsForWallet, type TokenIDAssociations } from './ethersCalls/rpcRequests.js';
+	import { Circle } from 'svelte-loading-spinners';
 
 	export let vouchers721Address: string;
 	export let chainId: number;
@@ -42,6 +43,7 @@
 	export let projectImageURLs: string[];
 	export let basePriceUnit: string;
 	export let basePriceDenominator: number[];
+	export let supportedCountriesForShipping: string[];
 
 	export let productConfiguration: SplitSelection;
 	export let projectId: number;
@@ -77,7 +79,9 @@
 				crowdtainerId
 			);
 			if (tokenIdSearchResult.isErr()) {
-				console.warn(`Error loading tokens for connected wallet: ${tokenIdSearchResult.unwrapErr()}`);
+				console.warn(
+					`Error loading tokens for connected wallet: ${tokenIdSearchResult.unwrapErr()}`
+				);
 				return;
 			}
 			tokenIdAssociations = tokenIdSearchResult.unwrap();
@@ -129,8 +133,12 @@
 
 	// dynamic
 	$: state = toState($campaignDynamicData, $campaignStaticData);
-	$: joinViewEnabled = state === ProjectStatusUI.Funding && (!$connected || !tokenIdAssociations || tokenIdAssociations.foundTokenIds.length == 0 &&
-		$walletInCrowdtainer.fundsInCrowdtainer.isZero());
+	$: joinViewEnabled =
+		state === ProjectStatusUI.Funding &&
+		(!$connected ||
+			!tokenIdAssociations ||
+			(tokenIdAssociations.foundTokenIds.length == 0 &&
+				$walletInCrowdtainer.fundsInCrowdtainer.isZero()));
 
 	// $: $campaignDynamicData;
 	$: loadingAnimation = staticDataLoadStatus === LoadStatus.Loading;
@@ -200,6 +208,10 @@
 					<p class="my-6 text-red-800">Error fetching data.</p>
 				{/if}
 
+				{#if projectURL && projectURL !== ''}
+					<a href={projectURL}><button class="promoted-btn my-2 mb-2">Campaign Page ></button></a>
+				{/if}
+
 				{#if staticDataLoadStatus === LoadStatus.Loaded && joinViewEnabled && campaignStaticUI}
 					<AddToCartView
 						{crowdtainerId}
@@ -226,6 +238,14 @@
 						>
 					</div>
 				{:else if tokenIdAssociations !== undefined}
+					{#if staticDataLoadStatus === LoadStatus.Loading || !tokenIdAssociations || !$walletInCrowdtainer.lastLoadedEpochTimeInMs}
+						<div class="flex flex-inline items-center my-4">
+							<Circle size="24" unit="px" />
+							<div class="ml-4 text-black dark:text-white" class:animate-pulse={true}>
+								Loading wallet data...
+							</div>
+						</div>
+					{/if}
 					<DetailedTokenIdState
 						walletData={$walletInCrowdtainer}
 						campaignStaticUI={$campaignStaticUI}
@@ -272,6 +292,7 @@
 					{basePriceDenominator}
 					{basePriceUnit}
 					referralRate={$campaignStaticData.referralRate}
+					{supportedCountriesForShipping}
 					on:userJoinedCrowdtainerEvent={(event) =>
 						handleCampaignJoinedEvent(event, modalDialog, () => {
 							refreshData();

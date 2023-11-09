@@ -5,11 +5,11 @@
 </script>
 
 {#if $toasts}
-	<div class="fixed right-2 top-20 z-50">
+	<div class="fixed right-0 sm:right-4 md:right-8 2xl:right-0 w-full top-20 z-50">
 		<div class="">
 			<section class="">
 				{#each $toasts as toast (toast.id)}
-					<div class="flex justify-end">
+					<div class="flex justify-end 2xl:justify-center">
 						<Toast
 							type={toast.type}
 							dismissible={toast.dismissible}

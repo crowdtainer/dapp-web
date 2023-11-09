@@ -14,13 +14,17 @@
 	import { ethers } from 'ethers';
 	import { pseudoRandomNonce } from './Utils/random';
 	import { slide } from 'svelte/transition';
-	import countries from 'iso-3166-1/dist/iso-3166.js';
+	import countries, { type Country } from 'iso-3166-1/dist/iso-3166.js';
+	import { onMount } from 'svelte';
 
 	let modalDialog: ModalDialog;
 
 	export let walletAddress: string;
 	export let vouchers721Address: string;
 	export let voucherId: number;
+	export let supportedCountriesFilter: string[];
+
+	let countriesListDisplay: Country[] = new Array<Country>();
 
 	let deliveryAddress = makeAddress();
 	let billingAddress = makeAddress();
@@ -128,6 +132,16 @@
 			});
 		}
 	};
+
+	onMount(async () => {
+		if (supportedCountriesFilter.length > 0) {
+			countriesListDisplay = countries.filter((country) =>
+				supportedCountriesFilter.includes(country.country)
+			);
+		} else {
+			countriesListDisplay = countries;
+		}
+	});
 </script>
 
 <ModalDialog bind:this={modalDialog} />
@@ -161,15 +175,17 @@
 				<p class="py-1 text-lg text-primary">Delivery address</p>
 
 				<!-- Country -->
-				<div class="form-control w-full mb-2">
-					<span class=" text-secondary text-sm">Country</span>
-					<select class="select" bind:value={deliveryAddress.country}>
-						<option disabled selected>Select</option>
-						{#each countries as country}
-							<option value={country.alpha2}>{country.country}</option>
-						{/each}
-					</select>
-				</div>
+				{#if countriesListDisplay.length > 0}
+					<div class="form-control w-full mb-2">
+						<span class=" text-secondary text-sm">Country</span>
+						<select class="select" bind:value={deliveryAddress.country}>
+							<option disabled selected>Select</option>
+							{#each countriesListDisplay as country}
+								<option value={country.alpha2}>{country.country}</option>
+							{/each}
+						</select>
+					</div>
+				{/if}
 
 				<!-- Name -->
 				<div class="grid grid-cols-2 gap-4">
@@ -272,15 +288,17 @@
 				{#if !deliverySameAsBilling}
 					<div in:slide={{ duration: 250 }} out:slide={{ duration: 250 }}>
 						<!-- Country -->
-						<div class="form-control w-full mb-2">
-							<span class=" text-secondary text-sm">Country</span>
-							<select class="select" bind:value={billingAddress.country}>
-								<option disabled selected>Select</option>
-								{#each countries as country}
-									<option value={country.alpha2}>{country.country}</option>
-								{/each}
-							</select>
-						</div>
+						{#if countriesListDisplay.length > 0}
+							<div class="form-control w-full mb-2">
+								<span class=" text-secondary text-sm">Country</span>
+								<select class="select" bind:value={billingAddress.country}>
+									<option disabled selected>Select</option>
+									{#each countriesListDisplay as country}
+										<option value={country.alpha2}>{country.country}</option>
+									{/each}
+								</select>
+							</div>
+						{/if}
 
 						<!-- Name -->
 						<div class="grid grid-cols-2 gap-4">

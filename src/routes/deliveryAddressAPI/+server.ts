@@ -2,11 +2,10 @@ import { getDatabase } from "$lib/Database/redis";              // Database
 
 import { BigNumber, ethers } from 'ethers';                     // Ethers
 import { type Result, Ok, Err, } from "@sniptt/monads";         // Monads
-// const countryISO = require('iso-3166-1');
 import { whereAlpha2 } from 'iso-3166-1';
 
 import { isTimeValid, makeDeliveryRequestMessage, type DeliveryDetails, type Address } from '$lib/Model/SignTerms';
-import { Vouchers721Address } from '../Data/projects.json';
+import { Vouchers721Address, projects } from '../Data/projects.json';
 
 import { error } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
@@ -18,6 +17,8 @@ import { loadTokenURIRepresentation, type TokenURIObject, type Description } fro
 import { MockERC20__factory, Crowdtainer__factory } from "../typechain/index.js";
 import { camelToSentenceCase } from "$lib/Utils/camelCase.js";
 import { toHuman } from "$lib/Converters/CrowdtainerData.js";
+import { validEmail } from "$lib/Validation/utils.js";
+import countries, { type Country } from "iso-3166-1/dist/iso-3166.js";
 
 async function getDiscountForWallet(provider: ethers.Signer | undefined,
     vouchers721Address: string, crowdtainerAddress: string, walletAdress: string): Promise<Result<BigNumber, string>> {
@@ -169,7 +170,15 @@ export const POST: RequestHandler = async ({ request }) => {
 
     let [signerAddress, domain, nonce, currentTimeISO, deliveryDetails, signatureHash] = result.unwrap();
 
-    // Check if country field is valid
+    // Check if Email is valid
+    if (!validEmail(deliveryDetails.deliveryAddress.email)) {
+        throw error(400, `Contact Email address in invalid format: '${deliveryDetails.deliveryAddress.email}'`);
+    }
+
+    if (!validEmail(deliveryDetails.billingAddress.email)) {
+        throw error(400, `Billing Email address in invalid format: '${deliveryDetails.billingAddress.email}'`);
+    }
+
     let countryFound = whereAlpha2(deliveryDetails.deliveryAddress.country);
     if (!countryFound) {
         throw error(400, `Unrecognized delivery address country: '${deliveryDetails.deliveryAddress.country}'`);
@@ -201,12 +210,11 @@ export const POST: RequestHandler = async ({ request }) => {
 
         // Perform domain validation
         console.log(`client declared domain: ${domain}`);
-        if(domain!== import.meta.env.VITE_DOMAIN) {
+        if (domain !== import.meta.env.VITE_DOMAIN) {
             throw error(400, `Invalid domain address: ${domain}. Expected: ${import.meta.env.VITE_DOMAIN}`);
         }
 
         // TODO: validate nonce (i.e., is it in 8 digit range? has it been used (redis))
-        // TODO: Filter out unsupported chainIds
 
         if (!isTimeValid(currentTimeISO)) {
             throw error(400, 'Signature timestamp too old or too far in the future.');
@@ -226,22 +234,69 @@ export const POST: RequestHandler = async ({ request }) => {
         throw error(500, `Db connection error.`);
     }
 
+    let signer: ethers.providers.JsonRpcSigner | undefined;
+    let crowdtainerReference: CrowdtainerReference;
     try {
-        let signer = provider.getSigner();
-        let signerWallet = await signer.getAddress();
+        signer = provider.getSigner();
+    } catch (e) {
+        console.log(`Error: ${e}`);
+        throw error(500, "Internal server error. Please try again later.");
+    }
 
-        // Check if token is owned by wallet
-        if (!(await isOwnerOf(signerWallet, signer, Vouchers721Address, deliveryDetails.voucherId))) {
-            throw error(401, "The signature provided does not belog to a wallet which owns the specified token id.");
-        }
+    // Check if token is owned by wallet
+    let isOwnerOfResult = await isOwnerOf(signerAddress, signer, Vouchers721Address, deliveryDetails.voucherId);
+    if (isOwnerOfResult.isErr()) {
+        throw error(500, "Unable to check token ownership.");
+    }
 
-        let crowdtainerReference = await getCrowdtainerFromTokenId(signer, Vouchers721Address, deliveryDetails.voucherId);
-        if (crowdtainerReference.isErr()) {
-            console.log(`Error: ${crowdtainerReference.unwrapErr()}`);
-            throw error(500, `Failure to read campaign reference.`);
-        }
+    if (!isOwnerOfResult.unwrap()) {
+        throw error(401, "The signature provided does not belog to a wallet which owns the specified token id");
+    }
 
-        let crowdtainerAddress = crowdtainerReference.unwrap().contractAddress;
+    let crowdtainerReferenceResult = (await getCrowdtainerFromTokenId(signer, Vouchers721Address, deliveryDetails.voucherId));
+    if (crowdtainerReferenceResult.isErr()) {
+        console.log(`Error: ${crowdtainerReferenceResult.unwrapErr()}`);
+        throw error(500, `Failure to read campaign reference.`);
+    }
+    crowdtainerReference = crowdtainerReferenceResult.unwrap();
+
+    // Check if user's country field input is valid and allowed.
+    // If restriction found in respective projects.json definition, apply it.
+    // An empty list means no restriction (all recognized countries are valid).
+
+    // load shipping country restrictions
+    let projectData = projects.filter((project) => project.crowdtainerId === crowdtainerReference.crowdtainerId.toNumber());
+    if (projectData.length !== 1) {
+        throw error(500, "Unable to find project data");
+    }
+
+    let currentProject = projectData[0];
+    let allowedCountries = new Array<Country>();
+    let supportedCountries = currentProject.supportedCountriesForShipping;
+    if (supportedCountries.length > 0) {
+        allowedCountries = countries.filter((currentCountry) =>
+            supportedCountries.includes(currentCountry.country)
+        );
+    } else {
+        allowedCountries = countries;
+    }
+
+    if (!allowedCountries.find((value) => value.alpha2 === deliveryDetails.deliveryAddress.country)) {
+        throw error(401, `The country specified is not supported by this project: ${deliveryDetails.deliveryAddress.country}`);;
+    }
+
+    if (!allowedCountries.find((value) => value.alpha2 === deliveryDetails.billingAddress.country)) {
+        throw error(401, `The billing country specified is not supported by this project: ${deliveryDetails.billingAddress.country}`);;
+    }
+
+    // Check if chainId is correct for based on project definition
+    if (deliveryDetails.chainId !== currentProject.chainId) {
+        throw error(401, `The chainId (${deliveryDetails.chainId}) for which the message was signed does not match the project's defined chainId (${currentProject.chainId})`)
+    }
+
+    try {
+
+        let crowdtainerAddress = crowdtainerReference.contractAddress;
         // Check if the smart contract is in delivery state.
         const campaignStateResult = await getCampaignState(signer, Vouchers721Address, crowdtainerAddress);
 
@@ -276,14 +331,14 @@ export const POST: RequestHandler = async ({ request }) => {
             deliveryDetails.billingAddress = deliveryDetails.deliveryAddress;
         }
 
-        let userDiscount = await getDiscountForWallet(signer, Vouchers721Address, crowdtainerAddress, signerWallet);
+        let userDiscount = await getDiscountForWallet(signer, Vouchers721Address, crowdtainerAddress, signerAddress);
         if (userDiscount.isErr()) {
-            throw error(500, `Unable get discount given to wallet: ${signerWallet} in Vouchers721Address ${Vouchers721Address}, on crowdtainer ID: ${crowdtainerReference.unwrap().crowdtainerId}`);
+            throw error(500, `Unable get discount given to wallet: ${signerAddress} in Vouchers721Address ${Vouchers721Address}, on crowdtainer ID: ${crowdtainerReference.crowdtainerId}`);
         }
 
         let decimals = await getTokenDecimals(signer, crowdtainerAddress);
         if (decimals.isErr()) {
-            throw error(500, `Unable to read token decimals from crowdtainer ID: ${crowdtainerReference.unwrap().crowdtainerId}`);
+            throw error(500, `Unable to read token decimals from crowdtainer ID: ${crowdtainerReference.crowdtainerId}`);
         }
 
         await redis.multi()

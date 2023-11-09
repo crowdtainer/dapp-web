@@ -116,7 +116,7 @@
 				<div class="flex justify-center">
 					<div class="form-group">
 						{#if captchaVerificationRequired}
-							<div>
+							<div class="flex justify-center">
 								<input
 									type="text"
 									name="postalCode"
@@ -126,7 +126,7 @@
 								/>
 							</div>
 						{/if}
-						<div>
+						<div class="flex justify-center">
 							<input
 								type="text"
 								placeholder="Email"
@@ -136,13 +136,19 @@
 									: ''} input input-bordered input-info max-w-xs dark:text-black w-full max-w-xs dark:text-black my-2"
 							/>
 						</div>
+						<div class="flex flex-inline text-sm">
+							By entering your Email, you agree to the &nbsp;
+							<a target="_blank" rel="noopener" href="/Legal/PrivacyPolicy" class="link"
+								>Privacy Policy</a
+							>.
+						</div>
 						<div class="flex justify-center">
 							<button
 								class="sky-btn mx-2 dark:text-white dark:disabled:text-gray-200"
 								disabled={!emailValid || emailSent}
 								on:click={callSendChallengeCodeAPI}
 							>
-								<p in:slide|global={{ duration: 300 }}>Send</p>
+								<p in:slide|global={{ duration: 300 }}>Send Code</p>
 							</button>
 						</div>
 					</div>

@@ -1,4 +1,7 @@
 <script lang="ts">
+	// controls whether the wallet connection button / display is loaded and shown
+	export let displayWalletConnection = true;
+
 	import { page } from '$app/stores';
 	import { fade } from 'svelte/transition';
 	import { onMount, onDestroy } from 'svelte';
@@ -49,17 +52,22 @@
 	};
 
 	onMount(() => {
-		console.log(`import.meta.env.MODE: ` + import.meta.env.MODE);
-		walletState.setUpdatesCallback(updatesCallbackFunction);
-		setupWallet();
+		if (displayWalletConnection) {
+			console.log(`import.meta.env.MODE: ` + import.meta.env.MODE);
+			walletState.setUpdatesCallback(updatesCallbackFunction);
+			setupWallet();
+		}
 	});
 
 	onDestroy(() => {
-		tearDownWallet();
+		if (displayWalletConnection) {
+			tearDownWallet();
+		}
 	});
 
 	$: path = $page.url.pathname;
 </script>
+
 
 <div class="max-w-7xl mx-auto px-2 sm:px-6 lg:px-8">
 	<div class="relative flex items-center justify-between h-16">
@@ -126,131 +134,134 @@
 				</div>
 			</div>
 		</div>
+
 		<div
 			class="absolute inset-y-0 right-0 flex items-center pr-2 sm:static sm:inset-auto sm:ml-3 sm:pr-0"
 		>
 			<!-- Profile dropdown -->
-			{#if $connected}
-				<div class="pr-2 md:pr-4 text-right text-sm text-white">
-					{#await $shortOrENSNamedAccount}
-						Loading
-					{:then address}
-						<div class="flex justify-center">
-							<button
-								on:click={() => {
-									copyToClipBoardAndNotify('Connected wallet address', $walletState.account);
-								}}
-							>
-								<span class="inline-flex items-center">
-									<span class="relative flex h-2 w-2 mx-2">
-										<span class="relative inline-flex rounded-full h-2 w-2 bg-green-400" />
+			{#if displayWalletConnection}
+				{#if $connected}
+					<div class="pr-2 md:pr-4 text-right text-sm text-white">
+						{#await $shortOrENSNamedAccount}
+							Loading
+						{:then address}
+							<div class="flex justify-center">
+								<button
+									on:click={() => {
+										copyToClipBoardAndNotify('Connected wallet address', $walletState.account);
+									}}
+								>
+									<span class="inline-flex items-center">
+										<span class="relative flex h-2 w-2 mx-2">
+											<span class="relative inline-flex rounded-full h-2 w-2 bg-green-400" />
+										</span>
+										<span>{address} </span>
+										<span><Icon src={Clipboard} class="self-center ml-2" size="16" /></span>
 									</span>
-									<span>{address} </span>
-									<span><Icon src={Clipboard} class="self-center ml-2" size="16" /></span>
-								</span>
-							</button>
-						</div>
-					{/await}
-				</div>
-			{:else if $walletState.connectionState === ConnectionState.ConnectedButNoAccountAvailable}
-				<div class="inline-flex items-baseline">
-					<span class="relative flex h-2 w-2 mx-2 float-right">
-						<span
-							class="animate-ping absolute inline-flex h-full w-full rounded-full bg-yellow-400 opacity-75"
-						/>
-						<span class="relative inline-flex rounded-full h-2 w-2 bg-yellow-400" />
-					</span>
-					<p class="pt-1 text-right text-sm text-white invisible sm:visible">Wallet locked</p>
-				</div>
-			{:else if $walletState.connectionState === ConnectionState.ConnectedToUnsupportedNetwork}
-				<div class="inline-flex items-baseline">
-					<span class="relative flex h-2 w-2 mx-2 float-right">
-						<span
-							class="animate-ping absolute inline-flex h-full w-full rounded-full bg-yellow-400 opacity-75"
-						/>
-						<span class="relative inline-flex rounded-full h-2 w-2 bg-yellow-400" />
-					</span>
-					<p class="hidden md:block pt-1 text-right text-sm text-white invisible sm:visible">
-						Change your wallet to chain id {VITE_WALLET_CONNECT_CHAIN_ID}
-					</p>
-				</div>
-			{:else if $walletState.connectionState === ConnectionState.Disconnected}
-				<div class="inline-flex items-baseline">
-					<span class="relative flex h-2 w-2 mx-2 float-right">
-						<span class="relative inline-flex rounded-full h-2 w-2 bg-red-400" />
-					</span>
-					<p class="hidden md:block pt-1 text-right text-sm text-white invisible sm:visible">
-						Disconnected
-					</p>
-				</div>
-			{/if}
-			<div class="ml-2 relative">
-				<div>
-					<button
-						on:click={flipProfileMenu}
-						type="button"
-						class="bg-gray-800 flex text-sm rounded-full focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-800 focus:ring-white"
-						id="user-menu-button"
-						aria-expanded="false"
-						aria-haspopup="true"
-					>
-						<span class="sr-only">Open user menu</span>
-						<img class="h-8 w-8 rounded-full" src="/images/site/Ethereum.svg" alt="" />
-					</button>
-				</div>
-
-				{#if profileMenuOpen}
-					<div
-						use:clickOutside={() => (profileMenuOpen = false)}
-						transition:fade|global={{ duration: 130 }}
-						class="origin-top-right absolute right-0 mt-2 w-52 rounded-md shadow-lg py-1 bg-white text-gray-800 dark:text-gray-200 dark:bg-gray-800 ring-1 ring-black ring-opacity-5 focus:outline-none"
-						role="menu"
-						aria-orientation="vertical"
-						aria-labelledby="user-menu-button"
-						tabindex="-1"
-					>
-						{#if $walletState.connectionState !== ConnectionState.Disconnected}
-							<!-- svelte-ignore a11y-invalid-attribute -->
-							<a
-								href="#"
-								on:click={async () => {
-									await disconnect();
-									profileMenuOpen = false;
-								}}
-								class="block px-4 py-4 text-sm"
-								role="menuitem"
-								tabindex="-1"
-								id="user-menu-item-0">Disconnect wallet</a
-							>
-						{:else}
-							<!-- svelte-ignore a11y-invalid-attribute -->
-							<a
-								href="#"
-								on:click={async () => {
-									await connect(WalletType.WalletConnect);
-									profileMenuOpen = false;
-								}}
-								class="block px-4 py-4 text-sm"
-								role="menuitem"
-								tabindex="-1"
-								id="user-menu-item-0">Connect to external wallet</a
-							>
-							<!-- svelte-ignore a11y-invalid-attribute -->
-							<a
-								href="#"
-								on:click={async () => {
-									await connect(WalletType.Injected);
-									profileMenuOpen = false;
-								}}
-								class="block px-4 py-4 text-sm"
-								role="menuitem"
-								tabindex="-1"
-								id="user-menu-item-0">Connect to browser wallet</a
-							>
-						{/if}
+								</button>
+							</div>
+						{/await}
+					</div>
+				{:else if $walletState.connectionState === ConnectionState.ConnectedButNoAccountAvailable}
+					<div class="inline-flex items-baseline">
+						<span class="relative flex h-2 w-2 mx-2 float-right">
+							<span
+								class="animate-ping absolute inline-flex h-full w-full rounded-full bg-yellow-400 opacity-75"
+							/>
+							<span class="relative inline-flex rounded-full h-2 w-2 bg-yellow-400" />
+						</span>
+						<p class="pt-1 text-right text-sm text-white max-w-[120px] md:max-w-full">Wallet locked</p>
+					</div>
+				{:else if $walletState.connectionState === ConnectionState.ConnectedToUnsupportedNetwork}
+					<div class="inline-flex items-baseline">
+						<span class="relative flex h-2 w-2 mx-2 float-right">
+							<span
+								class="animate-ping absolute inline-flex h-full w-full rounded-full bg-yellow-400 opacity-75"
+							/>
+							<span class="relative inline-flex rounded-full h-2 w-2 bg-yellow-400" />
+						</span>
+						<p class="pt-1 text-right text-sm text-white max-w-[120px] md:max-w-full">
+							Change your wallet to chain id {VITE_WALLET_CONNECT_CHAIN_ID}
+						</p>
+					</div>
+				{:else if $walletState.connectionState === ConnectionState.Disconnected}
+					<div class="inline-flex items-baseline">
+						<span class="relative flex h-2 w-2 mx-2 float-right">
+							<span class="relative inline-flex rounded-full h-2 w-2 bg-red-400" />
+						</span>
+						<p class="pt-1 text-right text-sm text-white max-w-[120px] md:max-w-full">
+							Disconnected
+						</p>
 					</div>
 				{/if}
-			</div>
+				<div class="ml-2 relative">
+					<div>
+						<button
+							on:click={flipProfileMenu}
+							type="button"
+							class="bg-gray-800 flex text-sm rounded-full focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-800 focus:ring-white"
+							id="user-menu-button"
+							aria-expanded="false"
+							aria-haspopup="true"
+						>
+							<span class="sr-only">Open user menu</span>
+							<img class="h-8 w-8 rounded-full" src="/images/site/Ethereum.svg" alt="" />
+						</button>
+					</div>
+
+					{#if profileMenuOpen}
+						<div
+							use:clickOutside={() => (profileMenuOpen = false)}
+							transition:fade|global={{ duration: 130 }}
+							class="origin-top-right absolute right-0 mt-2 w-52 rounded-md shadow-lg py-1 bg-white text-gray-800 dark:text-gray-200 dark:bg-gray-800 ring-1 ring-black ring-opacity-5 focus:outline-none"
+							role="menu"
+							aria-orientation="vertical"
+							aria-labelledby="user-menu-button"
+							tabindex="-1"
+						>
+							{#if $walletState.connectionState !== ConnectionState.Disconnected}
+								<!-- svelte-ignore a11y-invalid-attribute -->
+								<a
+									href="#"
+									on:click={async () => {
+										await disconnect();
+										profileMenuOpen = false;
+									}}
+									class="block px-4 py-4 text-sm"
+									role="menuitem"
+									tabindex="-1"
+									id="user-menu-item-0">Disconnect wallet</a
+								>
+							{:else}
+								<!-- svelte-ignore a11y-invalid-attribute -->
+								<a
+									href="#"
+									on:click={async () => {
+										await connect(WalletType.WalletConnect);
+										profileMenuOpen = false;
+									}}
+									class="block px-4 py-4 text-sm"
+									role="menuitem"
+									tabindex="-1"
+									id="user-menu-item-0">Connect to external wallet</a
+								>
+								<!-- svelte-ignore a11y-invalid-attribute -->
+								<a
+									href="#"
+									on:click={async () => {
+										await connect(WalletType.Injected);
+										profileMenuOpen = false;
+									}}
+									class="block px-4 py-4 text-sm"
+									role="menuitem"
+									tabindex="-1"
+									id="user-menu-item-0">Connect to browser wallet</a
+								>
+							{/if}
+						</div>
+					{/if}
+				</div>
+			{/if}
 		</div>
 	</div>
 </div>

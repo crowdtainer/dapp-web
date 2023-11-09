@@ -8,8 +8,9 @@
 	import { copyToClipBoardAndNotify } from './Utils/clipboard.js';
 	import type { CrowdtainerStaticModel } from './Model/CrowdtainerModel.js';
 	import { moneyFormatter } from '$lib/Utils/moneyFormatter.js';
-	import { ethers } from 'ethers';
 	import type { UIFields } from './Converters/CrowdtainerData.js';
+	import { projects } from '../routes/Data/projects.json';
+	import { onMount } from 'svelte';
 
 	export let vouchers721Address: string;
 	export let crowdtainerId: number;
@@ -18,6 +19,8 @@
 
 	let visible: boolean;
 
+	let chainId: number | undefined;
+
 	function visibilityToggle() {
 		visible = !visible;
 	}
@@ -25,6 +28,16 @@
 	$: discount = campaignStaticData.referralRate
 		? BigNumber.from(campaignStaticData.referralRate).toNumber() / 2
 		: BigNumber.from(0);
+
+	onMount(() => {
+		let projectData = projects.filter((project) => project.crowdtainerId === crowdtainerId);
+		if (projectData.length !== 1) {
+			console.warn('Unable to find project data');
+			return;
+		}
+		chainId = projectData[0].chainId;
+	});
+
 </script>
 
 <div class="mb-4">
@@ -47,6 +60,14 @@
 			class="border border-black dark:border-white p-2 mt-2 text-sm"
 		>
 			<table class="table-auto">
+				<tr>
+					<td>Network:</td>
+					<td>
+						<span class="inline-flex items-baseline">
+							<span>{chainId} (chain id)</span>
+						</span>
+					</td>
+				</tr>
 				<tr>
 					<td class="pr-20"> Vouchers721: </td>
 					<td>
@@ -209,6 +230,24 @@
 								</span>
 							</button>
 						{/if}
+					</td>
+				</tr>
+
+				<!-- Dates -->
+				<tr>
+					<td>Start date:</td>
+					<td>
+						<span class="inline-flex items-baseline">
+							<span>{campaignStaticUI.startDateString}</span>
+						</span>
+					</td>
+				</tr>
+				<tr>
+					<td>End date:</td>
+					<td>
+						<span class="inline-flex items-baseline">
+							<span>{campaignStaticUI.endDateString}</span>
+						</span>
 					</td>
 				</tr>
 			</table>
