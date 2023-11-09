@@ -15,6 +15,7 @@
 	import { projectFromCrowdtainerId } from '$lib/TokenUtils/search.js';
 	import { showToast } from '$lib/Toast/ToastStore.js';
 	import { campaignStaticStores } from '$lib/Stores/campaignStaticDataStore.js';
+	import { onMount } from 'svelte';
 
 	let modalDialog: ModalDialog;
 
@@ -68,6 +69,10 @@
 
 	// Immediatelly update UI elements related to connected wallet on wallet or connection change
 	$: $accountAddress, reloadUserData();
+
+	onMount(async () => {
+		reloadUserData();
+	});
 </script>
 
 <ModalDialog bind:this={modalDialog} />

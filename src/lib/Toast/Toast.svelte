@@ -8,7 +8,7 @@
 	const dispatch = createEventDispatcher();
 
 	export let type: MessageType = MessageType.Warning;
-	export let dismissible = true;
+	export let dismissible = false;
 
 	$: typeString = (type: MessageType): string => {
 		switch (type) {

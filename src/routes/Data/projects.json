@@ -7,7 +7,7 @@
             "crowdtainerId": 1,
             "chainId": 31337,
             "tokenVersion": "1",
-            "txSponsoringEnabled":true,
+            "txSponsoringEnabled": true,
             "title": "Roasted Filter Coffee Beans TEST 1",
             "subtitle": "Santa Inácia and Santa Alina Farms",
             "description": "Explore the amazing world of Single Origin coffee beans. Sitting at altitudes between 950 and 1,450 m.a.s.l., the farm covers almost 900 hectares of predominantly hilly terrain, of which 239 hectares are used for coffee cultivation.",
@@ -30,37 +30,16 @@
             "basePriceUnit": "kg",
             "productConfiguration": {
                 "categoryDelimiter": " | ",
-                "categoryDescriptors" : [ "Delivery", "Type", "Size"]
-            }
-        },{
-            "crowdtainerId": 2,
-            "chainId": 31337,
-            "tokenVersion": "1",
-            "txSponsoringEnabled": false,
-            "title": "Roasted Filter Coffee Beans TEST 2",
-            "subtitle": "Santa Inácia and Santa Alina Farms",
-            "description": "Explore the amazing world of Single Origin coffee beans. Sitting at altitudes between 950 and 1,450 m.a.s.l., the farm covers almost 900 hectares of predominantly hilly terrain, of which 239 hectares are used for coffee cultivation.",
-            "projectURL": "https://shop.barterfly.de/index.php/meet-your-farmers/",
-            "projectImageURLs": [
-                "images/projects/CoffeeBag.png",
-                "images/projects/CoffeeBag.png",
-                "images/projects/CoffeeBag.png"
-            ],
-            "basePriceDenominator": [
-                0.5,
-                1,
-                1.5,
-                3,
-                0.5,
-                1,
-                1.5,
-                3
-            ],
-            "basePriceUnit": "kg",
-            "productConfiguration": {
-                "categoryDelimiter": " | ",
-                "categoryDescriptors" : [ "Delivery", "Type", "Size"]
-            }
+                "categoryDescriptors": [
+                    "Delivery",
+                    "Type",
+                    "Size"
+                ]
+            },
+            "supportedCountriesForShipping": [
+                "Germany",
+                "Hungary"
+            ]
         }
     ]
 }

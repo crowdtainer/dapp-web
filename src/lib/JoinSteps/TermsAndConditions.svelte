@@ -1,13 +1,11 @@
 <script lang="ts">
-	import { accountAddress, connect, connected, getSigner, walletState } from '$lib/Utils/wallet';
+	import { accountAddress, connected, getSigner, walletState } from '$lib/Utils/wallet';
 	import { Icon } from '@steeze-ui/svelte-icon';
-	import { Check, ShieldCheck, InformationCircle } from '@steeze-ui/heroicons';
-	import { pseudoRandomNonce } from '$lib/Utils/random.js';
+	import { Check, ShieldCheck } from '@steeze-ui/heroicons';
 	import { makeAgreeToTermsMessage, signMessage } from '$lib/Model/SignTerms.js';
 	import { requestWalletAuthorizationAPI } from '$lib/api.js';
 
 	import { ethers } from 'ethers';
-	import { WalletType } from '$lib/Utils/walletStorage.js';
 	const ChainID = import.meta.env.VITE_WALLET_CONNECT_CHAIN_ID;
 
 	import ModalDialog, { ModalAnimation, ModalIcon, ModalType } from '$lib/ModalDialog.svelte';
@@ -16,6 +14,7 @@
 	import { MessageType } from '$lib/Toast/MessageType.js';
 	import ConnectWallet from '$lib/ConnectWallet.svelte';
 
+	export let supportedCountriesForShipping: string[];
 	export let userEmail: string;
 	export let termsAcceptanceSuccess: () => void;
 	export let acceptanceRequired = true;
@@ -27,14 +26,24 @@
 
 	let termsAccepted = false;
 
-	let deliveryAcknowledged = true;
-	let shipmentConditions = true;
-	let termsAcknowledged = true;
-	let feesAcknowledged = true;
+	let deliveryAcknowledged = false;
+	let shipmentConditions = false;
+	let termsAcknowledged = false;
+	let feesAcknowledged = false;
+	let shippingAcknowledged = false;
+
+	let supportedCountriesText = supportedCountriesForShipping.join(', ');
 
 	onMount(async () => {
 		if (!acceptanceRequired) {
 			termsAccepted = true;
+		}
+		if (termsAccepted) {
+			deliveryAcknowledged = true;
+			shipmentConditions = true;
+			termsAcknowledged = true;
+			feesAcknowledged = true;
+			shippingAcknowledged = true;
 		}
 	});
 
@@ -64,7 +73,7 @@
 			return;
 		}
 
-		if(vouchers721Address === undefined) {
+		if (vouchers721Address === undefined) {
 			showToast('Error: Missing Vouchers721Address.', MessageType.Warning);
 			return;
 		}
@@ -148,30 +157,46 @@
 
 {#if $connected}
 	<div class="text-left mx-4">
-		<div class="flex justify-center gap-2 my-2">
-			<div class="grid grid-flow-col auto-cols-max my-2">
-				<div><Icon src={ShieldCheck} class="text-green-600" size="24" /></div>
-				<p class="text-xs px-1 py-1">Connected to: <b>{$accountAddress}</b></p>
+		<div class="flex justify-center my-2">
+			<div class="grid grid-flow-col auto-cols-max">
+				<div class="my-1">Please confirm:</div>
 			</div>
 		</div>
 
 		<div class="flex justify-center">
-			<label class="label cursor-pointer gap-3 my-4 sm:w-full md:w-4/5 lg:w-4/6 xl:w-3/6">
+			<label class="label cursor-pointer gap-3 my-1 sm:w-full md:w-4/5 lg:w-4/6 xl:w-3/6">
 				<input
 					type="checkbox"
 					disabled={termsAccepted}
 					bind:checked={deliveryAcknowledged}
 					class="checkbox checkbox-primary"
 				/>
-				<span class="label-text dark:text-white"
-					>I acknowledge that if the project is succesful, I need to return to this website to
-					provide my delivery details.</span
+				<span class="label-text dark:text-white w-full"
+					>If the project is succesful, I need to return to this website to provide my delivery
+					details.</span
 				>
 			</label>
 		</div>
 
+		{#if supportedCountriesForShipping.length > 0}
+		<div class="flex sm:justify-center">
+			<label class="label cursor-pointer gap-3 my-1 sm:w-full md:w-4/5 lg:w-4/6 xl:w-3/6">
+				<input
+						type="checkbox"
+						disabled={termsAccepted}
+						bind:checked={shippingAcknowledged}
+						class="checkbox checkbox-primary"
+					/>
+				<span class="label-text dark:text-white w-full"
+					>Shipping is only possible to: {supportedCountriesText}.</span
+				>
+			</label>
+		</div>
+		{/if}
+
+
 		<div class="flex justify-center">
-			<label class="label cursor-pointer gap-3 my-4 sm:w-full md:w-4/5 lg:w-4/6 xl:w-3/6">
+			<label class="label cursor-pointer gap-3 my-1 sm:w-full md:w-4/5 lg:w-4/6 xl:w-3/6">
 				<input
 					type="checkbox"
 					disabled={termsAccepted}
@@ -186,7 +211,7 @@
 		</div>
 
 		<div class="flex justify-center">
-			<label class="label cursor-pointer gap-3 my-4 sm:w-full md:w-4/5 lg:w-4/6 xl:w-3/6">
+			<label class="label cursor-pointer gap-3 my-1 sm:w-full md:w-4/5 lg:w-4/6 xl:w-3/6">
 				<input
 					type="checkbox"
 					disabled={termsAccepted}
@@ -202,7 +227,7 @@
 		</div>
 
 		<div class="flex justify-center">
-			<label class="label cursor-pointer gap-3 my-4 sm:w-full md:w-4/5 lg:w-4/6 xl:w-3/6">
+			<label class="label cursor-pointer gap-3 my-1 sm:w-full md:w-4/5 lg:w-4/6 xl:w-3/6">
 				<input
 					type="checkbox"
 					disabled={termsAccepted}
@@ -210,18 +235,42 @@
 					class="checkbox checkbox-primary"
 				/>
 				<span class="label-text dark:text-white"
-					>I agree to the <b>General Terms and Conditions</b> and that I am solely responsible in safeguarding
-					my cryptographic private keys used to interact with this website.</span
+					>I agree to the <a class="link" target="_blank" href="/Legal/Terms" rel="noopener"
+						>General Terms and Conditions</a
+					> and that I am solely responsible in safeguarding my cryptographic private keys used to interact
+					with this website.</span
 				>
 			</label>
 		</div>
 
 		<div class="flex justify-center">
 			<div>
-				<a class="link" target="_blank" href="/Legal/Terms" rel="noopener"
-					>General Terms and Conditions ⏍
-				</a>
+				<button
+					disabled={feesAcknowledged &&
+						deliveryAcknowledged &&
+						termsAcknowledged &&
+						shipmentConditions &&
+						shippingAcknowledged}
+					class="{modalDialog.open ? 'hidden' : ''} btn btn-primary mx-2 my-2 w-auto"
+					on:click={() => {
+						feesAcknowledged =
+							deliveryAcknowledged =
+							termsAcknowledged =
+							shipmentConditions =
+							shippingAcknowledged =
+								true;
+					}}
+				>
+					Select all items
+				</button>
 			</div>
+		</div>
+	</div>
+
+	<div class="flex justify-center gap-2 my-2">
+		<div class="grid grid-flow-col auto-cols-max my-2">
+			<div><Icon src={ShieldCheck} class="text-green-600" size="24" /></div>
+			<p class="text-xs px-1 py-1">Connected to: <b>{$accountAddress}</b></p>
 		</div>
 	</div>
 
@@ -239,7 +288,8 @@
 			disabled={!feesAcknowledged ||
 				!deliveryAcknowledged ||
 				!termsAcknowledged ||
-				!shipmentConditions}
+				!shipmentConditions ||
+				!shippingAcknowledged}
 			class="{modalDialog.open ? 'hidden' : ''} btn btn-primary mx-2 my-2 w-28"
 			on:click={callSignTermsAndConditions}
 		>

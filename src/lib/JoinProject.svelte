@@ -10,6 +10,7 @@
 	export let basePriceDenominator: number[];
 	export let basePriceUnit: string;
 	export let referralRate: BigNumber | undefined;
+	export let supportedCountriesForShipping: string[];
 
 	import { onMount } from 'svelte';
 	import { slide } from 'svelte/transition';
@@ -264,6 +265,7 @@
 				</div>
 			{:else if preOrderStep === JoinStep.TermsAcceptance && vouchers721Address !== undefined && userEMailCode != ''}
 				<TermsAndConditions
+					{supportedCountriesForShipping}
 					{vouchers721Address}
 					{crowdtainerAddress}
 					{userEMailCode}

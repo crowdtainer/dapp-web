@@ -16,13 +16,13 @@
 	function setStyleForPage(path: string) {
 		if (path === '/') {
 			navBarStyle = 'bg-[#172939] dark:backdrop-blur-none dark:backdrop-blur-sm';
-			backgroundColor = 'bg-white dark:bg-[#172939]';
+			backgroundColor = 'bg-[#fefefe] dark:bg-[#172939]';
 			footerBackgroundColor = 'bg-[#FFF8F0] dark:bg-[#153437]';
 			backgroundStyle = ``;
 			backdropStyle = 'backdrop-blur-[0px] dark:backdrop-brightness-[0.6]';
 		} else {
 			navBarStyle = 'bg-[#172939] dark:backdrop-blur-none dark:backdrop-blur-sm';
-			backgroundColor = 'bg-white dark:bg-[#101921]';
+			backgroundColor = 'bg-[#fefefe] dark:bg-[#101921]';
 			footerBackgroundColor = '';
 			backgroundStyle = '';
 			backdropStyle = '';

@@ -106,7 +106,7 @@
 					}}
 				>
 					<span
-						class="h-auto w-40 relative px-5 py-6 transition-all ease-in duration-75 bg-white rounded-md group-hover:bg-opacity-0"
+						class="squared-btn"
 					>
 						<div class="flex justify-center items-center">
 							<img width="30" height="30" src="images/site/Cart.svg" alt="Checkout" />
@@ -134,7 +134,7 @@
 					}}
 				>
 					<span
-						class="h-auto w-40 relative px-5 py-6 transition-all ease-in duration-75 bg-white rounded-md group-hover:bg-opacity-0"
+						class="squared-btn"
 					>
 						<div class="flex justify-center items-center">
 							<img
@@ -179,7 +179,7 @@
 					}}
 				>
 					<span
-						class="h-auto w-40 relative px-5 py-6 transition-all ease-in duration-75 bg-white rounded-md group-hover:bg-opacity-0"
+						class="squared-btn"
 					>
 						<div class="flex justify-center items-center">
 							<img width="30" height="30" src="images/site/Exit.svg" alt="Leave campaign" />
@@ -211,7 +211,7 @@
 				}}
 			>
 				<span
-					class="h-auto w-40 relative px-5 py-6 transition-all ease-in duration-75 bg-white rounded-md group-hover:bg-opacity-0"
+					class="squared-btn"
 				>
 					<div class="flex justify-center items-center">
 						<img width="30" height="30" src="images/site/Exit.svg" alt="Leave campaign" />
@@ -237,7 +237,7 @@
 					}}
 				>
 					<span
-						class="h-auto w-40 relative px-5 py-6 transition-all ease-in duration-75 bg-white rounded-md group-hover:bg-opacity-0"
+						class="squared-btn"
 					>
 						<div class="flex justify-center items-center">
 							<p class="text-4xl">💲</p>

@@ -45,6 +45,7 @@
 
 	let fundsInContract: number | undefined;
 	let raisedAmount: number | undefined;
+	let isInThePast: boolean;
 
 	initializeDataForWallet($campaignStaticData.contractAddress, $accountAddress);
 
@@ -58,6 +59,9 @@
 		}
 		if (campaignStaticUI === undefined) {
 			return;
+		}
+		if ($campaignStaticUI.endDate < new Date()) {
+			isInThePast = true;
 		}
 	}
 
@@ -102,13 +106,18 @@
 	<ProjectRaisedAmount {crowdtainerId} {projectId} {staticDataLoadStatus} />
 
 	<!-- Main Status -->
-	<div class="flex flex-wrap justify-between gap-6">
+	<div class="flex flex-wrap justify-between gap-8">
 		<div>
 			<p class="projectStatus">{stateString}</p>
 			<p class="projectDataSubtitle">Status</p>
 		</div>
 
-		<MoneyInContract {fundsInContract} {raisedAmount} campaignStaticUI={$campaignStaticUI} {state} />
+		<MoneyInContract
+			{fundsInContract}
+			{raisedAmount}
+			campaignStaticUI={$campaignStaticUI}
+			{state}
+		/>
 
 		<div class="min-w-max">
 			{#if campaignStaticUI}
@@ -125,21 +134,38 @@
 		</div>
 	</div>
 
-	<!-- Dates -->
-	<div class="flex py-4 justify-between gap-12">
-		<div class="">
-			<p class="projectData">
-				{campaignStaticUI ? $campaignStaticUI.startDateString : loadingString}
-			</p>
-			<p class="projectDataSubtitle">Start</p>
+	<!-- Dates | Only show fields if the campaign is in the past -->
+	{#if isInThePast}
+		<div class="flex py-4 justify-between gap-12">
+			<div class="">
+				<p class="projectData">
+					{campaignStaticUI ? $campaignStaticUI.startDateString : loadingString}
+				</p>
+				<p class="projectDataSubtitle">Start</p>
+			</div>
+			<div class="">
+				<p class="projectData">
+					{campaignStaticUI ? $campaignStaticUI.endDateString : loadingString}
+				</p>
+				<p class="projectDataSubtitle">End</p>
+			</div>
 		</div>
-		<div class="">
-			<p class="projectData">
-				{campaignStaticUI ? $campaignStaticUI.endDateString : loadingString}
-			</p>
-			<p class="projectDataSubtitle">End</p>
+	{:else}
+		<div class="text-sm text-gray-800 dark:text-gray-200 my-4">
+			This campaign will only be funded if it reaches its goal by {$campaignStaticUI.endDate.toLocaleString(
+				'en-GB',
+				{
+					weekday: 'short',
+					year: 'numeric',
+					month: 'long',
+					day: '2-digit',
+					hour: '2-digit',
+					minute: '2-digit',
+					timeZoneName: 'short'
+				}
+			)}.
 		</div>
-	</div>
+	{/if}
 
 	<!-- Smart contract details -->
 	<div class="dark:text-gray-200">

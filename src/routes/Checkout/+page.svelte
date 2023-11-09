@@ -6,8 +6,14 @@
 	import { fetchDynamicData, fetchStaticData } from '$lib/api';
 	import { LoadStatus, ProjectStatusUI, toState } from '$lib/Converters/CrowdtainerData';
 	import type { CrowdtainerDynamicModel } from '$lib/Model/CrowdtainerModel';
+	import { projects } from '../Data/projects.json';
 
-	import { connected, getSigner, accountAddress, injectedProviderAvailableNow } from '$lib/Utils/wallet';
+	import {
+		connected,
+		getSigner,
+		accountAddress,
+		injectedProviderAvailableNow
+	} from '$lib/Utils/wallet';
 	import EmptySection from '$lib/EmptySection.svelte';
 	import { connect } from '$lib/Utils/wallet';
 	import { WalletType } from '$lib/Utils/walletStorage';
@@ -26,10 +32,14 @@
 	let userWalletInvalid: boolean;
 	let tokenIdAssociations: TokenIDAssociations;
 
+	let countriesList: string[] | undefined = undefined;
+
 	let projectTitle: string | null;
 	let projectURL: string | null;
 	let voucherId: BigNumber;
 	let vouchers721Address: string;
+
+	let crowdtainerId: number | undefined = undefined;
 
 	let tokenValidForWallet: boolean;
 
@@ -66,7 +76,11 @@
 
 		loadedWallet = await currentSigner.getAddress();
 
-		let walletTokensSearch = await findTokenIdsForWallet(currentSigner, vouchers721Address, loadedWallet);
+		let walletTokensSearch = await findTokenIdsForWallet(
+			currentSigner,
+			vouchers721Address,
+			loadedWallet
+		);
 		if (walletTokensSearch.isErr()) {
 			console.log(`Unable to search wallet tokens: ${walletTokensSearch.unwrapErr()}`);
 			//TODO: inform user
@@ -82,7 +96,9 @@
 		}
 
 		// parameter needs to match token owner
-		let foundToken = tokenIdAssociations.foundTokenIds.filter((item) => item === voucherId.toNumber());
+		let foundToken = tokenIdAssociations.foundTokenIds.filter(
+			(item) => item === voucherId.toNumber()
+		);
 		if (foundToken.length === 0) {
 			console.log('The specified token does not belong to the connected wallet.');
 			return;
@@ -108,9 +124,16 @@
 		// console.log(JSON.stringify(tokenJSON));
 
 		let jsonObject = JSON.parse(JSON.stringify(tokenJSON));
+		crowdtainerId = Number(jsonObject.crowdtainerId);
+
+		if (!crowdtainerId) {
+			console.warn('Unable to find crowdtainer ID');
+			return;
+		}
 
 		// Load dynamic data
-		let campaignDynamicDataResult = await fetchDynamicData(jsonObject.crowdtainerId);
+
+		let campaignDynamicDataResult = await fetchDynamicData(crowdtainerId);
 		if (campaignDynamicDataResult.isErr()) {
 			console.log('Unable to read dynamic contract data.');
 			return;
@@ -119,7 +142,7 @@
 		campaignDynamicData = campaignDynamicDataResult.unwrap();
 
 		// Load static data
-		let result = await fetchStaticData([jsonObject.crowdtainerId]);
+		let result = await fetchStaticData([crowdtainerId]);
 		if (!result.isOk()) {
 			console.log('Unable to fetch data');
 			return;
@@ -131,6 +154,16 @@
 		}
 		let campaignStaticData = result.unwrap()[0];
 		projectStatusUI = toState(campaignDynamicData, campaignStaticData);
+
+		// load shipping country restrictions
+		let projectData = projects.filter((project) => project.crowdtainerId === crowdtainerId);
+		if (projectData.length !== 1) {
+			console.warn('Unable to find project data');
+			return;
+		}
+		countriesList = new Array<string>();
+		countriesList = projectData[0].supportedCountriesForShipping;
+
 		staticDataLoadStatus = LoadStatus.Loaded;
 	}
 
@@ -161,10 +194,10 @@
 	<div class="max-w-7xl mx-auto py-4 px-4 sm:px-6 lg:px-8">
 		<div class="text-md breadcrumbs text-white">
 			<ul>
-			  <li><a href={projectURL}>{(projectTitle)? `${projectTitle}`: ''}</a></li> 
-			  <li>Checkout &nbsp; 🛍️</li>
+				<li><a href={projectURL}>{projectTitle ? `${projectTitle}` : ''}</a></li>
+				<li>Checkout &nbsp; 🛍️</li>
 			</ul>
-		  </div>
+		</div>
 	</div>
 </header>
 
@@ -185,11 +218,15 @@
 					/>
 				</div>
 			</div>
-			<DeliveryAddress
-				walletAddress={loadedWallet}
-				{vouchers721Address}
-				voucherId={voucherId.toNumber()}
-			/>
+
+			{#if countriesList}
+				<DeliveryAddress
+					supportedCountriesFilter={countriesList}
+					walletAddress={loadedWallet}
+					{vouchers721Address}
+					voucherId={voucherId.toNumber()}
+				/>
+			{/if}
 		</div>
 	{:else if projectStatusUI === ProjectStatusUI.Loading}
 		<p class="text-black dark:text-white text-center mx-2 my-4">Loading data..</p>
