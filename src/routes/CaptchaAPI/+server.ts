@@ -28,7 +28,7 @@ export const POST: RequestHandler = async ({ }) => {
     let randomNumber = randomInt(9999999999);
     let captchaIdsKey = 'captchaId:v1:' + randomNumber;
 
-    let captcha = svgCaptcha.create({ size: 5, ignoreChars: '0o1i', noise: 2, color: false })
+    let captcha = svgCaptcha.create({ size: 5, ignoreChars: '0o1iILl', noise: 2, color: false })
 
     try {
         await redis.set(captchaIdsKey, captcha.text, 'EX', codeExpireTimeInSeconds);

@@ -41,7 +41,7 @@
 			<!-- Discount code | start -->
 			{#if (validUserCouponCode === undefined || validUserCouponCode === '') && referralEnabled}
 				<!-- content here -->
-				<div class="flex justify-center my-4">
+				<div class="flex justify-center mx-5 my-4">
 					<div
 						class="tooltip tooltip-info tooltip-right sm:tooltip-bottom lg:tooltip-left p-1 mt-2"
 						data-tip="Enter your friends code to apply discount."
@@ -56,12 +56,12 @@
 							redField = false;
 						}}
 						placeholder="Coupon / referral code"
-						class="{redField && validUserCouponCode === ''
+						class=" {redField && validUserCouponCode === ''
 							? 'border-red-600 border-2'
-							: ''} input input-primary w-full max-w-xs dark:text-black"
+							: ''} input input-primary w-[200px] dark:text-black"
 					/>
 					<button
-						class="btn btn-outline mx-2 w-28 dark:text-white dark:disabled:text-gray-200"
+						class="btn btn-outline mx-2 w-20 dark:text-white dark:disabled:text-gray-200"
 						on:click={userAppliedCoupon}
 					>
 						<p>Apply</p>
@@ -72,7 +72,7 @@
 
 			<!-- Summary -->
 			<div
-				class="text-black dark:text-white divide-y divide-dashed text-right mr-4 sm:mr-12 my-2 py-4"
+				class="text-black dark:text-white divide-y divide-dashed text-right mr-4 sm:mr-12 my-2 py-2"
 			>
 				{#if validUserCouponCode !== undefined && validUserCouponCode !== '' && referralEnabled}
 					<p class="text-sm sm:text-md text-primary my-2">
