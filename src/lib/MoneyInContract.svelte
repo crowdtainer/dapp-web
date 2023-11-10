@@ -16,32 +16,40 @@
 
 	function setRaisedAmount(raised: number | undefined, fundsInContract: number | undefined) {
 		raised === undefined ? tweenedRaised.set(0) : tweenedRaised.set(raised);
-		fundsInContract === undefined ? tweenedFundsInContract.set(0) : tweenedFundsInContract.set(fundsInContract);
+		fundsInContract === undefined
+			? tweenedFundsInContract.set(0)
+			: tweenedFundsInContract.set(fundsInContract);
 	}
 
 	$: setRaisedAmount(raisedAmount, fundsInContract);
 </script>
 
-<div class="">
+<div class="px-2">
 	{#if state === ProjectStatusUI.Failed || state === ProjectStatusUI.ServiceProviderDeclined}
-		<p class="projectStatus">
-			{moneyFormatter.format($tweenedFundsInContract)}
-			{campaignStaticUI ? campaignStaticUI.tokenSymbol : ''}
-		</p>
+		<div class="projectStatus">
+			<div class="flex flex-inline">
+				{moneyFormatter.format($tweenedFundsInContract)}
+				<p class="text-xs">{campaignStaticUI ? campaignStaticUI.tokenSymbol : ''}</p>
+			</div>
+		</div>
 		<p class="projectDataSubtitle">left in pool</p>
 	{:else if state === ProjectStatusUI.Delivery}
-	<p class="projectStatus">
-		{moneyFormatter.format($tweenedRaised)}
-		{campaignStaticUI ? campaignStaticUI.tokenSymbol : ''}
-	</p>
-	<p class="projectDataSubtitle">raised</p>
+		<div class="projectStatus">
+			<div class="flex flex-inline">
+				{moneyFormatter.format($tweenedRaised)}
+				<p class="text-xs">{campaignStaticUI ? campaignStaticUI.tokenSymbol : ''}</p>
+			</div>
+		</div>
+		<p class="projectDataSubtitle">raised</p>
 	{:else}
-		<p class="projectStatus">
-			{moneyFormatter.format($tweenedRaised)}
-			{campaignStaticUI ? campaignStaticUI.tokenSymbol : ''}
-		</p>
+		<div class="projectStatus">
+			<div class="flex flex-inline items-end text-left lg:text-right">
+				<div class='mr-2'>{moneyFormatter.format($tweenedRaised)}</div>
+				<p class="">{campaignStaticUI ? campaignStaticUI.tokenSymbol : ''}</p>
+			</div>
+		</div>
 		{#if campaignStaticUI}
-			<p class="projectDataSubtitle">
+			<p class="projectDataSubtitle lg:text-right">
 				raised of {moneyFormatter.format(Number(campaignStaticUI.minimum))} goal
 			</p>
 		{:else}
