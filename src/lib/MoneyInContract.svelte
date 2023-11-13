@@ -29,15 +29,15 @@
 		<div class="projectStatus">
 			<div class="flex flex-inline">
 				{moneyFormatter.format($tweenedFundsInContract)}
-				<p class="text-xs">{campaignStaticUI ? campaignStaticUI.tokenSymbol : ''}</p>
+				<p class="">{campaignStaticUI ? campaignStaticUI.tokenSymbol : ''}</p>
 			</div>
 		</div>
 		<p class="projectDataSubtitle">left in pool</p>
 	{:else if state === ProjectStatusUI.Delivery}
 		<div class="projectStatus">
-			<div class="flex flex-inline">
-				{moneyFormatter.format($tweenedRaised)}
-				<p class="text-xs">{campaignStaticUI ? campaignStaticUI.tokenSymbol : ''}</p>
+			<div class="flex flex-inline items-center items-end text-left lg:text-right ">
+				<div class='mr-2'>{moneyFormatter.format($tweenedRaised)}</div>
+				<p class="">{campaignStaticUI ? campaignStaticUI.tokenSymbol : ''}</p>
 			</div>
 		</div>
 		<p class="projectDataSubtitle">raised</p>

@@ -4,7 +4,12 @@
 	import MyCampaign from '$lib/MyCampaign.svelte';
 
 	import { Vouchers721Address } from '../Data/projects.json';
-	import { connected, getSigner, accountAddress, injectedProviderAvailableNow } from '$lib/Utils/wallet';
+	import {
+		connected,
+		getSigner,
+		accountAddress,
+		injectedProviderAvailableNow
+	} from '$lib/Utils/wallet';
 	import EmptySection from '$lib/EmptySection.svelte';
 	import { connect } from '$lib/Utils/wallet';
 	import { WalletType } from '$lib/Utils/walletStorage';
@@ -38,16 +43,9 @@
 	}
 
 	async function reloadUserData() {
-		if ($connected == false || !$accountAddress) {
-			console.log(
-				`Skipping reloadUserData(); connected: ${$connected} accountAddress: ${$accountAddress}`
-			);
-			return;
-		}
 		resetState();
-		let signer = getSigner();
 		let tokenIdSearchResult = await findTokenIdsForWallet(
-			signer,
+			getSigner(),
 			Vouchers721Address,
 			$accountAddress
 		);
@@ -68,7 +66,8 @@
 	}
 
 	// Immediatelly update UI elements related to connected wallet on wallet or connection change
-	$: $accountAddress, reloadUserData();
+	// $: $accountAddress, reloadUserData();
+	$: $connected, $accountAddress, reloadUserData();
 
 	onMount(async () => {
 		reloadUserData();

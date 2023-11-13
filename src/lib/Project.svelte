@@ -226,6 +226,7 @@
 				{#if loadingAnimation}
 					<div class:animate-pulse={tokenIdAssociations === undefined}>Loading...</div>
 				{:else if tokenIdAssociations !== undefined && tokenIdAssociations.foundTokenIds.length > 1}
+				<div class='flex'>
 					<div class="mt-4 md:mt-6 inline-flex items-center text-black dark:text-gray-200">
 						<p>More than one participation proof detected:</p>
 						<button
@@ -237,6 +238,7 @@
 							View in wallet ⎘</button
 						>
 					</div>
+				</div>
 				{:else if tokenIdAssociations !== undefined}
 					{#if staticDataLoadStatus === LoadStatus.Loading || !tokenIdAssociations || !$walletInCrowdtainer.lastLoadedEpochTimeInMs}
 						<div class="flex flex-inline items-center my-4">

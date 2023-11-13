@@ -30,7 +30,9 @@ export function createStaticCampaignDataStore() {
             let missingItems = new Array<number>();
             projectIds.forEach(element => {
                 if (!campaignData.availableProjectIds.includes(element)) {
-                    missingItems.push(element);
+                    if (!missingItems.includes(element)) {
+                        missingItems.push(element);
+                    }
                 }
             });
 
