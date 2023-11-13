@@ -138,7 +138,7 @@
 						</div>
 						<div class="flex flex-inline text-sm">
 							By entering your Email, you agree to the &nbsp;
-							<a target="_blank" rel="noopener" href="/Legal/PrivacyPolicy" class="link"
+							<a target="_blank" rel="noopener" class="link" href="/Legal/PrivacyPolicy"
 								>Privacy Policy</a
 							>.
 						</div>

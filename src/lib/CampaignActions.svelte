@@ -2,6 +2,9 @@
 	import { ProjectStatusUI } from '$lib/Converters/CrowdtainerData';
 	import ModalDialog from './ModalDialog.svelte';
 
+	import tippy from 'svelte-tippy';
+	import 'tippy.js/dist/tippy.css'; // optional
+
 	export let projectURL: string | undefined;
 	export let title: string | undefined;
 	export let tokenId: number | undefined;
@@ -92,11 +95,14 @@
 	{#if projectStatusUI === ProjectStatusUI.Delivery && orderStatus === OrderStatus.WaitingForDeliveryAddress && tokenId !== undefined}
 		<div class="p-0.5 mb-2 m-2">
 			<div
-				class="tooltip tooltip-right sm:tooltip-top rounded shadow-lg p-1 text-red-500 mt-4"
-				data-tip="Complete purchase by requesting your product delivery"
+				class="rounded shadow-lg p-1 text-red-500 mt-4"
 			>
 				<button
 					class="relative inline-flex items-center justify-center overflow-hidden text-sm font-medium text-gray-900 rounded-lg group bg-gradient-to-br from-teal-300 to-lime-300 group-hover:from-teal-300 group-hover:to-lime-300 focus:ring-4 focus:outline-none focus:ring-lime-200"
+					use:tippy={{
+						content: `Complete purchase by requesting your product delivery.`,
+						arrow: true,
+					  }}
 					on:click={() => {
 						goto(
 							`/Checkout?vouchers721Address=${vouchers721Address}&voucherId=${tokenId}&projectURL=${projectURL}&projectTitle=${
@@ -105,9 +111,7 @@
 						);
 					}}
 				>
-					<span
-						class="squared-btn"
-					>
+					<span class="squared-btn">
 						<div class="flex justify-center items-center">
 							<img width="30" height="30" src="images/site/Cart.svg" alt="Checkout" />
 						</div>
@@ -123,25 +127,26 @@
 	{#if projectStatusUI === ProjectStatusUI.Delivery && tokenId !== undefined && orderStatus === OrderStatus.WaitingForDeliveryAddress}
 		<div class="p-0.5 mb-2 m-2">
 			<div
-				class="tooltip tooltip-right sm:tooltip-top rounded shadow-lg p-1 text-red-500 mt-4"
-				data-tip="Transfer participation proof to another wallet"
+				class="rounded shadow-lg p-1 text-red-500 mt-4"
 			>
 				<button
 					class="relative inline-flex items-center justify-center overflow-hidden text-sm font-medium text-gray-900 rounded-lg group bg-gradient-to-br from-red-200 via-red-300 to-yellow-200 group-hover:from-red-200 group-hover:via-red-300 group-hover:to-yellow-200 focus:ring-4 focus:outline-none focus:ring-red-100"
+					use:tippy={{
+						content: `Transfer participation proof to another wallet.`,
+						arrow: true,
+					  }}
 					on:click={() => {
 						transferWalletUserInput = '';
 						showTransferDialog(transferWalletModalDialog);
 					}}
 				>
-					<span
-						class="squared-btn"
-					>
+					<span class="squared-btn">
 						<div class="flex justify-center items-center">
 							<img
 								width="30"
 								height="30"
 								src="images/site/Transfer.svg"
-								alt="Transfer participation proof to another wallet"
+								alt="Transfer participation proof to another wallet."
 							/>
 						</div>
 						<p class="text-lg mt-5">Transfer</p>
@@ -155,11 +160,14 @@
 		<!-- Leave button -->
 		<div class="p-0.5 mb-2 m-2">
 			<div
-				class="tooltip tooltip-right sm:tooltip-top rounded shadow-lg p-1 text-red-500 mt-4"
-				data-tip="Leave the campaign and get {tokenSymbol} back"
+				class="rounded shadow-lg p-1 text-red-500 mt-4"
 			>
 				<button
 					class="relative inline-flex items-center justify-center overflow-hidden text-sm font-medium text-gray-900 rounded-lg group bg-gradient-to-br from-pink-500 to-orange-400 group-hover:from-cyan-500 group-hover:to-blue-500 focus:ring-4 focus:outline-none focus:ring-red-400"
+					use:tippy={{
+						content: `Leave the campaign and get ${tokenSymbol} back`,
+						arrow: true,
+					  }}
 					on:click={async () => {
 						if (!wallet) {
 							showToast('Wallet address not available.');
@@ -178,9 +186,7 @@
 						);
 					}}
 				>
-					<span
-						class="squared-btn"
-					>
+					<span class="squared-btn">
 						<div class="flex justify-center items-center">
 							<img width="30" height="30" src="images/site/Exit.svg" alt="Leave campaign" />
 						</div>
@@ -210,9 +216,7 @@
 					);
 				}}
 			>
-				<span
-					class="squared-btn"
-				>
+				<span class="squared-btn">
 					<div class="flex justify-center items-center">
 						<img width="30" height="30" src="images/site/Exit.svg" alt="Leave campaign" />
 					</div>
@@ -227,18 +231,19 @@
 	{#if walletData !== undefined && !walletData.accumulatedRewards.isZero() && (projectStatusUI === ProjectStatusUI.Delivery || projectStatusUI === ProjectStatusUI.SuccessfulyFunded)}
 		<div class="p-0.5 mb-2 m-2">
 			<div
-				class="tooltip tooltip-right sm:tooltip-top rounded shadow-lg p-1 text-red-500 mt-4"
-				data-tip="Withdraw referral rewards / cashback."
+				class="rounded shadow-lg p-1 text-red-500 mt-4"
 			>
 				<button
 					class="relative inline-flex items-center justify-center overflow-hidden text-sm font-medium text-gray-900 rounded-lg group bg-gradient-to-br from-teal-300 to-lime-300 group-hover:from-teal-300 group-hover:to-lime-300 focus:ring-4 focus:outline-none focus:ring-lime-200"
+					use:tippy={{
+						content: `Withdraw referral rewards / cashback.`,
+						arrow: true,
+					  }}
 					on:click={() => {
 						callClaimRewards(crowdtainerAddress, modalDialog);
 					}}
 				>
-					<span
-						class="squared-btn"
-					>
+					<span class="squared-btn">
 						<div class="flex justify-center items-center">
 							<p class="text-4xl">💲</p>
 						</div>
