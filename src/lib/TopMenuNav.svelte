@@ -113,14 +113,14 @@
 					<img
 						class="block lg:hidden h-8 w-auto mx-16 sm:mx-0"
 						src="/images/site/CrowdtainerLogo.svg"
-						alt="Workflow"
+						alt="Crowdtainer"
 					/>
 				</a>
 				<a href="/">
 					<img
 						class="hidden lg:block h-8 w-auto"
 						src="/images/site/TopNavbarLogo.svg"
-						alt="Workflow"
+						alt="Crowdtainer"
 					/>
 				</a>
 			</div>

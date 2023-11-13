@@ -1,126 +1,96 @@
-<div class="flex justify-center my-6">
-	<div class="">
-		<img class="my-8 h-32 w-32 rounded-full" src="/images/site/CrowdtainerLogo.svg" alt=""/>
-	</div>
-</div>
 <div class="flex justify-center">
+	<a class="link" href="https://crowdtainer.io">
+		<img
+			class="lg:h-32 md:h-28 h-20 mt-8"
+			alt="Crowdtainer Logo"
+			src="images/site/CrowdtainerLogo.svg"
+		/>
+	</a>
+</div>
+<div class="flex justify-center mt-10">
 	<p class="font-sans text-center dark:text-gray-200 text-xl mb-2 md:mb-0 md:text-2xl">
-		About
+		<a class="link" href="https://crowdtainer.io">Crowdtainer:</a>
+		'<b><u>Crowd</u>funding a con<u>tainer</u></b>'.
 	</p>
 </div>
 
 <div class="flex flex-center">
 	<div class="max-w-lg mx-auto white overflow-hidden md:max-w-7xl px-6 mb-12">
 		<div class="prose lg:prose-lg prose-headings:underline prose-a:text-blue-600">
-			<article class="prose-blockquote:font-text prose-ol:font-text prose-li:font-text prose-p:font-text prose-h2:font-display">
+			<article
+				class="prose-blockquote:font-text prose-ol:font-text prose-li:font-text prose-p:font-text prose-h2:font-display text-xl"
+			>
 				<div class="text-gray-900 dark:text-[#C8D1D0]">
-					<!-- Why -->
-					<h2 class="text-primary">Why?</h2>
-					<p class="">
-						<b>The boostrapping dillema:</b> Is it worth to invest "X" in project "Y"? Is there enough
-						demand to justify the invesment?
-					</p>
-					<p>
-						I was faced with this question while thinking about how to export/import coffee beans
-						from my family's farm in Brazil, to Germany, whereby a minimum quantity/scale is needed
-						in order for a sale to make sense in the first place.
-					</p>
-
 					<blockquote class="dark:text-[#C8D1D0]">
-						Would it be possible to ship coffee abroad (from Brazil to Germany), but knowing upfront
-						that there is demand, instead of sending a whole container and taking the risk that not
-						enough demand is present?
+						A crowdfunding campaign allows multiple users contribute towards a specific goal set by
+						the project creator. If the targeted amount is reached or exceeded by the campaign's
+						deadline, the project creator withdrawls the funds and applies it towards the proposed
+						goal. Conversely, if the goal is not achieved, then all the users who contributed will
+						be able to withdraw their contribution.
 					</blockquote>
-					<p>
-						Can we <b>crowdfund a container</b>? The journey of discovering demand is the motivation
-						behind the <b>Crowdtainer</b> project.
-					</p>
 
-					<!-- What -->
-					<h2 class="text-primary">What?</h2>
+					<p>
+						Typically, crowdfunding campaigns are run, operated, and promoted by third party
+						companies that holds the participants' funds while the campaign is running.
+					</p>
 					<p class="lead dark:text-gray-300">
-						Crowdtainer is an <a href="https://github.com/crowdtainer">open source</a> group buying application.
-						With Crowdtainer, groups of people with similar interests can easily discover whether there
-						is enough interest in a certain product or service.
+						Crowdtainer, on the other hand, is an <a
+							class="link"
+							href="https://github.com/crowdtainer">open source</a
+						> software kit that allows the campaigner to deploy a campaign without an intermediary company,
+						while still retaining the property that payments are innacessible to the campaigner, until
+						the minimum goal is reached.
 					</p>
 					<p>
-						It strives to be abstract enough to be used for a variety of projects, essentially any
-						situation where pooling funds for a common goal is desired.
-					</p>
-					<p>
-						When enough funds are pooled, an atomic set of bulk orders can be performed by the
-						service provider. If not, participants withdraw their funds (ERC20) back.
-					</p>
-
-					<p>An instantiation of a campaign has two main parts:</p>
-
-					<ol>
-						<li>
-							<p>
-								<b>The platform (infrastructure, software, tools)</b>, where people coordinate. It
-								consists of Ethereum smart contracts and the interfaces to interact with the public
-								ledger (where custody of money is coordinated).
-							</p>
-						</li>
-						<li>
-							<p>
-								<b>A service/product provider</b>, which offers a sale contract via the platform and
-								is the legal counterpart responsible for shipping the products to the participants.
-							</p>
-						</li>
-					</ol>
-
-					<!-- How -->
-					<h2 class="text-primary">How?</h2>
-
-					<p>
-						I (my company) have deployed and host an "instance" of the platform (this website), and
-						display only the product(s) that I sell myself as a company. Participating in a campaign
-						will help me develop this project further. Of course I hope you will find our coffee
-						delicious too!
-					</p>
-					<p>
-						On the surface, the platform is similar to other crowdfunding platforms, but at a closer
-						look you will see a few important differences:
+						Using ethereum to coordinate a campaign provides a neutral place where it is possible to
+						enforce these rules, achieving comparable or better alternative to existing platforms:
 					</p>
 					<ul>
 						<li>
-							<b>a binding sale contract clearly specifies what is to be delivered:</b>
-							While traditional crowdfunding platforms are usually oriented towards "experimental projects",
-							my focus will be on lower complexity campaings, such as simple, but great coffee.
+							<b>Banks and credit cards not strictly required.</b> Ethereum
+							<a class="link" href="https://eips.ethereum.org/EIPS/eip-20">ERC20</a> used as a
+							medium of payment in case of successful campaigns. Costs are per transaction, not as
+							percentage. <b>Less fees</b> for intermediaries means <b>more</b> is available towards
+							the campaign goal.
 						</li>
 						<li>
-							<b>Credit cards are not required.</b> Neither there is a "crowdfunding company", since
-							this part is
-							<b>automated by the smart contracts</b> which lives on Ethereum.
+							<b>Optional, transparent & fair referral system.</b> Backers can share the campaign with
+							their networks and achieve discounts that becomes more significant as more people join
+							the campaign, creating a sense of community and shared success. Smart contracts allow the
+							public to inspect the source code and ensure that friend referrals are compensated fairly,
+							both for the referee and the referrer.
 						</li>
 						<li>
-							<b>Improved privacy.</b> There are ways to improve the status quo when it comes to online
-							orders and privacy. More details on this soon.
+							<b>Improved privacy.</b> Instead of multiple companies receiving sensitive data (such
+							as delivery details), only the actual service provider receives what is neeed to
+							fulfill the agreements. Other opportunities to improve the status quo when it comes to
+							online orders and privacy, for example, by using
+							<a class="link" href="https://en.wikipedia.org/wiki/Zero-knowledge_proof"
+								>zero knowledge proofs</a
+							>
+							to prove participation, becomes possible.
 						</li>
 						<li>
-							<b>Custody.</b> as a service/product provider, I do not have access to customer funds at
-							all until the minimum target is reached and the bulk sale can be completed "concurrently".
+							<b>Customizable.</b> Allows for creative ideas such as releasing funds only after
+							completion of milestones, or automatically splitting payment by setting a
+							<a class="link" href="https://github.com/0xSplits/splits-sdk">split contract</a>
+							at the receiving address:
+							<div class="flex justify-center">
+								<img
+									class="dark:invert"
+									alt="Crowdtainer Logo"
+									src="/images/site/splitPayment.webp"
+								/>
+							</div>
 						</li>
 					</ul>
-					<p>
-						Since I am based in Germany, from a legal perspective, there is a step of "preparation
-						of payment", and a second step of confirmation from the seller side, referencing
-						preparation step as the payment.
-					</p>
-					<p>Customers send a binding order, which I as a seller only confirm if:</p>
-					<ol>
-						<li>
-							<p>The minimum order threshold is reached.</p>
-						</li>
-						<li>
-							<p>
-								All orders are connected to the 'pool address' indicated by this website's
-								interfaces.
-							</p>
-						</li>
-					</ol>
 				</div>
+				<p class="lead dark:text-gray-300">
+					Join us in giving a voice and access to markets for diverse small business.
+				</p>
+				<p class="text-center lead dark:text-gray-300">
+					Learn more at <a class="link" href="https://crowdtainer.io">crowdtainer.io</a>
+				</p>
 			</article>
 		</div>
 	</div>

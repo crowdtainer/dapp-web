@@ -59,7 +59,7 @@
 	let actionButtonEnabled = true;
 
 	let validUserCouponCode = '';
-	let referralCheckBoxActivated = true;
+	let referralCheckBoxActivated = false;
 
 	// Pre-order state
 	let emailVerificationRequired = true;
@@ -306,22 +306,35 @@
 					/>
 				</Quantity>
 
-				<div class="flex justify-center my-4">
-					<div class="max-w-xs">
-						<div class="grid grid-flow-col auto-cols-1">
-							<div class="form-control">
-								<label class="label cursor-pointer">
-									<input
-										type="checkbox"
-										bind:checked={referralCheckBoxActivated}
-										class="checkbox checkbox-success"
-									/>
-									<span class="ml-4">Enable referral program for my wallet.</span>
-								</label>
+				{#if referralEnabled}
+					<div>
+						<div class="flex justify-center mx-4">
+							<div class="dark:bg-green-900 bg-orange-100 rounded-xl p-3 mb-4 max-w-5xl">
+								<div class=" flex justify-center">
+									<div class="form-control max-w-sm">
+										<label class="label cursor-pointer">
+											<div class="flex flex-inline">
+												<input
+													type="checkbox"
+													bind:checked={referralCheckBoxActivated}
+													class="checkbox checkbox-success"
+												/>
+												<div class="ml-4">Enable referral for my wallet.</div>
+											</div>
+										</label>
+									</div>
+								</div>
+								<div class="text-sm mb-4 p-2">
+									If enabled, each time your wallet address is provided as a "referral code" by
+									another participant, you'll be entitled to half of their order's discount value if
+									the campaign succeeds. By enabling this option, you acknowledge that you can <b
+										>only</b
+									> withdraw from the campaign if it fails (and not during funding).
+								</div>
 							</div>
 						</div>
 					</div>
-				</div>
+				{/if}
 
 				{#if $connected && crowdtainerId && crowdtainerAddress && vouchers721Address}
 					<JoinProjectButton
@@ -411,22 +424,24 @@
 			</div>
 		</div>
 
-		<div class="flex justify-center my-4">
-			<div class="max-w-xs">
-				<div class="grid grid-flow-col auto-cols-1">
-					<div class="form-control">
-						<label class="label cursor-pointer">
-							<input
-								type="checkbox"
-								bind:checked={referralCheckBoxActivated}
-								class="checkbox checkbox-success"
-							/>
-							<span class="ml-4">Enable referral program for my wallet.</span>
-						</label>
+		{#if referralEnabled}
+			<div class="flex justify-center my-4">
+				<div class="max-w-xs">
+					<div class="grid grid-flow-col auto-cols-1">
+						<div class="form-control">
+							<label class="label cursor-pointer">
+								<input
+									type="checkbox"
+									bind:checked={referralCheckBoxActivated}
+									class="checkbox checkbox-success"
+								/>
+								<span class="ml-4">Enable referral program for my wallet.</span>
+							</label>
+						</div>
 					</div>
 				</div>
 			</div>
-		</div>
+		{/if}
 
 		{#if $connected && crowdtainerId && crowdtainerAddress && vouchers721Address}
 			<JoinProjectButton
