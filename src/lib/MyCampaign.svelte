@@ -60,6 +60,8 @@
 	export let basePriceDenominator: number[];
 	// svelte-ignore unused-export-let
 	export let basePriceUnit: string;
+	// svelte-ignore unused-export-let
+	export let supportedCountriesForShipping: string[];
 
 	export let campaignStaticData: CrowdtainerStaticModel | undefined;
 	export let campaignStaticUI: UIFields | undefined;
@@ -75,15 +77,17 @@
 
 	initializeDataForWallet(campaignStaticData?.contractAddress, $accountAddress);
 
+	// Dynamic data
+	if (campaignDynamicData == undefined) {
+		campaignDynamicData = initializeCampaignDynamicStores(crowdtainerId);
+	} else {
+		campaignDynamicData = campaignDynamicStores.get(crowdtainerId);
+	}
+
 	onMount(async () => {
-		// Dynamic data
-		if (campaignDynamicData == undefined) {
-			campaignDynamicData = initializeCampaignDynamicStores(crowdtainerId);
-		} else {
-			campaignDynamicData = campaignDynamicStores.get(crowdtainerId);
-		}
 		let signer = getSigner();
 		if (signer === undefined) {
+			console.warn('MyCampaign: Missing signer');
 			return;
 		}
 
