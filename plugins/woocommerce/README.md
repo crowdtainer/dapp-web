@@ -41,10 +41,10 @@ Each Wordpress/WooCommerce installation can be freely configured to react to the
 ## Installation / running without docker
 
 ```sh
-# Make sure you in the plugin root folder (cd plugins/woocommerce/)
+# Make sure you are in the plugin root folder (cd plugins/woocommerce/)
 
 # Copy and edit the .env file accordingly
-cp .env.exmple .env
+cp .env.example .env
 
 # Note: make sure REDIS_CONNECTION_STRING is defined in your .env.
 # It is by default commented so that it works directly with the docker compose setup, which sets the value.
