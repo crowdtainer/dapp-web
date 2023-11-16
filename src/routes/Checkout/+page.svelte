@@ -191,12 +191,26 @@
 </script>
 
 <header class="ct-divider">
-	<div class="max-w-7xl mx-auto py-4 px-4 sm:px-6 lg:px-8">
-		<div class="text-md breadcrumbs text-white">
-			<ul>
-				<li><a href={projectURL}>{projectTitle ? `${projectTitle}` : ''}</a></li>
-				<li>Checkout &nbsp; 🛍️</li>
-			</ul>
+	<div class="block md:hidden">
+		<!-- small screen -->
+		<div class="max-w-7xl mx-auto py-4 px-4 sm:px-6 lg:px-8">
+			<div class="text-sm md:text-xl breadcrumbs text-white">
+				<ul>
+					<li>Checkout &nbsp; 🛍️</li>
+					<li><a href={projectURL}>{projectTitle ? `${projectTitle}` : ''}</a></li>
+				</ul>
+			</div>
+		</div>
+	</div>
+	<div class="hidden md:block">
+		<!-- large screen -->
+		<div class="max-w-7xl mx-auto py-4 px-4 sm:px-6 lg:px-8">
+			<div class="breadcrumbs text-white">
+				<ul>
+					<li><a href={projectURL}>{projectTitle ? `${projectTitle}` : ''}</a></li>
+					<li>Checkout &nbsp; 🛍️</li>
+				</ul>
+			</div>
 		</div>
 	</div>
 </header>

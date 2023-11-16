@@ -221,7 +221,7 @@
 						<CampaignActions
 							wallet={$accountAddress}
 							{modalDialog}
-							title={`${subtitle} - ${title}`}
+							{title}
 							{projectURL}
 							{tokenId}
 							{vouchers721Address}

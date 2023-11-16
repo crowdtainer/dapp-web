@@ -204,7 +204,7 @@
 		<div class="text-black text-md font-medium dark:text-gray-200">Price</div>
 		{#if staticDataLoadStatus === LoadStatus.Loaded && currentPrice}
 			{#key currentPrice}
-				<p in:blur|global={{ duration: 200 }} class="text-primary productPrice">
+				<p in:blur|global={{ duration: 200 }} class="text-primary productPrice mx-0">
 					{currentPrice}
 					{$campaignStaticUI.tokenSymbol} ({`${currentBasePrice.toFixed(2)} ${
 						$campaignStaticUI.tokenSymbol
@@ -220,13 +220,13 @@
 		{#if productOptions && staticDataLoadStatus === LoadStatus.Loaded}
 			<div class="flex flex-wrap">
 				{#each productOptions as productOption}
-					<div class="mx-0 max-w-md md:my-2">
+					<div class="mx-0 mr-4 md:mr-6 max-w-md md:my-2">
 						<div class="text-black text-md font-medium dark:text-gray-200">
 							{productOption.name}
 						</div>
-						<ul class="grid grid-flow-col auto-cols my-2 items-center mx-0 md:mx-4">
+						<ul class="grid grid-flow-col auto-cols my-2 items-center mx-0">
 							{#each productOption.productSubOptions as subOption, index}
-								<li class="mx-2">
+								<li class="mr-2">
 									<input
 										checked={index == 0}
 										type="radio"
@@ -260,6 +260,6 @@
 		}}
 		class="px-2 mt-5 w-full md:w-4/6 lg:w-2/6 btn btn-primary"
 	>
-		↓ Add to pre-order
+		↓ Add to cart
 	</button>
 </div>
