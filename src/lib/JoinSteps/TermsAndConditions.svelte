@@ -172,7 +172,7 @@
 					class="checkbox checkbox-primary"
 				/>
 				<span class="label-text dark:text-white w-full"
-					>If the project is succesful, I need to return to this website to provide my delivery
+					>If the campaign is succesful, I need to return to this website to provide my delivery
 					details.</span
 				>
 			</label>

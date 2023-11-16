@@ -184,99 +184,107 @@
 				</div>
 			</div>
 
-			<div class="font-sans px-4 sm:pr-8 sm:pl-8 pt-8 pb-4">
-				<div class="font-display uppercase tracking-wide text-primary">
-					{title}
-				</div>
-				<a
-					href={projectURL}
-					class="link font-sans text-black dark:text-gray-200 block mt-1 text-2xl leading-tight font-medium hover:underline"
-					>{subtitle}</a
-				>
-				<div class="font-text my-4 text-slate-700 dark:text-gray-200">
-					{@html description}
-				</div>
-
-				{#if staticDataLoadStatus === LoadStatus.Loaded || staticDataLoadStatus === LoadStatus.Loading}
-					<ProjectGlobalView
-						{vouchers721Address}
-						{crowdtainerId}
-						{projectId}
-						{staticDataLoadStatus}
-					/>
-				{:else}
-					<p class="my-6 text-red-800">Error fetching data.</p>
-				{/if}
-
-				{#if projectURL && projectURL !== ''}
-					<a href={projectURL}><button class="promoted-btn my-2 mb-2">Campaign Page ></button></a>
-				{/if}
-
-				{#if staticDataLoadStatus === LoadStatus.Loaded && joinViewEnabled && campaignStaticUI}
-					<AddToCartView
-						{crowdtainerId}
-						{basePriceUnit}
-						{basePriceDenominator}
-						{productConfiguration}
-						{projectId}
-						{staticDataLoadStatus}
-					/>
-				{/if}
-
-				{#if loadingAnimation}
-					<div class:animate-pulse={tokenIdAssociations === undefined}>Loading...</div>
-				{:else if tokenIdAssociations !== undefined && tokenIdAssociations.foundTokenIds.length > 1}
-				<div class='flex'>
-					<div class="mt-4 md:mt-6 inline-flex items-center text-black dark:text-gray-200">
-						<p>More than one participation proof detected:</p>
-						<button
-							class="btn btn-sm ml-2"
-							on:click={() => {
-								goto(`/Wallet`);
-							}}
-						>
-							View in wallet ⎘</button
-						>
+			<div>
+				<div class="font-sans px-4 px-4 pt-8 pb-4">
+					<div class="font-display uppercase tracking-wide text-primary">
+						{title}
+					</div>
+					<a
+						href={projectURL}
+						class="link font-sans text-black dark:text-gray-200 block mt-1 text-2xl leading-tight font-medium hover:underline"
+						>{subtitle}</a
+					>
+					<div class="font-text my-4 text-slate-700 dark:text-gray-200">
+						{@html description}
 					</div>
 				</div>
-				{:else if tokenIdAssociations !== undefined}
-					{#if staticDataLoadStatus === LoadStatus.Loading || !tokenIdAssociations || !$walletInCrowdtainer.lastLoadedEpochTimeInMs}
-						<div class="flex flex-inline items-center my-4">
-							<Circle size="24" unit="px" />
-							<div class="ml-4 text-black dark:text-white" class:animate-pulse={true}>
-								Loading wallet data...
+
+				<div class="font-sans">
+					{#if staticDataLoadStatus === LoadStatus.Loaded || staticDataLoadStatus === LoadStatus.Loading}
+						<div class="dark:bg-[#122833] px-4 py-4 rounded-xl md:mr-4">
+							<ProjectGlobalView
+								{vouchers721Address}
+								{crowdtainerId}
+								{projectId}
+								{staticDataLoadStatus}
+							/>
+						</div>
+					{:else}
+						<p class="my-6 text-red-800">Error fetching data.</p>
+					{/if}
+				</div>
+
+				<div class="font-sans px-4 py-4">
+					{#if projectURL && projectURL !== ''}
+						<a href={projectURL}><button class="promoted-btn my-4">Campaign Page ></button></a>
+					{/if}
+
+					{#if staticDataLoadStatus === LoadStatus.Loaded && joinViewEnabled && campaignStaticUI}
+						<AddToCartView
+							{crowdtainerId}
+							{basePriceUnit}
+							{basePriceDenominator}
+							{productConfiguration}
+							{projectId}
+							{staticDataLoadStatus}
+						/>
+					{/if}
+
+					{#if loadingAnimation}
+						<div class:animate-pulse={tokenIdAssociations === undefined}>Loading...</div>
+					{:else if tokenIdAssociations !== undefined && tokenIdAssociations.foundTokenIds.length > 1}
+						<div class="flex">
+							<div class="mt-4 md:mt-6 inline-flex items-center text-black dark:text-gray-200">
+								<p>More than one participation proof detected:</p>
+								<button
+									class="btn btn-sm ml-2"
+									on:click={() => {
+										goto(`/Wallet`);
+									}}
+								>
+									View in wallet ⎘</button
+								>
 							</div>
 						</div>
-					{/if}
-					<DetailedTokenIdState
-						walletData={$walletInCrowdtainer}
-						campaignStaticUI={$campaignStaticUI}
-						{state}
-						{orderStatus}
-					/>
-
-					<div class="w-auto flex">
-						{#if campaignStaticData !== undefined && campaignStaticUI !== undefined}
-							<CampaignActions
-								wallet={$accountAddress}
-								title={`${subtitle} - ${title}`}
-								{projectURL}
-								tokenId={tokenIdAssociations.foundTokenIds[0]}
-								{vouchers721Address}
-								crowdtainerAddress={$campaignStaticData.contractAddress}
-								projectStatusUI={state}
-								tokenSymbol={$campaignStaticUI.tokenSymbol}
-								walletData={$walletInCrowdtainer}
-								{orderStatus}
-								{modalDialog}
-								on:userClaimedFundsEvent={(event) =>
-									handleUserClaimedFundsEvent(event, modalDialog)}
-								on:userLeftCrowdtainerEvent={handleUserLeftCrowdtainerEvent}
-								on:userTransferredParticipationEvent={handleUserTransferredParticipationEvent}
-							/>
+					{:else if tokenIdAssociations !== undefined}
+						{#if staticDataLoadStatus === LoadStatus.Loading || !tokenIdAssociations || !$walletInCrowdtainer.lastLoadedEpochTimeInMs}
+							<div class="flex flex-inline items-center my-4">
+								<Circle size="24" unit="px" />
+								<div class="ml-4 text-black dark:text-white" class:animate-pulse={true}>
+									Loading wallet data...
+								</div>
+							</div>
 						{/if}
-					</div>
-				{/if}
+						<DetailedTokenIdState
+							walletData={$walletInCrowdtainer}
+							campaignStaticUI={$campaignStaticUI}
+							{state}
+							{orderStatus}
+						/>
+
+						<div class="w-auto flex">
+							{#if campaignStaticData !== undefined && campaignStaticUI !== undefined}
+								<CampaignActions
+									wallet={$accountAddress}
+									{title}
+									{projectURL}
+									tokenId={tokenIdAssociations.foundTokenIds[0]}
+									{vouchers721Address}
+									crowdtainerAddress={$campaignStaticData.contractAddress}
+									projectStatusUI={state}
+									tokenSymbol={$campaignStaticUI.tokenSymbol}
+									walletData={$walletInCrowdtainer}
+									{orderStatus}
+									{modalDialog}
+									on:userClaimedFundsEvent={(event) =>
+										handleUserClaimedFundsEvent(event, modalDialog)}
+									on:userLeftCrowdtainerEvent={handleUserLeftCrowdtainerEvent}
+									on:userTransferredParticipationEvent={handleUserTransferredParticipationEvent}
+								/>
+							{/if}
+						</div>
+					{/if}
+				</div>
 			</div>
 		</div>
 

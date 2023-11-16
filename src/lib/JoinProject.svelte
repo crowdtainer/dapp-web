@@ -404,7 +404,7 @@
 				<p class="text-center text-lg pb-4">By clicking "Confirm and Join" I acknowledge that:</p>
 				<ul class="list-disc">
 					<li>
-						If the project is succesful, I need to return to this website to provide my delivery
+						If the campaign is succesful, I need to return to this website to provide my delivery
 						details.
 					</li>
 					<li>

@@ -201,7 +201,7 @@ export function handleCampaignJoinedEvent(event: CustomEvent, modalDialog: Modal
     console.log(`Detected event of type: ${event.type} : detail: ${event.detail.text}`);
     modalDialog.show({
         id: 'joinSuccess',
-        title: 'You have succesfully joined the project! 🎉',
+        title: 'You have succesfully joined the campaign! 🎉',
         body: 'If the minimum funding is reached, you will be able to enter your delivery address on this site. Otherwise, you can get your pre-payment back.',
         type: ModalType.Information,
         icon: ModalIcon.BadgeCheck

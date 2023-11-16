@@ -106,7 +106,7 @@
 	<ProjectRaisedAmount {crowdtainerId} {projectId} {staticDataLoadStatus} />
 
 	<!-- Main Status -->
-	<div class="flex flex-wrap justify-between gap-8">
+	<div class="flex flex-wrap justify-between gap-6">
 		<div>
 			<p class="projectStatus">{stateString}</p>
 			<p class="projectDataSubtitle">Status</p>
