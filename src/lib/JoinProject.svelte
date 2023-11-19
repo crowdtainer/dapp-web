@@ -113,10 +113,6 @@
 
 	onMount(async () => {
 		$joinSelection = $joinSelection;
-
-		if (connected) {
-			// TODO: Check if this wallet already joined, if yes: preOrderStep = 3;
-		}
 	});
 
 	async function handleUserAppliedCouponEvent(event: CustomEvent) {

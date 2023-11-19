@@ -394,7 +394,6 @@
 			crowdtainerAddress === undefined
 		) {
 			console.log('A required object is undefined');
-			// TODO: Show UI dialog
 			return false;
 		}
 

@@ -14,36 +14,27 @@ import {
     checkPreconditions, INTERVAL_IN_MS, SMTP_SERVER,
     SMTP_PORT, SMTP_SECURE, SMTP_USER,
     SMTP_PASSWORD, EMAIL_FROM, EMAIL_SUBJECT,
-    EMAIL_TEXT, EMAIL_HTML, ALIVE_PING_URL, ALIVE_PING_INTERVAL_IN_SECONDS,
-    LOGS_REPORT_URL
+    EMAIL_TEXT, EMAIL_HTML, HEALTH_CHECK_URL, ALIVE_PING_INTERVAL_IN_SECONDS
 } from './preconditions.js';
 
 import { createTransport } from 'nodemailer';
-import { AliveSignal } from './AliveSignal.js';
+import { HealthReport, LogType } from 'healthreports';
 
-let aliveSignal: AliveSignal;
+let healthReporter: HealthReport;
 
 type EmailsSent = { emails: string[] };
 type Error = { details: string };
 
-if (ALIVE_PING_URL && ALIVE_PING_URL !== '') {
-    aliveSignal = new AliveSignal();
+if (HEALTH_CHECK_URL) {
+    healthReporter = new HealthReport(new URL(HEALTH_CHECK_URL), ALIVE_PING_INTERVAL_IN_SECONDS);
     console.log(`Alive ping signal enabled, pinging each ${ALIVE_PING_INTERVAL_IN_SECONDS} second(s).`);
 } else {
-    console.log(`Warning: Alive ping signal disabled.`);
-}
-
-if (!LOGS_REPORT_URL) {
-    console.log('Note: External error reporting disabled.');
-} else {
-    console.log('Note: External log reporting enabled.');
+    console.log(`Warning: Alive ping signal disabled!`);
 }
 
 async function performMailWork(db: Redis) {
 
-    if (ALIVE_PING_URL) {
-        aliveSignal.sendAliveSignal(new URL(ALIVE_PING_URL), ALIVE_PING_INTERVAL_IN_SECONDS);
-    }
+    if (healthReporter) healthReporter.sendAliveSignal();
 
     const emailCodes = await getMailWork(db);
     if (emailCodes.size == 0) {
@@ -60,15 +51,11 @@ async function performMailWork(db: Redis) {
             if (process.env.NODE_ENV == "development") {
                 console.log(`Emails sent to: ${emailsSent}`);
             }
-            if (LOGS_REPORT_URL) {
-                aliveSignal.postExternalLog(new URL(LOGS_REPORT_URL), `Sent ${emailsSent.length} email(s).`);
-            }
+            if (healthReporter) healthReporter.postExternalLog(`Sent ${emailsSent.length} email(s).`, LogType.Information);
         }
     } else {
         console.log(`Failed to send emails: ${mailerResult.unwrapErr().details}`);
-        if (LOGS_REPORT_URL) {
-            aliveSignal.postExternalLog(new URL(LOGS_REPORT_URL), mailerResult.unwrapErr().details.toString());
-        }
+        if (healthReporter) healthReporter.postExternalLog(mailerResult.unwrapErr().details.toString(), LogType.Error);
     }
 
     numberOfSuccessfulySentEmails += mailerResult.unwrap().emails.length;
@@ -91,11 +78,16 @@ async function getMailWork(db: Redis): Promise<Map<string, string>> {
     const emailCodes = new Map<string, string>();
 
     for (let i = 0; i < mailWork.length; i++) {
-        console.log(`Found: ${mailWork[i]}`);
+        if (process.env.NODE_ENV == "development") {
+            console.log(`Found: ${mailWork[i]}`);
+        }
         let otp = await db.get('userCode:' + mailWork[i]);
         if (otp) {
             emailCodes.set(mailWork[i], otp);
         }
+    }
+    if (mailWork.length > 0) {
+        console.log(`Work items detected: ${mailWork.length}`);
     }
 
     return emailCodes;
@@ -145,9 +137,7 @@ async function dispatchEmails(emailCodes: Map<string, string>, onSent: (id: stri
                 emailsSentTo.push(email);
             }).catch((error) => {
                 console.log(error);
-                if (LOGS_REPORT_URL) {
-                    aliveSignal.postExternalLog(new URL(LOGS_REPORT_URL), error.toString());
-                }
+                return Err({ details: JSON.stringify(error) });
             })
         }
     } catch (error) {
@@ -162,19 +152,28 @@ async function foreverLoop() {
         terminateProcess = true;
     }
 
-    console.log(`Mailer worker started @ ${new Date().toISOString()}`);
+    const processStartedMessage = `Mailer worker started @ ${new Date().toISOString()}`;
+    console.log(processStartedMessage);
+    if (healthReporter) await healthReporter.postExternalLog(processStartedMessage, LogType.Information);
 
     const db = getDatabase();
 
     while (!terminateProcess) {
-        await performMailWork(db);
+        try {
+            await performMailWork(db);
+        } catch (error) {
+            let errorMessage = String(error);
+            console.log(errorMessage);
+            if (healthReporter) await healthReporter.postExternalLog(errorMessage, LogType.Error);
+            terminateProcess = true;
+        }
         await delay(INTERVAL_IN_MS);
     }
 
-    console.log("Closing db connection..");
+    console.log('Mailer worker stopping..');
     await db.quit();
-    console.log("Closed.");
-    console.log("Mailer worker stopped.");
+    if (healthReporter) await healthReporter.postExternalLog('Mailer worker stopped.', LogType.Error);
+    console.log('Mailer worker stopped.');
     process.exit(0);
 }
 

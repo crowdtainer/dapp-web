@@ -85,9 +85,13 @@ export const POST: RequestHandler = async ({ request }) => {
             .lpush(workerKey, userEmail)
             .expire(workerKey, emailWorkerExpirationInSeconds)
             .exec();
-        console.log(`Key -> ${emailCodeKey} ; Value -> ${randomNumber} ; Expires in ${emailWorkerExpirationInSeconds} seconds.`);
+        if (process.env.NODE_ENV === 'development') {
+            console.log(`Key -> ${emailCodeKey} ; Value -> ${randomNumber} ; Expires in ${emailWorkerExpirationInSeconds} seconds.`);
+        }
     } catch (_error) {
-        console.log(`Unable to set user code: ${emailCodeKey}:${randomNumber}`);
+        if (process.env.NODE_ENV === 'development') {
+            console.log(`Unable to set user code: ${emailCodeKey}:${randomNumber}`);
+        }
         console.dir(_error);
         throw error(500, "Database failure.");
     }
@@ -106,7 +110,6 @@ function getPayload(item: any): Result<[captchaId: string, captchaCode: string, 
     }
 
     if (captchaEnabled && item.captchaId == undefined) {
-        console.log('dafuq captach enabled?');
         return Err("Missing 'captchaId' field");
     }
 

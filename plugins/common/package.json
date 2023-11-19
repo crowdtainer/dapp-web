@@ -1,0 +1,23 @@
+{
+  "name": "healthreports",
+  "version": "1.0.18",
+  "description": "Utility functions to report a service's status to an external monitoring system.",
+  "main": "dist/HealthReport.js",
+  "types": "dist/HealthReport.d.ts",
+  "author": "Thiago F. Alencar",
+  "scripts": {
+    "build": "tsc",
+    "test": "jest"
+  },
+  "license": "MIT",
+  "dependencies": {
+    "axios": "^1.6.2"
+  },
+  "devDependencies": {
+    "@types/jest": "^29.5.8",
+    "axios-mock-adapter": "^1.22.0",
+    "jest": "^29.7.0",
+    "ts-jest": "^29.1.1",
+    "typescript": "^5.2.2"
+  }
+}

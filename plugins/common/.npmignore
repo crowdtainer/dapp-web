@@ -1,0 +1,25 @@
+# Files and directories to ignore when publishing to npm
+
+# Ignore version control files
+.git
+.gitignore
+
+# Ignore development and test files
+#tests/
+#__tests__/
+#*.test.js
+#*.spec.js
+
+# Ignore build files
+#dist/
+#build/
+#*.min.js
+
+# Ignore configuration files
+config.js
+.env
+
+# Ignore editor or IDE files
+.vscode/
+.idea/
+*.sublime-*

@@ -21,6 +21,7 @@
 	},
 	"dependencies": {
 		"@types/nodemailer": "^6.4.7",
+		"healthreports": "^1.0.18",
 		"nodemailer": "^6.9.7"
 	}
 }
