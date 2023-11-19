@@ -15,8 +15,7 @@ export const EMAIL_SUBJECT = process.env.EMAIL_SUBJECT;
 export const EMAIL_TEXT = process.env.EMAIL_TEXT;
 export const EMAIL_HTML = process.env.EMAIL_HTML;
 export const INTERVAL_IN_MS = process.env.INTERVAL_IN_MS ? Number(process.env.INTERVAL_IN_MS) : DEFAULT_INTERVAL_IN_MS;
-export const ALIVE_PING_URL = process.env.ALIVE_PING_URL;
-export const LOGS_REPORT_URL = process.env.LOGS_REPORT_URL;
+export const HEALTH_CHECK_URL = process.env.HEALTH_CHECK_URL;
 export const ALIVE_PING_INTERVAL_IN_SECONDS = process.env.ALIVE_PING_INTERVAL_IN_SECONDS ? Number(process.env.ALIVE_PING_INTERVAL_IN_SECONDS) : DEFAULT_ALIVE_PING_IN_SECONDS;
 
 function printMissingVariable(name: string) {
@@ -28,7 +27,7 @@ export function checkPreconditions(): boolean {
         console.log(`Warning: INTERVAL_IN_MS environment variable not defined. Using ${DEFAULT_INTERVAL_IN_MS} ms as default.`)
     }
 
-    if (process.env.ALIVE_PING_URL && process.env.ALIVE_PING_URL != '' && !process.env.ALIVE_PING_INTERVAL_IN_SECONDS) {
+    if (process.env.HEALTH_CHECK_URL && process.env.HEALTH_CHECK_URL != '' && !process.env.ALIVE_PING_INTERVAL_IN_SECONDS) {
         console.log(`Warning: ALIVE_PING_INTERVAL_IN_SECONDS environment variable not defined. Using ${ALIVE_PING_INTERVAL_IN_SECONDS} ms as default.`)
     }
 
@@ -76,6 +75,11 @@ export function checkPreconditions(): boolean {
 
     if (!EMAIL_HTML) {
         printMissingVariable('EMAIL_HTML');
+        missingMandatoryEnvVar = true;
+    }
+
+    if (!HEALTH_CHECK_URL) {
+        printMissingVariable('HEALTH_CHECK_URL');
         missingMandatoryEnvVar = true;
     }
 

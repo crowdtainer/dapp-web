@@ -1,5 +1,3 @@
-// TODO: Create abstraction of common code from notifications and this plugin.
-
 'use strict';
 
 import 'dotenv/config';
@@ -14,7 +12,8 @@ let numberOfSuccessfulyCreatedOrders = 0;
 import {
     checkPreconditions, INTERVAL_IN_MS, WORDPRESS_SERVER,
     WORDPRESS_API_CONSUMER_KEY, WORDPRESS_API_CONSUMER_SECRET,
-    WOOCOMMERCE_PRODUCT_IDS, WOOCOMMERCE_VARIATION_IDS, WOOCOMMERCE_COUPON_CODE
+    WOOCOMMERCE_PRODUCT_IDS, WOOCOMMERCE_VARIATION_IDS, WOOCOMMERCE_COUPON_CODE,
+    ALIVE_PING_INTERVAL_IN_SECONDS, HEALTH_CHECK_URL
 } from './lib/preconditions.js';
 
 const productIDs = WOOCOMMERCE_PRODUCT_IDS.split(',');
@@ -23,6 +22,7 @@ const productVariationIDs = WOOCOMMERCE_VARIATION_IDS.split(',');
 import { Address, DeliveryDetails, Order } from './lib/commonTypes.js';
 import { createWordpressOrders } from './lib/createWordpressOrders.js';
 import axios, { AxiosInstance } from 'axios';
+import { HealthReport, LogType } from 'healthreports';
 
 export const Woo_API_Config = {
     baseURL: WORDPRESS_SERVER,
@@ -33,9 +33,21 @@ export const Woo_API_Config = {
     headers: { 'Content-Type': 'application/json' }
 };
 
+
+
+let healthReporter: HealthReport;
+
+if (HEALTH_CHECK_URL) {
+    healthReporter = new HealthReport(new URL(HEALTH_CHECK_URL), ALIVE_PING_INTERVAL_IN_SECONDS);
+    console.log(`Alive ping signal enabled, pinging each ${ALIVE_PING_INTERVAL_IN_SECONDS} second(s).`);
+} else {
+    console.log(`Warning: Alive ping signal disabled.`);
+}
+
 async function performWork(axiosInstance: AxiosInstance, db: Redis) {
 
-    console.log('\n');
+    if (healthReporter) healthReporter.sendAliveSignal();
+
     const deliveryOrders = await getDeliveryOrdersWork(db);
     if (deliveryOrders.size == 0) {
         return;
@@ -49,24 +61,34 @@ async function performWork(axiosInstance: AxiosInstance, db: Redis) {
             .exec();
     });
 
+    let ordersCreatedMessage = '0';
     if (ordersCreated.orderIDs.length > 0) {
-        console.log(`Orders created: ${JSON.stringify(ordersCreated)}`);
+        ordersCreatedMessage = JSON.stringify(ordersCreated);
+        console.log(ordersCreatedMessage);
     }
 
+    let lastErrorStatusCode = '';
+    let lastErrorDetails = '';
     ordersWithError.forEach(element => {
-        console.log(`Order creation failures: status code: ${element.statusCode}. Details: ${element.details}`);
+        lastErrorStatusCode = element.statusCode.toString();
+        lastErrorDetails = element.details;
+        console.log(`Order creation failure: status code: ${lastErrorStatusCode}. Details: ${lastErrorDetails}`);
     });
 
     numberOfSuccessfulyCreatedOrders += ordersCreated.orderIDs.length;
-    console.log(`Total orders created since process start: ${numberOfSuccessfulyCreatedOrders}.`);
+
+    let logOrderCreatedMessage = `Orders created: ${ordersCreatedMessage}. Total since process start: ${numberOfSuccessfulyCreatedOrders}.`;
+    console.log(logOrderCreatedMessage);
+    if (healthReporter) healthReporter.postExternalLog(logOrderCreatedMessage, LogType.Information);
 
     // There are cases where an order is created, yet wordpress returns an error.
-    // In order to avoid creating duplicate orders., we will stop processing in case 
-    // of failed orders until the problem is resolved.
-    if(ordersWithError.length > 0) {
-        console.log(`Shutting down since orders with errors were detected.`);
+    // To avoid creating duplicate orders, we stop processing in case of failed orders
+    // until the problem is manually checked and resolved.
+    if (ordersWithError.length > 0) {
+        let errorMessage = `Shutting down since orders with errors were detected. Last error code: ${lastErrorStatusCode}: ${lastErrorDetails}`;
+        console.log(errorMessage);
+        if (healthReporter) await healthReporter.postExternalLog(errorMessage, LogType.Error);
         terminateProcess = true;
-        // TODO: Dispatch an e-mail to system admin
     }
 }
 
@@ -92,7 +114,9 @@ async function getDeliveryOrdersWork(db: Redis): Promise<Map<string, Order>> {
         let orderCreated = await db.hexists(`${currentKey}:orderCreated`, 'epochTimeInMilliseconds');
         if (orderCreated) {
             let createdTime = await db.hget(`${currentKey}:orderCreated`, 'epochTimeInMilliseconds');
-            console.log(`Warning: Order for ${currentKey} already exists (from epoch time ${createdTime} ms). Removing delivery request job.`)
+            let logMessage = `Warning: Order for ${currentKey} already exists (from epoch time ${createdTime} ms). Removing delivery request job.`;
+            console.log(logMessage);
+            if (healthReporter) await healthReporter.postExternalLog(logMessage, LogType.Information);
             db.lrem('deliveryRequests:v1', 0, currentKey);
             continue;
         }
@@ -100,8 +124,11 @@ async function getDeliveryOrdersWork(db: Redis): Promise<Map<string, Order>> {
         // Extract currentKey data. E.g.: deliveryRequest:v1:31337:0x0165878A594ca255338adfa4d48449f69242Eb8F:1000002
         let currentKeyComponents = currentKey.split(':');
         if (currentKeyComponents.length != 5) {
-            console.log(`Fatal error: key ${currentKey} uses unexpected format.`);
-            continue;
+            let errorMessage = `Fatal error: key ${currentKey} uses unexpected format.`;
+            console.log(errorMessage);
+            if (healthReporter) await healthReporter.postExternalLog(errorMessage, LogType.Error);
+            terminateProcess = true;
+            break;
         }
 
         let chainId = Number(currentKeyComponents[2]);
@@ -124,8 +151,11 @@ async function getDeliveryOrdersWork(db: Redis): Promise<Map<string, Order>> {
 
         const quantitiesResult = await db.get(`${currentKey}:quantities`);
         if (quantitiesResult === null) {
-            console.log(`Error: Skipping ${currentKey}; Quantities data not found.`);
-            continue;
+            let logMessage = `Skipping ${currentKey}; Quantities data not found.`;
+            console.log(logMessage);
+            if (healthReporter) await healthReporter.postExternalLog(logMessage, LogType.Error);
+            terminateProcess = true;
+            break;
         }
 
         const quantities = JSON.parse(quantitiesResult) as number[];
@@ -133,19 +163,28 @@ async function getDeliveryOrdersWork(db: Redis): Promise<Map<string, Order>> {
 
         const discountValueResult = await db.get(`${currentKey}:discount`);
         if (discountValueResult === null) {
-            console.log(`Error: Skipping ${currentKey}; Discount value data not found.`);
-            continue;
+            let logMessage = `Skipping ${currentKey}; Discount value data not found.`;
+            console.log(logMessage);
+            if (healthReporter) await healthReporter.postExternalLog(logMessage, LogType.Error);
+            terminateProcess = true;
+            break;
         }
         const discountValue = Number(discountValueResult);
 
         if (quantities.length !== productIDs?.length) {
-            console.log(`Error: Skipping ${currentKey} due mismatch in array length. Expected: ${productIDs?.length}. Actual: ${quantities.length}.`);
-            continue;
+            let logMessage = `Skipping ${currentKey} due mismatch in products array length. Expected: ${productIDs?.length}. Actual: ${quantities.length}.`;
+            console.log(logMessage);
+            if (healthReporter) await healthReporter.postExternalLog(logMessage, LogType.Error);
+            terminateProcess = true;
+            break;
         }
 
         if (quantities.length !== productVariationIDs?.length) {
-            console.log(`Error: Skipping ${currentKey} due mismatch in array length. Expected: ${productVariationIDs?.length}. Actual: ${quantities.length}.`);
-            continue;
+            let logMessage = `Skipping ${currentKey} due mismatch in product variations array length. Expected: ${productVariationIDs?.length}. Actual: ${quantities.length}.`;
+            console.log(logMessage);
+            if (healthReporter) await healthReporter.postExternalLog(logMessage, LogType.Error);
+            terminateProcess = true;
+            break;
         }
 
         let lineItems = new Array<LineItem>();
@@ -170,8 +209,11 @@ async function getDeliveryOrdersWork(db: Redis): Promise<Map<string, Order>> {
         }
 
         if (lineItems.length !== quantities.length) {
-            console.log(`Error: Skipping ${currentKey} due missing product id.`);
-            continue;
+            let logMessage = `Error: ${currentKey} is missing product id.`;
+            console.log(logMessage);
+            if (healthReporter) await healthReporter.postExternalLog(logMessage, LogType.Error);
+            terminateProcess = true;
+            break;
         }
 
         let couponLines = new Array<CouponLine>();
@@ -182,8 +224,8 @@ async function getDeliveryOrdersWork(db: Redis): Promise<Map<string, Order>> {
         deliveryOrders.set(currentKey, { deliveryDetails, lineItems, couponLines });
     }
 
-    if (deliveryOrders.size === 0) {
-        console.log(`Work queue empty.`);
+    if (deliveryOrders.size > 0) {
+        console.log(`Work queue size: ${deliveryOrders.size}.`);
     }
 
     return deliveryOrders;
@@ -194,18 +236,30 @@ async function foreverLoop() {
         terminateProcess = true;
     }
 
-    console.log("Order creation worker started.");
+    const processStartedMessage = `Woocommerce order creator worker started @ ${new Date().toISOString()}`;
+    console.log(processStartedMessage);
+    if (healthReporter) await healthReporter.postExternalLog(processStartedMessage, LogType.Information);
 
-    const db = getDatabase();
     let axiosInstance = axios.create(Woo_API_Config);
+    const db = getDatabase();
 
     while (!terminateProcess) {
-        await performWork(axiosInstance, db);
+        try {
+            await performWork(axiosInstance, db);
+        } catch (error) {
+            let errorMessage = `Fatal error: ${error}.`;
+            console.log(errorMessage);
+            if (healthReporter) await healthReporter.postExternalLog(errorMessage, LogType.Error);
+            terminateProcess = true;
+        }
         await delay(INTERVAL_IN_MS);
     }
 
-    console.log("Order creation worker stopped.");
-    db.quit();
+    console.log('Order creation worker stopping..');
+    await db.quit();
+    const processEndedMessage = 'Order creation worker stopped.';
+    if (healthReporter) await healthReporter.postExternalLog(processEndedMessage, LogType.Error);
+    console.log(processEndedMessage);
 }
 
 function delay(time: number) {

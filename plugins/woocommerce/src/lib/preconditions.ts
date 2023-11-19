@@ -4,6 +4,7 @@ import { dbPreconditiosFail } from './database.js';
 
 export const DEFAULT_INTERVAL_IN_MS = 5000;
 export const INTERVAL_IN_MS = process.env.INTERVAL_IN_MS ? Number(process.env.INTERVAL_IN_MS) : DEFAULT_INTERVAL_IN_MS;
+export const DEFAULT_ALIVE_PING_IN_SECONDS = 60;
 
 // Authentication
 export const WORDPRESS_SERVER = process.env.WORDPRESS_SERVER || '';
@@ -18,6 +19,10 @@ export const WOOCOMMERCE_PAYMENT_METHOD_TITLE = process.env.WOOCOMMERCE_PAYMENT_
 export const WOOCOMMERCE_SET_PAID = process.env.WOOCOMMERCE_SET_PAID || '';
 export const WOOCOMMERCE_COUPON_CODE = process.env.WOOCOMMERCE_COUPON_CODE || '';
 
+// Notification options
+export const HEALTH_CHECK_URL = process.env.HEALTH_CHECK_URL;
+export const ALIVE_PING_INTERVAL_IN_SECONDS = process.env.ALIVE_PING_INTERVAL_IN_SECONDS ? Number(process.env.ALIVE_PING_INTERVAL_IN_SECONDS) : DEFAULT_ALIVE_PING_IN_SECONDS;
+
 function printMissingVariable(name: string) {
     console.log(`Failure: missing ${name} environment variable.`);
 }
@@ -25,6 +30,10 @@ function printMissingVariable(name: string) {
 export function checkPreconditions(): boolean {
     if (!process.env.INTERVAL_IN_MS) {
         console.log(`Warning: INTERVAL_IN_MS environment variable not defined. Using ${DEFAULT_INTERVAL_IN_MS} ms as default.`)
+    }
+
+    if (process.env.HEALTH_CHECK_URL && process.env.HEALTH_CHECK_URL != '' && !process.env.ALIVE_PING_INTERVAL_IN_SECONDS) {
+        console.log(`Warning: ALIVE_PING_INTERVAL_IN_SECONDS environment variable not defined. Using ${ALIVE_PING_INTERVAL_IN_SECONDS} ms as default.`)
     }
 
     let missingMandatoryEnvVar = false;
