@@ -3,7 +3,7 @@ import type { RequestHandler } from './$types';
 
 import { error } from '@sveltejs/kit';
 
-import { deliveryVoucherKey } from "$lib/Database/schemes";
+import { deliveryRequestsKey, deliveryVoucherKey } from "$lib/Database/schemes";
 
 // Monads
 import { type Result, Ok, Err } from "@sniptt/monads";
@@ -18,9 +18,14 @@ async function fetchData(chainId: number, vouchers721Address: string, voucherId:
 
         let key = deliveryVoucherKey(chainId, vouchers721Address, voucherId);
 
-        if (await redis.lpos('deliveryRequests:v1', key) !== null) {
+        if (await redis.lpos(deliveryRequestsKey, key) !== null) {
             return Ok(OrderStatus.DeliveryAddressReceived);
-        } else {
+        } 
+        else {
+            let orderCreated = await redis.hexists(`${key}:orderCreated`, 'epochTimeInMilliseconds')
+            if(orderCreated) {
+                return Ok(OrderStatus.InvoiceSent);
+            }
             return Ok(OrderStatus.WaitingForDeliveryAddress);
         }
     } catch (error) {

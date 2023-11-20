@@ -66,6 +66,8 @@
 				<p>• Next step: &nbsp;Please proceed to <b>Checkout</b> to complete your order.</p>
 			{:else if orderStatus !== undefined && orderStatus === OrderStatus.DeliveryAddressReceived}
 				<p>• Next step: &nbsp;Your order has been received and is being processed.</p>
+			{:else if orderStatus !== undefined && orderStatus === OrderStatus.InvoiceSent}
+				<p>• Your order has been confirmed. The invoice and delivery status will be sent by email.</p>
 			{/if}
 		{/if}
 	</div>
