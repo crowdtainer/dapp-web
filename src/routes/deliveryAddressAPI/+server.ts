@@ -11,7 +11,7 @@ import { error } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
 
 import { Vouchers721__factory } from "../typechain/factories/Vouchers721__factory";
-import { deliveryVoucherKey } from "$lib/Database/schemes";
+import { deliveryRequestsKey, deliveryVoucherKey } from "$lib/Database/schemes";
 import { provider } from '$lib/ethersCalls/provider';
 import { loadTokenURIRepresentation, type TokenURIObject, type Description } from "$lib/Converters/tokenURI.js";
 import { MockERC20__factory, Crowdtainer__factory } from "../typechain/index.js";
@@ -346,7 +346,7 @@ export const POST: RequestHandler = async ({ request }) => {
             .hset(`${key}:billingAddress`, deliveryDetails.billingAddress)                                  // Save billing address
             .set(`${key}:quantities`, JSON.stringify(quantities))                                           // Save order quantities
             .set(`${key}:discount`, JSON.stringify(toHuman(userDiscount.unwrap(), decimals.unwrap())))      // Save discount value
-            .lpush("deliveryRequests:v1", key)                                                              // Add its id to the work queue
+            .lpush(deliveryRequestsKey, key)                                                              // Add its id to the work queue
             .exec();
 
     } catch (e) {

@@ -151,8 +151,7 @@
 		<p class="text-secondary text-xl">Success !</p>
 		<br />
 		<p>
-			Thank you. We have received your delivery address and in a few minutes you should receive an
-			invoice by Email as a final confirmation.
+			Thank you for providing your delivery address. A confirmation email will be sent shortly to confirm receipt.
 		</p>
 	</div>
 {:else}
