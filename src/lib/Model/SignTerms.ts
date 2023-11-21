@@ -2,6 +2,7 @@ import type { Signer } from 'ethers';
 
 // Monads
 import { type Result, Ok, Err } from "@sniptt/monads";
+import { treatSpecialChars } from '$lib/Utils/sanitize.js';
 
 export let domain = import.meta.env.VITE_DOMAIN;
 export let termsURI = `${domain}/${import.meta.env.VITE_TERMS_OF_AGREEMENT_PATH}`;
@@ -65,13 +66,18 @@ export function normalizeDeliveryDetails(deliveryDetails: DeliveryDetails): Deli
 }
 
 export function isTimeValid(timeISO: string): boolean {
-    // Signatures older than one day, or too far in the future are rejected
-    const timeDifference = +new Date() - +new Date(timeISO);
-    console.log(`Signature time difference: ${timeDifference}`);
-    if (timeDifference < -360000 || timeDifference > 360000) {
-        console.log(`Rejected signature.`);
+    try {
+        // Signatures older than one day, or too far in the future are rejected
+        const timeDifference = +new Date() - +new Date(timeISO);
+        console.log(`Signature time difference: ${timeDifference}`);
+        if (timeDifference < -360000 || timeDifference > 360000) {
+            console.log(`Rejected signature.`);
+            return false;
+        } else return true;
+    } catch (error) {
+        console.warn(`Unable to validate ISO time string: ${timeISO}`);
         return false;
-    } else return true;
+    }
 }
 
 export function makeAgreeToTermsMessage(domain: string, email: string, walletAddress: string, chainId: string,
@@ -129,13 +135,6 @@ export async function signMessage(signer: Signer | undefined, message: string): 
     } else {
         return Err("Unable to sign message - signer or wallet not detected.");
     }
-}
-
-import { transliterate as tr } from 'transliteration';
-
-export function treatSpecialChars(input: string): string {
-    let asciiRepresentation = tr(input);
-    return asciiRepresentation.replace(/[^@:/\.a-zA-Z0-9 ]/g, "");
 }
 
 function makeAgreeToTermsStatement(email: string, _termsURI: string, chainId: string,

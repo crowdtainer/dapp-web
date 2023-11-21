@@ -1,9 +1,10 @@
 import { randomInt } from "crypto";                         // Random number
 import { getDatabase } from "$lib/Database/redis";          // Database
-import { captchaEnabled } from '../../Data/projects.json';
+import { captchaEnabled, challengeCodeLength } from '../../Data/projects.json';
 import { error, type RequestHandler } from "@sveltejs/kit";
 import { validEmail } from "$lib/Validation/utils.js";
 import { Err, Ok, type Result } from "@sniptt/monads";
+import { sanitizeString } from "$lib/Utils/sanitize.js";
 
 const maxAPI_hits = 8;
 const codeExpireTimeInSeconds = 1800 // 30 minutes
@@ -37,6 +38,7 @@ export const POST: RequestHandler = async ({ request }) => {
     let emailCodeKey = `userCode:${userEmail}`;
     let workerKey = `mailWork`;
 
+    // Limit requests per Email
     let apiHits = `apiHits:${userEmail}`;
     let randomNumber: string | null | undefined;
 
@@ -49,16 +51,30 @@ export const POST: RequestHandler = async ({ request }) => {
         console.dir(_error);
         throw error(500, "Database failure.");
     }
-
     if (currentCount > maxAPI_hits) {
         throw error(429, "Maximum requests limit reached. Please try again later.");
     }
 
     if (captchaEnabled) {
-        // Check if captch code is valid
         let captchaIdsKey = 'captchaId:v1:' + captchaId;
         let actualCode: null | undefined | string;
 
+        // Limit requests per captcha ID
+        let apiHits = `apiHits:${captchaIdsKey}`;
+        let currentCount: number;
+        try {
+            currentCount = await redis.incr(apiHits);
+            console.log(`hits: ${currentCount}, max: ${maxAPI_hits}`);
+            await redis.expire(apiHits, codeExpireTimeInSeconds);
+        } catch (_error) {
+            console.dir(_error);
+            throw error(500, "Database failure.");
+        }
+        if (currentCount > maxAPI_hits) {
+            throw error(429, "Maximum requests limit reached. Please try again later.");
+        }
+
+        // Check if captcha code is valid
         try {
             await redis.get(captchaIdsKey, (err, result) => {
                 if (err) {
@@ -79,7 +95,7 @@ export const POST: RequestHandler = async ({ request }) => {
 
     // Save code in database and push item to "email sender worker" list
     try {
-        randomNumber = randomInt(0, 100000).toString();
+        randomNumber = randomInt(0, challengeCodeLength).toString();
         await redis.multi()
             .set(emailCodeKey, Number(randomNumber), 'EX', codeExpireTimeInSeconds)
             .lpush(workerKey, userEmail)
@@ -112,14 +128,24 @@ function getPayload(item: any): Result<[captchaId: string, captchaCode: string, 
     if (captchaEnabled && item.captchaId == undefined) {
         return Err("Missing 'captchaId' field");
     }
-
+    
     if (captchaEnabled && item.captchaCode == undefined) {
         return Err("Missing 'captchaCode' field");
     }
 
+    let captchaIdResult: Result<string, string> = sanitizeString(item.captchaId, 50, true);
+    let captchaCodeResult: Result<string, string> = sanitizeString(item.captchaCode, 50);
+
+    if (captchaIdResult.isErr()) {
+        return Err(captchaCodeResult.unwrapErr());
+    }
+    if (captchaCodeResult.isErr()) {
+        return Err(captchaCodeResult.unwrapErr());
+    }
+
     try {
         const result: [string, string, string] =
-            [item.captchaId, item.captchaCode, item.email];
+            [captchaIdResult.unwrap(), captchaCodeResult.unwrap(), item.email];
         return Ok(result);
     } catch (error) {
         return Err("Error decoding input fields");

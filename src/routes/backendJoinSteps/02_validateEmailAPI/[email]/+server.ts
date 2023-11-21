@@ -1,4 +1,5 @@
 import { getDatabase } from "$lib/Database/redis";              // Database
+import { sanitizeString } from "$lib/Utils/sanitize.js";
 import { validEmail } from "$lib/Validation/utils.js";
 import { type Result, Ok, Err } from "@sniptt/monads";          // Monads
 import { error, type RequestHandler } from '@sveltejs/kit';
@@ -63,9 +64,19 @@ function getPayload(item: any): Result<number, Error> {
     if (item.code == undefined) {
         return Err("Missing 'code' field");
     }
+
+    let captchaCodeResult = sanitizeString(item.code, 50, true);
+    if (captchaCodeResult.isErr()) {
+        return Err(captchaCodeResult.unwrapErr());
+    }
+
     try {
-        return Ok(item.code);
+        let captchaCode = parseInt(captchaCodeResult.unwrap());
+        if (isNaN(captchaCode)) {
+            return Err("Error decoding input field(s).");
+        }
+        return Ok(Number(captchaCodeResult.unwrap()));
     } catch (error) {
-        return Err("Error decoding input fields");
+        return Err("Error decoding input field(s).");
     }
 }
