@@ -9,6 +9,7 @@ import { error, type RequestHandler } from '@sveltejs/kit';
 import { validEmail } from "$lib/Validation/utils.js";
 import { Vouchers721Address } from '../../Data/projects.json';
 import { provider } from "$lib/ethersCalls/provider.js";
+import { limitStringLength, sanitizeString } from "$lib/Utils/sanitize.js";
 
 async function costForWalletInCrowdtainer(provider: ethers.Signer | undefined,
     crowdtainerAddress: string,
@@ -204,47 +205,68 @@ function getPayload(item: any): Result<[email: string, signerAddress: string, ch
     if (item == undefined) {
         return Err("Missing payload");
     }
-
     if (item.email == undefined) {
         return Err("Missing 'email' field");
     }
-
     if (item.signerAddress == undefined) {
         return Err("Missing 'signerAddress' field");
     }
-
     if (item.chainId == undefined) {
         return Err("Missing 'chainId' field");
     }
-
     if (item.voucherAddress == undefined) {
         return Err("Missing 'voucherAddress' field");
     }
-
     if (item.crowdtainerAddress == undefined) {
         return Err("Missing 'crowdtainerAddress' field");
     }
-
     if (item.domain == undefined) {
         return Err("Missing 'domain' field");
     }
-
     if (item.nonce == undefined) {
         return Err("Missing 'nonce' field");
     }
-
     if (item.currentTimeISO == undefined) {
         return Err("Missing 'currentTimeISO' field");
     }
-
     if (item.signatureHash == undefined) {
         return Err("Missing 'signatureHash' field");
     }
 
+    let email = limitStringLength(item.email, 150);
+    let domain = limitStringLength(item.domain, 150);
+    let chainIdResult = sanitizeString(item.chainId, 50, true);
+    let currentTimeISO = limitStringLength(item.currentTimeISO, 29);
+    let signerAddressResult = sanitizeString(item.signerAddress, 42);
+    let voucherAddressResult = sanitizeString(item.voucherAddress, 42);
+    let crowdtainerAddressResult = sanitizeString(item.crowdtainerAddress, 42);
+    // "0x" + 65 bytes * 2 hexadecimal characters per byte (130 hexadecimal characters) = 132.
+    let signatureHashResult = sanitizeString(item.signatureHash, 132);
+    let nonceResult = sanitizeString(item.nonce, 50, true);
+
+    if (chainIdResult.isErr()) {
+        return Err(chainIdResult.unwrapErr());
+    }
+    if (nonceResult.isErr()) {
+        return Err(nonceResult.unwrapErr());
+    }
+    if (signerAddressResult.isErr()) {
+        return Err(signerAddressResult.unwrapErr());
+    }
+    if (voucherAddressResult.isErr()) {
+        return Err(voucherAddressResult.unwrapErr());
+    }
+    if (crowdtainerAddressResult.isErr()) {
+        return Err(crowdtainerAddressResult.unwrapErr());
+    }
+    if (signatureHashResult.isErr()) {
+        return Err(signatureHashResult.unwrapErr());
+    }
+
     try {
         const result: [string, string, string, string, string, string, string, string, string] =
-            [item.email, item.signerAddress, item.chainId, item.voucherAddress, item.crowdtainerAddress, item.domain,
-            item.nonce, item.currentTimeISO, item.signatureHash];
+            [email, signerAddressResult.unwrap(), chainIdResult.unwrap(), voucherAddressResult.unwrap(), crowdtainerAddressResult.unwrap(), domain,
+                nonceResult.unwrap(), currentTimeISO, signatureHashResult.unwrap()];
         return Ok(result);
     } catch (error) {
         return Err("Error decoding input fields");

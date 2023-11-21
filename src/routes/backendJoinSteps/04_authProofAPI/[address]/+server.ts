@@ -17,6 +17,7 @@ import type { CrowdtainerStaticModel } from "$lib/Model/CrowdtainerModel.js";
 import { fetchStaticData } from "$lib/ethersCalls/fetchStaticData.js";
 import { moneyFormatter } from "$lib/Utils/moneyFormatter.js";
 import { toHuman } from "$lib/Converters/CrowdtainerData.js";
+import { sanitizeString } from "$lib/Utils/sanitize.js";
 for (let result of projects) {
     availableCrowdtainerIds.push(result.crowdtainerId);
 }
@@ -56,8 +57,8 @@ async function loadCampaignData(): Promise<CrowdtainerStaticModel[]> {
 //                }
 export const POST: RequestHandler = async ({ request, params }) => {
 
-    if(!campaignStaticData) { // first execution
-       campaignStaticData =  await loadCampaignData();
+    if (!campaignStaticData) { // first execution
+        campaignStaticData = await loadCampaignData();
     }
 
     let redis = getDatabase();
@@ -102,6 +103,16 @@ export const POST: RequestHandler = async ({ request, params }) => {
     const args = abiInterface.decodeFunctionData("getSignedJoinApproval", `${hexCalldata}`);
     const [crowdtainerAddress, decodedWalletAddress, quantities, enableReferral, referralAddress] = args;
 
+    if (!crowdtainerAddress || !decodedWalletAddress || !quantities || !referralAddress || enableReferral === undefined) {
+        throw error(400, `Missing input fields in calldata.`);
+    }
+
+    if (!ethers.utils.isAddress(crowdtainerAddress)
+        || !ethers.utils.isAddress(decodedWalletAddress)
+        || !ethers.utils.isAddress(referralAddress)) {
+        throw error(400, `Invalid address input in calldata.`);
+    }
+
     if (userWalletAddress !== decodedWalletAddress) {
         throw error(400, `Unexpected wallet address.`);
     }
@@ -135,9 +146,7 @@ export const POST: RequestHandler = async ({ request, params }) => {
         throw error(500, `Inconsistent data. Please contact the service provider.`);
     }
 
-    console.log(`raw nonce: ${walletNonceResult}`);
     const nonce = ethers.utils.hexZeroPad(ethers.utils.hexlify(walletNonceResult), 32);
-    console.log(`actual: ${nonce}`);
 
     // Apply other sanity checks and restrictions
     let campaignData: CrowdtainerStaticModel | undefined;
@@ -152,6 +161,10 @@ export const POST: RequestHandler = async ({ request, params }) => {
     }
 
     let totalValue = BigNumber.from(0);
+
+    if (quantities.length != campaignData.prices.length) {
+        throw error(400, `Invalid input data.`);
+    }
 
     for (let i = 0; i < campaignData.prices.length; i++) {
         console.log(`Quantities[${i}]: ${quantities[i]}`);
@@ -201,6 +214,7 @@ function getPayload(item: any): Result<number, Error> {
     if (item.calldata == undefined) {
         return Err("Missing 'calldata' field");
     }
+
     try {
         return Ok(item.calldata);
     } catch (error) {

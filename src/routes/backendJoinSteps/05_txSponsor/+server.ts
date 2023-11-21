@@ -6,10 +6,12 @@ import { TX_SPONSOR_PRIVATE_KEY } from '$env/static/private';
 import { AuthorizationGateway__factory, Vouchers721__factory } from "../../typechain/index.js";
 import { joinProjectWithSignature } from "$lib/ethersCalls/rpcRequests.js";
 import type { SignedPermitStruct } from '../../typechain/Vouchers721.js';
-import { Vouchers721Address, projects } from '../../Data/projects.json';
+import { Vouchers721Address, projects, challengeCodeLength } from '../../Data/projects.json';
 
 import { provider } from "$lib/ethersCalls/provider.js";
 import { promiseWithTimeout } from "$lib/Utils/transactionHandling.js";
+import { sanitizeString } from "$lib/Utils/sanitize.js";
+import { isTimeValid } from "$lib/Model/SignTerms.js";
 
 let signer = new ethers.Wallet(TX_SPONSOR_PRIVATE_KEY, provider);
 if (!ethers.utils.isAddress(ethers.utils.computeAddress(TX_SPONSOR_PRIVATE_KEY))) {
@@ -65,6 +67,16 @@ export const POST: RequestHandler = async ({ request }) => {
     const args = abiInterface.decodeFunctionData("getSignedJoinApproval", `${hexCalldata}`);
     const [crowdtainerAddress, decodedWalletAddress, quantities, enableReferral, referralAddress] = args;
 
+    if (!crowdtainerAddress || !decodedWalletAddress || !quantities || !referralAddress || enableReferral === undefined) {
+        throw error(400, `Missing input fields in calldata.`);
+    }
+
+    if (!ethers.utils.isAddress(crowdtainerAddress)
+        || !ethers.utils.isAddress(decodedWalletAddress)
+        || !ethers.utils.isAddress(referralAddress)) {
+        throw error(400, `Invalid address input in calldata.`);
+    }
+
     console.log(`Transaction sponsoring request received from wallet: ${decodedWalletAddress}`);
 
     // Check if this is a recognized Crowdtainer
@@ -114,8 +126,26 @@ export const POST: RequestHandler = async ({ request }) => {
     // Get epochExpiration and nonce
     let [signedCrowdtainerAddress, epochExpiration, nonce, signature] = ethers.utils.defaultAbiCoder.decode(["address", "uint64", "bytes32", "bytes"], calldataSignature);
 
+    if (!signedCrowdtainerAddress || !epochExpiration || !nonce || !signature) {
+        throw error(400, `Missing input fields in calldata.`);
+    }
+    let maxTimeRange = new Date().getTime() / 1000 + 360000;
+    let epochExpirationResult = sanitizeString(String(epochExpiration), maxTimeRange.toString().length, true);
+    if (epochExpirationResult.isErr()) {
+        throw error(400, 'Invalid epoch expiration time');
+    }
+
+    if (!ethers.utils.isAddress(signedCrowdtainerAddress)) {
+        throw error(400, `Invalid address input in calldata.`);
+    }
+
     if (signedCrowdtainerAddress != crowdtainerAddress) {
         throw error(400, `CrowdtainerAddress mismatch between calldata input and signed calldata input.`);
+    }
+
+    let nonceResult = sanitizeString(nonce, challengeCodeLength, true);
+    if(nonceResult.isErr()){ 
+        throw error(400, `Invalid challenge nonce length.`);
     }
 
     let messageHash = ethers.utils.solidityKeccak256(["address", "address", "uint256[]", "bool", "address", "uint64", "bytes32"],
