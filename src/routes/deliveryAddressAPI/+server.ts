@@ -17,7 +17,7 @@ import { loadTokenURIRepresentation, type TokenURIObject, type Description } fro
 import { MockERC20__factory, Crowdtainer__factory } from "../typechain/index.js";
 import { camelToSentenceCase } from "$lib/Utils/camelCase.js";
 import { toHuman } from "$lib/Converters/CrowdtainerData.js";
-import { validEmail } from "$lib/Validation/utils.js";
+import { validEmail } from "$lib/Validation/email.js";
 import countries, { type Country } from "iso-3166-1/dist/iso-3166.js";
 
 async function getDiscountForWallet(provider: ethers.Signer | undefined,

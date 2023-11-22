@@ -2,7 +2,7 @@ import { randomInt } from "crypto";                         // Random number
 import { getDatabase } from "$lib/Database/redis";          // Database
 import { captchaEnabled, challengeCodeLength } from '../../Data/projects.json';
 import { error, type RequestHandler } from "@sveltejs/kit";
-import { validEmail } from "$lib/Validation/utils.js";
+import { validEmail } from "$lib/Validation/email.js";
 import { Err, Ok, type Result } from "@sniptt/monads";
 import { sanitizeString } from "$lib/Utils/sanitize.js";
 

@@ -6,7 +6,7 @@ import { makeAgreeToTermsMessage, isTimeValid } from '$lib/Model/SignTerms';
 import { Crowdtainer__factory } from '../../../routes/typechain/factories/Crowdtainer.sol/Crowdtainer__factory';
 
 import { error, type RequestHandler } from '@sveltejs/kit';
-import { validEmail } from "$lib/Validation/utils.js";
+import { validEmail } from "$lib/Validation/email.js";
 import { Vouchers721Address } from '../../Data/projects.json';
 import { provider } from "$lib/ethersCalls/provider.js";
 import { limitStringLength, sanitizeString } from "$lib/Utils/sanitize.js";
@@ -151,8 +151,9 @@ export const POST: RequestHandler = async ({ request }) => {
             throw error(400, `The provided e-mail was already used by another wallet, to join Crowtainer at address ${crowdtainerAddress}.`);
         }
     }
-
-    console.log(`authorizedWalletsKey: ${authorizedWalletsKey}; wallet: ${userWalletAddress}`);
+    if (process.env.NODE === 'development') {
+        console.log(`authorizedWalletsKey: ${authorizedWalletsKey}; wallet: ${userWalletAddress}`);
+    }
 
     // Check if wallet has already signed the Terms
     let userSigKey = `userSignature:${chainId}:${voucherAddress}:${crowdtainerAddress}:${userWalletAddress}`;

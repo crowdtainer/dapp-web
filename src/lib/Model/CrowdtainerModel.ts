@@ -30,4 +30,5 @@ export type CrowdtainerStaticModel = {
 export interface SplitSelection { 
 	categoryDelimiter: string;
 	categoryDescriptors: string[];
+	mutuallyExclusive: string[];
 }

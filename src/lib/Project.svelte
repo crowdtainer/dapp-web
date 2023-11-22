@@ -227,6 +227,7 @@
 							{productConfiguration}
 							{projectId}
 							{staticDataLoadStatus}
+							{modalDialog}
 						/>
 					{/if}
 

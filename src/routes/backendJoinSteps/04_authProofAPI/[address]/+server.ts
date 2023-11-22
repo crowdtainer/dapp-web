@@ -16,13 +16,18 @@ import { projects, ERC20_MaximumPurchaseValuePerWallet } from '../../../Data/pro
 import type { CrowdtainerStaticModel } from "$lib/Model/CrowdtainerModel.js";
 import { fetchStaticData } from "$lib/ethersCalls/fetchStaticData.js";
 import { moneyFormatter } from "$lib/Utils/moneyFormatter.js";
-import { toHuman } from "$lib/Converters/CrowdtainerData.js";
-import { sanitizeString } from "$lib/Utils/sanitize.js";
+import { prepareForUI, toHuman } from "$lib/Converters/CrowdtainerData.js";
+import { checkConflictingItems } from "$lib/Validation/cartItems.js";
+import { projectFromCrowdtainerId } from "$lib/TokenUtils/search.js";
+import type { UIFields } from '$lib/Converters/CrowdtainerData';
+
 for (let result of projects) {
     availableCrowdtainerIds.push(result.crowdtainerId);
 }
 
 let campaignStaticData: CrowdtainerStaticModel[] | undefined;
+let campaignIDs: number[] = [];
+let smartContractFields: Record<number, UIFields> = {};
 
 if (!ethers.utils.isAddress(ethers.utils.computeAddress(AUTHORIZER_PRIVATE_KEY))) {
     const message = 'Invalid AUTHORIZER_PRIVATE_KEY.';
@@ -35,11 +40,14 @@ async function loadCampaignData(): Promise<CrowdtainerStaticModel[]> {
     let campaignStaticData = new Array<CrowdtainerStaticModel>();
     try {
         for (let i = 0; i < availableCrowdtainerIds.length; i++) {
-            let crowdtainer = BigNumber.from(Number(availableCrowdtainerIds[i]));
+            let currentCrowdtainerID = availableCrowdtainerIds[i];
+            let crowdtainer = BigNumber.from(Number(currentCrowdtainerID));
             let result = await fetchStaticData(crowdtainer);
 
             if (result.isOk()) {
                 campaignStaticData.push(result.unwrap());
+                campaignIDs.push(currentCrowdtainerID);
+                smartContractFields[currentCrowdtainerID] = prepareForUI(result.unwrap());
             } else {
                 // Fail if any id request fails.
                 throw error(500, `${result.unwrapErr()}`);
@@ -91,6 +99,9 @@ export const POST: RequestHandler = async ({ request, params }) => {
 
     // console.log(`Selector: ${ethers.utils.id('joinWithSignature(bytes,bytes)')}`);
     let hexCalldata = ethers.utils.hexlify(calldata);
+    if (hexCalldata.length < 12) {
+        throw error(400, `Incorrect payload. Unexpected calldata size.`);
+    }
     const functionSelector = hexCalldata.slice(0, 10).toLowerCase();
     if (functionSelector !== `0xed52b41c`) { //getSignedJoinApproval().selector
         throw error(400, `Incorrect payload. Function selector: ${functionSelector}. Expected: 0x566a2cc2`);
@@ -98,13 +109,37 @@ export const POST: RequestHandler = async ({ request, params }) => {
 
     const abiInterface = new ethers.utils.Interface(JSON.stringify(AuthorizationGateway__factory.abi));
 
-    console.log(`Authorization request received from wallet: ${userWalletAddress}`);
     // Decode function arguments
-    const args = abiInterface.decodeFunctionData("getSignedJoinApproval", `${hexCalldata}`);
+    let args: ethers.utils.Result;
+    try {
+        console.log(`Authorization request received from wallet: ${userWalletAddress}`);
+        args = abiInterface.decodeFunctionData("getSignedJoinApproval", `${hexCalldata}`);
+    } catch (_error) {
+        console.log(`${_error}`);
+        throw error(400, `Unable to decode calldata.`);
+    }
+
     const [crowdtainerAddress, decodedWalletAddress, quantities, enableReferral, referralAddress] = args;
 
     if (!crowdtainerAddress || !decodedWalletAddress || !quantities || !referralAddress || enableReferral === undefined) {
         throw error(400, `Missing input fields in calldata.`);
+    }
+
+    if (!quantities || !Array.isArray(quantities)) {
+        throw error(400, `Invalid input data.`);
+    }
+
+    let quantitiesInNumber: number[] = [];
+    try {
+        for (let index = 0; index < quantities.length; index++) {
+            if (quantities[index] > 100) {
+                throw error(400, "Unexpectedly high quantities value");
+            }
+            quantitiesInNumber.push(Number(quantities[index]));
+        }
+    } catch (_error) {
+        console.log(`${_error}`);
+        throw error(400, `Invalid input data.`);
     }
 
     if (!ethers.utils.isAddress(crowdtainerAddress)
@@ -150,13 +185,15 @@ export const POST: RequestHandler = async ({ request, params }) => {
 
     // Apply other sanity checks and restrictions
     let campaignData: CrowdtainerStaticModel | undefined;
-    campaignStaticData.forEach((value: CrowdtainerStaticModel, _key: number) => {
+    let currentCampaignID: number | undefined;
+    campaignStaticData.forEach((value: CrowdtainerStaticModel, index) => {
         if (value.contractAddress === crowdtainerAddress) {
             campaignData = value;
+            currentCampaignID = campaignIDs[index];
         }
     });
 
-    if (campaignData === undefined) {
+    if (campaignData === undefined || !currentCampaignID) {
         throw error(400, `Unrecognized crowdtainer address.`);
     }
 
@@ -166,9 +203,24 @@ export const POST: RequestHandler = async ({ request, params }) => {
         throw error(400, `Invalid input data.`);
     }
 
-    for (let i = 0; i < campaignData.prices.length; i++) {
+    for (let i = 0; i < quantities.length; i++) {
         console.log(`Quantities[${i}]: ${quantities[i]}`);
         totalValue = totalValue.add(campaignData.prices[i].mul(BigNumber.from(quantities[i])));
+    }
+
+    // Restrictions on mutually exclusive product categories.
+    let productConfiguration = projectFromCrowdtainerId(currentCampaignID).productConfiguration;
+    let productNames = smartContractFields[currentCampaignID].descriptions;
+
+    let conflictTestResult = checkConflictingItems(
+        productNames,
+        productConfiguration.categoryDelimiter,
+        productConfiguration.categoryDescriptors,
+        productConfiguration.mutuallyExclusive,
+        quantitiesInNumber);
+
+    if (conflictTestResult.isErr()) {
+        throw error(400, conflictTestResult.unwrapErr());
     }
 
     let maxCost = ethers.utils.parseUnits(`${ERC20_MaximumPurchaseValuePerWallet}`, campaignData.tokenDecimals);

@@ -19,6 +19,10 @@
 	import { initializeDataForWallet } from './Stores/dataForWalletStore.js';
 	import { showToast } from './Toast/ToastStore.js';
 
+	import ModalDialog, { ModalIcon, ModalType } from './ModalDialog.svelte';
+	import { mutuallyExclusiveItemPresentOnSelection } from './Validation/cartItems.js';
+	export let modalDialog: ModalDialog;
+
 	export let crowdtainerId: number;
 	export let basePriceUnit: string;
 	export let basePriceDenominator: number[];
@@ -44,6 +48,9 @@
 	let productTypesIndices = new Set<number>();
 	let descriptorForProduct = new Map<string, number>();
 
+	// keep track of whether the user added mutually exclusive items: kv = descriptor:value
+	let mutuallyExclusiveInCart = new Map<string, string>();
+
 	interface ProductOptions {
 		name: string;
 		productSubOptions: string[];
@@ -61,7 +68,9 @@
 
 		let categoryDescriptorIndex = productConfiguration.categoryDescriptors.indexOf(descriptor);
 		if (categoryDescriptorIndex == -1) {
-			console.log(`Error: categoryDescriptors not found for descriptor: ${descriptor} value: ${value}`);
+			console.log(
+				`Error: categoryDescriptors not found for descriptor: ${descriptor} value: ${value}`
+			);
 			return;
 		}
 
@@ -175,20 +184,43 @@
 	}
 
 	function addProduct() {
+		let currentQuantity = $joinSelection.get(crowdtainerId);
+
 		if (staticDataLoadStatus === LoadStatus.FetchFailed || $campaignStaticUI === undefined) {
+			console.warn('Missing data');
 			return;
 		}
-		let updatedQuantity = $joinSelection.get(crowdtainerId);
-		if (updatedQuantity) {
-			updatedQuantity[currentSelection]++;
-			$joinSelection.set(crowdtainerId, updatedQuantity);
-			$joinSelection = $joinSelection;
-		} else {
+
+		if (!currentQuantity) {
 			let quantities: number[] = new Array<number>($campaignStaticUI.prices.length).fill(0);
 			quantities[currentSelection]++;
 			$joinSelection.set(crowdtainerId, quantities);
 			$joinSelection = $joinSelection;
+			return;
 		}
+
+		let conflictTestResult = mutuallyExclusiveItemPresentOnSelection(
+			$campaignStaticUI.descriptions,
+			productConfiguration.categoryDelimiter,
+			productConfiguration.categoryDescriptors,
+			productConfiguration.mutuallyExclusive,
+			currentQuantity,
+			currentSelection
+		);
+		if (conflictTestResult.isErr()) {
+			modalDialog.show({
+				id: 'addProductWithConflict',
+				type: ModalType.Information,
+				title: 'Conflicting cart items',
+				body: `${conflictTestResult.unwrapErr()}`,
+				icon: ModalIcon.Exclamation
+			});
+			return;
+		}
+
+		currentQuantity[currentSelection]++;
+		$joinSelection.set(crowdtainerId, currentQuantity);
+		$joinSelection = $joinSelection;
 	}
 
 	$: $campaignDynamicData;

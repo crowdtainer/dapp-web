@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { MessageType } from '$lib/Toast/MessageType.js';
 	import { showToast } from '$lib/Toast/ToastStore.js';
-	import { validEmail } from '$lib/Validation/utils.js';
+	import { validEmail } from '$lib/Validation/email';
 	import {
 		requestCaptchaChallenge,
 		requestEmailAuthorizationAPI,
