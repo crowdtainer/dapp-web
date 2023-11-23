@@ -23,7 +23,6 @@
 	import type { SignedPermitStruct } from '../routes/typechain/Vouchers721.js';
 	import { getSignedPermit } from './TokenUtils/permit.js';
 	import type ModalDialog from '$lib/ModalDialog.svelte';
-	import { waitForTransaction } from './Utils/transactionHandling.js';
 
 	export let crowdtainerId: number;
 	export let chainId: number;
