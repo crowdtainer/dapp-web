@@ -38,7 +38,7 @@
 	import { connected } from '$lib/Utils/wallet';
 
 	import { isReferralEnabledForAddress } from './ethersCalls/rpcRequests';
-	import refreshWalletData from './JoinProject.svelte';
+	import refreshWalletData from './JoinProjectButton.svelte';
 	import ConnectWallet from './ConnectWallet.svelte';
 	import EmailCheck from './JoinSteps/EmailCheck.svelte';
 	import TermsAndConditions from './JoinSteps/TermsAndConditions.svelte';

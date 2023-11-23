@@ -144,9 +144,7 @@
 	$: loadingAnimation = staticDataLoadStatus === LoadStatus.Loading;
 
 	// Immediatelly update UI elements related to connected wallet on wallet or connection change
-	$: $accountAddress,
-		initializeDataForWallet($campaignStaticData.contractAddress, $accountAddress),
-		refreshData();
+	$: $connected, $accountAddress, refreshData();
 </script>
 
 <ModalDialog bind:this={modalDialog} />

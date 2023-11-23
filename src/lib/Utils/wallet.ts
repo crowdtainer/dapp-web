@@ -1,7 +1,7 @@
 import WalletConnectProvider from '@walletconnect/web3-provider/dist/umd/index.min.js';
 // Can't use proper import, see: https://github.com/WalletConnect/walletconnect-monorepo/issues/864
 // import WalletConnectProvider from "@walletconnect/web3-provider";
-import { ethers, providers, Signer } from 'ethers';
+import { ethers, providers, Signer, Wallet } from 'ethers';
 import type { TypedDataSigner } from "@ethersproject/abstract-signer";
 
 import { writable, derived } from 'svelte/store';
@@ -70,6 +70,7 @@ interface Network {
     _defaultProvider?: (providers: any, options?: any) => any
 }
 import type { ExternalProvider } from '@ethersproject/providers';
+import { timeout } from './timer.js';
 type ExtensionForProvider = { on: (event: string, callback: (...params: any) => void) => void; };
 type EthersProvider = ExternalProvider & ExtensionForProvider;
 
@@ -121,7 +122,7 @@ function createWalletStore() {
                 dispatchMessage(`Wallet configured with unsupported network: ` + chainId + `. Switch to network chain id ${CHAIN_ID}`, MessageType.Warning);
             }
             else if (supportedChainId && !wallet.account) {
-                dispatchMessage("Wallet present, but no account connected yet. Make sure your wallet is unlocked.", MessageType.Warning);
+                console.log('Wallet present, but no account connected yet. Make sure your wallet is unlocked.');
                 wallet.connectionState = ConnectionState.ConnectedButNoAccountAvailable;
             } else if (supportedChainId && wallet.account && wallet.account != '') {
                 wallet.connectionState = ConnectionState.Connected;
@@ -137,7 +138,6 @@ function createWalletStore() {
             persistState(wallet);
         },
         setAccount: async (account: string) => {
-            // console.log(`called Former: ${wallet.account} , current: ${account}`);
             if (account !== undefined && wallet.account !== undefined && wallet.account != account) {
                 dispatchMessage(`Wallet detected: '${shortenAddress(account)}'`, MessageType.Info);
             }
@@ -147,7 +147,7 @@ function createWalletStore() {
                 if (web3Provider && wallet.type === WalletType.Injected) {
                     chainId = web3Provider.network.chainId;
                 } else if (wcProvider && wallet.type === WalletType.WalletConnect) {
-                    chainId = await wcProvider.send("eth_chainId", []) ?? -1 ;
+                    chainId = await wcProvider.send("eth_chainId", []) ?? -1;
                     // chainId = web3Provider?.network.chainId ?? -1;
                 }
                 if (chainId == CHAIN_ID) {
@@ -156,6 +156,9 @@ function createWalletStore() {
                 } else {
                     wallet.connectionState = ConnectionState.ConnectedToUnsupportedNetwork;
                     console.log(`Connected to unsupported network: ` + chainId);
+                    if (web3Provider) {
+                        await requestSwitchToNetwork(web3Provider, CHAIN_ID);
+                    }
                 }
             } else {
                 wallet.connectionState = ConnectionState.Disconnected;
@@ -236,11 +239,6 @@ async function setupWalletConnect() {
         console.log(`Error:`)
         console.dir(error);
     }
-
-    let currentChainID = wcProvider.chainId;
-    if (currentChainID !== CHAIN_ID) {
-        await requestSwitchToNetwork(web3Provider, CHAIN_ID);
-    }
 }
 
 async function setupInjectedProviderWallet() {
@@ -269,14 +267,18 @@ async function setupInjectedProviderWallet() {
 
     web3Provider.on('connect', async () => {
         console.log('connect event received..');
-        if (web3Provider?.network.chainId === CHAIN_ID) {
+        if (web3Provider && web3Provider.network.chainId === CHAIN_ID) {
             if ((await web3Provider.listAccounts()).length === 0) {
                 walletState.setConnected(ConnectionState.ConnectedButNoAccountAvailable);
             } else {
                 walletState.setConnected(ConnectionState.Connected);
             }
-        } else if (web3Provider?.network.chainId != CHAIN_ID) {
+        } else if (web3Provider && web3Provider.network.chainId != CHAIN_ID) {
             walletState.setConnected(ConnectionState.ConnectedToUnsupportedNetwork);
+            if (web3Provider.network) {
+                let currentChainID = web3Provider.network.chainId;
+                walletState.setChainId(currentChainID);
+            }
         }
     });
 
@@ -284,22 +286,23 @@ async function setupInjectedProviderWallet() {
         console.log(`accountsChanged: ${accounts}`);
         walletState.setAccount(accounts[0]);
     });
-
-    if (web3Provider.network) {
-        let currentChainID = web3Provider.network.chainId;
-        walletState.setChainId(currentChainID);
-        if (currentChainID !== CHAIN_ID) {
-            await requestSwitchToNetwork(web3Provider, CHAIN_ID);
-        }
-    }
 }
 
 async function requestSwitchToNetwork(provider: ethers.providers.Web3Provider, chainId: number) {
     try {
-        await provider.send("wallet_switchEthereumChain", [{ chainId: chainId }]);
+        console.log(`Requesting change to network ${chainId}...`);
+        // Metamask mobile over wallet connect v1 currently freezes if rpc requests are sent too quickly
+        if (wcProvider) await timeout(2000);
+        let chainIdHexString = `0x` + parseInt(`${chainId}`, 10).toString(16);
+        await provider.send("wallet_switchEthereumChain", [{ chainId: chainIdHexString }]);
+        // Wallet connect v1 library requires re-establishing the session..
+        if (wcProvider) {
+            await timeout(1500);
+            connect(WalletType.WalletConnect);
+        }
     } catch (error) {
-        console.log(`User rejected switching chains: ${error}`);
-        dispatchMessage(`The connected wallet doesn't support the chain used by this app.`, MessageType.Warning);
+        console.log(`Rejected switching chains: ${error}`);
+        dispatchMessage(`The connected wallet either reject the request to switch network, or it doesn't support the chain used by this app.`, MessageType.Warning);
     }
 }
 

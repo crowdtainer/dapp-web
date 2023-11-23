@@ -37,7 +37,8 @@ export async function walletFundsInCrowdtainer(provider: ethers.Signer | undefin
 
     let walletCrowdtainerData: WalletCrowdtainerModel = {
         fundsInCrowdtainer: BigNumber.from(0),
-        accumulatedRewards: BigNumber.from(0)
+        accumulatedRewards: BigNumber.from(0),
+        lastLoadedEpochTimeInMs: undefined
     };
 
     try {
@@ -92,7 +93,7 @@ export async function hasEnoughFunds(erc20Contract: IERC20, signerAddress: strin
     return Ok(balance);
 }
 
-export async function findTokenIdsForWallet(provider: ethers.Signer | undefined,
+export async function findTokenIdsForWallet(provider: ethers.Signer | ethers.providers.Provider | undefined,
     vouchers721Address: string, walletAddress: string, crowdtainerIdFilter: number | undefined = undefined): Promise<Result<TokenIDAssociations, string>> {
 
     if (provider === undefined) {
