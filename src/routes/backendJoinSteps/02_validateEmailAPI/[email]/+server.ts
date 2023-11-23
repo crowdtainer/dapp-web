@@ -1,6 +1,6 @@
 import { getDatabase } from "$lib/Database/redis";              // Database
 import { sanitizeString } from "$lib/Utils/sanitize.js";
-import { validEmail } from "$lib/Validation/utils.js";
+import { validEmail } from "$lib/Validation/email.js";
 import { type Result, Ok, Err } from "@sniptt/monads";          // Monads
 import { error, type RequestHandler } from '@sveltejs/kit';
 

@@ -56,6 +56,9 @@ export const POST: RequestHandler = async ({ request }) => {
     }
 
     let hexCalldata = ethers.utils.hexlify(calldata);
+    if (hexCalldata.length < 12) {
+        throw error(400, `Incorrect payload. Unexpected calldata size.`);
+    }
     const functionSelector = hexCalldata.slice(0, 10).toLowerCase();
     if (functionSelector !== `0xed52b41c`) { //getSignedJoinApproval().selector
         throw error(400, `Incorrect payload. Function selector: ${functionSelector}. Expected: 0x566a2cc2`);
@@ -64,8 +67,24 @@ export const POST: RequestHandler = async ({ request }) => {
     const abiInterface = new ethers.utils.Interface(JSON.stringify(AuthorizationGateway__factory.abi));
 
     // Decode function arguments
-    const args = abiInterface.decodeFunctionData("getSignedJoinApproval", `${hexCalldata}`);
+    let args: ethers.utils.Result;
+    try {
+        args = abiInterface.decodeFunctionData("getSignedJoinApproval", `${hexCalldata}`);
+    } catch (_error) {
+        console.log(`${_error}`);
+        throw error(400, `Unable to decode calldata.`);
+    }
     const [crowdtainerAddress, decodedWalletAddress, quantities, enableReferral, referralAddress] = args;
+
+    if (!quantities || !Array.isArray(quantities)) {
+        throw error(400, "Unexpected quantities input.");
+    }
+
+    quantities.forEach((item) => {
+        if (item > 100) {
+            throw error(400, "Unexpectedly high quantities value");
+        }
+    });
 
     if (!crowdtainerAddress || !decodedWalletAddress || !quantities || !referralAddress || enableReferral === undefined) {
         throw error(400, `Missing input fields in calldata.`);
@@ -124,7 +143,14 @@ export const POST: RequestHandler = async ({ request }) => {
     // Check if service provider signature is valid by reconstructing the message and recovering the signer.
 
     // Get epochExpiration and nonce
-    let [signedCrowdtainerAddress, epochExpiration, nonce, signature] = ethers.utils.defaultAbiCoder.decode(["address", "uint64", "bytes32", "bytes"], calldataSignature);
+    let decodedCalldata: ethers.utils.Result;
+    try {
+        decodedCalldata = ethers.utils.defaultAbiCoder.decode(["address", "uint64", "bytes32", "bytes"], calldataSignature);
+    } catch (_error) {
+        console.log(`${_error}`);
+        throw error(400, `Unable to decode calldata.`);
+    }
+    let [signedCrowdtainerAddress, epochExpiration, nonce, signature] = decodedCalldata;
 
     if (!signedCrowdtainerAddress || !epochExpiration || !nonce || !signature) {
         throw error(400, `Missing input fields in calldata.`);
@@ -144,14 +170,20 @@ export const POST: RequestHandler = async ({ request }) => {
     }
 
     let nonceResult = sanitizeString(nonce, challengeCodeLength, true);
-    if(nonceResult.isErr()){ 
+    if (nonceResult.isErr()) {
         throw error(400, `Invalid challenge nonce length.`);
     }
 
-    let messageHash = ethers.utils.solidityKeccak256(["address", "address", "uint256[]", "bool", "address", "uint64", "bytes32"],
-        [crowdtainerAddress, decodedWalletAddress, quantities, enableReferral, referralAddress, epochExpiration, nonce]);
-    let messageHashBinary = ethers.utils.arrayify(messageHash);
-    let recoveredSigner = ethers.utils.verifyMessage(messageHashBinary, signature);
+    let recoveredSigner: string;
+    try {
+        let messageHash = ethers.utils.solidityKeccak256(["address", "address", "uint256[]", "bool", "address", "uint64", "bytes32"],
+            [crowdtainerAddress, decodedWalletAddress, quantities, enableReferral, referralAddress, epochExpiration, nonce]);
+        let messageHashBinary = ethers.utils.arrayify(messageHash);
+        recoveredSigner = ethers.utils.verifyMessage(messageHashBinary, signature);
+    } catch (_error) {
+        console.log(_error);
+        throw error(400, "Unable to recover signer.");
+    }
 
     if (serviceProviderPK != recoveredSigner) {
         throw error(400, `Service provider signature invalid: ${serviceProviderPK} ${recoveredSigner} `);

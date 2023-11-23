@@ -105,7 +105,7 @@
 		);
 
 		if (authorizationResult.isErr()) {
-			return Err(`An error ocurred when joining the project: ${authorizationResult.unwrapErr()}`);
+			return Err(`${authorizationResult.unwrapErr()}`);
 		}
 
 		let [calldata, signedPayload] = authorizationResult.unwrap();
