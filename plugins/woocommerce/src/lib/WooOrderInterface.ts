@@ -38,6 +38,11 @@ export interface CouponLine {
     code: string;
 }
 
+export interface MetaData {
+    key: string,
+    value: string
+}
+
 export interface WooOrderObject {
     payment_method: string;
     payment_method_title: string;
@@ -47,4 +52,5 @@ export interface WooOrderObject {
     line_items: LineItem[];
     shipping_lines: ShippingLine[];
     coupon_lines: CouponLine[];
+    meta_data: MetaData[];
 }

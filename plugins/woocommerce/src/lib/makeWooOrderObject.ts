@@ -1,7 +1,7 @@
 'use strict';
 import { Result, Ok } from '@sniptt/monads';
 import { Order } from './commonTypes.js';
-import { Billing, Shipping, ShippingLine, WooOrderObject } from './WooOrderInterface.js';
+import { Billing, MetaData, Shipping, ShippingLine, WooOrderObject } from './WooOrderInterface.js';
 
 export type Error = { details: number };
 
@@ -53,6 +53,11 @@ export function makeWooOrderObject(inputOrderData: Order,
     };
 
     let shippingLines = new Array<ShippingLine>();
+    let metaData = new Array<MetaData>();
+
+    metaData.push({key: 'crowdtainer_chainId', value: inputOrderData.deliveryDetails.chainId.toString()});
+    metaData.push({key: 'crowdtainer_vouchers721Address', value: inputOrderData.deliveryDetails.vouchers721Address});
+    metaData.push({key: 'crowdtainer_voucherId', value: inputOrderData.deliveryDetails.voucherId.toString()});
 
     let wooOrder: WooOrderObject = {
         payment_method: paymentMethod,
@@ -62,7 +67,8 @@ export function makeWooOrderObject(inputOrderData: Order,
         shipping,
         line_items: inputOrderData.lineItems,
         shipping_lines: shippingLines,
-        coupon_lines: inputOrderData.couponLines
+        coupon_lines: inputOrderData.couponLines,
+        meta_data: metaData
     };
     return Ok(wooOrder);
 }

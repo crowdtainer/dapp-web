@@ -36,17 +36,21 @@ export async function createWordpressOrders(axios: AxiosInstance, deliveries: Ma
         assert(wooOrderObject.isOk());
         let requestError: any | undefined;
 
-        console.log(`Woocommerce API payload: ${JSON.stringify(wooOrderObject.unwrap())}`);
+        if (process.env.NODE_ENV === 'development') {
+            console.log(`Woocommerce API payload: ${JSON.stringify(wooOrderObject.unwrap())}`);
+        }
 
         await Promise.all([await axios.post(`${WORDPRESS_SERVER}/wp-json/wc/v3/orders`, wooOrderObject.unwrap())
             .then(function (response) {
 
-                console.log(response.data);
-                console.log(response.status);
-                console.log(response.statusText);
-                console.log(response.headers);
-                console.log(response.config);
-
+                if (process.env.NODE_ENV === 'development') {
+                    console.log(response.data);
+                    console.log(response.status);
+                    console.log(response.statusText);
+                    console.log(response.headers);
+                    console.log(response.config);
+                }
+                console.log(`Order created for voucher ${order.deliveryDetails.voucherId} (vouchers721 ${order.deliveryDetails.vouchers721Address} @ network ${order.deliveryDetails.chainId}).`);
                 onCreated(id);
                 ordersCreated.push(id);
             })
