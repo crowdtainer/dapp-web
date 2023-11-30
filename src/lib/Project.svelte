@@ -155,7 +155,7 @@
 	>
 		<div class="md:flex">
 			<!-- large size -->
-			<div class="hidden md:block w-4/6">
+			<div class="hidden md:block w-3/6">
 				<div class="flex flex-col items-center align-center h-full">
 					<div class="my-4 grow carousel carousel-vertical p-4 rounded-box">
 						<div class="h-[32rem]">
@@ -182,7 +182,7 @@
 				</div>
 			</div>
 
-			<div>
+			<div class="lg:mx-6 mx-2">
 				<div class="font-sans px-4 px-4 pt-8 pb-4">
 					<div class="font-display uppercase tracking-wide text-primary">
 						{title}
