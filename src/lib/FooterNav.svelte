@@ -59,7 +59,7 @@
 					>
 				</svg></a
 			>
-			<a href="https://discord.gg/ZS3FcRHn" class="mr-3"
+			<a href="https://discord.gg/D6FrwCfKAP" class="mr-3"
 				><svg
 					data-v-ea960c88=""
 					id="discord"
