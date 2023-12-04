@@ -250,7 +250,7 @@
 	<fieldset class="mt-4">
 		<legend class="sr-only">Choose a product</legend>
 		{#if productOptions && staticDataLoadStatus === LoadStatus.Loaded}
-			<div class="flex flex-wrap">
+			<div class="flex flex-wrap mx-4">
 				{#each productOptions as productOption}
 					<div class="mx-0 mr-4 md:mr-6 max-w-md md:my-2">
 						<div class="text-black text-md font-medium dark:text-gray-200">
@@ -290,7 +290,7 @@
 		on:click={() => {
 			addProduct();
 		}}
-		class="px-2 mt-5 w-full md:w-4/6 lg:w-2/6 btn btn-primary"
+		class="px-2 mt-5 w-4/6 lg:w-2/6 btn btn-primary"
 	>
 		↓ Add to cart
 	</button>
