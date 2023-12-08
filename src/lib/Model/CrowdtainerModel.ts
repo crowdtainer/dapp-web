@@ -25,6 +25,7 @@ export type CrowdtainerStaticModel = {
 	tokenVersion: string;
 	signer: string;
 	referralRate: BigNumber;
+	legalContractURI: string;
 }
 
 export interface SplitSelection { 

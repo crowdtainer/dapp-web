@@ -41,18 +41,18 @@
 
 <div class="">
 	<!-- <div class="flex justify-center"> -->
-		<button
-			on:click={() => {
-				visibilityToggle();
-			}}
-			class=" w-auto"
-		>
-			{#if visible}
-				⬇ Details
-			{:else}
-				➡ Details
-			{/if}
-		</button>
+	<button
+		on:click={() => {
+			visibilityToggle();
+		}}
+		class=" w-auto"
+	>
+		{#if visible}
+			⬇ Details
+		{:else}
+			➡ Details
+		{/if}
+	</button>
 	<!-- </div> -->
 
 	{#if visible}
@@ -257,13 +257,27 @@
 							</span>
 						</td>
 					</tr>
+
+					<!-- Terms and Conditions -->
+					<tr class="even:backdrop-brightness-75">
+						<td class="p-1">Terms and Conditions:</td>
+						<td class="pr-4">
+							<span class="inline-flex items-baseline">
+								{#if campaignStaticData.legalContractURI && campaignStaticData.legalContractURI != ''}
+									<span>{campaignStaticData.legalContractURI}</span>
+								{:else}
+									<span>Unspecified</span>
+								{/if}
+							</span>
+						</td>
+					</tr>
 				</table>
 			</div>
 		</div>
 		<!-- <div class=''> -->
 		<span class="text-sm inline-flex items-baseline m-4 max-w-xs"
 			>Note: The unique identifier is composed of: ChainID, Vouchers721, and CrowdtainerID</span
-		> 
-	<!-- </div> -->
+		>
+		<!-- </div> -->
 	{/if}
 </div>
