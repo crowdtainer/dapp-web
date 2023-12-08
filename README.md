@@ -187,9 +187,12 @@ docker compose --env-file plugins/notifications/.env  up --build -d mailer
 ```
 Note: be careful to not expose the redis port to the internet (unless authenticated/encrypted). When docker compose is used, the redis port remains isolated and shared only between the required services.
 
-## WooCommerce integration (invoice / order creation after successfull campaigns)
+## WooCommerce (invoices/orders creation for successful campaigns)
 
-This plugin helps with the "check out" workflow, by integrating with Wordpress' plugin WooCommerce. One reason to use WooCommerce is to take advantage of the existing open source ecosystem in E-commerce and avoid reimplementing existing functionality with regards to fulfillment, stock management, invoicing, tax, accounting, etc. It checks for work in a redis queue, checks its validity against blockchain state (to verify participation proof), and creates the respective orders in WooCommerce with the production selection (and if enabled, apply discount codes for projects with referral enabled).
+This plugin helps with order creation and tracking workflow, by integrating with Wordpress' plugin WooCommerce. A reason to use WooCommerce is to take advantage of the existing open source ecosystem in E-commerce and avoid reimplementing existing functionality with regards to fulfillment, stock management, invoicing, tax, accounting, etc. The user doesn't need to see any web page from WooCommerce itself; This plugin simply connects to WooCommerce APIs to create orders on the system via REST calls. 
+
+This plugin checks for work in a redis queue (created by successful campaigns in the web app), checks its validity against blockchain state (to verify participation proof), and creates the respective orders in WooCommerce with the respective product selection (a.k.a. cart items). If referrals are enabled in the campaign, it also applies discount codes so that invoices are correctly generated. 
+
 Plugins for other e-commerce platforms can be easily created based on this plugin, by changing the REST api call with a new request format.
 
 Please see all files under:
