@@ -28,11 +28,11 @@ cp .env.example .env
 
 ### Projects & Legal texts
 
-Edit the projects.json file (src/routes/Data/projects.json) accordingly to inform the frontend about which campaigns should be displayed.
-The Vouchers721Address is obtained during smart contract deployment. Then each new Crowdtainer project generates an 'id' which should be referenced in the file.
+Edit the projects.json file (src/routes/Data/projects.json) accordingly to configure which campaigns should be displayed and available.
+The Vouchers721Address is obtained during smart contract deployment (the address of the Vouchers721 contract, which acts as the 'entrypoint' for multiple campaigns). Then each new crowdtainer campaign project generates an 'id' which should be referenced in the projects.json file.
 
 ```bash
-# Enter projects to be displayed in:
+# Configure projects to be displayed in:
 src/routes/Data/projects.json
 
 # Edit the privacy policy and other custom pages accordingly:
@@ -44,9 +44,9 @@ src/routes/Legal/Terms/+page.svelte
 src/lib/strings.ts
 ```
 
-The productConfiguration defined in projects.json is used to build the product selection UI automatically, by aligning the product name in the deployed campaign (smart contract side), with the description/delimiters defined in product configuration.
+The productConfiguration defined in projects.json is used to build the product selection UI automatically, by aligning the product name in the deployed campaign (smart contract side), with the description/delimiters defined in product configuration on the frontend.
 
-For example, a project deployed with the following parameters: 
+For example, a campaign deployed to the blockchain with the following parameters: 
 
 ```ts
 await vouchers721.createCrowdtainer(
@@ -64,7 +64,7 @@ await vouchers721.createCrowdtainer(
     );
 ```
 
-And with the following configuration in projects.json:
+Along with the following configuration in projects.json (web application):
 
 ```json
 "productConfiguration": {
@@ -74,7 +74,6 @@ And with the following configuration in projects.json:
 ```
 
 Will generate an interface similar to the following:
-
 
 <img src="static/images/docs/productSelection.png" alt="Crowdtainer" height="328px"/><br />
 <br />
@@ -117,7 +116,7 @@ brew install redis # MacOS; For other OS's see: https://redis.io/docs/getting-st
 ```
 
 ---
-### To start a development server:
+### To start a development environment:
 
  Run redis server:
  ```bash
@@ -161,7 +160,7 @@ More details [here](https://kit.svelte.dev/docs/adapter-node)
 
 # Plugins
 
-The plugins folder contains services that can be run separately from the frontend (only a connection to the same redis db is required).
+The plugins folder contains optional auxiliary services that runs separately from the frontend (only a connection to the same redis db is required).
 
 ## Mailer service (verification codes)
 - The e-mail worker sending verification codes (joining with signature) can be executed as follows:
@@ -188,9 +187,12 @@ docker compose --env-file plugins/notifications/.env  up --build -d mailer
 ```
 Note: be careful to not expose the redis port to the internet (unless authenticated/encrypted). When docker compose is used, the redis port remains isolated and shared only between the required services.
 
-## WooCommerce integration (order creation from successfull campaigns)
+## WooCommerce integration (invoice / order creation after successfull campaigns)
 
-This plugin helps with the "check out" workflow, with integration with Wordpress plugin WooCommerce. A reason to use WooCommerce is to take advantage of the existing ecosystem thus avoiding 'reinventing the wheel' when it comes to fulfillment, stock management, invoicing, tax, accounting, etc. Please see all files under:
+This plugin helps with the "check out" workflow, by integrating with Wordpress' plugin WooCommerce. One reason to use WooCommerce is to take advantage of the existing open source ecosystem in E-commerce and avoid reimplementing existing functionality with regards to fulfillment, stock management, invoicing, tax, accounting, etc. It checks for work in a redis queue, checks its validity against blockchain state (to verify participation proof), and creates the respective orders in WooCommerce with the production selection (and if enabled, apply discount codes for projects with referral enabled).
+Plugins for other e-commerce platforms can be easily created based on this plugin, by changing the REST api call with a new request format.
+
+Please see all files under:
 
 ```sh
 cd plugins/woocommerce/
@@ -201,9 +203,15 @@ cd plugins/woocommerce/
 ```
 ---
 
+## Security Policy and Vulnerability Reporting
+
+Please refer to [Security Policy](https://github.com/crowdtainer/dapp-web/blob/main/SECURITY.md) for detailed information about how to report vulnerabilities in this codebase.
+
+---
+
 ## Known issues
 
-- Typechain (our tool to generate bindings between EVM/Solidity ABI and typescript) has a bug where it generates a few imports wrongly (without typescript's "type" specifier). For this reason, these files are not git ignored (included in the '.gitignore' list), so that we can quickly revert changes done by the generator.
+- Typechain (our tool to generate bindings between EVM/Solidity ABI and typescript) has a bug where it generates a few imports wrongly (without typescript's "type" specifier). For this reason, these files are not included in the '.gitignore' list, so that we can quickly revert changes done by the generator.
 
 ---
 
@@ -222,7 +230,7 @@ cd plugins/woocommerce/
         - Use `Crowdtainer.crowdtainerState()`.
     - ✅ If active, percentage of goal so far (progress bar).
         - Use `Crowdtainer.totalValueRaised()` and `CampaignData.targetMinimum().` to calculate percentage.
-    - ◻️ IPFS/Swarm hash which points to the legal sale contract agreement documents.
+    - ✅ IPFS/Swarm hash which points to the legal sale contract agreement documents.
 
 ### As a participant
 
@@ -287,7 +295,6 @@ cd plugins/woocommerce/
     - Use `Crowdtainer.claimRewards()` method.
 ##### Out of scope for MVP:
 
-- ◻️ Service to set ERC-721's status as 'claimed' for token ids which had its order created/confirmed.
-- ◻️ "Download Invoice" button
-- ◻️ Browser-side encryption (asymmetric, using service provider's PubKey) before pushing sensitive data to redis.
 - ◻️ Support for multiple deployments, each on potentially different chainIDs.
+- ◻️ Service to set ERC-721's status as 'claimed' on-chain, for token ids which had its order created/confirmed.
+- ◻️ In cases where it is desired to host this web application with a third party server (such as Cloudflare, Vercel, etc), in order to not have to trust them, it is better protect sensitive information such as delivery address by doing E2E encryption between the Browser (client-side) and the service provider before pushing the data to redis dabatase, by applying asymmetric encryption using service provider's PubKey, then decrypting the data at the service provider premises.

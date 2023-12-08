@@ -85,7 +85,8 @@ export async function fetchStaticData(crowdtainerId: BigNumber): Promise<Result<
          tokenName: await ERC20Contract.name(),
          signer: await crowdtainerContract.getSigner(),
          referralRate: await crowdtainerContract.referralRate(),
-         tokenVersion: jsonData[0].tokenVersion
+         tokenVersion: jsonData[0].tokenVersion,
+         legalContractURI: await crowdtainerContract.legalContractURI()
       }
 
       crowdtainerStaticDataMap.set(crowdtainerId.toHexString(), crowdtainerData);

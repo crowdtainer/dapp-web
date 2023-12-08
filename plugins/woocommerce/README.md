@@ -11,7 +11,7 @@ A reason to use WooCommerce is to take advantage of the existing ecosystem thus 
 
 > It is crutial that the conversion rate is correct for each product: e.g.: in Germany, set the  EUR price equivalent to the USDC amount for each product based on the moment where "getPaidAndDeliver()" method has been called on the smart contract. As always, consult a local tax advisor before doing anything.
 
-> Future work may also include automatically creating the products in WooCommerce based on smart contract data, but this is NOT a feature of the current "MVP".
+> Future work may include automatically creating the products in WooCommerce based on smart contract data, but this is NOT a feature of the current "MVP".
 
 ### Process Description
 
@@ -25,7 +25,7 @@ After a crowdtainer project has been successful, an "order/delivery" process can
 6. A thank you message is shown to the user, who is informed that the service provider's order acceptance will arrive soon by e-mail with the respective invoice.
 7. In the project's web page, the "Check out" button disappears, and the user is presented with the message: "Your order has been received and is being processed."
 
-All steps above happens outside this plugin. If they are successful and the final state (7) is reached, a 'job' had been created in the database, to be processed by this plugin. This is the point where this module's work starts.
+All steps above happens in the SvelteKit Crowdtainer web app, outside this plugin. If they are successful and the final state (7) is reached, a 'job' had been created in the database, to be processed by this plugin. This is the point where this module's work starts.
 
 ### Order creation service
 
@@ -35,7 +35,7 @@ After a connection to the redis database and the WooCommerce site can be establi
 2. An order is created via API on the given WooCommerce instance (as defined in the environment variable).
 3. If the order is successfully created in WooCommerce, the delivery job is deleted from the redis database.
 
-Each Wordpress/WooCommerce installation can be freely configured to react to the order creation. Usually this will eventually trigger creation and dispatch of the invoice PDF e-mail.
+Each Wordpress/WooCommerce installation can be freely configured to react to the order creation. Usually this will eventually trigger creation and dispatch of the invoice PDF e-mail (by WooCommerce).
 
 
 ## Installation / running without docker
