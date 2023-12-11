@@ -95,7 +95,7 @@
 					</tr>
 
 					<tr class="even:backdrop-brightness-75">
-						<td class="p-1">Crowdtainer ID: {crowdtainerId}</td>
+						<td class="p-1">Crowdtainer ID {crowdtainerId}: </td>
 						<td class="pr-4">
 							<button
 								on:click={() => {
@@ -205,7 +205,8 @@
 									<span> -- </span>
 								{:else if discount > BigNumber.from(0)}
 									<span>
-										{discount} % off for referee.<br /> {discount}% cashback for referrer.</span
+										{discount}% off for referred person.<br />
+										{discount}% cashback for referrer.</span
 									>
 								{:else}
 									<span> disabled </span>
@@ -257,7 +258,6 @@
 							</span>
 						</td>
 					</tr>
-
 					<!-- Terms and Conditions -->
 					<tr class="even:backdrop-brightness-75">
 						<td class="p-1">Terms and Conditions:</td>
@@ -276,7 +276,8 @@
 		</div>
 		<!-- <div class=''> -->
 		<span class="text-sm inline-flex items-baseline m-4 max-w-xs"
-			>Note: The unique identifier is composed of: ChainID, Vouchers721, and CrowdtainerID</span
+			>The unique identifier is composed of the ChainID, Vouchers721 contract address, and
+			CrowdtainerID.</span
 		>
 		<!-- </div> -->
 	{/if}

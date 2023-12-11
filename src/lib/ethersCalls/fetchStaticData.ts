@@ -72,7 +72,7 @@ export async function fetchStaticData(crowdtainerId: BigNumber): Promise<Result<
       let crowdtainerData: CrowdtainerStaticModel = {
          chainId: jsonData[0].chainId,
          contractAddress: crowdtainerAddress,
-         serviceProvider: `${await crowdtainerContract.owner()}`,
+         serviceProvider: await crowdtainerContract.shippingAgent(),
          startDate: await crowdtainerContract.openingTime(),
          endDate: await crowdtainerContract.expireTime(),
          minimumGoal: await crowdtainerContract.targetMinimum(),

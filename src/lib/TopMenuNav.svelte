@@ -26,7 +26,7 @@
 	import type { MessageType } from './Toast/MessageType';
 	import { copyToClipBoardAndNotify } from './Utils/clipboard.js';
 	import { Icon } from '@steeze-ui/svelte-icon';
-	export let VITE_WALLET_CONNECT_CHAIN_ID = import.meta.env.VITE_WALLET_CONNECT_CHAIN_ID;
+	let VITE_WALLET_CONNECT_CHAIN_ID = import.meta.env.VITE_WALLET_CONNECT_CHAIN_ID;
 
 	let mobileMenuOpen = false,
 		profileMenuOpen = false;
