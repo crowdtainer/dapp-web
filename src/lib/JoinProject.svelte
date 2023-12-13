@@ -375,98 +375,111 @@
 			{/if}
 		</div>
 	{:else if $totalSum > 0 && !projectHasSigner}
-		<Quantity
-			tokenSymbol={campaignStaticUI.tokenSymbol}
-			totalSum={$totalSum}
-			{ratePercentage}
-			{referralEnabled}
-			{discountValue}
-			{validUserCouponCode}
-			on:userAppliedCouponEvent={handleUserAppliedCouponEvent}
-			on:userRemovedCouponEvent={handleRemovedAppliedCouponEvent}
-		>
-			<ProductQuantity
-				prices={campaignStaticUI.prices}
-				descriptions={campaignStaticUI.descriptions}
-				{crowdtainerId}
+		<div in:slide|global={{ duration: 150 }}>
+			<Quantity
 				tokenSymbol={campaignStaticUI.tokenSymbol}
-				{basePriceDenominator}
-				{basePriceUnit}
-			/>
-		</Quantity>
+				totalSum={$totalSum}
+				{ratePercentage}
+				{referralEnabled}
+				{discountValue}
+				{validUserCouponCode}
+				on:userAppliedCouponEvent={handleUserAppliedCouponEvent}
+				on:userRemovedCouponEvent={handleRemovedAppliedCouponEvent}
+			>
+				<ProductQuantity
+					prices={campaignStaticUI.prices}
+					descriptions={campaignStaticUI.descriptions}
+					{crowdtainerId}
+					tokenSymbol={campaignStaticUI.tokenSymbol}
+					{basePriceDenominator}
+					{basePriceUnit}
+				/>
+			</Quantity>
 
-		<div class="flex justify-center">
-			<div class="max-w-xl mx-10">
-				<p class="text-center text-lg pb-4">By clicking "Confirm and Join" I acknowledge that:</p>
-				<ul class="list-disc">
-					<li>
-						If the campaign is succesful, I need to return to this website to provide my delivery
-						details.
-					</li>
-					<li>
-						I am aware that Ethereum network fees will apply to prepare the payment and in case I
-						want to leave a campaign. Those fees are paid to 3rd parties and are not re-payable by
-						us in case of my withdrawal from the purchase.
-					</li>
-					<li>
-						I agree to the <a
-							target="_blank"
-							href="/Legal/Terms"
-							rel="noopener"
-							class="text-secondary"><b>General Terms and Conditions 📚</b></a
-						>.
-					</li>
-				</ul>
-			</div>
-		</div>
-
-		{#if referralEnabled}
-			<div class="flex justify-center my-4">
-				<div class="max-w-xs">
-					<div class="grid grid-flow-col auto-cols-1">
-						<div class="form-control">
-							<label class="label cursor-pointer">
-								<input
-									type="checkbox"
-									bind:checked={referralCheckBoxActivated}
-									class="checkbox checkbox-success"
-								/>
-								<span class="ml-4">Enable referral program for my wallet.</span>
-							</label>
-						</div>
+			<div class="flex justify-center">
+				<div class="max-w-xl mx-10 mb-5">
+					<p class="text-center text-lg pb-4">By clicking "Confirm and Join" I acknowledge that:</p>
+					<div class="w-full text-left">
+						<ul class="list-disc">
+							<li>
+								If the campaign is succesful, I need to return to this website to provide my
+								delivery details.
+							</li>
+							<li>
+								I am aware that Ethereum network fees are necessary to prepare the payment and in case
+								I want to leave a campaign. Those fees are paid to 3rd parties and are not
+								re-payable by us in case of my withdrawal from the purchase.
+							</li>
+							<li>
+								I agree to the <a
+									target="_blank"
+									href="/Legal/Terms"
+									rel="noopener"
+									class="text-secondary"><b>General Terms and Conditions 📚</b></a
+								>.
+							</li>
+						</ul>
 					</div>
 				</div>
 			</div>
-		{/if}
 
-		{#if $connected && crowdtainerId && crowdtainerAddress && vouchers721Address}
-			<JoinProjectButton
-				{tokenAddress}
-				{tokenVersion}
-				{txSponsoringEnabled}
-				{chainId}
-				{crowdtainerId}
-				{crowdtainerAddress}
-				{vouchers721Address}
-				tokenSymbol={campaignStaticUI.tokenSymbol}
-				tokenName={campaignStaticUI.tokenName}
-				totalSum={$totalSum}
-				tokenDecimals={campaignStaticUI.tokenDecimals}
-				{totalCostInERCUnits}
-				{discountValue}
-				{validUserCouponCode}
-				{referralCheckBoxActivated}
-				{actionButtonEnabled}
-				productListLength={campaignStaticUI ? campaignStaticUI?.descriptions.length : 0}
-				{modalDialog}
-				userJoinedSuccess={() => {
-					userJoinedCrowdtainer();
-					preOrderStep = JoinStep.ThankYouMessage;
-				}}
-				{projectHasSigner}
-			/>
-		{:else}
-			<ConnectWallet />
-		{/if}
+			{#if referralEnabled}
+				<div class="flex justify-center my-6">
+					<div class="max-w-2xl">
+						<div class="dark:bg-green-900 bg-orange-100 rounded-xl p-3 mb-4">
+							<div class="form-control">
+								<label class="label cursor-pointer flex justify-center">
+									<div class="flex flex-inline">
+										<input
+											type="checkbox"
+											bind:checked={referralCheckBoxActivated}
+											class="checkbox checkbox-success"
+										/>
+										<div class="ml-4">Enable referral for my wallet.</div>
+									</div>
+								</label>
+							</div>
+							<div class="text-sm mb-4 p-2">
+								If enabled, each time your wallet address is provided as a "referral code" by
+								another participant, you'll be entitled to half of their order's discount value if
+								the campaign succeeds. By enabling this option, you acknowledge that you can <b
+									>only</b
+								> withdraw from the campaign if it fails (and not during funding).
+							</div>
+						</div>
+					</div>
+				</div>
+			{/if}
+
+			{#if $connected && crowdtainerId && crowdtainerAddress && vouchers721Address}
+				<JoinProjectButton
+					{tokenAddress}
+					{tokenVersion}
+					{txSponsoringEnabled}
+					{chainId}
+					{crowdtainerId}
+					{crowdtainerAddress}
+					{vouchers721Address}
+					tokenSymbol={campaignStaticUI.tokenSymbol}
+					tokenName={campaignStaticUI.tokenName}
+					totalSum={$totalSum}
+					tokenDecimals={campaignStaticUI.tokenDecimals}
+					{totalCostInERCUnits}
+					{discountValue}
+					{validUserCouponCode}
+					{referralCheckBoxActivated}
+					{actionButtonEnabled}
+					productListLength={campaignStaticUI ? campaignStaticUI?.descriptions.length : 0}
+					{modalDialog}
+					userJoinedSuccess={() => {
+						userJoinedCrowdtainer();
+						preOrderStep = JoinStep.ThankYouMessage;
+					}}
+					{projectHasSigner}
+				/>
+			{:else}
+				<ConnectWallet />
+			{/if}
+		</div>
 	{/if}
 {/if}

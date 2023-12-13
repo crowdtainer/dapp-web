@@ -219,7 +219,7 @@
 					class="checkbox checkbox-primary"
 				/>
 				<span class="label-text dark:text-white"
-					>I am aware that Ethereum network fees will apply to prepare the payment and in case I
+					>I am aware that Ethereum network fees are necessary to prepare the payment and in case I
 					want to leave a campaign. Those fees are paid to 3rd parties and are not re-payable by us
 					in case of my withdrawal from the purchase.</span
 				>
