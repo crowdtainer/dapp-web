@@ -233,7 +233,7 @@
 
 <div class="grid w-full gap-2 md:grid-cols-1">
 	<div class="md:pt-4">
-		<div class="text-black text-md font-medium dark:text-gray-200">Price</div>
+		<div class="text-black text-md font-medium dark:text-gray-200">Price | VAT & Shipping included</div>
 		{#if staticDataLoadStatus === LoadStatus.Loaded && currentPrice}
 			{#key currentPrice}
 				<p in:blur|global={{ duration: 200 }} class="text-primary productPrice mx-0">
