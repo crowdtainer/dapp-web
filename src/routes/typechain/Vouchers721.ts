@@ -121,12 +121,14 @@ export interface Vouchers721Interface extends utils.Interface {
     "leave(uint256)": FunctionFragment;
     "metadataServiceForCrowdatinerId(uint256)": FunctionFragment;
     "name()": FunctionFragment;
+    "owner()": FunctionFragment;
     "ownerOf(uint256)": FunctionFragment;
     "productDescription(uint256,uint256)": FunctionFragment;
     "safeTransferFrom(address,address,uint256)": FunctionFragment;
     "safeTransferFrom(address,address,uint256,bytes)": FunctionFragment;
     "setApprovalForAll(address,bool)": FunctionFragment;
     "setClaimStatus(uint256,bool)": FunctionFragment;
+    "setOwner(address)": FunctionFragment;
     "supportsInterface(bytes4)": FunctionFragment;
     "symbol()": FunctionFragment;
     "tokenByIndex(uint256)": FunctionFragment;
@@ -161,12 +163,14 @@ export interface Vouchers721Interface extends utils.Interface {
       | "leave"
       | "metadataServiceForCrowdatinerId"
       | "name"
+      | "owner"
       | "ownerOf"
       | "productDescription"
       | "safeTransferFrom(address,address,uint256)"
       | "safeTransferFrom(address,address,uint256,bytes)"
       | "setApprovalForAll"
       | "setClaimStatus"
+      | "setOwner"
       | "supportsInterface"
       | "symbol"
       | "tokenByIndex"
@@ -278,6 +282,7 @@ export interface Vouchers721Interface extends utils.Interface {
     values: [PromiseOrValue<BigNumberish>]
   ): string;
   encodeFunctionData(functionFragment: "name", values?: undefined): string;
+  encodeFunctionData(functionFragment: "owner", values?: undefined): string;
   encodeFunctionData(
     functionFragment: "ownerOf",
     values: [PromiseOrValue<BigNumberish>]
@@ -310,6 +315,10 @@ export interface Vouchers721Interface extends utils.Interface {
   encodeFunctionData(
     functionFragment: "setClaimStatus",
     values: [PromiseOrValue<BigNumberish>, PromiseOrValue<boolean>]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "setOwner",
+    values: [PromiseOrValue<string>]
   ): string;
   encodeFunctionData(
     functionFragment: "supportsInterface",
@@ -421,6 +430,7 @@ export interface Vouchers721Interface extends utils.Interface {
     data: BytesLike
   ): Result;
   decodeFunctionResult(functionFragment: "name", data: BytesLike): Result;
+  decodeFunctionResult(functionFragment: "owner", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "ownerOf", data: BytesLike): Result;
   decodeFunctionResult(
     functionFragment: "productDescription",
@@ -442,6 +452,7 @@ export interface Vouchers721Interface extends utils.Interface {
     functionFragment: "setClaimStatus",
     data: BytesLike
   ): Result;
+  decodeFunctionResult(functionFragment: "setOwner", data: BytesLike): Result;
   decodeFunctionResult(
     functionFragment: "supportsInterface",
     data: BytesLike
@@ -477,13 +488,15 @@ export interface Vouchers721Interface extends utils.Interface {
     "Approval(address,address,uint256)": EventFragment;
     "ApprovalForAll(address,address,bool)": EventFragment;
     "CrowdtainerDeployed(address,uint256)": EventFragment;
+    "OwnerChanged(address)": EventFragment;
     "Transfer(address,address,uint256)": EventFragment;
-    "Vouchers721Created(address)": EventFragment;
+    "Vouchers721Created(address,address)": EventFragment;
   };
 
   getEvent(nameOrSignatureOrTopic: "Approval"): EventFragment;
   getEvent(nameOrSignatureOrTopic: "ApprovalForAll"): EventFragment;
   getEvent(nameOrSignatureOrTopic: "CrowdtainerDeployed"): EventFragment;
+  getEvent(nameOrSignatureOrTopic: "OwnerChanged"): EventFragment;
   getEvent(nameOrSignatureOrTopic: "Transfer"): EventFragment;
   getEvent(nameOrSignatureOrTopic: "Vouchers721Created"): EventFragment;
 }
@@ -524,6 +537,13 @@ export type CrowdtainerDeployedEvent = TypedEvent<
 export type CrowdtainerDeployedEventFilter =
   TypedEventFilter<CrowdtainerDeployedEvent>;
 
+export interface OwnerChangedEventObject {
+  newOwner: string;
+}
+export type OwnerChangedEvent = TypedEvent<[string], OwnerChangedEventObject>;
+
+export type OwnerChangedEventFilter = TypedEventFilter<OwnerChangedEvent>;
+
 export interface TransferEventObject {
   from: string;
   to: string;
@@ -538,9 +558,10 @@ export type TransferEventFilter = TypedEventFilter<TransferEvent>;
 
 export interface Vouchers721CreatedEventObject {
   crowdtainer: string;
+  owner: string;
 }
 export type Vouchers721CreatedEvent = TypedEvent<
-  [string],
+  [string, string],
   Vouchers721CreatedEventObject
 >;
 
@@ -685,6 +706,8 @@ export interface Vouchers721 extends BaseContract {
 
     name(overrides?: CallOverrides): Promise<[string]>;
 
+    owner(overrides?: CallOverrides): Promise<[string]>;
+
     ownerOf(
       tokenId: PromiseOrValue<BigNumberish>,
       overrides?: CallOverrides
@@ -720,6 +743,11 @@ export interface Vouchers721 extends BaseContract {
     setClaimStatus(
       _tokenId: PromiseOrValue<BigNumberish>,
       _value: PromiseOrValue<boolean>,
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
+    ): Promise<ContractTransaction>;
+
+    setOwner(
+      _owner: PromiseOrValue<string>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<ContractTransaction>;
 
@@ -878,6 +906,8 @@ export interface Vouchers721 extends BaseContract {
 
   name(overrides?: CallOverrides): Promise<string>;
 
+  owner(overrides?: CallOverrides): Promise<string>;
+
   ownerOf(
     tokenId: PromiseOrValue<BigNumberish>,
     overrides?: CallOverrides
@@ -913,6 +943,11 @@ export interface Vouchers721 extends BaseContract {
   setClaimStatus(
     _tokenId: PromiseOrValue<BigNumberish>,
     _value: PromiseOrValue<boolean>,
+    overrides?: Overrides & { from?: PromiseOrValue<string> }
+  ): Promise<ContractTransaction>;
+
+  setOwner(
+    _owner: PromiseOrValue<string>,
     overrides?: Overrides & { from?: PromiseOrValue<string> }
   ): Promise<ContractTransaction>;
 
@@ -1071,6 +1106,8 @@ export interface Vouchers721 extends BaseContract {
 
     name(overrides?: CallOverrides): Promise<string>;
 
+    owner(overrides?: CallOverrides): Promise<string>;
+
     ownerOf(
       tokenId: PromiseOrValue<BigNumberish>,
       overrides?: CallOverrides
@@ -1106,6 +1143,11 @@ export interface Vouchers721 extends BaseContract {
     setClaimStatus(
       _tokenId: PromiseOrValue<BigNumberish>,
       _value: PromiseOrValue<boolean>,
+      overrides?: CallOverrides
+    ): Promise<void>;
+
+    setOwner(
+      _owner: PromiseOrValue<string>,
       overrides?: CallOverrides
     ): Promise<void>;
 
@@ -1185,6 +1227,13 @@ export interface Vouchers721 extends BaseContract {
       _nextCrowdtainerId?: null
     ): CrowdtainerDeployedEventFilter;
 
+    "OwnerChanged(address)"(
+      newOwner?: PromiseOrValue<string> | null
+    ): OwnerChangedEventFilter;
+    OwnerChanged(
+      newOwner?: PromiseOrValue<string> | null
+    ): OwnerChangedEventFilter;
+
     "Transfer(address,address,uint256)"(
       from?: PromiseOrValue<string> | null,
       to?: PromiseOrValue<string> | null,
@@ -1196,11 +1245,13 @@ export interface Vouchers721 extends BaseContract {
       tokenId?: PromiseOrValue<BigNumberish> | null
     ): TransferEventFilter;
 
-    "Vouchers721Created(address)"(
-      crowdtainer?: PromiseOrValue<string> | null
+    "Vouchers721Created(address,address)"(
+      crowdtainer?: PromiseOrValue<string> | null,
+      owner?: PromiseOrValue<string> | null
     ): Vouchers721CreatedEventFilter;
     Vouchers721Created(
-      crowdtainer?: PromiseOrValue<string> | null
+      crowdtainer?: PromiseOrValue<string> | null,
+      owner?: PromiseOrValue<string> | null
     ): Vouchers721CreatedEventFilter;
   };
 
@@ -1316,6 +1367,8 @@ export interface Vouchers721 extends BaseContract {
 
     name(overrides?: CallOverrides): Promise<BigNumber>;
 
+    owner(overrides?: CallOverrides): Promise<BigNumber>;
+
     ownerOf(
       tokenId: PromiseOrValue<BigNumberish>,
       overrides?: CallOverrides
@@ -1351,6 +1404,11 @@ export interface Vouchers721 extends BaseContract {
     setClaimStatus(
       _tokenId: PromiseOrValue<BigNumberish>,
       _value: PromiseOrValue<boolean>,
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
+    ): Promise<BigNumber>;
+
+    setOwner(
+      _owner: PromiseOrValue<string>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<BigNumber>;
 
@@ -1510,6 +1568,8 @@ export interface Vouchers721 extends BaseContract {
 
     name(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
+    owner(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+
     ownerOf(
       tokenId: PromiseOrValue<BigNumberish>,
       overrides?: CallOverrides
@@ -1545,6 +1605,11 @@ export interface Vouchers721 extends BaseContract {
     setClaimStatus(
       _tokenId: PromiseOrValue<BigNumberish>,
       _value: PromiseOrValue<boolean>,
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
+    ): Promise<PopulatedTransaction>;
+
+    setOwner(
+      _owner: PromiseOrValue<string>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<PopulatedTransaction>;
 

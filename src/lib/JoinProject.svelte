@@ -406,8 +406,8 @@
 								delivery details.
 							</li>
 							<li>
-								I am aware that Ethereum network fees are necessary to prepare the payment and in case
-								I want to leave a campaign. Those fees are paid to 3rd parties and are not
+								I am aware that Ethereum network fees are necessary to prepare the payment and in
+								case I want to leave a campaign. Those fees are paid to 3rd parties and are not
 								re-payable by us in case of my withdrawal from the purchase.
 							</li>
 							<li>
@@ -478,7 +478,11 @@
 					{projectHasSigner}
 				/>
 			{:else}
-				<ConnectWallet />
+				<div class="flex justify-center">
+					<div class="max-w-xl mx-10 mb-10">
+						<ConnectWallet />
+					</div>
+				</div>
 			{/if}
 		</div>
 	{/if}

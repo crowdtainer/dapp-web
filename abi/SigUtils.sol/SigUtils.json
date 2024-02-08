@@ -72,20 +72,20 @@
     }
   ],
   "bytecode": {
-    "object": "0x608060405234801561001057600080fd5b5060405161029e38038061029e83398101604081905261002f91610037565b600055610050565b60006020828403121561004957600080fd5b5051919050565b61023f8061005f6000396000f3fe608060405234801561001057600080fd5b50600436106100365760003560e01c806330adf81f1461003b578063ba20b89d14610074575b600080fd5b6100627f6e71edae12b1b97f4d1f60370fef10105fa2faae0126114a169c64845d6126c981565b60405190815260200160405180910390f35b61006261008236600461017f565b6000805461008f836100cb565b60405161190160f01b6020820152602281019290925260428201526062015b604051602081830303815290604052805190602001209050919050565b80516020808301516040808501516060860151608087015192516000966100ae967f6e71edae12b1b97f4d1f60370fef10105fa2faae0126114a169c64845d6126c9969195919493920195865273ffffffffffffffffffffffffffffffffffffffff94851660208701529290931660408501526060840152608083019190915260a082015260c00190565b803573ffffffffffffffffffffffffffffffffffffffff8116811461017a57600080fd5b919050565b600060a0828403121561019157600080fd5b60405160a0810181811067ffffffffffffffff821117156101c257634e487b7160e01b600052604160045260246000fd5b6040526101ce83610156565b81526101dc60208401610156565b6020820152604083013560408201526060830135606082015260808301356080820152809150509291505056fea264697066735822122005cab4dbb9212f7bc51cb0a87e3a2c1e73d0668da56c429fa3d0c8501a0ad20364736f6c63430008150033",
-    "sourceMap": "60:1431:47:-:0;;;124:92;;;;;;;;;;;;;;;;;;;;;;;;;;;;:::i;:::-;173:16;:36;60:1431;;14:184:49;84:6;137:2;125:9;116:7;112:23;108:32;105:52;;;153:1;150;143:12;105:52;-1:-1:-1;176:16:49;;14:184;-1:-1:-1;14:184:49:o;:::-;60:1431:47;;;;;;",
+    "object": "0x608060405234801561001057600080fd5b506040516102d23803806102d283398101604081905261002f91610037565b600055610050565b60006020828403121561004957600080fd5b5051919050565b6102738061005f6000396000f3fe608060405234801561001057600080fd5b50600436106100365760003560e01c806330adf81f1461003b578063ba20b89d14610074575b600080fd5b6100627f6e71edae12b1b97f4d1f60370fef10105fa2faae0126114a169c64845d6126c981565b60405190815260200160405180910390f35b61006261008236600461019a565b6000805461008f836100e6565b6040517f19010000000000000000000000000000000000000000000000000000000000006020820152602281019290925260428201526062015b604051602081830303815290604052805190602001209050919050565b80516020808301516040808501516060860151608087015192516000966100c9967f6e71edae12b1b97f4d1f60370fef10105fa2faae0126114a169c64845d6126c9969195919493920195865273ffffffffffffffffffffffffffffffffffffffff94851660208701529290931660408501526060840152608083019190915260a082015260c00190565b803573ffffffffffffffffffffffffffffffffffffffff8116811461019557600080fd5b919050565b600060a082840312156101ac57600080fd5b60405160a0810181811067ffffffffffffffff821117156101f6577f4e487b7100000000000000000000000000000000000000000000000000000000600052604160045260246000fd5b60405261020283610171565b815261021060208401610171565b6020820152604083013560408201526060830135606082015260808301356080820152809150509291505056fea26469706673582212207ba935933b979221fbf265b1749a503ffa9fb4d822d4db4e22f3f510abf8698064736f6c63430008150033",
+    "sourceMap": "60:1431:45:-:0;;;124:92;;;;;;;;;;;;;;;;;;;;;;;;;;;;:::i;:::-;173:16;:36;60:1431;;14:184:47;84:6;137:2;125:9;116:7;112:23;108:32;105:52;;;153:1;150;143:12;105:52;-1:-1:-1;176:16:47;;14:184;-1:-1:-1;14:184:47:o;:::-;60:1431:45;;;;;;",
     "linkReferences": {}
   },
   "deployedBytecode": {
-    "object": "0x608060405234801561001057600080fd5b50600436106100365760003560e01c806330adf81f1461003b578063ba20b89d14610074575b600080fd5b6100627f6e71edae12b1b97f4d1f60370fef10105fa2faae0126114a169c64845d6126c981565b60405190815260200160405180910390f35b61006261008236600461017f565b6000805461008f836100cb565b60405161190160f01b6020820152602281019290925260428201526062015b604051602081830303815290604052805190602001209050919050565b80516020808301516040808501516060860151608087015192516000966100ae967f6e71edae12b1b97f4d1f60370fef10105fa2faae0126114a169c64845d6126c9969195919493920195865273ffffffffffffffffffffffffffffffffffffffff94851660208701529290931660408501526060840152608083019190915260a082015260c00190565b803573ffffffffffffffffffffffffffffffffffffffff8116811461017a57600080fd5b919050565b600060a0828403121561019157600080fd5b60405160a0810181811067ffffffffffffffff821117156101c257634e487b7160e01b600052604160045260246000fd5b6040526101ce83610156565b81526101dc60208401610156565b6020820152604083013560408201526060830135606082015260808301356080820152809150509291505056fea264697066735822122005cab4dbb9212f7bc51cb0a87e3a2c1e73d0668da56c429fa3d0c8501a0ad20364736f6c63430008150033",
-    "sourceMap": "60:1431:47:-:0;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;326:116;;376:66;326:116;;;;;160:25:49;;;148:2;133:18;326:116:47;;;;;;;1171:318;;;;;;:::i;:::-;1255:7;1390:16;;1428:22;1442:7;1428:13;:22::i;:::-;1320:148;;-1:-1:-1;;;1320:148:47;;;1475:27:49;1518:11;;;1511:27;;;;1554:12;;;1547:28;1591:12;;1320:148:47;;;;;;;;;;;;;1293:189;;;;;;1274:208;;1171:318;;;:::o;633:414::-;850:13;;885:15;;;;;922:13;;;;;957;;;;992:16;;;;781:245;;716:7;;781:245;;376:66;;850:13;;885:15;;922:13;957;781:245;1901:25:49;;;1945:42;2023:15;;;2018:2;2003:18;;1996:43;2075:15;;;;2070:2;2055:18;;2048:43;2122:2;2107:18;;2100:34;2165:3;2150:19;;2143:35;;;;2209:3;2194:19;;2187:35;1888:3;1873:19;;1614:614;196:196;264:20;;324:42;313:54;;303:65;;293:93;;382:1;379;372:12;293:93;196:196;;;:::o;397:815::-;481:6;534:3;522:9;513:7;509:23;505:33;502:53;;;551:1;548;541:12;502:53;584:2;578:9;626:3;618:6;614:16;696:6;684:10;681:22;660:18;648:10;645:34;642:62;639:185;;;746:10;741:3;737:20;734:1;727:31;781:4;778:1;771:15;809:4;806:1;799:15;639:185;840:2;833:22;879:29;898:9;879:29;:::i;:::-;871:6;864:45;942:38;976:2;965:9;961:18;942:38;:::i;:::-;937:2;929:6;925:15;918:63;1042:2;1031:9;1027:18;1014:32;1009:2;1001:6;997:15;990:57;1108:2;1097:9;1093:18;1080:32;1075:2;1067:6;1063:15;1056:57;1175:3;1164:9;1160:19;1147:33;1141:3;1133:6;1129:16;1122:59;1200:6;1190:16;;;397:815;;;;:::o",
+    "object": "0x608060405234801561001057600080fd5b50600436106100365760003560e01c806330adf81f1461003b578063ba20b89d14610074575b600080fd5b6100627f6e71edae12b1b97f4d1f60370fef10105fa2faae0126114a169c64845d6126c981565b60405190815260200160405180910390f35b61006261008236600461019a565b6000805461008f836100e6565b6040517f19010000000000000000000000000000000000000000000000000000000000006020820152602281019290925260428201526062015b604051602081830303815290604052805190602001209050919050565b80516020808301516040808501516060860151608087015192516000966100c9967f6e71edae12b1b97f4d1f60370fef10105fa2faae0126114a169c64845d6126c9969195919493920195865273ffffffffffffffffffffffffffffffffffffffff94851660208701529290931660408501526060840152608083019190915260a082015260c00190565b803573ffffffffffffffffffffffffffffffffffffffff8116811461019557600080fd5b919050565b600060a082840312156101ac57600080fd5b60405160a0810181811067ffffffffffffffff821117156101f6577f4e487b7100000000000000000000000000000000000000000000000000000000600052604160045260246000fd5b60405261020283610171565b815261021060208401610171565b6020820152604083013560408201526060830135606082015260808301356080820152809150509291505056fea26469706673582212207ba935933b979221fbf265b1749a503ffa9fb4d822d4db4e22f3f510abf8698064736f6c63430008150033",
+    "sourceMap": "60:1431:45:-:0;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;326:116;;376:66;326:116;;;;;160:25:47;;;148:2;133:18;326:116:45;;;;;;;1171:318;;;;;;:::i;:::-;1255:7;1390:16;;1428:22;1442:7;1428:13;:22::i;:::-;1320:148;;1544:66:47;1320:148:45;;;1532:79:47;1627:11;;;1620:27;;;;1663:12;;;1656:28;1700:12;;1320:148:45;;;;;;;;;;;;;1293:189;;;;;;1274:208;;1171:318;;;:::o;633:414::-;850:13;;885:15;;;;;922:13;;;;;957;;;;992:16;;;;781:245;;716:7;;781:245;;376:66;;850:13;;885:15;;922:13;957;781:245;2010:25:47;;;2054:42;2132:15;;;2127:2;2112:18;;2105:43;2184:15;;;;2179:2;2164:18;;2157:43;2231:2;2216:18;;2209:34;2274:3;2259:19;;2252:35;;;;2318:3;2303:19;;2296:35;1997:3;1982:19;;1723:614;196:196;264:20;;324:42;313:54;;303:65;;293:93;;382:1;379;372:12;293:93;196:196;;;:::o;397:872::-;481:6;534:3;522:9;513:7;509:23;505:33;502:53;;;551:1;548;541:12;502:53;584:2;578:9;626:3;618:6;614:16;696:6;684:10;681:22;660:18;648:10;645:34;642:62;639:242;;;737:77;734:1;727:88;838:4;835:1;828:15;866:4;863:1;856:15;639:242;897:2;890:22;936:29;955:9;936:29;:::i;:::-;928:6;921:45;999:38;1033:2;1022:9;1018:18;999:38;:::i;:::-;994:2;986:6;982:15;975:63;1099:2;1088:9;1084:18;1071:32;1066:2;1058:6;1054:15;1047:57;1165:2;1154:9;1150:18;1137:32;1132:2;1124:6;1120:15;1113:57;1232:3;1221:9;1217:19;1204:33;1198:3;1190:6;1186:16;1179:59;1257:6;1247:16;;;397:872;;;;:::o",
     "linkReferences": {}
   },
   "methodIdentifiers": {
     "PERMIT_TYPEHASH()": "30adf81f",
     "getTypedDataHash((address,address,uint256,uint256,uint256))": "ba20b89d"
   },
-  "rawMetadata": "{\"compiler\":{\"version\":\"0.8.21+commit.d9974bed\"},\"language\":\"Solidity\",\"output\":{\"abi\":[{\"inputs\":[{\"internalType\":\"bytes32\",\"name\":\"_DOMAIN_SEPARATOR\",\"type\":\"bytes32\"}],\"stateMutability\":\"nonpayable\",\"type\":\"constructor\"},{\"inputs\":[],\"name\":\"PERMIT_TYPEHASH\",\"outputs\":[{\"internalType\":\"bytes32\",\"name\":\"\",\"type\":\"bytes32\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"components\":[{\"internalType\":\"address\",\"name\":\"owner\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"spender\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"value\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"nonce\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"deadline\",\"type\":\"uint256\"}],\"internalType\":\"struct SigUtils.Permit\",\"name\":\"_permit\",\"type\":\"tuple\"}],\"name\":\"getTypedDataHash\",\"outputs\":[{\"internalType\":\"bytes32\",\"name\":\"\",\"type\":\"bytes32\"}],\"stateMutability\":\"view\",\"type\":\"function\"}],\"devdoc\":{\"kind\":\"dev\",\"methods\":{},\"version\":1},\"userdoc\":{\"kind\":\"user\",\"methods\":{},\"version\":1}},\"settings\":{\"compilationTarget\":{\"src/test/utils/SigUtils.sol\":\"SigUtils\"},\"evmVersion\":\"london\",\"libraries\":{},\"metadata\":{\"bytecodeHash\":\"ipfs\"},\"optimizer\":{\"enabled\":true,\"runs\":800},\"remappings\":[\":@openzeppelin/=node_modules/@openzeppelin/\",\":ds-test/=lib/ds-test/src/\",\":forge-std/=lib/forge-std/src/\"]},\"sources\":{\"src/test/utils/SigUtils.sol\":{\"keccak256\":\"0xb79a4d32e5c7abfebddf94d9fc78294165dfe262a50d05076303f16e8bc6de6c\",\"license\":\"MIT\",\"urls\":[\"bzz-raw://85520f51affb2f45bb03a09dba7a752d58f5bb013afb7474035ff4f3a7bdd876\",\"dweb:/ipfs/QmSxwTqwK2KVeFwPJAYZfQ8miURfKsL32W3ThtGMUmWo7n\"]}},\"version\":1}",
+  "rawMetadata": "{\"compiler\":{\"version\":\"0.8.21+commit.d9974bed\"},\"language\":\"Solidity\",\"output\":{\"abi\":[{\"inputs\":[{\"internalType\":\"bytes32\",\"name\":\"_DOMAIN_SEPARATOR\",\"type\":\"bytes32\"}],\"stateMutability\":\"nonpayable\",\"type\":\"constructor\"},{\"inputs\":[],\"name\":\"PERMIT_TYPEHASH\",\"outputs\":[{\"internalType\":\"bytes32\",\"name\":\"\",\"type\":\"bytes32\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"components\":[{\"internalType\":\"address\",\"name\":\"owner\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"spender\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"value\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"nonce\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"deadline\",\"type\":\"uint256\"}],\"internalType\":\"struct SigUtils.Permit\",\"name\":\"_permit\",\"type\":\"tuple\"}],\"name\":\"getTypedDataHash\",\"outputs\":[{\"internalType\":\"bytes32\",\"name\":\"\",\"type\":\"bytes32\"}],\"stateMutability\":\"view\",\"type\":\"function\"}],\"devdoc\":{\"kind\":\"dev\",\"methods\":{},\"version\":1},\"userdoc\":{\"kind\":\"user\",\"methods\":{},\"version\":1}},\"settings\":{\"compilationTarget\":{\"src/test/utils/SigUtils.sol\":\"SigUtils\"},\"evmVersion\":\"london\",\"libraries\":{},\"metadata\":{\"bytecodeHash\":\"ipfs\"},\"optimizer\":{\"enabled\":true,\"runs\":500000},\"remappings\":[\":@openzeppelin/=node_modules/@openzeppelin/\",\":ds-test/=lib/ds-test/src/\",\":forge-std/=lib/forge-std/src/\"]},\"sources\":{\"src/test/utils/SigUtils.sol\":{\"keccak256\":\"0xb79a4d32e5c7abfebddf94d9fc78294165dfe262a50d05076303f16e8bc6de6c\",\"license\":\"MIT\",\"urls\":[\"bzz-raw://85520f51affb2f45bb03a09dba7a752d58f5bb013afb7474035ff4f3a7bdd876\",\"dweb:/ipfs/QmSxwTqwK2KVeFwPJAYZfQ8miURfKsL32W3ThtGMUmWo7n\"]}},\"version\":1}",
   "metadata": {
     "compiler": {
       "version": "0.8.21+commit.d9974bed"
@@ -183,7 +183,7 @@
       ],
       "optimizer": {
         "enabled": true,
-        "runs": 800
+        "runs": 500000
       },
       "metadata": {
         "bytecodeHash": "ipfs"
@@ -207,19 +207,19 @@
   },
   "ast": {
     "absolutePath": "src/test/utils/SigUtils.sol",
-    "id": 35592,
+    "id": 35387,
     "exportedSymbols": {
       "SigUtils": [
-        35591
+        35386
       ]
     },
     "nodeType": "SourceUnit",
-    "src": "32:1460:47",
+    "src": "32:1460:45",
     "nodes": [
       {
-        "id": 35518,
+        "id": 35313,
         "nodeType": "PragmaDirective",
-        "src": "32:26:47",
+        "src": "32:26:45",
         "nodes": [],
         "literals": [
           "solidity",
@@ -229,20 +229,20 @@
         ]
       },
       {
-        "id": 35591,
+        "id": 35386,
         "nodeType": "ContractDefinition",
-        "src": "60:1431:47",
+        "src": "60:1431:45",
         "nodes": [
           {
-            "id": 35520,
+            "id": 35315,
             "nodeType": "VariableDeclaration",
-            "src": "84:33:47",
+            "src": "84:33:45",
             "nodes": [],
             "constant": false,
             "mutability": "mutable",
             "name": "DOMAIN_SEPARATOR",
-            "nameLocation": "101:16:47",
-            "scope": 35591,
+            "nameLocation": "101:16:45",
+            "scope": 35386,
             "stateVariable": true,
             "storageLocation": "default",
             "typeDescriptions": {
@@ -250,10 +250,10 @@
               "typeString": "bytes32"
             },
             "typeName": {
-              "id": 35519,
+              "id": 35314,
               "name": "bytes32",
               "nodeType": "ElementaryTypeName",
-              "src": "84:7:47",
+              "src": "84:7:45",
               "typeDescriptions": {
                 "typeIdentifier": "t_bytes32",
                 "typeString": "bytes32"
@@ -262,30 +262,30 @@
             "visibility": "internal"
           },
           {
-            "id": 35530,
+            "id": 35325,
             "nodeType": "FunctionDefinition",
-            "src": "124:92:47",
+            "src": "124:92:45",
             "nodes": [],
             "body": {
-              "id": 35529,
+              "id": 35324,
               "nodeType": "Block",
-              "src": "163:53:47",
+              "src": "163:53:45",
               "nodes": [],
               "statements": [
                 {
                   "expression": {
-                    "id": 35527,
+                    "id": 35322,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
                     "lValueRequested": false,
                     "leftHandSide": {
-                      "id": 35525,
+                      "id": 35320,
                       "name": "DOMAIN_SEPARATOR",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
-                      "referencedDeclaration": 35520,
-                      "src": "173:16:47",
+                      "referencedDeclaration": 35315,
+                      "src": "173:16:45",
                       "typeDescriptions": {
                         "typeIdentifier": "t_bytes32",
                         "typeString": "bytes32"
@@ -294,26 +294,26 @@
                     "nodeType": "Assignment",
                     "operator": "=",
                     "rightHandSide": {
-                      "id": 35526,
+                      "id": 35321,
                       "name": "_DOMAIN_SEPARATOR",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
-                      "referencedDeclaration": 35522,
-                      "src": "192:17:47",
+                      "referencedDeclaration": 35317,
+                      "src": "192:17:45",
                       "typeDescriptions": {
                         "typeIdentifier": "t_bytes32",
                         "typeString": "bytes32"
                       }
                     },
-                    "src": "173:36:47",
+                    "src": "173:36:45",
                     "typeDescriptions": {
                       "typeIdentifier": "t_bytes32",
                       "typeString": "bytes32"
                     }
                   },
-                  "id": 35528,
+                  "id": 35323,
                   "nodeType": "ExpressionStatement",
-                  "src": "173:36:47"
+                  "src": "173:36:45"
                 }
               ]
             },
@@ -323,18 +323,18 @@
             "name": "",
             "nameLocation": "-1:-1:-1",
             "parameters": {
-              "id": 35523,
+              "id": 35318,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 35522,
+                  "id": 35317,
                   "mutability": "mutable",
                   "name": "_DOMAIN_SEPARATOR",
-                  "nameLocation": "144:17:47",
+                  "nameLocation": "144:17:45",
                   "nodeType": "VariableDeclaration",
-                  "scope": 35530,
-                  "src": "136:25:47",
+                  "scope": 35325,
+                  "src": "136:25:45",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -342,10 +342,10 @@
                     "typeString": "bytes32"
                   },
                   "typeName": {
-                    "id": 35521,
+                    "id": 35316,
                     "name": "bytes32",
                     "nodeType": "ElementaryTypeName",
-                    "src": "136:7:47",
+                    "src": "136:7:45",
                     "typeDescriptions": {
                       "typeIdentifier": "t_bytes32",
                       "typeString": "bytes32"
@@ -354,30 +354,30 @@
                   "visibility": "internal"
                 }
               ],
-              "src": "135:27:47"
+              "src": "135:27:45"
             },
             "returnParameters": {
-              "id": 35524,
+              "id": 35319,
               "nodeType": "ParameterList",
               "parameters": [],
-              "src": "163:0:47"
+              "src": "163:0:45"
             },
-            "scope": 35591,
+            "scope": 35386,
             "stateMutability": "nonpayable",
             "virtual": false,
             "visibility": "public"
           },
           {
-            "id": 35533,
+            "id": 35328,
             "nodeType": "VariableDeclaration",
-            "src": "326:116:47",
+            "src": "326:116:45",
             "nodes": [],
             "constant": true,
             "functionSelector": "30adf81f",
             "mutability": "constant",
             "name": "PERMIT_TYPEHASH",
-            "nameLocation": "350:15:47",
-            "scope": 35591,
+            "nameLocation": "350:15:45",
+            "scope": 35386,
             "stateVariable": true,
             "storageLocation": "default",
             "typeDescriptions": {
@@ -385,10 +385,10 @@
               "typeString": "bytes32"
             },
             "typeName": {
-              "id": 35531,
+              "id": 35326,
               "name": "bytes32",
               "nodeType": "ElementaryTypeName",
-              "src": "326:7:47",
+              "src": "326:7:45",
               "typeDescriptions": {
                 "typeIdentifier": "t_bytes32",
                 "typeString": "bytes32"
@@ -396,14 +396,14 @@
             },
             "value": {
               "hexValue": "307836653731656461653132623162393766346431663630333730666566313031303566613266616165303132363131346131363963363438343564363132366339",
-              "id": 35532,
+              "id": 35327,
               "isConstant": false,
               "isLValue": false,
               "isPure": true,
               "kind": "number",
               "lValueRequested": false,
               "nodeType": "Literal",
-              "src": "376:66:47",
+              "src": "376:66:45",
               "typeDescriptions": {
                 "typeIdentifier": "t_rational_49955707469362902507454157297736832118868343942642399513960811609542965143241_by_1",
                 "typeString": "int_const 4995...(69 digits omitted)...3241"
@@ -413,21 +413,21 @@
             "visibility": "public"
           },
           {
-            "id": 35544,
+            "id": 35339,
             "nodeType": "StructDefinition",
-            "src": "449:141:47",
+            "src": "449:141:45",
             "nodes": [],
             "canonicalName": "SigUtils.Permit",
             "members": [
               {
                 "constant": false,
-                "id": 35535,
+                "id": 35330,
                 "mutability": "mutable",
                 "name": "owner",
-                "nameLocation": "481:5:47",
+                "nameLocation": "481:5:45",
                 "nodeType": "VariableDeclaration",
-                "scope": 35544,
-                "src": "473:13:47",
+                "scope": 35339,
+                "src": "473:13:45",
                 "stateVariable": false,
                 "storageLocation": "default",
                 "typeDescriptions": {
@@ -435,10 +435,10 @@
                   "typeString": "address"
                 },
                 "typeName": {
-                  "id": 35534,
+                  "id": 35329,
                   "name": "address",
                   "nodeType": "ElementaryTypeName",
-                  "src": "473:7:47",
+                  "src": "473:7:45",
                   "stateMutability": "nonpayable",
                   "typeDescriptions": {
                     "typeIdentifier": "t_address",
@@ -449,13 +449,13 @@
               },
               {
                 "constant": false,
-                "id": 35537,
+                "id": 35332,
                 "mutability": "mutable",
                 "name": "spender",
-                "nameLocation": "504:7:47",
+                "nameLocation": "504:7:45",
                 "nodeType": "VariableDeclaration",
-                "scope": 35544,
-                "src": "496:15:47",
+                "scope": 35339,
+                "src": "496:15:45",
                 "stateVariable": false,
                 "storageLocation": "default",
                 "typeDescriptions": {
@@ -463,10 +463,10 @@
                   "typeString": "address"
                 },
                 "typeName": {
-                  "id": 35536,
+                  "id": 35331,
                   "name": "address",
                   "nodeType": "ElementaryTypeName",
-                  "src": "496:7:47",
+                  "src": "496:7:45",
                   "stateMutability": "nonpayable",
                   "typeDescriptions": {
                     "typeIdentifier": "t_address",
@@ -477,13 +477,13 @@
               },
               {
                 "constant": false,
-                "id": 35539,
+                "id": 35334,
                 "mutability": "mutable",
                 "name": "value",
-                "nameLocation": "529:5:47",
+                "nameLocation": "529:5:45",
                 "nodeType": "VariableDeclaration",
-                "scope": 35544,
-                "src": "521:13:47",
+                "scope": 35339,
+                "src": "521:13:45",
                 "stateVariable": false,
                 "storageLocation": "default",
                 "typeDescriptions": {
@@ -491,10 +491,10 @@
                   "typeString": "uint256"
                 },
                 "typeName": {
-                  "id": 35538,
+                  "id": 35333,
                   "name": "uint256",
                   "nodeType": "ElementaryTypeName",
-                  "src": "521:7:47",
+                  "src": "521:7:45",
                   "typeDescriptions": {
                     "typeIdentifier": "t_uint256",
                     "typeString": "uint256"
@@ -504,13 +504,13 @@
               },
               {
                 "constant": false,
-                "id": 35541,
+                "id": 35336,
                 "mutability": "mutable",
                 "name": "nonce",
-                "nameLocation": "552:5:47",
+                "nameLocation": "552:5:45",
                 "nodeType": "VariableDeclaration",
-                "scope": 35544,
-                "src": "544:13:47",
+                "scope": 35339,
+                "src": "544:13:45",
                 "stateVariable": false,
                 "storageLocation": "default",
                 "typeDescriptions": {
@@ -518,10 +518,10 @@
                   "typeString": "uint256"
                 },
                 "typeName": {
-                  "id": 35540,
+                  "id": 35335,
                   "name": "uint256",
                   "nodeType": "ElementaryTypeName",
-                  "src": "544:7:47",
+                  "src": "544:7:45",
                   "typeDescriptions": {
                     "typeIdentifier": "t_uint256",
                     "typeString": "uint256"
@@ -531,13 +531,13 @@
               },
               {
                 "constant": false,
-                "id": 35543,
+                "id": 35338,
                 "mutability": "mutable",
                 "name": "deadline",
-                "nameLocation": "575:8:47",
+                "nameLocation": "575:8:45",
                 "nodeType": "VariableDeclaration",
-                "scope": 35544,
-                "src": "567:16:47",
+                "scope": 35339,
+                "src": "567:16:45",
                 "stateVariable": false,
                 "storageLocation": "default",
                 "typeDescriptions": {
@@ -545,10 +545,10 @@
                   "typeString": "uint256"
                 },
                 "typeName": {
-                  "id": 35542,
+                  "id": 35337,
                   "name": "uint256",
                   "nodeType": "ElementaryTypeName",
-                  "src": "567:7:47",
+                  "src": "567:7:45",
                   "typeDescriptions": {
                     "typeIdentifier": "t_uint256",
                     "typeString": "uint256"
@@ -558,19 +558,19 @@
               }
             ],
             "name": "Permit",
-            "nameLocation": "456:6:47",
-            "scope": 35591,
+            "nameLocation": "456:6:45",
+            "scope": 35386,
             "visibility": "public"
           },
           {
-            "id": 35570,
+            "id": 35365,
             "nodeType": "FunctionDefinition",
-            "src": "633:414:47",
+            "src": "633:414:45",
             "nodes": [],
             "body": {
-              "id": 35569,
+              "id": 35364,
               "nodeType": "Block",
-              "src": "725:322:47",
+              "src": "725:322:45",
               "nodes": [],
               "statements": [
                 {
@@ -579,12 +579,12 @@
                       {
                         "arguments": [
                           {
-                            "id": 35555,
+                            "id": 35350,
                             "name": "PERMIT_TYPEHASH",
                             "nodeType": "Identifier",
                             "overloadedDeclarations": [],
-                            "referencedDeclaration": 35533,
-                            "src": "813:15:47",
+                            "referencedDeclaration": 35328,
+                            "src": "813:15:45",
                             "typeDescriptions": {
                               "typeIdentifier": "t_bytes32",
                               "typeString": "bytes32"
@@ -592,27 +592,27 @@
                           },
                           {
                             "expression": {
-                              "id": 35556,
+                              "id": 35351,
                               "name": "_permit",
                               "nodeType": "Identifier",
                               "overloadedDeclarations": [],
-                              "referencedDeclaration": 35547,
-                              "src": "850:7:47",
+                              "referencedDeclaration": 35342,
+                              "src": "850:7:45",
                               "typeDescriptions": {
-                                "typeIdentifier": "t_struct$_Permit_$35544_memory_ptr",
+                                "typeIdentifier": "t_struct$_Permit_$35339_memory_ptr",
                                 "typeString": "struct SigUtils.Permit memory"
                               }
                             },
-                            "id": 35557,
+                            "id": 35352,
                             "isConstant": false,
                             "isLValue": true,
                             "isPure": false,
                             "lValueRequested": false,
-                            "memberLocation": "858:5:47",
+                            "memberLocation": "858:5:45",
                             "memberName": "owner",
                             "nodeType": "MemberAccess",
-                            "referencedDeclaration": 35535,
-                            "src": "850:13:47",
+                            "referencedDeclaration": 35330,
+                            "src": "850:13:45",
                             "typeDescriptions": {
                               "typeIdentifier": "t_address",
                               "typeString": "address"
@@ -620,27 +620,27 @@
                           },
                           {
                             "expression": {
-                              "id": 35558,
+                              "id": 35353,
                               "name": "_permit",
                               "nodeType": "Identifier",
                               "overloadedDeclarations": [],
-                              "referencedDeclaration": 35547,
-                              "src": "885:7:47",
+                              "referencedDeclaration": 35342,
+                              "src": "885:7:45",
                               "typeDescriptions": {
-                                "typeIdentifier": "t_struct$_Permit_$35544_memory_ptr",
+                                "typeIdentifier": "t_struct$_Permit_$35339_memory_ptr",
                                 "typeString": "struct SigUtils.Permit memory"
                               }
                             },
-                            "id": 35559,
+                            "id": 35354,
                             "isConstant": false,
                             "isLValue": true,
                             "isPure": false,
                             "lValueRequested": false,
-                            "memberLocation": "893:7:47",
+                            "memberLocation": "893:7:45",
                             "memberName": "spender",
                             "nodeType": "MemberAccess",
-                            "referencedDeclaration": 35537,
-                            "src": "885:15:47",
+                            "referencedDeclaration": 35332,
+                            "src": "885:15:45",
                             "typeDescriptions": {
                               "typeIdentifier": "t_address",
                               "typeString": "address"
@@ -648,27 +648,27 @@
                           },
                           {
                             "expression": {
-                              "id": 35560,
+                              "id": 35355,
                               "name": "_permit",
                               "nodeType": "Identifier",
                               "overloadedDeclarations": [],
-                              "referencedDeclaration": 35547,
-                              "src": "922:7:47",
+                              "referencedDeclaration": 35342,
+                              "src": "922:7:45",
                               "typeDescriptions": {
-                                "typeIdentifier": "t_struct$_Permit_$35544_memory_ptr",
+                                "typeIdentifier": "t_struct$_Permit_$35339_memory_ptr",
                                 "typeString": "struct SigUtils.Permit memory"
                               }
                             },
-                            "id": 35561,
+                            "id": 35356,
                             "isConstant": false,
                             "isLValue": true,
                             "isPure": false,
                             "lValueRequested": false,
-                            "memberLocation": "930:5:47",
+                            "memberLocation": "930:5:45",
                             "memberName": "value",
                             "nodeType": "MemberAccess",
-                            "referencedDeclaration": 35539,
-                            "src": "922:13:47",
+                            "referencedDeclaration": 35334,
+                            "src": "922:13:45",
                             "typeDescriptions": {
                               "typeIdentifier": "t_uint256",
                               "typeString": "uint256"
@@ -676,27 +676,27 @@
                           },
                           {
                             "expression": {
-                              "id": 35562,
+                              "id": 35357,
                               "name": "_permit",
                               "nodeType": "Identifier",
                               "overloadedDeclarations": [],
-                              "referencedDeclaration": 35547,
-                              "src": "957:7:47",
+                              "referencedDeclaration": 35342,
+                              "src": "957:7:45",
                               "typeDescriptions": {
-                                "typeIdentifier": "t_struct$_Permit_$35544_memory_ptr",
+                                "typeIdentifier": "t_struct$_Permit_$35339_memory_ptr",
                                 "typeString": "struct SigUtils.Permit memory"
                               }
                             },
-                            "id": 35563,
+                            "id": 35358,
                             "isConstant": false,
                             "isLValue": true,
                             "isPure": false,
                             "lValueRequested": false,
-                            "memberLocation": "965:5:47",
+                            "memberLocation": "965:5:45",
                             "memberName": "nonce",
                             "nodeType": "MemberAccess",
-                            "referencedDeclaration": 35541,
-                            "src": "957:13:47",
+                            "referencedDeclaration": 35336,
+                            "src": "957:13:45",
                             "typeDescriptions": {
                               "typeIdentifier": "t_uint256",
                               "typeString": "uint256"
@@ -704,27 +704,27 @@
                           },
                           {
                             "expression": {
-                              "id": 35564,
+                              "id": 35359,
                               "name": "_permit",
                               "nodeType": "Identifier",
                               "overloadedDeclarations": [],
-                              "referencedDeclaration": 35547,
-                              "src": "992:7:47",
+                              "referencedDeclaration": 35342,
+                              "src": "992:7:45",
                               "typeDescriptions": {
-                                "typeIdentifier": "t_struct$_Permit_$35544_memory_ptr",
+                                "typeIdentifier": "t_struct$_Permit_$35339_memory_ptr",
                                 "typeString": "struct SigUtils.Permit memory"
                               }
                             },
-                            "id": 35565,
+                            "id": 35360,
                             "isConstant": false,
                             "isLValue": true,
                             "isPure": false,
                             "lValueRequested": false,
-                            "memberLocation": "1000:8:47",
+                            "memberLocation": "1000:8:45",
                             "memberName": "deadline",
                             "nodeType": "MemberAccess",
-                            "referencedDeclaration": 35543,
-                            "src": "992:16:47",
+                            "referencedDeclaration": 35338,
+                            "src": "992:16:45",
                             "typeDescriptions": {
                               "typeIdentifier": "t_uint256",
                               "typeString": "uint256"
@@ -759,32 +759,32 @@
                             }
                           ],
                           "expression": {
-                            "id": 35553,
+                            "id": 35348,
                             "name": "abi",
                             "nodeType": "Identifier",
                             "overloadedDeclarations": [],
                             "referencedDeclaration": -1,
-                            "src": "781:3:47",
+                            "src": "781:3:45",
                             "typeDescriptions": {
                               "typeIdentifier": "t_magic_abi",
                               "typeString": "abi"
                             }
                           },
-                          "id": 35554,
+                          "id": 35349,
                           "isConstant": false,
                           "isLValue": false,
                           "isPure": true,
                           "lValueRequested": false,
-                          "memberLocation": "785:6:47",
+                          "memberLocation": "785:6:45",
                           "memberName": "encode",
                           "nodeType": "MemberAccess",
-                          "src": "781:10:47",
+                          "src": "781:10:45",
                           "typeDescriptions": {
                             "typeIdentifier": "t_function_abiencode_pure$__$returns$_t_bytes_memory_ptr_$",
                             "typeString": "function () pure returns (bytes memory)"
                           }
                         },
-                        "id": 35566,
+                        "id": 35361,
                         "isConstant": false,
                         "isLValue": false,
                         "isPure": false,
@@ -793,7 +793,7 @@
                         "nameLocations": [],
                         "names": [],
                         "nodeType": "FunctionCall",
-                        "src": "781:245:47",
+                        "src": "781:245:45",
                         "tryCall": false,
                         "typeDescriptions": {
                           "typeIdentifier": "t_bytes_memory_ptr",
@@ -808,18 +808,18 @@
                           "typeString": "bytes memory"
                         }
                       ],
-                      "id": 35552,
+                      "id": 35347,
                       "name": "keccak256",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
                       "referencedDeclaration": -8,
-                      "src": "754:9:47",
+                      "src": "754:9:45",
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_keccak256_pure$_t_bytes_memory_ptr_$returns$_t_bytes32_$",
                         "typeString": "function (bytes memory) pure returns (bytes32)"
                       }
                     },
-                    "id": 35567,
+                    "id": 35362,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
@@ -828,17 +828,17 @@
                     "nameLocations": [],
                     "names": [],
                     "nodeType": "FunctionCall",
-                    "src": "754:286:47",
+                    "src": "754:286:45",
                     "tryCall": false,
                     "typeDescriptions": {
                       "typeIdentifier": "t_bytes32",
                       "typeString": "bytes32"
                     }
                   },
-                  "functionReturnParameters": 35551,
-                  "id": 35568,
+                  "functionReturnParameters": 35346,
+                  "id": 35363,
                   "nodeType": "Return",
-                  "src": "735:305:47"
+                  "src": "735:305:45"
                 }
               ]
             },
@@ -846,64 +846,64 @@
             "kind": "function",
             "modifiers": [],
             "name": "getStructHash",
-            "nameLocation": "642:13:47",
+            "nameLocation": "642:13:45",
             "parameters": {
-              "id": 35548,
+              "id": 35343,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 35547,
+                  "id": 35342,
                   "mutability": "mutable",
                   "name": "_permit",
-                  "nameLocation": "679:7:47",
+                  "nameLocation": "679:7:45",
                   "nodeType": "VariableDeclaration",
-                  "scope": 35570,
-                  "src": "665:21:47",
+                  "scope": 35365,
+                  "src": "665:21:45",
                   "stateVariable": false,
                   "storageLocation": "memory",
                   "typeDescriptions": {
-                    "typeIdentifier": "t_struct$_Permit_$35544_memory_ptr",
+                    "typeIdentifier": "t_struct$_Permit_$35339_memory_ptr",
                     "typeString": "struct SigUtils.Permit"
                   },
                   "typeName": {
-                    "id": 35546,
+                    "id": 35341,
                     "nodeType": "UserDefinedTypeName",
                     "pathNode": {
-                      "id": 35545,
+                      "id": 35340,
                       "name": "Permit",
                       "nameLocations": [
-                        "665:6:47"
+                        "665:6:45"
                       ],
                       "nodeType": "IdentifierPath",
-                      "referencedDeclaration": 35544,
-                      "src": "665:6:47"
+                      "referencedDeclaration": 35339,
+                      "src": "665:6:45"
                     },
-                    "referencedDeclaration": 35544,
-                    "src": "665:6:47",
+                    "referencedDeclaration": 35339,
+                    "src": "665:6:45",
                     "typeDescriptions": {
-                      "typeIdentifier": "t_struct$_Permit_$35544_storage_ptr",
+                      "typeIdentifier": "t_struct$_Permit_$35339_storage_ptr",
                       "typeString": "struct SigUtils.Permit"
                     }
                   },
                   "visibility": "internal"
                 }
               ],
-              "src": "655:37:47"
+              "src": "655:37:45"
             },
             "returnParameters": {
-              "id": 35551,
+              "id": 35346,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 35550,
+                  "id": 35345,
                   "mutability": "mutable",
                   "name": "",
                   "nameLocation": "-1:-1:-1",
                   "nodeType": "VariableDeclaration",
-                  "scope": 35570,
-                  "src": "716:7:47",
+                  "scope": 35365,
+                  "src": "716:7:45",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -911,10 +911,10 @@
                     "typeString": "bytes32"
                   },
                   "typeName": {
-                    "id": 35549,
+                    "id": 35344,
                     "name": "bytes32",
                     "nodeType": "ElementaryTypeName",
-                    "src": "716:7:47",
+                    "src": "716:7:45",
                     "typeDescriptions": {
                       "typeIdentifier": "t_bytes32",
                       "typeString": "bytes32"
@@ -923,22 +923,22 @@
                   "visibility": "internal"
                 }
               ],
-              "src": "715:9:47"
+              "src": "715:9:45"
             },
-            "scope": 35591,
+            "scope": 35386,
             "stateMutability": "pure",
             "virtual": false,
             "visibility": "internal"
           },
           {
-            "id": 35590,
+            "id": 35385,
             "nodeType": "FunctionDefinition",
-            "src": "1171:318:47",
+            "src": "1171:318:45",
             "nodes": [],
             "body": {
-              "id": 35589,
+              "id": 35384,
               "nodeType": "Block",
-              "src": "1264:225:47",
+              "src": "1264:225:45",
               "nodes": [],
               "statements": [
                 {
@@ -948,14 +948,14 @@
                         "arguments": [
                           {
                             "hexValue": "1901",
-                            "id": 35581,
+                            "id": 35376,
                             "isConstant": false,
                             "isLValue": false,
                             "isPure": true,
                             "kind": "string",
                             "lValueRequested": false,
                             "nodeType": "Literal",
-                            "src": "1358:10:47",
+                            "src": "1358:10:45",
                             "typeDescriptions": {
                               "typeIdentifier": "t_stringliteral_301a50b291d33ce1e8e9064e3f6a6c51d902ec22892b50d58abf6357c6a45541",
                               "typeString": "literal_string hex\"1901\""
@@ -963,12 +963,12 @@
                             "value": "\u0019\u0001"
                           },
                           {
-                            "id": 35582,
+                            "id": 35377,
                             "name": "DOMAIN_SEPARATOR",
                             "nodeType": "Identifier",
                             "overloadedDeclarations": [],
-                            "referencedDeclaration": 35520,
-                            "src": "1390:16:47",
+                            "referencedDeclaration": 35315,
+                            "src": "1390:16:45",
                             "typeDescriptions": {
                               "typeIdentifier": "t_bytes32",
                               "typeString": "bytes32"
@@ -977,14 +977,14 @@
                           {
                             "arguments": [
                               {
-                                "id": 35584,
+                                "id": 35379,
                                 "name": "_permit",
                                 "nodeType": "Identifier",
                                 "overloadedDeclarations": [],
-                                "referencedDeclaration": 35573,
-                                "src": "1442:7:47",
+                                "referencedDeclaration": 35368,
+                                "src": "1442:7:45",
                                 "typeDescriptions": {
-                                  "typeIdentifier": "t_struct$_Permit_$35544_memory_ptr",
+                                  "typeIdentifier": "t_struct$_Permit_$35339_memory_ptr",
                                   "typeString": "struct SigUtils.Permit memory"
                                 }
                               }
@@ -992,22 +992,22 @@
                             "expression": {
                               "argumentTypes": [
                                 {
-                                  "typeIdentifier": "t_struct$_Permit_$35544_memory_ptr",
+                                  "typeIdentifier": "t_struct$_Permit_$35339_memory_ptr",
                                   "typeString": "struct SigUtils.Permit memory"
                                 }
                               ],
-                              "id": 35583,
+                              "id": 35378,
                               "name": "getStructHash",
                               "nodeType": "Identifier",
                               "overloadedDeclarations": [],
-                              "referencedDeclaration": 35570,
-                              "src": "1428:13:47",
+                              "referencedDeclaration": 35365,
+                              "src": "1428:13:45",
                               "typeDescriptions": {
-                                "typeIdentifier": "t_function_internal_pure$_t_struct$_Permit_$35544_memory_ptr_$returns$_t_bytes32_$",
+                                "typeIdentifier": "t_function_internal_pure$_t_struct$_Permit_$35339_memory_ptr_$returns$_t_bytes32_$",
                                 "typeString": "function (struct SigUtils.Permit memory) pure returns (bytes32)"
                               }
                             },
-                            "id": 35585,
+                            "id": 35380,
                             "isConstant": false,
                             "isLValue": false,
                             "isPure": false,
@@ -1016,7 +1016,7 @@
                             "nameLocations": [],
                             "names": [],
                             "nodeType": "FunctionCall",
-                            "src": "1428:22:47",
+                            "src": "1428:22:45",
                             "tryCall": false,
                             "typeDescriptions": {
                               "typeIdentifier": "t_bytes32",
@@ -1040,32 +1040,32 @@
                             }
                           ],
                           "expression": {
-                            "id": 35579,
+                            "id": 35374,
                             "name": "abi",
                             "nodeType": "Identifier",
                             "overloadedDeclarations": [],
                             "referencedDeclaration": -1,
-                            "src": "1320:3:47",
+                            "src": "1320:3:45",
                             "typeDescriptions": {
                               "typeIdentifier": "t_magic_abi",
                               "typeString": "abi"
                             }
                           },
-                          "id": 35580,
+                          "id": 35375,
                           "isConstant": false,
                           "isLValue": false,
                           "isPure": true,
                           "lValueRequested": false,
-                          "memberLocation": "1324:12:47",
+                          "memberLocation": "1324:12:45",
                           "memberName": "encodePacked",
                           "nodeType": "MemberAccess",
-                          "src": "1320:16:47",
+                          "src": "1320:16:45",
                           "typeDescriptions": {
                             "typeIdentifier": "t_function_abiencodepacked_pure$__$returns$_t_bytes_memory_ptr_$",
                             "typeString": "function () pure returns (bytes memory)"
                           }
                         },
-                        "id": 35586,
+                        "id": 35381,
                         "isConstant": false,
                         "isLValue": false,
                         "isPure": false,
@@ -1074,7 +1074,7 @@
                         "nameLocations": [],
                         "names": [],
                         "nodeType": "FunctionCall",
-                        "src": "1320:148:47",
+                        "src": "1320:148:45",
                         "tryCall": false,
                         "typeDescriptions": {
                           "typeIdentifier": "t_bytes_memory_ptr",
@@ -1089,18 +1089,18 @@
                           "typeString": "bytes memory"
                         }
                       ],
-                      "id": 35578,
+                      "id": 35373,
                       "name": "keccak256",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
                       "referencedDeclaration": -8,
-                      "src": "1293:9:47",
+                      "src": "1293:9:45",
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_keccak256_pure$_t_bytes_memory_ptr_$returns$_t_bytes32_$",
                         "typeString": "function (bytes memory) pure returns (bytes32)"
                       }
                     },
-                    "id": 35587,
+                    "id": 35382,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
@@ -1109,17 +1109,17 @@
                     "nameLocations": [],
                     "names": [],
                     "nodeType": "FunctionCall",
-                    "src": "1293:189:47",
+                    "src": "1293:189:45",
                     "tryCall": false,
                     "typeDescriptions": {
                       "typeIdentifier": "t_bytes32",
                       "typeString": "bytes32"
                     }
                   },
-                  "functionReturnParameters": 35577,
-                  "id": 35588,
+                  "functionReturnParameters": 35372,
+                  "id": 35383,
                   "nodeType": "Return",
-                  "src": "1274:208:47"
+                  "src": "1274:208:45"
                 }
               ]
             },
@@ -1128,64 +1128,64 @@
             "kind": "function",
             "modifiers": [],
             "name": "getTypedDataHash",
-            "nameLocation": "1180:16:47",
+            "nameLocation": "1180:16:45",
             "parameters": {
-              "id": 35574,
+              "id": 35369,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 35573,
+                  "id": 35368,
                   "mutability": "mutable",
                   "name": "_permit",
-                  "nameLocation": "1220:7:47",
+                  "nameLocation": "1220:7:45",
                   "nodeType": "VariableDeclaration",
-                  "scope": 35590,
-                  "src": "1206:21:47",
+                  "scope": 35385,
+                  "src": "1206:21:45",
                   "stateVariable": false,
                   "storageLocation": "memory",
                   "typeDescriptions": {
-                    "typeIdentifier": "t_struct$_Permit_$35544_memory_ptr",
+                    "typeIdentifier": "t_struct$_Permit_$35339_memory_ptr",
                     "typeString": "struct SigUtils.Permit"
                   },
                   "typeName": {
-                    "id": 35572,
+                    "id": 35367,
                     "nodeType": "UserDefinedTypeName",
                     "pathNode": {
-                      "id": 35571,
+                      "id": 35366,
                       "name": "Permit",
                       "nameLocations": [
-                        "1206:6:47"
+                        "1206:6:45"
                       ],
                       "nodeType": "IdentifierPath",
-                      "referencedDeclaration": 35544,
-                      "src": "1206:6:47"
+                      "referencedDeclaration": 35339,
+                      "src": "1206:6:45"
                     },
-                    "referencedDeclaration": 35544,
-                    "src": "1206:6:47",
+                    "referencedDeclaration": 35339,
+                    "src": "1206:6:45",
                     "typeDescriptions": {
-                      "typeIdentifier": "t_struct$_Permit_$35544_storage_ptr",
+                      "typeIdentifier": "t_struct$_Permit_$35339_storage_ptr",
                       "typeString": "struct SigUtils.Permit"
                     }
                   },
                   "visibility": "internal"
                 }
               ],
-              "src": "1196:37:47"
+              "src": "1196:37:45"
             },
             "returnParameters": {
-              "id": 35577,
+              "id": 35372,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 35576,
+                  "id": 35371,
                   "mutability": "mutable",
                   "name": "",
                   "nameLocation": "-1:-1:-1",
                   "nodeType": "VariableDeclaration",
-                  "scope": 35590,
-                  "src": "1255:7:47",
+                  "scope": 35385,
+                  "src": "1255:7:45",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -1193,10 +1193,10 @@
                     "typeString": "bytes32"
                   },
                   "typeName": {
-                    "id": 35575,
+                    "id": 35370,
                     "name": "bytes32",
                     "nodeType": "ElementaryTypeName",
-                    "src": "1255:7:47",
+                    "src": "1255:7:45",
                     "typeDescriptions": {
                       "typeIdentifier": "t_bytes32",
                       "typeString": "bytes32"
@@ -1205,9 +1205,9 @@
                   "visibility": "internal"
                 }
               ],
-              "src": "1254:9:47"
+              "src": "1254:9:45"
             },
-            "scope": 35591,
+            "scope": 35386,
             "stateMutability": "view",
             "virtual": false,
             "visibility": "public"
@@ -1220,16 +1220,16 @@
         "contractKind": "contract",
         "fullyImplemented": true,
         "linearizedBaseContracts": [
-          35591
+          35386
         ],
         "name": "SigUtils",
-        "nameLocation": "69:8:47",
-        "scope": 35592,
+        "nameLocation": "69:8:45",
+        "scope": 35387,
         "usedErrors": [],
         "usedEvents": []
       }
     ],
     "license": "MIT"
   },
-  "id": 47
+  "id": 45
 }
