@@ -11,43 +11,43 @@ import type {
 
 const _abi = [
   {
+    type: "function",
+    name: "getSignedJoinApproval",
     inputs: [
       {
-        internalType: "address",
         name: "crowdtainerAddress",
         type: "address",
+        internalType: "address",
       },
       {
-        internalType: "address",
         name: "addr",
         type: "address",
+        internalType: "address",
       },
       {
-        internalType: "uint256[]",
         name: "quantities",
         type: "uint256[]",
+        internalType: "uint256[]",
       },
       {
-        internalType: "bool",
         name: "_enableReferral",
         type: "bool",
+        internalType: "bool",
       },
       {
-        internalType: "address",
         name: "_referrer",
         type: "address",
+        internalType: "address",
       },
     ],
-    name: "getSignedJoinApproval",
     outputs: [
       {
-        internalType: "bytes",
         name: "signature",
         type: "bytes",
+        internalType: "bytes",
       },
     ],
     stateMutability: "view",
-    type: "function",
   },
 ] as const;
 
