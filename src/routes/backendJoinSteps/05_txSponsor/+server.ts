@@ -2,7 +2,7 @@ import { getDatabase } from "$lib/Database/redis";              // Database
 import { type Result, Ok, Err } from "@sniptt/monads";          // Monads
 import { error, type RequestHandler } from '@sveltejs/kit';
 import { BigNumber, ethers } from "ethers";
-import { TX_SPONSOR_PRIVATE_KEY } from '$env/static/private';
+import { TX_SPONSOR_PRIVATE_KEY, AUTHORIZER_PRIVATE_KEY } from '$env/static/private';
 import { AuthorizationGateway__factory, Vouchers721__factory } from "../../typechain/index.js";
 import { joinProjectWithSignature } from "$lib/ethersCalls/rpcRequests.js";
 import type { SignedPermitStruct } from '../../typechain/Vouchers721.js';
@@ -19,7 +19,14 @@ if (!ethers.utils.isAddress(ethers.utils.computeAddress(TX_SPONSOR_PRIVATE_KEY))
     console.log(message);
     throw error(500, message);
 }
-let serviceProviderPK = await signer.getAddress();
+
+if (!ethers.utils.isAddress(ethers.utils.computeAddress(AUTHORIZER_PRIVATE_KEY))) {
+    const message = 'Invalid AUTHORIZER_PRIVATE_KEY.';
+    console.log(message);
+    throw error(500, message);
+}
+
+let joinAuthorizerPK = ethers.utils.computeAddress(AUTHORIZER_PRIVATE_KEY);
 
 const vouchers721Contract = Vouchers721__factory.connect(Vouchers721Address, provider.getSigner());
 
@@ -185,8 +192,8 @@ export const POST: RequestHandler = async ({ request }) => {
         throw error(400, "Unable to recover signer.");
     }
 
-    if (serviceProviderPK != recoveredSigner) {
-        throw error(400, `Service provider signature invalid: ${serviceProviderPK} ${recoveredSigner} `);
+    if (joinAuthorizerPK != recoveredSigner) {
+        throw error(400, `Service provider join authorization signature invalid. Expected: ${joinAuthorizerPK} Received: ${recoveredSigner}`);
     }
 
     // All checks succeeded. Attempt to include the transaction on behalf of the user.
