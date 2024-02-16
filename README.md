@@ -1,22 +1,42 @@
 <div align="center"><img src="static/images/site/CrowdtainerLogo.svg" alt="Crowdtainer" height="128px"/>
 
-<h1> Crowdtainer Web App </h1> </div>
+<h1> Crowdtainer Web App </h1>
+<h3>The Open source platform for Crowdfunding, Group Buying (E-commerce) and more.</h3>
+</div>
 <br/>
 
-Web-based (Svelte) application to interact with the [Crowdtainer solidity contracts](https://github.com/crowdtainer/dapp-contracts).
+Crowdtainer allows you to host your own online campaigns without having to rely on proprietary software.
+
+Example applications:
+- Crowdfunding in general, of any size: Fund features for you app, fund a book, etc.
+- Bulk / group orders (E-commerce): Buy collectively to enable new projects and lower costs for everyone.
+
+Advantages:
+- Reduces payment fees to as close to zero as possible by using [Layer 2 networks](https://l2beat.com/scaling/summary).
+- Campaigners are not prone to being randomly censored by a crowdfunding company.
+- Privacy oriented: Reducing the number of external dependencies can limit the sharing of sensitive customer data, which also means it is easier and less costly to comply with GDPR laws.
+- Easy E-commerce integration for Invoices, accounting, etc: Woocommerce is already integrated, others can be easily added.
+
+Disadvantages:
+- users who are not familiar or comfortable with cryptocurrency may experience some difficulty, although we are currently developing credit card onboarding to address this issue.
+- When compared to companies offering similar services with pre-defined terms and conditions, self-hosting a campaign requires the campaigner to define all contractual terms. This can be advantageous in certain cases, but may require upfront capital.
+
+This repository hosts the web-based application (SvelteKit) to interact with the [Crowdtainer solidity contracts](https://github.com/crowdtainer/dapp-contracts) and includes all necessary auxiliary services.
+
+A live deployment example can be seen in [Barterfly's Website](https://app.barterfly.de/Campaigns).
 
 Following these instructions allows you to host your own instance of Crowdtainer.
-
-## Development
-
-To run everything locally, follow the instructions in [Crowdtainer solidity contracts](https://github.com/crowdtainer/dapp-contracts) to run and deploy the contracts (`npx hardhat node`).
-Once a blockchain or RPC can be connected to, proceed setting up this frontend per instructions below.
 
 ### Frameworks
 
 - [SvelteKit](https://kit.svelte.dev) 
 - TailWindCSS
 - Typechain
+
+## Development
+
+To run everything locally, follow the instructions in [Crowdtainer solidity contracts](https://github.com/crowdtainer/dapp-contracts) to run and deploy the contracts (`npx hardhat node`).
+Once a blockchain or RPC can be connected to, proceed setting up this frontend per instructions below.
 
 As this project uses typechain to generate typescript bindings for interaction with deployed smart contracts, if changes are made to the smart contract interfaces, then the respective JSON files (in /abi folder) needs to be updated in this project, and bindings re-generated with: `npm run build-types`.
 
