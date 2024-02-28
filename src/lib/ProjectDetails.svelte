@@ -262,7 +262,7 @@
 					<tr class="even:backdrop-brightness-75">
 						<td class="p-1">Terms and Conditions:</td>
 						<td class="pr-4">
-							<span class="inline-flex items-baseline">
+							<span class="inline-flex items-baseline max-w-48">
 								{#if campaignStaticData.legalContractURI && campaignStaticData.legalContractURI != ''}
 									<span>{campaignStaticData.legalContractURI}</span>
 								{:else}

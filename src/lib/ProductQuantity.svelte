@@ -56,7 +56,7 @@
 	<div id="body" class="px-0 md:px-4 spacey-y-4">
 		{#each descriptions as product, index}
 		{#if $selection[index] > 0}
-			<div transition:slide|global="{{ duration: 250 }}">
+			<div transition:slide="{{ duration: 250 }}">
 				<div class="flex items-center">
 					<!-- Row start -->
 					<div class="w-6/12">
@@ -76,8 +76,8 @@
 								-
 							</button>
 						</div>
-						<div in:fade|global class="my-1 py-2 dark:text-white">
-							<p in:fade|global>{$selection[index]}</p>
+						<div in:fade class="my-1 py-2 dark:text-white">
+							<p in:fade>{$selection[index]}</p>
 						</div>
 						<div class="">
 							<button
