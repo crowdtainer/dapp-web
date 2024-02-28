@@ -285,7 +285,7 @@
 				</div>
 
 				{#if !deliverySameAsBilling}
-					<div in:slide={{ duration: 250 }} out:slide={{ duration: 250 }}>
+					<div in:slide|global={{ duration: 250 }} out:slide|global={{ duration: 250 }}>
 						<!-- Country -->
 						{#if countriesListDisplay.length > 0}
 							<div class="form-control w-full mb-2">
