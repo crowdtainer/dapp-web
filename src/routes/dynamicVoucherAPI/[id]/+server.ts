@@ -1,7 +1,7 @@
 // Typechain
 import { Vouchers721__factory } from '../../typechain/factories/Vouchers721__factory';
 import { Crowdtainer__factory } from '../../typechain/factories/Crowdtainer.sol/Crowdtainer__factory';
-import type { IERC20 } from '../../typechain';
+import { IERC20__factory, type IERC20 } from '../../typechain';
 
 // Ethers
 import { BigNumber } from 'ethers';
@@ -20,9 +20,12 @@ import { provider } from '$lib/ethersCalls/provider';
 let lastFetchEpochTimeInMilliseconds = 0;
 const cacheExpirationTimeInMilliseconds = 6 * 1000; // 6 seconds
 
+let erc20Contract: IERC20;
+let crowdtainerForIdMap = new Map<BigNumber, string>();
+
 async function fetchData(crowdtainerId: BigNumber): Promise<Result<CrowdtainerDynamicModel, Error>> {
    try {
-      if (crowdtainerId.toNumber() === 0) {
+      if (crowdtainerId.toNumber() <= 0) {
          return Err({ error: `Invalid crowdtainerId: ${crowdtainerId.toNumber()}` });
       }
 
@@ -40,24 +43,28 @@ async function fetchData(crowdtainerId: BigNumber): Promise<Result<CrowdtainerDy
 
       const vouchers721Contract = Vouchers721__factory.connect(Vouchers721Address, provider);
 
-      if (crowdtainerStaticData === undefined || crowdtainerStaticData.contractAddress === undefined) {
+      let crowdtainerIdCached = crowdtainerForIdMap.get(crowdtainerId);
+      if (!crowdtainerIdCached || crowdtainerStaticData === undefined || crowdtainerStaticData.contractAddress === undefined) {
          crowdtainerAddress = await vouchers721Contract.crowdtainerForId(crowdtainerId);
+         crowdtainerForIdMap.set(crowdtainerId, crowdtainerAddress);
       } else {
          crowdtainerAddress = crowdtainerStaticData.contractAddress;
+         erc20Contract = IERC20__factory.connect(crowdtainerStaticData.tokenAddress, provider);
       }
 
       const crowdtainerContract = Crowdtainer__factory.connect(crowdtainerAddress, provider);
 
       let state: number = await crowdtainerContract.crowdtainerState();
-      let erc20ContractResult = await getERC20Contract(provider, crowdtainerAddress);
-      let erc20Contract: IERC20;
+      if (!erc20Contract) {
+         let erc20ContractResult = await getERC20Contract(provider, crowdtainerAddress);
 
-      if (erc20ContractResult.isErr()) {
-         let error = erc20ContractResult.unwrapErr();
-         console.log(error);
-         return Err({ error: error });
-      } else {
-         erc20Contract = erc20ContractResult.unwrap();
+         if (erc20ContractResult.isErr()) {
+            let error = erc20ContractResult.unwrapErr();
+            console.log(error);
+            return Err({ error: error });
+         } else {
+            erc20Contract = erc20ContractResult.unwrap();
+         }
       }
 
       let crowdtainerData: CrowdtainerDynamicModel = {
@@ -68,7 +75,7 @@ async function fetchData(crowdtainerId: BigNumber): Promise<Result<CrowdtainerDy
 
       crowdtainerDynamicDataMap.set(crowdtainerId.toHexString(), crowdtainerData);
       lastFetchEpochTimeInMilliseconds = Date.now();
-      console.log(`Done. Crowdtainer ID ${crowdtainerId} dynamic data fetch took ${(lastFetchEpochTimeInMilliseconds - start)/1000} seconds.`);
+      console.log(`Done. Crowdtainer ID ${crowdtainerId} dynamic data fetch took ${(lastFetchEpochTimeInMilliseconds - start) / 1000} seconds.`);
 
       return Ok(crowdtainerData);
    } catch (errorMessage) {

@@ -31,6 +31,9 @@
 	import { findTokenIdsForWallet, type TokenIDAssociations } from './ethersCalls/rpcRequests.js';
 	import { Circle } from 'svelte-loading-spinners';
 
+	import { campaignImagesAt } from './ProjectImages.js';
+	import type { Image } from './ProjectImages';
+
 	export let vouchers721Address: string;
 	export let chainId: number;
 	export let tokenVersion: string;
@@ -61,6 +64,11 @@
 	let orderStatus: OrderStatus;
 
 	let tokenIdAssociations: TokenIDAssociations | undefined;
+
+	let staticProjectImages: [string, Image][];
+	staticProjectImages = campaignImagesAt(projectImageURLs);
+	const isURL = /^(?:\w+:)?\/\/([^\s\.]+\.\S{2}|localhost[\:?\d]*)\S*$/;
+	let otherProjectImages = projectImageURLs.filter((path) => isURL.test(path));
 
 	async function refreshData() {
 		if (staticDataLoadStatus !== LoadStatus.Loaded) {
@@ -159,11 +167,25 @@
 				<div class="flex flex-col items-center align-center h-full">
 					<div class="my-4 grow carousel carousel-vertical p-4 rounded-box">
 						<div class="h-[32rem]">
-							{#each projectImageURLs as imageURL}
-								<div class="carousel-item justify-center w-full">
-									<img src={imageURL} class="rounded-box w-auto my-2" alt="" />
-								</div>
-							{/each}
+							{#if staticProjectImages}
+								{#each staticProjectImages as [_, imageData], index}
+									<div class="carousel-item justify-center w-full">
+										<enhanced:img
+											src={imageData}
+											class="rounded-box my-2"
+											alt="Campaign"
+											fetchPriority={index === 0 ? 'high' : 'auto'}
+										/>
+									</div>
+								{/each}
+							{/if}
+							{#if otherProjectImages}
+								{#each otherProjectImages as imageURL, index}
+									<div class="carousel-item justify-center w-full">
+										<img src={imageURL} class="rounded-box w-auto my-2" alt="Campaign" />
+									</div>
+								{/each}
+							{/if}
 						</div>
 					</div>
 				</div>
@@ -173,9 +195,16 @@
 			<div class="block md:hidden p-4">
 				<div class="flex flex-col items-center align-center">
 					<div class="carousel carousel-end rounded-box space-x-4">
-						{#each projectImageURLs as imageURL}
+						{#if staticProjectImages}
+							{#each staticProjectImages as [_, imageData], index}
+								<div class="carousel-item">
+									<enhanced:img src={imageData} alt="Campaign" />
+								</div>
+							{/each}
+						{/if}
+						{#each otherProjectImages as imageURL, index}
 							<div class="carousel-item">
-								<img src={imageURL} class="h-80" alt="test" />
+								<img src={imageURL} class="h-80" alt="Campaign" />
 							</div>
 						{/each}
 					</div>

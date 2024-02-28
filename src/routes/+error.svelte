@@ -1,16 +1,17 @@
 <script>
-  
-  import { page } from '$app/stores'
+	import { page } from '$app/stores';
+
+	import CrowdtainerLogo from '$lib/images/site/CrowdtainerLogo.svg';
 
 	export let title = `${$page.status} - ${$page.error?.message}`;
 </script>
 
 <figure
-	class="max-w-4xl mx-auto grid grid-cols-1 py-6 px-4 sm:p-6 md:py-10 md:px-8 bg-slate-100 rounded-xl p-8 md:p-0 dark:bg-slate-800"
+	class="my-10 max-w-4xl mx-auto grid grid-cols-1 py-6 px-4 sm:p-6 md:py-10 md:px-8 rounded-xl p-8 md:p-0"
 >
 	<img
 		class="w-24 h-24 md:w-48 md:h-auto md:rounded-none rounded-full mx-auto"
-		src="/images/site/CrowdtainerLogo.svg"
+		src={CrowdtainerLogo}
 		alt=""
 		width="384"
 		height="512"
