@@ -48,13 +48,13 @@ export const POST: RequestHandler = async ({ request }) => {
 
     let redis = getDatabase();
     if (redis === undefined) {
-        throw error(500, `Db connection error.`);
+        error(500, `Db connection error.`);
     }
 
     let result = getPayload(await request.json());
 
     if (result.isErr()) {
-        throw error(400, result.unwrapErr());
+        error(400, result.unwrapErr());
     }
 
     let [email, userWalletAddress, chainId, voucherAddress, crowdtainerAddress, domain, nonce, currentTimeISO, signatureHash] = result.unwrap();
@@ -63,26 +63,26 @@ export const POST: RequestHandler = async ({ request }) => {
     try {
 
         if (!validEmail(email)) {
-            throw error(400, "Invalid e-mail provided.");
+            error(400, "Invalid e-mail provided.");
         }
 
         if (!ethers.utils.isAddress(userWalletAddress)) {
-            throw error(400, `Invalid wallet address (${userWalletAddress}).`);
+            error(400, `Invalid wallet address (${userWalletAddress}).`);
         }
 
         if (Number(chainId) !== Number(ChainID)) {
-            throw error(400, "Invalid chain ID.");
+            error(400, "Invalid chain ID.");
         }
 
         if (voucherAddress !== Vouchers721Address) {
-            throw error(400, "Invalid wallet address.");
+            error(400, "Invalid wallet address.");
         }
 
         // Check if email was validated
         validatedEmailsKey = `validatedEmails:${email}`;
         const emailAuthorized = await redis.sismember(validatedEmailsKey, nonce);
         if (!emailAuthorized) {
-            throw error(400, "Email address not validated.");
+            error(400, "Email address not validated.");
         }
 
         console.log(`siweMessage.issuedAt: ${currentTimeISO}`);
@@ -90,7 +90,7 @@ export const POST: RequestHandler = async ({ request }) => {
         // Perform domain/origin validation
         console.log(`client declared domain: ${domain}`);
         if (domain !== import.meta.env.VITE_DOMAIN) {
-            throw error(400, `Invalid domain address: ${domain}. Expected: ${import.meta.env.VITE_DOMAIN}`);
+            error(400, `Invalid domain address: ${domain}. Expected: ${import.meta.env.VITE_DOMAIN}`);
         }
 
         let emailCodeKey = `userCode:${email}`;
@@ -106,11 +106,11 @@ export const POST: RequestHandler = async ({ request }) => {
         });
 
         if (actualCode == undefined || actualCode !== String(providedCode)) {
-            throw error(400, "Invalid nonce code.");
+            error(400, "Invalid nonce code.");
         }
 
         if (!isTimeValid(currentTimeISO)) {
-            throw error(400, 'Signature timestamp too old or too far in the future.');
+            error(400, 'Signature timestamp too old or too far in the future.');
         }
 
         // Reconstruct the message locally
@@ -120,17 +120,17 @@ export const POST: RequestHandler = async ({ request }) => {
         let recoveredSigner = ethers.utils.verifyMessage(message, signatureHash);
 
         if (!ethers.utils.isAddress(userWalletAddress)) {
-            throw error(400, `Invalid wallet address (${userWalletAddress}).`);
+            error(400, `Invalid wallet address (${userWalletAddress}).`);
         }
 
         // Check if signatures matches
         if (recoveredSigner !== userWalletAddress) {
-            throw error(400, `Invalid statement or message signature.`);
+            error(400, `Invalid statement or message signature.`);
         }
 
     } catch (_error) {
         console.dir(_error);
-        throw error(400, `Invalid message: ${_error}`);
+        error(400, `Invalid message: ${_error}`);
     }
 
     // Only one wallet per Email allowed.
@@ -144,11 +144,11 @@ export const POST: RequestHandler = async ({ request }) => {
         // Check if the wallet has already joined the respective campaign. If yes, fail.
         let userFundsResult = await costForWalletInCrowdtainer(signer, crowdtainerAddress, walletResult);
         if (userFundsResult.isErr()) {
-            throw error(500, `Failed to fetch wallet data. Please try again. ${userFundsResult.unwrapErr()}`);
+            error(500, `Failed to fetch wallet data. Please try again. ${userFundsResult.unwrapErr()}`);
         }
         let userFundsInCrowdtainer = userFundsResult.unwrap();
         if (!userFundsInCrowdtainer.isZero()) {
-            throw error(400, `The provided e-mail was already used by another wallet, to join Crowtainer at address ${crowdtainerAddress}.`);
+            error(400, `The provided e-mail was already used by another wallet, to join Crowtainer at address ${crowdtainerAddress}.`);
         }
     }
     if (process.env.NODE === 'development') {

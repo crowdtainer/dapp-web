@@ -17,12 +17,12 @@ export type CaptchaResponse = {
 export const POST: RequestHandler = async ({ }) => {
 
     if (!captchaEnabled) {
-        throw error(400, "Captcha not enabled for this project.");
+        error(400, "Captcha not enabled for this project.");
     }
 
     let redis = getDatabase();
     if (redis === undefined) {
-        throw error(500, `Db connection error.`);
+        error(500, `Db connection error.`);
     }
 
     let randomNumber = randomInt(9999999999);
@@ -34,7 +34,7 @@ export const POST: RequestHandler = async ({ }) => {
         await redis.set(captchaIdsKey, captcha.text, 'EX', codeExpireTimeInSeconds);
     } catch (_error) {
         console.dir(_error);
-        throw error(500, "Database failure.");
+        error(500, "Database failure.");
     }
 
     let captchaChallenge: CaptchaResponse = { id: randomNumber, svg: captcha.data };

@@ -56,7 +56,7 @@
 	<div id="body" class="px-0 md:px-4 spacey-y-4">
 		{#each descriptions as product, index}
 		{#if $selection[index] > 0}
-			<div transition:slide="{{ duration: 250 }}">
+			<div transition:slide|global="{{ duration: 250 }}">
 				<div class="flex items-center">
 					<!-- Row start -->
 					<div class="w-6/12">

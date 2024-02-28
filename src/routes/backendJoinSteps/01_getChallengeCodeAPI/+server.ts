@@ -19,19 +19,19 @@ export const POST: RequestHandler = async ({ request }) => {
 
     let redis = getDatabase();
     if (redis === undefined) {
-        throw error(500, `Db connection error.`);
+        error(500, `Db connection error.`);
     }
 
     let result = getPayload(await request.json());
 
     if (result.isErr()) {
-        throw error(400, result.unwrapErr());
+        error(400, result.unwrapErr());
     }
 
     let [captchaId, captchaCode, userEmail] = result.unwrap();
 
     if (!userEmail || !validEmail(userEmail)) {
-        throw error(500, "Missing or invalid e-mail parameter");
+        error(500, "Missing or invalid e-mail parameter");
     }
 
     // TODO: encrypt user email client side
@@ -49,10 +49,10 @@ export const POST: RequestHandler = async ({ request }) => {
         await redis.expire(apiHits, codeExpireTimeInSeconds);
     } catch (_error) {
         console.dir(_error);
-        throw error(500, "Database failure.");
+        error(500, "Database failure.");
     }
     if (currentCount > maxAPI_hits) {
-        throw error(429, "Maximum requests limit reached. Please try again later.");
+        error(429, "Maximum requests limit reached. Please try again later.");
     }
 
     if (captchaEnabled) {
@@ -68,10 +68,10 @@ export const POST: RequestHandler = async ({ request }) => {
             await redis.expire(apiHits, codeExpireTimeInSeconds);
         } catch (_error) {
             console.dir(_error);
-            throw error(500, "Database failure.");
+            error(500, "Database failure.");
         }
         if (currentCount > maxAPI_hits) {
-            throw error(429, "Maximum requests limit reached. Please try again later.");
+            error(429, "Maximum requests limit reached. Please try again later.");
         }
 
         // Check if captcha code is valid
@@ -85,11 +85,11 @@ export const POST: RequestHandler = async ({ request }) => {
             });
         } catch (_error) {
             console.dir(_error);
-            throw error(500, "Database failure.");
+            error(500, "Database failure.");
         }
 
         if (!actualCode || actualCode !== String(captchaCode)) {
-            throw error(400, "Invalid code.");
+            error(400, "Invalid code.");
         }
     }
 
@@ -109,7 +109,7 @@ export const POST: RequestHandler = async ({ request }) => {
             console.log(`Unable to set user code: ${emailCodeKey}:${randomNumber}`);
         }
         console.dir(_error);
-        throw error(500, "Database failure.");
+        error(500, "Database failure.");
     }
 
     return new Response(JSON.stringify("OK"));

@@ -17,13 +17,13 @@ let signer = new ethers.Wallet(TX_SPONSOR_PRIVATE_KEY, provider);
 if (!ethers.utils.isAddress(ethers.utils.computeAddress(TX_SPONSOR_PRIVATE_KEY))) {
     const message = 'Invalid TX_SPONSOR_PRIVATE_KEY.';
     console.log(message);
-    throw error(500, message);
+    error(500, message);
 }
 
 if (!ethers.utils.isAddress(ethers.utils.computeAddress(AUTHORIZER_PRIVATE_KEY))) {
     const message = 'Invalid AUTHORIZER_PRIVATE_KEY.';
     console.log(message);
-    throw error(500, message);
+    error(500, message);
 }
 
 let joinAuthorizerPK = ethers.utils.computeAddress(AUTHORIZER_PRIVATE_KEY);
@@ -44,31 +44,31 @@ export const POST: RequestHandler = async ({ request }) => {
 
     let redis = getDatabase();
     if (redis === undefined) {
-        throw error(500, `Db connection error.`);
+        error(500, `Db connection error.`);
     }
 
     let result = getPayload(await request.json());
     if (result.isErr()) {
-        throw error(400, result.unwrapErr());
+        error(400, result.unwrapErr());
     }
 
     let [calldata, calldataSignature, signedPermit] = result.unwrap();
 
     if (!ethers.utils.isBytesLike(calldata)) {
-        throw error(400, "Invalid calldata parameter.");
+        error(400, "Invalid calldata parameter.");
     }
 
     if (!ethers.utils.isBytesLike(calldataSignature)) {
-        throw error(400, "Invalid calldataSignature parameter.");
+        error(400, "Invalid calldataSignature parameter.");
     }
 
     let hexCalldata = ethers.utils.hexlify(calldata);
     if (hexCalldata.length < 12) {
-        throw error(400, `Incorrect payload. Unexpected calldata size.`);
+        error(400, `Incorrect payload. Unexpected calldata size.`);
     }
     const functionSelector = hexCalldata.slice(0, 10).toLowerCase();
     if (functionSelector !== `0xed52b41c`) { //getSignedJoinApproval().selector
-        throw error(400, `Incorrect payload. Function selector: ${functionSelector}. Expected: 0x566a2cc2`);
+        error(400, `Incorrect payload. Function selector: ${functionSelector}. Expected: 0x566a2cc2`);
     }
 
     const abiInterface = new ethers.utils.Interface(JSON.stringify(AuthorizationGateway__factory.abi));
@@ -79,28 +79,28 @@ export const POST: RequestHandler = async ({ request }) => {
         args = abiInterface.decodeFunctionData("getSignedJoinApproval", `${hexCalldata}`);
     } catch (_error) {
         console.log(`${_error}`);
-        throw error(400, `Unable to decode calldata.`);
+        error(400, `Unable to decode calldata.`);
     }
     const [crowdtainerAddress, decodedWalletAddress, quantities, enableReferral, referralAddress] = args;
 
     if (!quantities || !Array.isArray(quantities)) {
-        throw error(400, "Unexpected quantities input.");
+        error(400, "Unexpected quantities input.");
     }
 
     quantities.forEach((item) => {
         if (item > 100) {
-            throw error(400, "Unexpectedly high quantities value");
+            error(400, "Unexpectedly high quantities value");
         }
     });
 
     if (!crowdtainerAddress || !decodedWalletAddress || !quantities || !referralAddress || enableReferral === undefined) {
-        throw error(400, `Missing input fields in calldata.`);
+        error(400, `Missing input fields in calldata.`);
     }
 
     if (!ethers.utils.isAddress(crowdtainerAddress)
         || !ethers.utils.isAddress(decodedWalletAddress)
         || !ethers.utils.isAddress(referralAddress)) {
-        throw error(400, `Invalid address input in calldata.`);
+        error(400, `Invalid address input in calldata.`);
     }
 
     console.log(`Transaction sponsoring request received from wallet: ${decodedWalletAddress}`);
@@ -113,19 +113,19 @@ export const POST: RequestHandler = async ({ request }) => {
             crowdtainerAddressToId[crowdtainerAddress] = crowdtainerId.toNumber();
         } catch (_error) {
             console.log(`${_error}`);
-            throw error(400, `Crowdtainer not found.`);
+            error(400, `Crowdtainer not found.`);
         }
     }
 
     let jsonData = projects.filter(e => e.crowdtainerId === crowdtainerAddressToId[crowdtainerAddress]);
     if (jsonData.length != 1) {
-        throw error(400, "Crowdtainer not found.");
+        error(400, "Crowdtainer not found.");
     }
 
     // Check if transaction sponsoring is enabled for this project by the service provider.
     let projectData = jsonData[0];
     if (!projectData.txSponsoringEnabled) {
-        throw error(400, "Transaction sponsoring not enabled for this project.");
+        error(400, "Transaction sponsoring not enabled for this project.");
     }
 
     // Add rate limit/counter per wallet
@@ -140,11 +140,11 @@ export const POST: RequestHandler = async ({ request }) => {
         }
     } catch (_error) {
         console.dir(_error);
-        throw error(500, "Database failure.");
+        error(500, "Database failure.");
     }
 
     if (currentCount > MaximumTxSponsorPerWalletCount) {
-        throw error(429, "Maximum sponsored transaction requests limit reached for the given wallet.");
+        error(429, "Maximum sponsored transaction requests limit reached for the given wallet.");
     }
 
     // Check if service provider signature is valid by reconstructing the message and recovering the signer.
@@ -155,30 +155,30 @@ export const POST: RequestHandler = async ({ request }) => {
         decodedCalldata = ethers.utils.defaultAbiCoder.decode(["address", "uint64", "bytes32", "bytes"], calldataSignature);
     } catch (_error) {
         console.log(`${_error}`);
-        throw error(400, `Unable to decode calldata.`);
+        error(400, `Unable to decode calldata.`);
     }
     let [signedCrowdtainerAddress, epochExpiration, nonce, signature] = decodedCalldata;
 
     if (!signedCrowdtainerAddress || !epochExpiration || !nonce || !signature) {
-        throw error(400, `Missing input fields in calldata.`);
+        error(400, `Missing input fields in calldata.`);
     }
     let maxTimeRange = new Date().getTime() / 1000 + 360000;
     let epochExpirationResult = sanitizeString(String(epochExpiration), maxTimeRange.toString().length, true);
     if (epochExpirationResult.isErr()) {
-        throw error(400, 'Invalid epoch expiration time');
+        error(400, 'Invalid epoch expiration time');
     }
 
     if (!ethers.utils.isAddress(signedCrowdtainerAddress)) {
-        throw error(400, `Invalid address input in calldata.`);
+        error(400, `Invalid address input in calldata.`);
     }
 
     if (signedCrowdtainerAddress != crowdtainerAddress) {
-        throw error(400, `CrowdtainerAddress mismatch between calldata input and signed calldata input.`);
+        error(400, `CrowdtainerAddress mismatch between calldata input and signed calldata input.`);
     }
 
     let nonceResult = sanitizeString(nonce, challengeCodeLength, true);
     if (nonceResult.isErr()) {
-        throw error(400, `Invalid challenge nonce length.`);
+        error(400, `Invalid challenge nonce length.`);
     }
 
     let recoveredSigner: string;
@@ -189,11 +189,11 @@ export const POST: RequestHandler = async ({ request }) => {
         recoveredSigner = ethers.utils.verifyMessage(messageHashBinary, signature);
     } catch (_error) {
         console.log(_error);
-        throw error(400, "Unable to recover signer.");
+        error(400, "Unable to recover signer.");
     }
 
     if (joinAuthorizerPK != recoveredSigner) {
-        throw error(400, `Service provider join authorization signature invalid. Expected: ${joinAuthorizerPK} Received: ${recoveredSigner}`);
+        error(400, `Service provider join authorization signature invalid. Expected: ${joinAuthorizerPK} Received: ${recoveredSigner}`);
     }
 
     // All checks succeeded. Attempt to include the transaction on behalf of the user.
@@ -220,7 +220,7 @@ export const POST: RequestHandler = async ({ request }) => {
                 ? ''
                 : `\n\n Details: ${errorString}`;
         console.log(`${joinTransaction.unwrapErr()}`);
-        throw error(400, `Tx failed to join. ${errorDescription}`);
+        error(400, `Tx failed to join. ${errorDescription}`);
     }
 
     let txResult: ethers.ContractReceipt;
@@ -233,7 +233,7 @@ export const POST: RequestHandler = async ({ request }) => {
     }
 
     if (txResult.status !== 1) {
-        throw error(400, 'The sponsored transaction to join the campaing failed. Please try again.');
+        error(400, 'The sponsored transaction to join the campaing failed. Please try again.');
     }
 
     return new Response("OK");

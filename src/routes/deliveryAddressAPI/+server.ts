@@ -18,7 +18,14 @@ import { MockERC20__factory, Crowdtainer__factory } from "../typechain/index.js"
 import { camelToSentenceCase } from "$lib/Utils/camelCase.js";
 import { toHuman } from "$lib/Converters/CrowdtainerData.js";
 import { validEmail } from "$lib/Validation/email.js";
-import countries, { type Country } from "iso-3166-1/dist/iso-3166.js";
+
+import countries from 'iso-3166-1';
+interface Country {
+    country: string;
+    alpha2: string;
+    alpha3: string;
+    numeric: string;
+}
 
 async function getDiscountForWallet(provider: ethers.Signer | undefined,
     vouchers721Address: string, crowdtainerAddress: string, walletAdress: string): Promise<Result<BigNumber, string>> {
@@ -165,28 +172,28 @@ export const POST: RequestHandler = async ({ request }) => {
     let result = getPayload(await request.json());
 
     if (result.isErr()) {
-        throw error(400, result.unwrapErr());
+        error(400, result.unwrapErr());
     }
 
     let [signerAddress, domain, nonce, currentTimeISO, deliveryDetails, signatureHash] = result.unwrap();
 
     // Check if Email is valid
     if (!validEmail(deliveryDetails.deliveryAddress.email)) {
-        throw error(400, `Contact Email address in invalid format: '${deliveryDetails.deliveryAddress.email}'`);
+        error(400, `Contact Email address in invalid format: '${deliveryDetails.deliveryAddress.email}'`);
     }
 
     if (!validEmail(deliveryDetails.billingAddress.email)) {
-        throw error(400, `Billing Email address in invalid format: '${deliveryDetails.billingAddress.email}'`);
+        error(400, `Billing Email address in invalid format: '${deliveryDetails.billingAddress.email}'`);
     }
 
     let countryFound = whereAlpha2(deliveryDetails.deliveryAddress.country);
     if (!countryFound) {
-        throw error(400, `Unrecognized delivery address country: '${deliveryDetails.deliveryAddress.country}'`);
+        error(400, `Unrecognized delivery address country: '${deliveryDetails.deliveryAddress.country}'`);
     }
 
     countryFound = whereAlpha2(deliveryDetails.billingAddress.country);
     if (!countryFound) {
-        throw error(400, `Unrecognized billing address country: '${deliveryDetails.billingAddress.country}'`);
+        error(400, `Unrecognized billing address country: '${deliveryDetails.billingAddress.country}'`);
     }
 
     try {
@@ -198,12 +205,12 @@ export const POST: RequestHandler = async ({ request }) => {
         console.log(`Derived signer address: ${recoveredSigner}`);
 
         if (!ethers.utils.isAddress(signerAddress)) {
-            throw error(400, "Invalid wallet address.");
+            error(400, "Invalid wallet address.");
         }
 
         // Check if signatures matches
         if (recoveredSigner !== signerAddress) {
-            throw error(400, `Invalid statement or message signature.`);
+            error(400, `Invalid statement or message signature.`);
         }
 
         console.log(`siweMessage.issuedAt: ${currentTimeISO}`);
@@ -211,27 +218,27 @@ export const POST: RequestHandler = async ({ request }) => {
         // Perform domain validation
         console.log(`client declared domain: ${domain}`);
         if (domain !== import.meta.env.VITE_DOMAIN) {
-            throw error(400, `Invalid domain address: ${domain}. Expected: ${import.meta.env.VITE_DOMAIN}`);
+            error(400, `Invalid domain address: ${domain}. Expected: ${import.meta.env.VITE_DOMAIN}`);
         }
 
         // TODO: validate nonce (i.e., is it in 8 digit range? has it been used (redis))
 
         if (!isTimeValid(currentTimeISO)) {
-            throw error(400, 'Signature timestamp too old or too far in the future.');
+            error(400, 'Signature timestamp too old or too far in the future.');
         }
 
         if (Vouchers721Address !== deliveryDetails.vouchers721Address) {
-            throw error(400, `Invalid Vouchers721 address. Expected: '${Vouchers721Address}' Received:'${deliveryDetails.vouchers721Address}'`);
+            error(400, `Invalid Vouchers721 address. Expected: '${Vouchers721Address}' Received:'${deliveryDetails.vouchers721Address}'`);
         }
 
     } catch (_error) {
         console.dir(_error);
-        throw error(400, `Invalid message: ${_error}`);
+        error(400, `Invalid message: ${_error}`);
     }
 
     let redis = getDatabase();
     if (redis === undefined) {
-        throw error(500, `Db connection error.`);
+        error(500, `Db connection error.`);
     }
 
     let signer: ethers.providers.JsonRpcSigner | undefined;
@@ -240,23 +247,23 @@ export const POST: RequestHandler = async ({ request }) => {
         signer = provider.getSigner();
     } catch (e) {
         console.log(`Error: ${e}`);
-        throw error(500, "Internal server error. Please try again later.");
+        error(500, "Internal server error. Please try again later.");
     }
 
     // Check if token is owned by wallet
     let isOwnerOfResult = await isOwnerOf(signerAddress, signer, Vouchers721Address, deliveryDetails.voucherId);
     if (isOwnerOfResult.isErr()) {
-        throw error(500, "Unable to check token ownership.");
+        error(500, "Unable to check token ownership.");
     }
 
     if (!isOwnerOfResult.unwrap()) {
-        throw error(401, "The signature provided does not belog to a wallet which owns the specified token id");
+        error(401, "The signature provided does not belog to a wallet which owns the specified token id");
     }
 
     let crowdtainerReferenceResult = (await getCrowdtainerFromTokenId(signer, Vouchers721Address, deliveryDetails.voucherId));
     if (crowdtainerReferenceResult.isErr()) {
         console.log(`Error: ${crowdtainerReferenceResult.unwrapErr()}`);
-        throw error(500, `Failure to read campaign reference.`);
+        error(500, `Failure to read campaign reference.`);
     }
     crowdtainerReference = crowdtainerReferenceResult.unwrap();
 
@@ -267,31 +274,31 @@ export const POST: RequestHandler = async ({ request }) => {
     // load shipping country restrictions
     let projectData = projects.filter((project) => project.crowdtainerId === crowdtainerReference.crowdtainerId.toNumber());
     if (projectData.length !== 1) {
-        throw error(500, "Unable to find project data");
+        error(500, "Unable to find project data");
     }
 
     let currentProject = projectData[0];
     let allowedCountries = new Array<Country>();
     let supportedCountries = currentProject.supportedCountriesForShipping;
     if (supportedCountries.length > 0) {
-        allowedCountries = countries.filter((currentCountry) =>
+        allowedCountries = countries.all().filter((currentCountry) =>
             supportedCountries.includes(currentCountry.country)
         );
     } else {
-        allowedCountries = countries;
+        allowedCountries = countries.all();
     }
 
     if (!allowedCountries.find((value) => value.alpha2 === deliveryDetails.deliveryAddress.country)) {
-        throw error(401, `The country specified is not supported by this project: ${deliveryDetails.deliveryAddress.country}`);;
+        error(401, `The country specified is not supported by this project: ${deliveryDetails.deliveryAddress.country}`);;
     }
 
     if (!allowedCountries.find((value) => value.alpha2 === deliveryDetails.billingAddress.country)) {
-        throw error(401, `The billing country specified is not supported by this project: ${deliveryDetails.billingAddress.country}`);;
+        error(401, `The billing country specified is not supported by this project: ${deliveryDetails.billingAddress.country}`);;
     }
 
     // Check if chainId is correct for based on project definition
     if (deliveryDetails.chainId !== currentProject.chainId) {
-        throw error(401, `The chainId (${deliveryDetails.chainId}) for which the message was signed does not match the project's defined chainId (${currentProject.chainId})`)
+        error(401, `The chainId (${deliveryDetails.chainId}) for which the message was signed does not match the project's defined chainId (${currentProject.chainId})`);
     }
 
     try {
@@ -302,11 +309,11 @@ export const POST: RequestHandler = async ({ request }) => {
 
         if (campaignStateResult.isErr()) {
             console.log(`Error: ${campaignStateResult.unwrapErr()}`);
-            throw error(500, `Failure to read campaign status as in 'delivery state'.`);
+            error(500, `Failure to read campaign status as in 'delivery state'.`);
         }
 
         if (campaignStateResult.unwrap() !== 2) {
-            throw error(500, `Failure not in 'delivery state'.`);
+            error(500, `Failure not in 'delivery state'.`);
         }
 
         // Key for item
@@ -315,7 +322,7 @@ export const POST: RequestHandler = async ({ request }) => {
         let orderDetailsResult = await getOrderDetails(signer, Vouchers721Address, deliveryDetails.voucherId);
 
         if (orderDetailsResult.isErr()) {
-            throw error(500, `Unable to get order details for token id: ${deliveryDetails.voucherId} in Vouchers721Address ${Vouchers721Address}.`);
+            error(500, `Unable to get order details for token id: ${deliveryDetails.voucherId} in Vouchers721Address ${Vouchers721Address}.`);
         }
 
         let orderDetails = orderDetailsResult.unwrap();
@@ -333,12 +340,12 @@ export const POST: RequestHandler = async ({ request }) => {
 
         let userDiscount = await getDiscountForWallet(signer, Vouchers721Address, crowdtainerAddress, signerAddress);
         if (userDiscount.isErr()) {
-            throw error(500, `Unable get discount given to wallet: ${signerAddress} in Vouchers721Address ${Vouchers721Address}, on crowdtainer ID: ${crowdtainerReference.crowdtainerId}`);
+            error(500, `Unable get discount given to wallet: ${signerAddress} in Vouchers721Address ${Vouchers721Address}, on crowdtainer ID: ${crowdtainerReference.crowdtainerId}`);
         }
 
         let decimals = await getTokenDecimals(signer, crowdtainerAddress);
         if (decimals.isErr()) {
-            throw error(500, `Unable to read token decimals from crowdtainer ID: ${crowdtainerReference.crowdtainerId}`);
+            error(500, `Unable to read token decimals from crowdtainer ID: ${crowdtainerReference.crowdtainerId}`);
         }
 
         await redis.multi()
@@ -351,7 +358,7 @@ export const POST: RequestHandler = async ({ request }) => {
 
     } catch (e) {
         console.log(`Error: ${e}`);
-        throw error(500, "Database error.");
+        error(500, "Database error.");
     }
 
     return new Response("OK");
