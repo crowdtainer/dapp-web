@@ -14,7 +14,14 @@
 	import { ethers } from 'ethers';
 	import { pseudoRandomNonce } from './Utils/random';
 	import { slide } from 'svelte/transition';
-	import countries, { type Country } from 'iso-3166-1/dist/iso-3166.js';
+	import countries from 'iso-3166-1';
+	interface Country {
+		country: string;
+		alpha2: string;
+		alpha3: string;
+		numeric: string;
+	}
+
 	import { onMount } from 'svelte';
 
 	let modalDialog: ModalDialog;
@@ -135,11 +142,11 @@
 
 	onMount(async () => {
 		if (supportedCountriesFilter.length > 0) {
-			countriesListDisplay = countries.filter((country) =>
-				supportedCountriesFilter.includes(country.country)
-			);
+			countriesListDisplay = countries
+				.all()
+				.filter((country) => supportedCountriesFilter.includes(country.country));
 		} else {
-			countriesListDisplay = countries;
+			countriesListDisplay = countries.all();
 		}
 	});
 </script>
@@ -151,7 +158,8 @@
 		<p class="text-secondary text-xl">Success !</p>
 		<br />
 		<p>
-			Thank you for providing your delivery address. A confirmation email will be sent shortly to confirm receipt.
+			Thank you for providing your delivery address. A confirmation email will be sent shortly to
+			confirm receipt.
 		</p>
 	</div>
 {:else}

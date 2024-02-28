@@ -18,7 +18,14 @@ import { MockERC20__factory, Crowdtainer__factory } from "../typechain/index.js"
 import { camelToSentenceCase } from "$lib/Utils/camelCase.js";
 import { toHuman } from "$lib/Converters/CrowdtainerData.js";
 import { validEmail } from "$lib/Validation/email.js";
-import countries, { type Country } from "iso-3166-1/dist/iso-3166.js";
+
+import countries from 'iso-3166-1';
+interface Country {
+    country: string;
+    alpha2: string;
+    alpha3: string;
+    numeric: string;
+}
 
 async function getDiscountForWallet(provider: ethers.Signer | undefined,
     vouchers721Address: string, crowdtainerAddress: string, walletAdress: string): Promise<Result<BigNumber, string>> {
@@ -274,11 +281,11 @@ export const POST: RequestHandler = async ({ request }) => {
     let allowedCountries = new Array<Country>();
     let supportedCountries = currentProject.supportedCountriesForShipping;
     if (supportedCountries.length > 0) {
-        allowedCountries = countries.filter((currentCountry) =>
+        allowedCountries = countries.all().filter((currentCountry) =>
             supportedCountries.includes(currentCountry.country)
         );
     } else {
-        allowedCountries = countries;
+        allowedCountries = countries.all();
     }
 
     if (!allowedCountries.find((value) => value.alpha2 === deliveryDetails.deliveryAddress.country)) {
