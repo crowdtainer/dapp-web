@@ -19,6 +19,9 @@
 
 	let transferWalletModalDialog: ModalDialog;
 
+	import CartImage from '$lib/images/site/Cart.svg';
+	import TransferImage from '$lib/images/site/Transfer.svg';
+
 	// Wallet management
 	import { OrderStatus } from './api';
 	import type { WalletCrowdtainerModel } from './Model/WalletCrowdtainerModel.js';
@@ -38,6 +41,9 @@
 	let transferWalletUserInput = '';
 
 	const dispatch = createEventDispatcher();
+
+	import ExitImage from '$lib/images/site/Exit.svg';
+
 </script>
 
 <ModalDialog bind:this={transferWalletModalDialog}>
@@ -113,7 +119,7 @@
 				>
 					<span class="squared-btn">
 						<div class="flex justify-center items-center">
-							<img width="30" height="30" src="images/site/Cart.svg" alt="Checkout" />
+							<img width="30" height="30" src={CartImage} alt="Checkout" />
 						</div>
 						<p class="text-lg mt-5">Checkout</p>
 					</span>
@@ -145,7 +151,7 @@
 							<img
 								width="30"
 								height="30"
-								src="images/site/Transfer.svg"
+								src={TransferImage}
 								alt="Transfer participation proof to another wallet."
 							/>
 						</div>
@@ -188,7 +194,7 @@
 				>
 					<span class="squared-btn">
 						<div class="flex justify-center items-center">
-							<img width="30" height="30" src="images/site/Exit.svg" alt="Leave campaign" />
+							<img width="30" height="30" src={ExitImage} alt="Leave campaign" />
 						</div>
 						<p class="text-lg mt-5">Leave</p>
 					</span>
@@ -218,7 +224,7 @@
 			>
 				<span class="squared-btn">
 					<div class="flex justify-center items-center">
-						<img width="30" height="30" src="images/site/Exit.svg" alt="Leave campaign" />
+						<img width="30" height="30" src={ExitImage} alt="Leave campaign" />
 					</div>
 					<p class="text-lg mt-5">Withdraw {tokenSymbol}</p>
 				</span>

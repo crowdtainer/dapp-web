@@ -34,7 +34,6 @@
 	export let tokenVersion: string;
 	export let txSponsoringEnabled: boolean;
 	export let totalSum: number;
-	export let tokenDecimals: number;
 	export let totalCostInERCUnits: BigNumber;
 	export let discountValue: number;
 	export let validUserCouponCode: string;

@@ -14,9 +14,7 @@
             "description": "Explore the amazing world of Single Origin coffee beans. Sitting at altitudes between 950 and 1,450 m.a.s.l., the farm covers almost 900 hectares of predominantly hilly terrain, of which 239 hectares are used for coffee cultivation.",
             "projectURL": "https://shop.barterfly.de/index.php/meet-your-farmers/",
             "projectImageURLs": [
-                "images/projects/CoffeeBag.png",
-                "images/projects/CoffeeBag.png",
-                "images/projects/CoffeeBag.png"
+                "/images/projects/31337/1/"
             ],
             "basePriceDenominator": [
                 0.5,

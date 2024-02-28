@@ -9,6 +9,10 @@
 	import { Clipboard } from '@steeze-ui/heroicons';
 	import { clickOutside } from '$lib/Utils/clickOutside';
 
+	import CrowdtainerLogo from '$lib/images/site/CrowdtainerLogo.svg';
+	import TopNavbarLogo from '$lib/images/site/TopNavbarLogo.svg';
+	import EthereumLogo from '$lib/images/site/Ethereum.svg';
+
 	// Wallet management
 	import {
 		walletState,
@@ -68,7 +72,6 @@
 	$: path = $page.url.pathname;
 </script>
 
-
 <div class="max-w-7xl mx-auto px-2 sm:px-6 lg:px-8">
 	<div class="relative flex items-center justify-between h-16">
 		<div class="absolute inset-y-0 left-0 flex items-center sm:hidden">
@@ -112,14 +115,14 @@
 				<a href="/">
 					<img
 						class="block lg:hidden h-8 w-auto mx-16 sm:mx-0"
-						src="/images/site/CrowdtainerLogo.svg"
+						src={CrowdtainerLogo}
 						alt="Crowdtainer"
 					/>
 				</a>
 				<a href="/">
 					<img
 						class="hidden lg:block h-8 w-auto"
-						src="/images/site/TopNavbarLogo.svg"
+						src={TopNavbarLogo}
 						alt="Crowdtainer"
 					/>
 				</a>
@@ -170,7 +173,9 @@
 							/>
 							<span class="relative inline-flex rounded-full h-2 w-2 bg-yellow-400" />
 						</span>
-						<p class="pt-1 text-right text-sm text-white max-w-[120px] md:max-w-full">Wallet locked</p>
+						<p class="pt-1 text-right text-sm text-white max-w-[120px] md:max-w-full">
+							Wallet locked
+						</p>
 					</div>
 				{:else if $walletState.connectionState === ConnectionState.ConnectedToUnsupportedNetwork}
 					<div class="inline-flex items-baseline">
@@ -205,7 +210,7 @@
 							aria-haspopup="true"
 						>
 							<span class="sr-only">Open user menu</span>
-							<img class="h-8 w-8 rounded-full" src="/images/site/Ethereum.svg" alt="" />
+							<img class="h-8 w-8 rounded-full" src={EthereumLogo} alt="" />
 						</button>
 					</div>
 

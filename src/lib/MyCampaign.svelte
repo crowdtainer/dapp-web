@@ -156,7 +156,7 @@
 	<div class="rounded-md max-w-lg mx-auto white overflow-hidden md:max-w-7xl my-8">
 		<div class="md:flex">
 			<div class="md:shrink-0">
-				<!-- <img class="w-full object-cover md:h-full md:w-96" src={projectImageURL} alt="Coffee" /> -->
+				<!-- <enhanced:img class="w-full object-cover md:h-full md:w-96" src={projectImageURL} alt="Coffee" /> -->
 				<img
 					class="drop-shadow-md hover:drop-shadow-xl w-full object-cover md:w-96 p-2"
 					src={svg}

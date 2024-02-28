@@ -1,10 +1,11 @@
+<script lang="ts">
+	import CrowdtainerLogo from '$lib/images/site/CrowdtainerLogo.svg';
+	import SplitPayment from '$lib/images/site/splitPayment.webp';
+</script>
+
 <div class="flex justify-center">
 	<a class="link" href="https://crowdtainer.io">
-		<img
-			class="lg:h-32 md:h-28 h-20 mt-16"
-			alt="Crowdtainer Logo"
-			src="images/site/CrowdtainerLogo.svg"
-		/>
+		<img class="lg:h-32 md:h-28 h-20 mt-16" alt="Crowdtainer Logo" src={CrowdtainerLogo} />
 	</a>
 </div>
 <div class="flex justify-center mt-20">
@@ -48,9 +49,8 @@
 						<li class="py-4">
 							<b>Banks and credit cards are not strictly required.</b> Ethereum
 							<a class="link" href="https://eips.ethereum.org/EIPS/eip-20">ERC20</a> tokens are used
-							as a medium of payment. Costs are per transaction, not
-							a percentage. <b>Less fees</b> for intermediaries means <b>more</b> is available for the
-							campaign goal.
+							as a medium of payment. Costs are per transaction, not a percentage. <b>Less fees</b>
+							for intermediaries means <b>more</b> is available for the campaign goal.
 						</li>
 						<li class="py-4">
 							<b>Optional, transparent & fair referral system.</b> Backers can share the campaign with
@@ -63,7 +63,7 @@
 							<b>Improved privacy.</b> Instead of multiple companies receiving sensitive data (such
 							as delivery details), only the actual service provider receives what is needed to
 							fulfil the agreements. Other ways to improve the status quo in online ordering and
-							privacy, such as using 
+							privacy, such as using
 							<a class="link" href="https://en.wikipedia.org/wiki/Zero-knowledge_proof"
 								>zero knowledge proofs</a
 							>
@@ -75,11 +75,7 @@
 							<a class="link" href="https://github.com/0xSplits/splits-sdk">split contract</a>
 							at the recipient address:
 							<div class="flex justify-center">
-								<img
-									class="dark:invert"
-									alt="Crowdtainer Logo"
-									src="/images/site/splitPayment.webp"
-								/>
+								<img class="dark:invert" alt="Crowdtainer Logo" src={SplitPayment} />
 							</div>
 						</li>
 					</ul>
