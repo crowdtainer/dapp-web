@@ -24,13 +24,13 @@ export const GET: RequestHandler = async ({ params }) => {
             responses.push(result.unwrap());
          } else {
             // Fail if any id request fails.
-            throw error(500, `${result.unwrapErr()}`);
+            error(500, `${result.unwrapErr()}`);
          }
       }
 
       return new Response(JSON.stringify(responses));
    } catch (_error) {
       console.log(_error);
-      throw error(500, `${_error}`);
+      error(500, `${_error}`);
    }
 }

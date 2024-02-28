@@ -11,13 +11,13 @@ export const POST: RequestHandler = async ({ request, params }) => {
 
     let redis = getDatabase();
     if (redis === undefined) {
-        throw error(500, `Db connection error.`);
+        error(500, `Db connection error.`);
     }
 
     let userEmail = params.email;
 
     if (userEmail == undefined || !validEmail(userEmail)) {
-        throw error(400, "Missing email field.");
+        error(400, "Missing email field.");
     }
 
     let emailCodeKey = `userCode:${userEmail}`;
@@ -26,7 +26,7 @@ export const POST: RequestHandler = async ({ request, params }) => {
     let result = getPayload(await request.json());
 
     if (result.isErr()) {
-        throw error(400, result.unwrapErr());
+        error(400, result.unwrapErr());
     }
 
     let providedCode = result.unwrap();
@@ -41,13 +41,13 @@ export const POST: RequestHandler = async ({ request, params }) => {
     });
 
     if (!actualCode || actualCode !== String(providedCode)) {
-        throw error(400, "Invalid code.");
+        error(400, "Invalid code.");
     }
 
     try {
         await redis.sadd(validatedEmailsKey, actualCode); // add to "validated set"
     } catch (e) {
-        throw error(500, "Database error.");
+        error(500, "Database error.");
     }
 
     return new Response("OK");

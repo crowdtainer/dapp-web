@@ -13,7 +13,7 @@ async function fetchData(chainId: number, vouchers721Address: string, voucherId:
     try {
         let redis = getDatabase();
         if (redis === undefined) {
-            throw error(500, `Db connection error.`);
+            error(500, `Db connection error.`);
         }
 
         let key = deliveryVoucherKey(chainId, vouchers721Address, voucherId);
@@ -38,7 +38,7 @@ export const GET: RequestHandler = async ({ url }) => {
     let payload = getPayload(url.searchParams)
 
     if (payload.isErr()) {
-        throw error(400, payload.unwrapErr());
+        error(400, payload.unwrapErr());
     }
 
     let [chainId, vouchers721Address, voucherId] = payload.unwrap();
