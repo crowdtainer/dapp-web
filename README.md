@@ -1,4 +1,4 @@
-<div align="center"><img src="static/images/site/CrowdtainerLogo.svg" alt="Crowdtainer" height="128px"/>
+<div align="center"><img src="src/lib/images/site/CrowdtainerLogo.svg" alt="Crowdtainer" height="128px"/>
 
 <h1> Crowdtainer Web App </h1>
 <h3>The Open source platform for Crowdfunding, Group Buying (E-commerce) and more.</h3>
