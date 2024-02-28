@@ -119,7 +119,7 @@
 			{state}
 		/>
 
-		<div class="min-w-max mx-2">
+		<div class="min-w-max">
 			{#if campaignStaticUI}
 				<p class="projectStatus">
 					<TimeLeft endTime={$campaignStaticUI.endDate} />
